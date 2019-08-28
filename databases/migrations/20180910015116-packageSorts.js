@@ -1,32 +1,28 @@
-'use strict';
+"use strict";
 
 module.exports = {
 	up: (queryInterface, Sequelize) => {
 		const {
 			BIGINT,
-			STRING,
 			INTEGER,
-			TEXT,
-			DATE,
-			JSON,
 		} = Sequelize;
 
-		return queryInterface.createTable('packageSorts', { 
+		return queryInterface.createTable("packageSorts", {
 			id: {
 				type: BIGINT,
 				autoIncrement: true,
 				primaryKey: true,
 			},
 
-			packageId: {          // 课程包ID
+			packageId: { // 课程包ID
 				type: BIGINT,
 				unique: true,
 				allowNull: false,
 			},
 
-			hotNo: {              // 热门序号
+			hotNo: { // 热门序号
 				type: INTEGER,
-				defaultValue: 0,  // 
+				defaultValue: 0, // 
 			},
 
 			createdAt: {
@@ -39,14 +35,14 @@ module.exports = {
 				type: Sequelize.DATE
 			},
 
-			}, {
-				underscored: false,
-				charset: "utf8mb4",
-				collate: 'utf8mb4_bin',
-			});
+		}, {
+			underscored: false,
+			charset: "utf8mb4",
+			collate: "utf8mb4_bin",
+		});
 	},
 
 	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable('packageSorts');
+		return queryInterface.dropTable("packageSorts");
 	}
 };

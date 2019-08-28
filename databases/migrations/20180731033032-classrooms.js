@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 module.exports = {
 	up: (queryInterface, Sequelize) => {
@@ -6,12 +6,10 @@ module.exports = {
 			BIGINT,
 			STRING,
 			INTEGER,
-			TEXT,
-			DATE,
 			JSON,
 		} = Sequelize;
 
-		return queryInterface.createTable('classrooms', { 
+		return queryInterface.createTable("classrooms", {
 			id: {
 				type: BIGINT,
 				autoIncrement: true,
@@ -23,7 +21,7 @@ module.exports = {
 				allowNull: false,
 			},
 
-			packageId: {   // 所属课程包ID
+			packageId: { // 所属课程包ID
 				type: BIGINT,
 				allowNull: false,
 			},
@@ -58,14 +56,14 @@ module.exports = {
 				type: Sequelize.DATE
 			},
 
-			}, {
-				underscored: false,
-				charset: "utf8mb4",
-				collate: 'utf8mb4_bin',
-			});
+		}, {
+			underscored: false,
+			charset: "utf8mb4",
+			collate: "utf8mb4_bin",
+		});
 	},
 
 	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable('classrooms');
+		return queryInterface.dropTable("classrooms");
 	}
 };

@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 module.exports = {
 	up: (queryInterface, Sequelize) => {
@@ -6,12 +6,10 @@ module.exports = {
 			BIGINT,
 			STRING,
 			INTEGER,
-			TEXT,
-			DATE,
 			JSON,
 		} = Sequelize;
 
-		return queryInterface.createTable('packages', { 
+		return queryInterface.createTable("packages", {
 			id: {
 				type: BIGINT,
 				autoIncrement: true,
@@ -79,14 +77,14 @@ module.exports = {
 				type: Sequelize.DATE
 			},
 
-			}, {
-				underscored: false,
-				charset: "utf8mb4",
-				collate: 'utf8mb4_bin',
-			});
+		}, {
+			underscored: false,
+			charset: "utf8mb4",
+			collate: "utf8mb4_bin",
+		});
 	},
 
 	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable('packages');
+		return queryInterface.dropTable("packages");
 	}
 };

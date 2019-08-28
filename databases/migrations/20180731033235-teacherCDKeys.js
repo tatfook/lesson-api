@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 module.exports = {
 	up: (queryInterface, Sequelize) => {
@@ -6,19 +6,17 @@ module.exports = {
 			BIGINT,
 			STRING,
 			INTEGER,
-			TEXT,
-			DATE,
 			JSON,
 		} = Sequelize;
 
-		return queryInterface.createTable('teacherCDKeys', { 
+		return queryInterface.createTable("teacherCDKeys", {
 			id: {
 				type: BIGINT,
 				autoIncrement: true,
 				primaryKey: true,
 			},
 
-			userId: {  // 谁在使用此激活码
+			userId: { // 谁在使用此激活码
 				type: BIGINT,
 			},
 
@@ -31,10 +29,10 @@ module.exports = {
 				type: INTEGER,
 				defaultValue: 0, // 0 --未使用 1 -- 已使用 2 -- 禁用态
 			},
-			
+
 			extra: {
 				type: JSON,
-				defaultValue:{},
+				defaultValue: {},
 			},
 
 			createdAt: {
@@ -47,14 +45,14 @@ module.exports = {
 				type: Sequelize.DATE
 			},
 
-			}, {
-				underscored: false,
-				charset: "utf8mb4",
-				collate: 'utf8mb4_bin',
-			});
+		}, {
+			underscored: false,
+			charset: "utf8mb4",
+			collate: "utf8mb4_bin",
+		});
 	},
 
 	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable('teacherCDKeys');
+		return queryInterface.dropTable("teacherCDKeys");
 	}
 };

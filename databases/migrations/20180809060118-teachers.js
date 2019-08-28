@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 module.exports = {
 	up: (queryInterface, Sequelize) => {
@@ -6,12 +6,10 @@ module.exports = {
 			BIGINT,
 			STRING,
 			INTEGER,
-			TEXT,
-			DATE,
 			JSON,
 		} = Sequelize;
 
-		return queryInterface.createTable('teachers', { 
+		return queryInterface.createTable("teachers", {
 			id: {
 				type: BIGINT,
 				autoIncrement: true,
@@ -33,9 +31,9 @@ module.exports = {
 				defaultValue: 0,
 			},
 
-			extra: {     // 额外数据
+			extra: { // 额外数据
 				type: JSON,
-				defaultValue:{},
+				defaultValue: {},
 			},
 
 			createdAt: {
@@ -48,14 +46,14 @@ module.exports = {
 				type: Sequelize.DATE
 			},
 
-			}, {
-				underscored: false,
-				charset: "utf8mb4",
-				collate: 'utf8mb4_bin',
-			});
+		}, {
+			underscored: false,
+			charset: "utf8mb4",
+			collate: "utf8mb4_bin",
+		});
 	},
 
 	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable('teachers');
+		return queryInterface.dropTable("teachers");
 	}
 };

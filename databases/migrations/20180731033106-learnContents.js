@@ -1,17 +1,15 @@
-'use strict';
+"use strict";
 
 module.exports = {
 	up: (queryInterface, Sequelize) => {
 		const {
 			BIGINT,
-			STRING,
 			INTEGER,
 			TEXT,
-			DATE,
 			JSON,
 		} = Sequelize;
 
-		return queryInterface.createTable('lessonContents', { 
+		return queryInterface.createTable("lessonContents", {
 			id: {
 				type: BIGINT,
 				autoIncrement: true,
@@ -36,7 +34,7 @@ module.exports = {
 
 			content: {
 				type: TEXT,
-				defaultValue:"",
+				defaultValue: "",
 			},
 
 			extra: {
@@ -54,14 +52,14 @@ module.exports = {
 				type: Sequelize.DATE
 			},
 
-			}, {
-				underscored: false,
-				charset: "utf8mb4",
-				collate: 'utf8mb4_bin',
-			});
+		}, {
+			underscored: false,
+			charset: "utf8mb4",
+			collate: "utf8mb4_bin",
+		});
 	},
 
 	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable('lessonContents');
+		return queryInterface.dropTable("lessonContents");
 	}
 };
