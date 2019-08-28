@@ -101,7 +101,7 @@ module.exports = app => {
 	model.audit = async function (packageId, userId, state) {
 		if (~~state !== PACKAGE_STATE_AUDIT_SUCCESS || !userId) {
 			app.keepworkModel.lessonOrganizationPackages.destroy({ where: { packageId }});
-			return ;
+			return;
 		};
 
 		await app.model.Packages.update({ auditAt: new Date() }, { where: { id: packageId }});
@@ -130,7 +130,7 @@ module.exports = app => {
 		});
 
 		if (data) return true;
-		
+
 		return false;
 	};
 

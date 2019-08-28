@@ -50,7 +50,7 @@ module.exports = app => {
 			},
 		],
 	});
-	
+
 	// model.sync({force:true});
 
 	model.getSkills = async function (userId) {

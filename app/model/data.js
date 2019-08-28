@@ -27,4 +27,4 @@ module.exports = app => {
 
 	return model;
 };
-	
+

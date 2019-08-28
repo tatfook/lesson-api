@@ -7,7 +7,7 @@ module.exports = app => {
 	// console.log(instance, options);
 	// console.log("--------");
 	// });
-	
+
 	const models = { "packages": "Packages" };
 
 	async function getList(options) {
@@ -30,7 +30,7 @@ module.exports = app => {
 		const modelName = models[tableName];
 		// console.log("------------", tableName, modelName);
 		if (!modelName) return;
-		
+
 		inst = inst.get({ plain: true });
 		await app.api[tableName + "Upsert"](inst);
 	});

@@ -16,7 +16,7 @@ module.exports = (options, app) => {
 		const arrs = order.split("-");
 
 		for (let i = 0; i < arrs.length; i += 2) {
-			orders.push([arrs[i], arrs[i+1]]);
+			orders.push([arrs[i], arrs[i + 1]]);
 		}
 
 		delete query["x-per-page"];

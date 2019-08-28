@@ -101,4 +101,59 @@ module.exports = app => {
 
 	const trades = controller.trades;
 	router.resources(prefix + "trades", trades);
+
+	// -----------------------------add from coreservice--------------------------------------------------------
+	// LESSON three 
+	const lessonOrganization = controller.lessonOrganization;
+	router.get(`${prefix}lessonOrganizations/token`, lessonOrganization.token);
+	router.get(`${prefix}lessonOrganizations/packages`, lessonOrganization.packages);
+	router.get(`${prefix}lessonOrganizations/packageDetail`, lessonOrganization.packageDetail);
+	router.get(`${prefix}lessonOrganizations/getByName`, lessonOrganization.getByName);
+	router.get(`${prefix}lessonOrganizations/getByUrl`, lessonOrganization.getByUrl);
+	router.post(`${prefix}lessonOrganizations/login`, lessonOrganization.login);
+	router.post(`${prefix}lessonOrganizations/search`, lessonOrganization.search);
+	router.resources(`${prefix}lessonOrganizations`, lessonOrganization);
+	// router.post(`${prefix}lessonOrganizations`, lessonOrganization.create);
+	// router.get(`${prefix}lessonOrganizations/:id`, lessonOrganization.show);
+	// router.put(`${prefix}lessonOrganizations/:id`, lessonOrganization.update);
+
+	// organization class
+	const lessonOrganizationClass = controller.lessonOrganizationClass;
+	router.get(`${prefix}lessonOrganizationClasses`, lessonOrganizationClass.index);
+	router.get(`${prefix}lessonOrganizationClasses/history`, lessonOrganizationClass.history);
+	router.post(`${prefix}lessonOrganizationClasses`, lessonOrganizationClass.create);
+	router.put(`${prefix}lessonOrganizationClasses/:id`, lessonOrganizationClass.update);
+	router.delete(`${prefix}lessonOrganizationClasses/:id`, lessonOrganizationClass.destroy);
+
+	// organization class member 
+	const lessonOrganizationClassMember = controller.lessonOrganizationClassMember;
+	router.get(`${prefix}lessonOrganizationClassMembers/student`, lessonOrganizationClassMember.student);
+	router.get(`${prefix}lessonOrganizationClassMembers/teacher`, lessonOrganizationClassMember.teacher);
+	router.post(`${prefix}lessonOrganizationClassMembers/bulk`, lessonOrganizationClassMember.bulkCreate);
+	router.resources(`${prefix}lessonOrganizationClassMembers`, lessonOrganizationClassMember);
+
+	// organization activate code
+	const lessonOrganizationActivateCode = controller.lessonOrganizationActivateCode;
+	router.post(`${prefix}lessonOrganizationActivateCodes/activate`, lessonOrganizationActivateCode.activate);
+	router.post(`${prefix}lessonOrganizationActivateCodes/search`, lessonOrganizationActivateCode.index);
+	router.resources(`${prefix}lessonOrganizationActivateCodes`, lessonOrganizationActivateCode);
+
+	// organization user 
+	const lessonOrganizationUser = controller.lessonOrganizationUser;
+	router.post(`${prefix}lessonOrganizationUsers/batch`, lessonOrganizationUser.batchCreateUser);
+	router.post(`${prefix}lessonOrganizationUsers/unbind`, lessonOrganizationUser.unbind);
+	router.post(`${prefix}lessonOrganizationUsers/setpwd`, lessonOrganizationUser.setpwd);
+
+	// organization form
+	const lessonOrganizationForm = controller.lessonOrganizationForm;
+	router.get(`${prefix}lessonOrganizationForms/:id/submit`, lessonOrganizationForm.getSubmit);
+	router.post(`${prefix}lessonOrganizationForms/:id/submit`, lessonOrganizationForm.postSubmit);
+	router.put(`${prefix}lessonOrganizationForms/:id/submit/:submitId`, lessonOrganizationForm.updateSubmit);
+	router.post(`${prefix}lessonOrganizationForms/search`, lessonOrganizationForm.search);
+	router.resources(`${prefix}lessonOrganizationForms`, lessonOrganizationForm);
+
+	// organization 
+	const organization = controller.organizationIndex;
+	router.post(`${prefix}organizations/changepwd`, organization.changepwd);
+	// -----------------------------add from coreservice--------------------------------------------------------
 };

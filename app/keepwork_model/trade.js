@@ -13,7 +13,7 @@ module.exports = app => {
 			autoIncrement: true,
 			primaryKey: true,
 		},
-		
+
 		userId: { // 用户ID
 			type: BIGINT,
 			allowNull: false,
@@ -104,7 +104,7 @@ module.exports = app => {
 		},
 
 		description: { // 交易内容
-			type: STRING,       
+			type: STRING,
 			defaultValue: "",
 		},
 
@@ -120,7 +120,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	app.keepworkModel.trades = model;
 	return model;
 };

@@ -13,7 +13,7 @@ module.exports = app => {
 			autoIncrement: true,
 			primaryKey: true,
 		},
-		
+
 		organizationId: {
 			type: BIGINT,
 			defaultValue: 0,
@@ -24,7 +24,7 @@ module.exports = app => {
 		},
 
 		begin: {
-			type: DATE, 
+			type: DATE,
 			defaultValue: function () {
 				return new Date();
 			},
@@ -56,7 +56,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	app.keepworkModel.lessonOrganizationClasses = model;
 
 	return model;

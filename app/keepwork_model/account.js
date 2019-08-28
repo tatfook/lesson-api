@@ -13,7 +13,7 @@ module.exports = app => {
 			autoIncrement: true,
 			primaryKey: true,
 		},
-		
+
 		userId: {
 			type: BIGINT,
 			unique: true,

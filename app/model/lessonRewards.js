@@ -92,8 +92,9 @@ module.exports = app => {
 		await app.keepworkModel.accounts.increment({ coin: coinCount, bean: beanCount, lockCoin: 0 - coinCount }, { where: { userId }});
 
 		const lesson = await app.model.Lessons.getById(lessonId);
-		await app.keepworkModel.trades.create({ userId,
-		   	type: TRADE_TYPE_LESSON_STUDY, 
+		await app.keepworkModel.trades.create({
+			userId,
+			type: TRADE_TYPE_LESSON_STUDY,
 			subject: lesson.lessonName,
 			coin: coinCount,
 			bean: beanCount,

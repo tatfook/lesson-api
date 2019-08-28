@@ -13,7 +13,7 @@ util.getDate = function () {
 	const hour = _.padStart(date.getHours(), 2, "0");
 	const minute = _.padStart(date.getMinutes(), 2, "0");
 	const second = _.padStart(date.getSeconds(), 2, "0");
-	
+
 	const datetime = year + month + day + hour + minute + second;
 	const datestr = year + month + day;
 	const timestr = hour + minute + second;

@@ -75,9 +75,8 @@ module.exports = app => {
 		foreignKey: "lessonId",
 		sourceKey: "id",
 		constraints: false,
-		
 	});
-	
+
 	app.model.packageLessons.belongsTo(app.model.lessons, {
 		as: "lessons",
 		foreignKey: "lessonId",

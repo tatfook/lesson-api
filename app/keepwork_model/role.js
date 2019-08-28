@@ -19,7 +19,7 @@ module.exports = app => {
 			autoIncrement: true,
 			primaryKey: true,
 		},
-		
+
 		userId: { // 用户Id
 			type: BIGINT,
 			allowNull: false,
@@ -40,7 +40,7 @@ module.exports = app => {
 			type: BIGINT,
 			defaultValue: 0,
 		},
-		
+
 		extra: {
 			type: JSON,
 			defaultValue: {},
@@ -76,17 +76,21 @@ module.exports = app => {
 	};
 
 	model.getAllianceMemberByUserId = async function (userId) {
-		return await app.keepworkModel.roles.findOne({ where: {
-			userId,
-			roleId: USER_ROLE_ALLIANCE_MEMBER,
-		}}).then(o => o && o.toJSON());
+		return await app.keepworkModel.roles.findOne({
+			where: {
+				userId,
+				roleId: USER_ROLE_ALLIANCE_MEMBER,
+			}
+		}).then(o => o && o.toJSON());
 	};
 
 	model.getTutorByUserId = async function (userId) {
-		return await app.keepworkModel.roles.findOne({ where: {
-			userId,
-			roleId: USER_ROLE_TUTOR,
-		}}).then(o => o && o.toJSON());
+		return await app.keepworkModel.roles.findOne({
+			where: {
+				userId,
+				roleId: USER_ROLE_TUTOR,
+			}
+		}).then(o => o && o.toJSON());
 	};
 
 	app.keepworkModel.roles = model;

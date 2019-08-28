@@ -33,7 +33,7 @@ class LessonsController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 		const data = await ctx.model.Lessons.getById(id);
-		
+
 		if (!data) ctx.throw(404, "not found");
 
 		data.skills = await ctx.model.LessonSkills.getSkillsByLessonId(id);
@@ -50,7 +50,7 @@ class LessonsController extends Controller {
 		let data = await ctx.model.Lessons.findOne({ where: { url }});
 		if (!data) ctx.throw(404, "not found" + url);
 		data = data.get({ plain: true });
-		
+
 		const id = data.id;
 
 		data.skills = await ctx.model.LessonSkills.getSkillsByLessonId(id);
@@ -97,7 +97,7 @@ class LessonsController extends Controller {
 				score: skillScore,
 			});
 		}
-		if (lessonSkills.length>0) {
+		if (lessonSkills.length > 0) {
 			await ctx.model.LessonSkills.bulkCreate(lessonSkills);
 		}
 
@@ -128,7 +128,7 @@ class LessonsController extends Controller {
 				score: skillScore,
 			});
 		}
-		if (lessonSkills.length>0) {
+		if (lessonSkills.length > 0) {
 			await ctx.model.LessonSkills.destroy({ where: { lessonId: id }});
 			await ctx.model.LessonSkills.bulkCreate(lessonSkills);
 		}
@@ -167,7 +167,7 @@ class LessonsController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 		const params = ctx.request.body;
-		
+
 		ctx.validate({
 			skillId: "int",
 			score: {
@@ -214,7 +214,7 @@ class LessonsController extends Controller {
 
 		const lesson = await ctx.model.Lessons.getById(id, userId);
 		if (!lesson) ctx.throw(400, "args error");
-		
+
 		const result = await ctx.model.LessonContents.release(userId, id, params.content);
 
 		return this.success(result);
@@ -265,7 +265,7 @@ class LessonsController extends Controller {
 
 		params.lessonId = id;
 		params.userId = userId;
-	
+
 		// const result = await ctx.model.LearnRecords.updateLearnRecord(params);
 
 		return this.success("OK");

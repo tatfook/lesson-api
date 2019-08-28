@@ -11,7 +11,7 @@ module.exports = app => {
 			autoIncrement: true,
 			primaryKey: true,
 		},
-		
+
 		organizationId: {
 			type: BIGINT,
 			defaultValue: 0,
@@ -26,7 +26,7 @@ module.exports = app => {
 			type: BIGINT,
 			defaultValue: 0,
 		},
-		
+
 		lessons: {
 			type: JSON,
 		},
@@ -50,7 +50,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	app.keepworkModel.lessonOrganizationPackages = model;
 
 	return model;

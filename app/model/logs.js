@@ -23,7 +23,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	app.model.logs = model;
 	return model;
 };

@@ -23,7 +23,7 @@ module.exports = app => {
 			type: INTEGER,
 			defaultValue: 0,
 		},
-		
+
 		amount: { // 金额
 			type: INTEGER,
 			defaultValue: 0,
@@ -45,6 +45,6 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	return model;
 };

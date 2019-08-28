@@ -6,7 +6,7 @@ module.exports = app => {
 		JSON,
 		TEXT,
 	} = app.Sequelize;
-	
+
 	const model = app.model.define("lessons", {
 		id: {
 			type: BIGINT,
@@ -65,10 +65,12 @@ module.exports = app => {
 	};
 
 	model.addSkill = async function (userId, lessonId, skillId, score) {
-		let data = await app.model.Lessons.findOne({ where: {
-			userId,
-			id: lessonId,
-		}});
+		let data = await app.model.Lessons.findOne({
+			where: {
+				userId,
+				id: lessonId,
+			}
+		});
 
 		if (!data) return false;
 

@@ -82,7 +82,7 @@ class UsersController extends Controller {
 		const { ctx } = this;
 		this.enauthenticated();
 		const user = this.getUser();
-		
+
 		const data = await ctx.model.Users.getById(user.userId, user.username);
 
 		return this.success(data);
@@ -127,7 +127,7 @@ class UsersController extends Controller {
 			key: "string",
 			school: "string_optional"
 		});
-		
+
 		const user = await this.model.Users.getById(id);
 		if (!user) this.throw(400, "arg error");
 
@@ -178,7 +178,7 @@ class UsersController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.query;
 		if (!id) ctx.throw(400, "id invalid");
-		
+
 		this.enauthenticated();
 		const userId = this.getUser().userId;
 		if (~~id !== userId) ctx.throw(400, "args error");
@@ -196,11 +196,11 @@ class UsersController extends Controller {
 	// const id = _.toNumber(ctx.params.id);
 	// const params = ctx.request.body;
 	// if (!id) ctx.throw(400, "id invalid");
-		
+
 	// this.enauthenticated();
 	// const userId = this.getUser().userId;
 	// if (id != userId) ctx.throw(400, "args error");
-		
+
 	// ctx.validate({
 	// packageId: 'int',
 	// }, params);
@@ -209,7 +209,7 @@ class UsersController extends Controller {
 	// const result = await ctx.model.Subscribes.subscribePackage(userId, packageId);
 
 	// if (result.id != 0) ctx.throw(400, result.message);
-		
+
 	// return this.success("OK");
 	// }
 
@@ -218,11 +218,11 @@ class UsersController extends Controller {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
-		
+
 		this.enauthenticated();
 		const userId = this.getUser().userId;
 		if (~~id !== userId) ctx.throw(400, "args error");
-	
+
 		const list = await ctx.model.Coins.findAll({ where: { userId }});
 		return this.success(list);
 	}
@@ -242,18 +242,18 @@ class UsersController extends Controller {
 	async expense() {
 		const { userId } = this.enauthenticated();
 		const { coin, bean, description } = this.validate({ coin: "int_optional", bean: "int_optional", description: "string_optional" });
-		
+
 		const user = await this.model.Users.getById(userId);
 		if (!user) this.throw(400);
 		if ((bean && bean > user.bean) || (coin && coin > user.coin)) this.throw(400, "余额不足");
 		if (user.bean && bean && user.bean >= bean && bean > 0) {
 			user.bean = user.bean - bean;
 			await this.model.Trades.create({ userId, type: TRADE_TYPE_BEAN, amount: bean * -1, description });
-		} 
+		}
 		if (user.coin && coin && user.coin >= coin && coin > 0) {
 			user.coin = user.coin - coin;
 			await this.model.Trades.create({ userId, type: TRADE_TYPE_COIN, amount: coin * -1, description });
-		} 
+		}
 
 		await this.model.Users.update(user, { fields: ["coin", "bean"], where: { id: userId }});
 
@@ -275,7 +275,7 @@ class UsersController extends Controller {
 
 		const tutor = await this.model.tutors.getByUserId(userId) || { userId, tutorId };
 		const curtitme = new Date().getTime();
-		
+
 
 		if (tutor.endTime <= curtitme) {
 			tutor.startTime = curtitme;

@@ -7,17 +7,17 @@ const Controller = require("../core/baseController.js");
 class TeacherCDKeysController extends Controller {
 	async index() {
 		this.adminAuthenticated();
-		const {ctx} = this;
+		const { ctx } = this;
 		const query = ctx.query;
 
-		const list = await ctx.model.TeacherCDKeys.findAndCount({...this.queryOptions, where:query});
+		const list = await ctx.model.TeacherCDKeys.findAndCount({ ...this.queryOptions, where: query });
 
 		return this.success(list);
 	}
 
 	async generate() {
 		this.adminAuthenticated();
-		const {ctx} = this;
+		const { ctx } = this;
 		const params = ctx.query || {};
 
 		const count = _.toNumber(params.count) || 1;
@@ -25,34 +25,34 @@ class TeacherCDKeysController extends Controller {
 
 		for (let i = 0; i < count; i++) {
 			let key = uuidv1().replace(/\-/g, "");
-			let data = await ctx.model.TeacherCDKeys.create({key});
+			let data = await ctx.model.TeacherCDKeys.create({ key });
 			list.push(data);
 		}
 
-		return this.success(list); 
+		return this.success(list);
 	}
 
 	async update() {
 		this.adminAuthenticated();
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 		const params = ctx.request.body;
-	
+
 		delete params.key;
 		delete params.teacherId;
-		const result = await ctx.model.TeacherCDKeys.update(params, {where:{id}});
+		const result = await ctx.model.TeacherCDKeys.update(params, { where: { id } });
 
 		return this.success(result);
 	}
 
 	async destroy() {
 		this.adminAuthenticated();
-		const {ctx} = this; 
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
-		const result = await ctx.model.TeacherCDKeys.destroy({where:{id}});
+		const result = await ctx.model.TeacherCDKeys.destroy({ where: { id } });
 
 		return this.success(result);
 	}

@@ -52,7 +52,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	model.getPackagesByUserId = async function (userId) {
 		const sql = `select packages.*, subscribes.createdAt joinAt, subscribes.state subscribeState 
 			from subscribes, packages 
@@ -136,8 +136,6 @@ module.exports = app => {
 			amount: _package.reward,
 			type: COIN_TYPE_PACKAGE_REWARD,
 		});
-
-		 
 	};
 
 	model.addTeachedLesson = async function (userId, packageId, lessonId) {

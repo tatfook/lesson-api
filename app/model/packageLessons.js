@@ -63,7 +63,7 @@ module.exports = app => {
 
 		const count = {};
 
-		_.each(list, o => {count[o.packageId] = o.count;});
+		_.each(list, o => { count[o.packageId] = o.count; });
 
 		return count;
 	};
@@ -72,5 +72,3 @@ module.exports = app => {
 
 	return model;
 };
-
-

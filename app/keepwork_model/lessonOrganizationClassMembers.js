@@ -13,7 +13,7 @@ module.exports = app => {
 			autoIncrement: true,
 			primaryKey: true,
 		},
-		
+
 		organizationId: {
 			type: BIGINT,
 			defaultValue: 0,
@@ -28,14 +28,14 @@ module.exports = app => {
 			type: BIGINT,
 			defaultValue: 0,
 		},
-		
+
 		realname: { // 真实姓名
 			type: STRING,
 		},
 
 		roleId: { // 角色  1 -- 学生  2 -- 教师  64 -- 管理员
 			type: INTEGER,
-			defaultValue: 0, 
+			defaultValue: 0,
 		},
 
 		privilege: { // 权限
@@ -63,7 +63,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	app.keepworkModel.lessonOrganizationClassMembers = model;
 
 	return model;

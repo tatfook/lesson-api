@@ -18,7 +18,7 @@ module.exports = app => {
 			unique: true,
 			allowNull: false,
 		},
-		
+
 		enSubjectName: {
 			type: STRING(64),
 		},
@@ -42,7 +42,7 @@ module.exports = app => {
 
 	model.getOne = async function (subjectId) {
 		let subject = await app.model.Subjects.findOne({ where: { id: subjectId }});
-		if (!subject) return ;
+		if (!subject) return;
 
 		subject = subject.get({ plain: true });
 

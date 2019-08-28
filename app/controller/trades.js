@@ -9,12 +9,11 @@ const Controller = require("../core/baseController.js");
 
 class TradesController extends Controller {
 	// index() {
-		
+
 	// }
 	//
 	get modelName() {
-		this.modelName = "Trades";
-		return this.modelName;
+		return "Trades";
 	}
 }
 

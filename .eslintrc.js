@@ -17,9 +17,9 @@ module.exports = {
 
         // enforce that class methods use "this"
         // https://eslint.org/docs/rules/class-methods-use-this
-        'class-methods-use-this': ['error', {
-            exceptMethods: [],
-        }],
+        // 'class-methods-use-this': ['error', {
+        //     exceptMethods: [],
+        // }],
 
         // require return statements to either always or never specify values
         // 'consistent-return': 'error',
@@ -191,8 +191,8 @@ module.exports = {
         // disallow reassignment of function parameters
         // disallow parameter object manipulation except for specific exclusions
         // rule: https://eslint.org/docs/rules/no-param-reassign.html
-        'no-param-reassign': ['warn', {
-            props: false,
+        // 'no-param-reassign': ['warn', {
+            // props: false,
             // ignorePropertyModificationsFor: [
             //     'acc', // for reduce accumulators
             //     'accumulator', // for reduce accumulators
@@ -204,7 +204,7 @@ module.exports = {
             //     'response', // for Express responses
             //     '$scope', // for Angular 1 scopes
             // ]
-        }],
+        // }],
 
         // disallow usage of __proto__ property
         'no-proto': 'error',

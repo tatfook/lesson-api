@@ -1,7 +1,7 @@
 
 const _ = require("lodash");
 const consts = require("../core/consts.js");
-const { 
+const {
 	USER_IDENTIFY_TEACHER
 } = consts;
 
@@ -29,7 +29,7 @@ module.exports = app => {
 		nickname: { // lesson昵称或真是姓名
 			type: STRING(64),
 		},
-		
+
 		coin: { // 知识币
 			type: INTEGER,
 			defaultValue: 0,
@@ -62,7 +62,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	model.updateExtra = async function (userId, extra) {
 		const user = await app.model.Users.getById(userId);
 
@@ -85,7 +85,7 @@ module.exports = app => {
 				username,
 				coin: amount,
 			});
-			 
+
 			// await app.model.Coins.create({
 			// userId,
 			// amount: amount,
@@ -98,7 +98,7 @@ module.exports = app => {
 
 		return data;
 	};
-	
+
 	model.isTeacher = async function (userId) {
 		let user = await app.model.Users.findOne({ where: { id: userId }});
 		if (!user) return false;
@@ -112,7 +112,7 @@ module.exports = app => {
 
 	model.learn = async function (userId) {
 		const user = await this.getById(userId);
-		if (!user) return ;
+		if (!user) return;
 
 		const datestr = app.util.getDate().datestr;
 		const learn = user.extra.learn || { learnDayCount: 0, lastLearnDate: "" };

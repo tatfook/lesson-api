@@ -30,7 +30,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	model.getHots = async function () {
 		const sql = `select packages.* 
 			from packageSorts, packages 

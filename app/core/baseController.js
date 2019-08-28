@@ -20,7 +20,7 @@ class BaseController extends Controller {
 		return _.merge({}, this.ctx.request.body, this.ctx.query, this.ctx.params);
 	}
 
-	validate(schema = {}, options = {allowUnknown:true}) {
+	validate(schema = {}, options = { allowUnknown: true }) {
 		const params = this.getParams();
 
 		_.each(schema, (val, key) => {
@@ -39,7 +39,7 @@ class BaseController extends Controller {
 
 		return params;
 	}
-	
+
 	formatQuery(query) {
 		const self = this;
 		const Op = this.app.Sequelize.Op;
@@ -49,7 +49,7 @@ class BaseController extends Controller {
 
 			const val = query[key];
 			delete query[key];
-			
+
 			const newkey = arr[0];
 			const op = arr[1];
 			const oldval = query[newkey];
@@ -64,8 +64,8 @@ class BaseController extends Controller {
 			query[newkey][Op[op]] = val;
 		}
 
-		const replaceOp = function(data) {
-			if (!_.isObject(data)) return ;
+		const replaceOp = function (data) {
+			if (!_.isObject(data)) return;
 			_.each(data, (val, key) => {
 				if (_.isString(key)) {
 					const op = key.substring(1);
@@ -73,7 +73,7 @@ class BaseController extends Controller {
 						data[Op[op]] = val;
 						delete data[key];
 					}
-					if (key == "$model$" && typeof(val) == "string" && self.model[val]) {
+					if (key == "$model$" && typeof (val) == "string" && self.model[val]) {
 						data["model"] = self.model[val];
 						delete data["$model$"];
 					}
@@ -97,17 +97,17 @@ class BaseController extends Controller {
 	}
 
 	async search() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const query = ctx.request.body;
 		this.formatQuery(query);
 		const model = this.model[this.modelName];
-		const result = await model.findAndCount({...this.queryOptions, where:query});
+		const result = await model.findAndCount({ ...this.queryOptions, where: query });
 
 		this.success(result);
 	}
-	
+
 	async index() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const query = ctx.query;
 
 		this.enauthenticated();
@@ -116,13 +116,13 @@ class BaseController extends Controller {
 		query.userId = userId;
 
 		const model = this.model[this.modelName];
-		const result = await model.findAndCount({...this.queryOptions, where:query});
+		const result = await model.findAndCount({ ...this.queryOptions, where: query });
 
 		this.success(result);
 	}
 
 	async create() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const params = ctx.request.body;
 
 		this.enauthenticated();
@@ -137,7 +137,7 @@ class BaseController extends Controller {
 	}
 
 	async show() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 
 		this.enauthenticated();
@@ -146,13 +146,13 @@ class BaseController extends Controller {
 		const userId = this.getUser().userId;
 
 		const model = this.model[this.modelName];
-		const result = await model.findOne({where:{id, userId}});
+		const result = await model.findOne({ where: { id, userId } });
 
 		this.success(result);
 	}
 
 	async update() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.request.body;
 
@@ -163,13 +163,13 @@ class BaseController extends Controller {
 		const userId = this.getUser().userId;
 
 		const model = this.model[this.modelName];
-		const result = await model.update(params, {where:{id, userId}});
+		const result = await model.update(params, { where: { id, userId } });
 
 		this.success(result);
 	}
 
 	async destroy() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.request.body;
 
@@ -180,78 +180,78 @@ class BaseController extends Controller {
 		const userId = this.getUser().userId;
 
 		const model = this.model[this.modelName];
-		const result = await model.destroy({where:{id, userId}});
+		const result = await model.destroy({ where: { id, userId } });
 
 		this.success(result);
 	}
 
 	async postExtra() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.request.body || {};
 
 		this.enauthenticated();
 		if (!id) ctx.throw(400, "id invalid");
-		const {userId} = this.getUser();
+		const { userId } = this.getUser();
 
 		const model = this.model[this.modelName];
-		const result = await model.update({extra:params}, {where:{id, userId}});
-		
+		const result = await model.update({ extra: params }, { where: { id, userId } });
+
 		this.success(result);
 	}
 
 	async putExtra() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.request.body || {};
 
 		this.enauthenticated();
 		if (!id) ctx.throw(400, "id invalid");
-		const {userId} = this.getUser();
+		const { userId } = this.getUser();
 
-		const where = {id, userId};
+		const where = { id, userId };
 		const model = this.model[this.modelName];
-		let data = await model.findOne({where});
+		let data = await model.findOne({ where });
 		if (!data) this.throw(404);
-		data = data.get({plain:true});
+		data = data.get({ plain: true });
 
 		const extra = data.extra || {};
 		_.merge(extra, params);
 
-		const result = await model.update({extra}, {where});
-		
+		const result = await model.update({ extra }, { where });
+
 		this.success(result);
 	}
 
 	async getExtra() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.request.body || {};
 
 		this.enauthenticated();
 		if (!id) ctx.throw(400, "id invalid");
-		const {userId} = this.getUser();
+		const { userId } = this.getUser();
 
-		const where = {id, userId};
+		const where = { id, userId };
 		const model = this.model[this.modelName];
-		let data = await model.findOne({where});
+		let data = await model.findOne({ where });
 		if (!data) this.throw(404);
-		data = data.get({plain:true});
+		data = data.get({ plain: true });
 
 		this.success(data.extra || {});
 	}
 
 	async deleteExtra() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 
 		this.enauthenticated();
 		if (!id) ctx.throw(400, "id invalid");
-		const {userId} = this.getUser();
+		const { userId } = this.getUser();
 
 		const model = this.model[this.modelName];
-		const result = await model.update({extra:{}}, {where:{id, userId}});
-		
+		const result = await model.update({ extra: {} }, { where: { id, userId } });
+
 		this.success(result);
 	}
 
@@ -275,7 +275,7 @@ class BaseController extends Controller {
 		const token = this.ctx.state.token;
 		const user = this.app.util.jwt_decode(token || "", config.adminSecret, true);
 		if (!user) return this.throw(401);
-		
+
 		return user;
 	}
 
@@ -305,7 +305,7 @@ class BaseController extends Controller {
 		return false;
 	}
 
-	success(body, status=200) {
+	success(body, status = 200) {
 		this.ctx.status = status;
 		this.ctx.body = body;
 	}

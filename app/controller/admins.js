@@ -16,21 +16,21 @@ class AdminsController extends Controller {
 
 		return;
 	}
-	
+
 	async query() {
 		this.adminAuthenticated();
 
-		const {sql} = this.validate({sql:"string"});
+		const { sql } = this.validate({ sql: "string" });
 		const _sql = sql.toLowerCase();
-		if (_sql.indexOf("select ") != 0 || 
-				_sql.indexOf(";") >= 0 ||
-				_sql.indexOf("upsert ") >= 0 ||
-				_sql.indexOf("drop ") >= 0 ||
-				_sql.indexOf("update ") >= 0 || 
-				_sql.indexOf("delete ") >= 0 ||
-				_sql.indexOf("create ") >= 0 ||
-				_sql.indexOf("show ") >= 0 ||
-				_sql.indexOf("alter ") >= 0) {
+		if (_sql.indexOf("select ") != 0 ||
+			_sql.indexOf(";") >= 0 ||
+			_sql.indexOf("upsert ") >= 0 ||
+			_sql.indexOf("drop ") >= 0 ||
+			_sql.indexOf("update ") >= 0 ||
+			_sql.indexOf("delete ") >= 0 ||
+			_sql.indexOf("create ") >= 0 ||
+			_sql.indexOf("show ") >= 0 ||
+			_sql.indexOf("alter ") >= 0) {
 			return this.throw(404, "sql 不合法");
 		}
 
@@ -61,36 +61,36 @@ class AdminsController extends Controller {
 
 		this.formatQuery(query);
 
-		const list = await this.resource.findAndCount({...this.queryOptions, where:query});
+		const list = await this.resource.findAndCount({ ...this.queryOptions, where: query });
 
 		this.success(list);
 	}
 
 	async index() {
 		this.parseParams();
-		const {ctx} = this;
+		const { ctx } = this;
 
 		const query = ctx.query || {};
-		const list = await this.resource.findAndCount({...this.queryOptions, where:query});
+		const list = await this.resource.findAndCount({ ...this.queryOptions, where: query });
 
 		this.success(list);
 	}
 
 	async show() {
 		this.parseParams();
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 
 		if (!id) ctx.throw(400, "args error");
 
-		const data = await this.resource.findOne({where:{id}});
+		const data = await this.resource.findOne({ where: { id } });
 
 		return this.success(data);
 	}
 
 	async create() {
 		this.parseParams();
-		const {ctx} = this;
+		const { ctx } = this;
 		const params = ctx.request.body;
 
 		const data = await this.resource.create(params);
@@ -100,13 +100,13 @@ class AdminsController extends Controller {
 
 	async update() {
 		this.parseParams();
-		const {ctx} = this;
+		const { ctx } = this;
 		const params = ctx.request.body;
 		const id = _.toNumber(ctx.params.id);
 
 		if (!id) ctx.throw(400, "args error");
 
-		const data = await this.resource.update(params, {where:{id}});
+		const data = await this.resource.update(params, { where: { id } });
 
 		if (this.resource.adminUpdateHook) await this.resource.adminUpdateHook(params);
 		return this.success(data);
@@ -114,12 +114,12 @@ class AdminsController extends Controller {
 
 	async destroy() {
 		this.parseParams();
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 
 		if (!id) ctx.throw(400, "args error");
 
-		const data = await this.resource.destroy({where:{id}});
+		const data = await this.resource.destroy({ where: { id } });
 
 		return this.success(data);
 	}

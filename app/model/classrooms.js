@@ -1,7 +1,7 @@
 
 const _ = require("lodash");
 const consts = require("../core/consts.js");
-const { 
+const {
 	CLASSROOM_STATE_USING,
 	CLASSROOM_STATE_USED,
 	LEARN_RECORD_STATE_START
@@ -31,7 +31,7 @@ module.exports = app => {
 			type: BIGINT,
 			defaultValue: 0
 		},
-		
+
 		organizationId: { // 机构Id
 			type: BIGINT,
 			defaultValue: 0,
@@ -72,11 +72,11 @@ module.exports = app => {
 
 	model.createClassroom = async function (params) {
 		let classroom = await app.model.Classrooms.create(params);
-		if (!classroom) return ;
+		if (!classroom) return;
 		classroom = classroom.get({ plain: true });
 		classroom.key = _.padEnd(_.toString(classroom.id), 6, "" + _.random(10000000, 99999999));
 		await app.model.Classrooms.update(classroom, { where: { id: classroom.id }});
-		
+
 		const userId = classroom.userId;
 		const user = await app.model.Users.getById(userId);
 		const extra = user.extra || {};
@@ -128,7 +128,7 @@ module.exports = app => {
 
 	model.quit = async function (studentId, username) {
 		const user = await app.model.Users.getById(studentId);
-		
+
 		const classroomId = user.extra.classroomId;
 		if (!classroomId) return;
 
@@ -159,7 +159,7 @@ module.exports = app => {
 		const classroomId = data.id;
 		const lessonId = data.lessonId;
 		// 课程未开始或结束
-		if (~~data.state !== CLASSROOM_STATE_USING) return ;
+		if (~~data.state !== CLASSROOM_STATE_USING) return;
 		const learnRecordData = {
 			classroomId,
 			classId: data.classId,
@@ -183,7 +183,7 @@ module.exports = app => {
 				learnRecordData.extra.username = username;
 				const lrs = await app.model.LearnRecords.findAll({ where: { classroomId }});
 				_.each(lrs, o => {
-					if ((o.extra || {}).username === username)learnRecord = o;
+					if ((o.extra || {}).username === username) learnRecord = o;
 				});
 			}
 			if (!learnRecord) {
@@ -209,14 +209,14 @@ module.exports = app => {
 
 		if (!data) return false;
 		data = data.get({ plain: true });
-	
+
 		app.keepworkModel.lessonOrganizationLogs.classroomLog({ classroom: data, action: "dismiss", handleId: userId, username });
 		// 更新课堂状态
 		await app.model.Classrooms.update({
 			state: CLASSROOM_STATE_USED,
 		}, {
 			where: {
-				userId, 
+				userId,
 				id: data.id,
 			}
 		});
@@ -229,7 +229,7 @@ module.exports = app => {
 
 	// 获取最后一次教课记录 
 	model.getLastTeach = async function (userId, packageId) {
-		const list = await app.model.Classrooms.findAll({	
+		const list = await app.model.Classrooms.findAll({
 			order: [["createdAt", "DESC"]],
 			limit: 1,
 			where: { userId, packageId },
@@ -237,19 +237,21 @@ module.exports = app => {
 
 		if (list.length === 1) return list[0];
 
-		
+
 	};
 
 	// 获取课程包周上课量
 	model.getPackageWeekClassroomCount = async function (packageId) {
-		const curtime = (new Date()).getTime();	
+		const curtime = (new Date()).getTime();
 		const startTime = curtime - 1000 * 3600 * 24 * 7;
 
-		const count = await app.model.Classrooms.count({ where: {
-			createdAt: {
-				[app.model.Op.gt]: new Date(startTime),
+		const count = await app.model.Classrooms.count({
+			where: {
+				createdAt: {
+					[app.model.Op.gt]: new Date(startTime),
+				}
 			}
-		}});
+		});
 
 		return count;
 	};

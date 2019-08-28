@@ -62,7 +62,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	model.isAllowTeach = async function (userId) {
 		let user = await app.model.Teachers.findOne({ where: { userId }});
 		if (!user) return false;
@@ -77,7 +77,7 @@ module.exports = app => {
 
 		// return privilege & TEACHER_PRIVILEGE_TEACH;
 	};
-	
+
 	model.getByUserId = async function (userId) {
 		return await app.model.teachers.findOne({ where: { userId }}).then(o => o && o.toJSON());
 	};

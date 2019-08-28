@@ -23,6 +23,7 @@
     "memory-cache": "^0.2.0",
     "mysql2": "^1.5.3",
     "nodemailer": "^4.6.8",
+    "pingpp": "^2.1.4",
     "uuid": "^3.3.2"
   },
   "devDependencies": {

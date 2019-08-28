@@ -44,7 +44,7 @@ class PayController extends Controller {
 		if (!package_) {
 			await ctx.model.Logs.create({ text: "支付-课程包不存在" });
 			ctx.throw(400, "package not exist" + packageId);
-		} 
+		}
 		package_ = package_.get({ plain: true });
 		if (package_.rmb > price) {
 			await ctx.model.Logs.create({ text: "支付-支付金额错误" + price });
@@ -55,7 +55,7 @@ class PayController extends Controller {
 		if (subscribe) {
 			await ctx.model.Logs.create({ text: "支付-课程包已购买" });
 			ctx.throw(400, "package already subscribe");
-		} 
+		}
 
 		// 更新用户待解锁金币数
 		const lockCoin = user.lockCoin + package_.coin;

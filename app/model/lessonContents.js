@@ -7,7 +7,7 @@ module.exports = app => {
 		TEXT,
 		JSON,
 	} = app.Sequelize;
-	
+
 	const model = app.model.define("lessonContents", {
 		id: {
 			type: BIGINT,
@@ -48,7 +48,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	model.release = async function (userId, lessonId, content) {
 		let count = await app.model.LessonContents.count({
 			where: {

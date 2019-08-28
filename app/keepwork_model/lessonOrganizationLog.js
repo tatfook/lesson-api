@@ -16,7 +16,7 @@ module.exports = app => {
 			autoIncrement: true,
 			primaryKey: true,
 		},
-		
+
 		organizationId: {
 			type: BIGINT,
 			defaultValue: 0,
@@ -53,17 +53,17 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	app.keepworkModel.lessonOrganizationLogs = model;
 
-	model.classroomLog = async function ({ classroom = {}, lr, action="create", username, handleId, organizationId }) {
+	model.classroomLog = async function ({ classroom = {}, lr, action = "create", username, handleId, organizationId }) {
 		const log = {
 			organizationId: organizationId || classroom.organizationId,
 			type: "课堂",
 			handleId,
 			username,
 		};
-		
+
 		if (action === "create") {
 			log.description = `创建课堂, 课堂ID: C${classroom.key}, 《${classroom.extra.packageName}》, ${classroom.extra.lessonNo}: ${classroom.extra.lessonName}`;
 		} else if (action === "dismiss") {

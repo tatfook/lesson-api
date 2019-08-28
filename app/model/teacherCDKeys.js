@@ -31,14 +31,14 @@ module.exports = app => {
 
 		state: { // 0 --未使用 1 -- 已使用 2 -- 禁用态
 			type: INTEGER,
-			defaultValue: 0, 
+			defaultValue: 0,
 		},
 
 		expire: { // 激活码有效期
 			type: BIGINT,
 			defaultValue: 1000 * 3600 * 24 * 365,
 		},
-		
+
 		extra: {
 			type: JSON,
 			defaultValue: {},
@@ -51,7 +51,7 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	model.isAvailable = async function (key) {
 		let data = await app.model.TeacherCDKeys.findOne({ where: { key }});
 

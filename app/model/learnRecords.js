@@ -1,6 +1,6 @@
 
 const consts = require("../core/consts.js");
-const { 
+const {
 	LEARN_RECORD_STATE_FINISH,
 } = consts;
 
@@ -59,12 +59,12 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	model.getById = async function (id, userId) {
 		const where = { id };
 		if (userId) where.userId = userId;
 		const data = await app.model.LearnRecords.findOne({ where });
-		
+
 		return data && data.get({ plain: true });
 	};
 
@@ -101,7 +101,7 @@ module.exports = app => {
 			await this.learnFinish(params);
 		}
 
-		return lr; 
+		return lr;
 	};
 
 	model.updateLearnRecord = async function (params) {
@@ -119,7 +119,7 @@ module.exports = app => {
 		if (params.state) lr.state = params.state;
 		if (params.extra) lr.extra = params.extra;
 		if (params.classroomId) lr.classroomId = params.classroomId;
-	
+
 		await app.model.LearnRecords.update(lr, { where });
 
 		if (lr.userId && ~~params.state === LEARN_RECORD_STATE_FINISH) {
@@ -129,7 +129,7 @@ module.exports = app => {
 	};
 
 	app.model.learnRecords = model;
-	
+
 	return model;
 };
 

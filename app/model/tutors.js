@@ -44,11 +44,11 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	
+
 	model.getByUserId = async function (userId) {
 		return await app.model.tutors.findOne({ where: { userId }}).then(o => o && o.toJSON());
 	};
-	
+
 	app.model.tutors = model;
 	return model;
 };

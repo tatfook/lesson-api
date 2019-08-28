@@ -6,7 +6,7 @@ module.exports = app => {
 		INTEGER,
 		JSON,
 	} = app.Sequelize;
-	
+
 	const model = app.model.define("lessonSkills", {
 		id: {
 			type: BIGINT,

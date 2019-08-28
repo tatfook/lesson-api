@@ -3,16 +3,16 @@ const _ = require("lodash");
 const axios = require("axios");
 const pathToRegexp = require('path-to-regexp');
 
-class Api  {
+class Api {
 	constructor(config, app) {
 		this.config = config;
 		this.app = app;
 	}
-	
+
 	curlConfig(token, baseURL) {
 		return {
 			headers: {
-				"Authorization":"Bearer " + token,
+				"Authorization": "Bearer " + token,
 			},
 			baseURL: baseURL,
 		}
@@ -22,7 +22,7 @@ class Api  {
 		if (this.app.config.env == "unittest") return;
 		url = config.baseURL + pathToRegexp.compile(url)(data || {});
 		method = (method || "get").toLowerCase();
-		config = {...config, method, url};
+		config = { ...config, method, url };
 		if (method == "get" || method == "delete" || method == "head" || method == "options") {
 			config.params = data;
 		} else {
@@ -35,8 +35,8 @@ class Api  {
 				this.app.logger.debug(`请求:${url}成功`, JSON.stringify(res.config));
 				return res.data;
 			})
-		.catch(res => {
-			console.log(`请求:${method} ${url}成功`, res.response.status, res.response.data);
+			.catch(res => {
+				console.log(`请求:${method} ${url}成功`, res.response.status, res.response.data);
 				this.app.logger.debug(`请求:${url}失败`, res.responsestatus, res.response.data);
 			});
 	}
@@ -56,7 +56,7 @@ class Api  {
 	async createGitProject(data) {
 		return await this.curl("post", "/projects/user/:username", data, this.gitConfig);
 	}
-	
+
 	async deleteGitProject(data) {
 		const url = "/projects/" + encodeURIComponent(data.username + "/" + data.sitename);
 		return await this.curl('delete', url, {}, this.gitConfig);
@@ -71,7 +71,7 @@ class Api  {
 
 	async usersUpsert(inst) {
 		return this.curl('post', `/users/${inst.id}/upsert`, {
-		//return await this.curl('post', `/users/${inst.id}/upsert`, {
+			//return await this.curl('post', `/users/${inst.id}/upsert`, {
 			id: inst.id,
 			username: inst.username,
 			user_portrait: inst.portrait,
@@ -80,7 +80,7 @@ class Api  {
 
 	async sitesUpsert(inst) {
 		return this.curl('post', `/sites/${inst.id}/upsert`, {
-		//return await this.curl('post', `/sites/${inst.id}/upsert`, {
+			//return await this.curl('post', `/sites/${inst.id}/upsert`, {
 			id: inst.id,
 			username: inst.username,
 			sitename: inst.sitename,
@@ -92,11 +92,11 @@ class Api  {
 
 	async projectsUpsert(inst) {
 		const tags = (inst.tags || "").split("|").filter(o => o);
-		const user = await this.app.model.users.findOne({where:{id:inst.userId}});
+		const user = await this.app.model.users.findOne({ where: { id: inst.userId } });
 		if (!user) return;
 
 		return this.curl('post', `/projects/${inst.id}/upsert`, {
-		//return await this.curl('post', `/projects/${inst.id}/upsert`, {
+			//return await this.curl('post', `/projects/${inst.id}/upsert`, {
 			id: inst.id,
 			name: inst.name,
 			username: user.username,
@@ -121,12 +121,12 @@ class Api  {
 		});
 		//console.log(inst);
 		if (inst.state == 2) {
-			const totalLessons = await this.app.model.PackageLessons.count({where:{packageId:inst.id}});
+			const totalLessons = await this.app.model.PackageLessons.count({ where: { packageId: inst.id } });
 			return this.curl('post', `/packages/${inst.id}/upsert`, {
-			//return await this.curl('post', `/projects/${inst.id}/upsert`, {
+				//return await this.curl('post', `/projects/${inst.id}/upsert`, {
 				id: inst.id,
 				title: inst.packageName,
-				total_lessons: totalLessons, 
+				total_lessons: totalLessons,
 				description: inst.description,
 				age_min: inst.minAge,
 				age_max: inst.maxAge,
@@ -141,19 +141,19 @@ class Api  {
 		}
 	}
 
-	async usersDestroy({id}) {
+	async usersDestroy({ id }) {
 		return await this.curl('delete', `/users/${id}`, {}, this.esConfig);
 	}
 
-	async sitesDestroy({id}) {
+	async sitesDestroy({ id }) {
 		return await this.curl('delete', `/sites/${id}`, {}, this.esConfig);
 	}
 
-	async projectsDestroy({id}) {
+	async projectsDestroy({ id }) {
 		return await this.curl('delete', `/projects/${id}`, {}, this.esConfig);
 	}
 
-	async packagesDestroy({id}) {
+	async packagesDestroy({ id }) {
 		return await this.curl('delete', `/packages/${id}`, {}, this.esConfig);
 	}
 }
@@ -161,7 +161,7 @@ class Api  {
 module.exports = app => {
 	const config = app.config.self;
 
-	config.adminToken = app.util.jwt_encode({userId:1, username:"xiaoyao", roleId:10}, config.secret, 3600 * 24 * 365 * 10);
+	config.adminToken = app.util.jwt_encode({ userId: 1, username: "xiaoyao", roleId: 10 }, config.secret, 3600 * 24 * 365 * 10);
 	app.api = new Api(config, app);
 }
 

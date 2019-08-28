@@ -8,25 +8,25 @@ const Controller = require("../core/baseController.js");
 class LearnRecordsController extends Controller {
 	// get
 	async index() {
-		const {ctx} = this;
+		// const {ctx} = this;
 		const query = this.validate();
-		const {userId} = this.authenticated();
+		const { userId } = this.authenticated();
 		query.userId = userId;
 
-		const result = await this.model.LearnRecords.findAndCount({...this.queryOptions, where:query});
+		const result = await this.model.LearnRecords.findAndCount({ ...this.queryOptions, where: query });
 
 		return this.success(result);
 	}
 
 	async show() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
 		this.enauthenticated();
 		const userId = this.getUser().userId;
 
-		const lr = await ctx.model.LearnRecords.findOne({where: {id, userId}});
+		const lr = await ctx.model.LearnRecords.findOne({ where: { id, userId } });
 
 		if (!lr) ctr.throw(404, "not found");
 
@@ -34,23 +34,23 @@ class LearnRecordsController extends Controller {
 	}
 
 	async create() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const params = ctx.request.body;
 
-		const {userId=0, username, organizationId} = this.getUser();
-	
+		const { userId = 0, username, organizationId } = this.getUser();
+
 		params.userId = userId;
 
 		ctx.validate({
 			packageId: "int",
 			lessonId: "int",
-			classroomId: {type:"int", required: false},
+			classroomId: { type: "int", required: false },
 			state: 'int',
 		}, params);
 
 		//const data = await ctx.model.Subscribes.findOne({where:{
-			//userId,
-			//packageId: params.packageId,
+		//userId,
+		//packageId: params.packageId,
 		//}});
 
 		//if (!data) this.throw(500, "未购买课程包");
@@ -58,14 +58,14 @@ class LearnRecordsController extends Controller {
 		let learnRecord = await ctx.model.LearnRecords.createLearnRecord(params);
 
 		if (!params.classroomId) {
-			await this.app.keepworkModel.lessonOrganizationLogs.classroomLog({lr: learnRecord, action:"learn", handleId: userId, username, organizationId});
+			await this.app.keepworkModel.lessonOrganizationLogs.classroomLog({ lr: learnRecord, action: "learn", handleId: userId, username, organizationId });
 		}
 
 		return this.success(learnRecord);
 	}
 
 	async update() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.request.body || {};
 		if (!id) ctx.throw(400, "id invalid");
@@ -74,7 +74,7 @@ class LearnRecordsController extends Controller {
 		const lr = await ctx.model.LearnRecords.getById(id, userId);
 		if (!lr) ctx.throw(400, "args error");
 
-		if(lr.classroomId) {
+		if (lr.classroomId) {
 			const isClassing = await ctx.model.Classrooms.isClassing(lr.classroomId);
 			if (!isClassing) ctx.throw(400, "已下课");
 		}
@@ -91,7 +91,7 @@ class LearnRecordsController extends Controller {
 	}
 
 	async destroy() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
@@ -99,14 +99,14 @@ class LearnRecordsController extends Controller {
 		const userId = this.getUser().userId;
 
 		const result = await ctx.model.LearnRecords.destroy({
-			where: {id, userId},
+			where: { id, userId },
 		});
 
 		return this.success(result);
 	}
 
 	async createReward() {
-		const {ctx} = this;
+		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 		this.enauthenticated();
@@ -114,21 +114,21 @@ class LearnRecordsController extends Controller {
 
 		const lr = await ctx.model.LearnRecords.getById(id, userId);
 		const pack = await ctx.model.Packages.getById(lr.packageId);
-		if (!pack || pack.state != PACKAGE_STATE_AUDIT_SUCCESS) return this.success({coin:0, bean:0});
+		if (!pack || pack.state != PACKAGE_STATE_AUDIT_SUCCESS) return this.success({ coin: 0, bean: 0 });
 
 		const data = await ctx.model.LessonRewards.rewards(userId, lr.packageId, lr.lessonId);
-		return this.success(data || {coin:0, bean:0});
+		return this.success(data || { coin: 0, bean: 0 });
 	}
 
 	async getReward() {
-		const {ctx} = this;
+		const { ctx } = this;
 		this.enauthenticated();
 		const userId = this.getUser().userId;
-		const params = this.validate({"packageId": "int", "lessonId": "int"});
+		const params = this.validate({ "packageId": "int", "lessonId": "int" });
 
 		const pack = await ctx.model.Packages.getById(params.packageId);
-		if (!pack || pack.state != PACKAGE_STATE_AUDIT_SUCCESS) return this.success({coin:10, bean:10});
-		
+		if (!pack || pack.state != PACKAGE_STATE_AUDIT_SUCCESS) return this.success({ coin: 10, bean: 10 });
+
 		let data = await this.model.LessonRewards.findOne({
 			where: {
 				userId,
@@ -136,7 +136,7 @@ class LearnRecordsController extends Controller {
 				lessonId: params.lessonId,
 			}
 		});
-		data = data ? data.get({plain:true}) : {coin:0, bean:0};
+		data = data ? data.get({ plain: true }) : { coin: 0, bean: 0 };
 
 		return this.success(data);
 	}

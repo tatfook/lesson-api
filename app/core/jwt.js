@@ -96,11 +96,11 @@ jwt.decode = function jwt_decode(token, key, noVerify, algorithm) {
 
 		// Support for nbf and exp claims.
 		// According to the RFC, they should be in seconds.
-		if (payload.nbf && Date.now() < payload.nbf*1000) {
+		if (payload.nbf && Date.now() < payload.nbf * 1000) {
 			throw new Error("Token not yet active");
 		}
 
-		if (payload.exp && Date.now() > payload.exp*1000) {
+		if (payload.exp && Date.now() > payload.exp * 1000) {
 			throw new Error("Token expired");
 		}
 	}
@@ -172,9 +172,9 @@ function verify(input, key, method, type, signature) {
 			.update(input)
 			.verify(key, base64urlUnescape(signature), "base64");
 	}
-  
+
 	throw new Error("Algorithm type not recognized");
-  
+
 }
 
 function sign(input, key, method, type) {
