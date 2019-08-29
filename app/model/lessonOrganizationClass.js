@@ -40,8 +40,15 @@ module.exports = app => {
 		extra: {
 			type: JSON,
 			defaultValue: {},
-		}
+		},
 
+		createdAt: {
+			type: DATE,
+		},
+
+		updatedAt: {
+			type: DATE,
+		}
 	}, {
 		underscored: false,
 		charset: "utf8mb4",

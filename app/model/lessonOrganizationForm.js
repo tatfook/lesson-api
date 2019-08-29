@@ -10,6 +10,7 @@ module.exports = app => {
 		STRING,
 		TEXT,
 		JSON,
+		DATE
 	} = app.Sequelize;
 
 	const model = app.model.define("lessonOrganizationForms", {
@@ -66,6 +67,13 @@ module.exports = app => {
 			type: JSON,
 			defaultValue: {},
 		},
+		createdAt: {
+			type: DATE,
+		},
+
+		updatedAt: {
+			type: DATE,
+		}
 
 	}, {
 		underscored: false,

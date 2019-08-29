@@ -2,7 +2,8 @@
 module.exports = app => {
 	const {
 		BIGINT,
-		JSON
+		JSON,
+		DATE
 	} = app.Sequelize;
 
 	const model = app.model.define("lessonOrganizationPackages", {
@@ -34,6 +35,13 @@ module.exports = app => {
 		extra: {
 			type: JSON,
 			defaultValue: {},
+		},
+		createdAt: {
+			type: DATE,
+		},
+
+		updatedAt: {
+			type: DATE,
 		}
 
 	}, {

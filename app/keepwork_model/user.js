@@ -76,9 +76,9 @@ module.exports = app => {
 		collate: "utf8mb4_bin",
 	};
 
-	app.model.illegalUsers = app.model.define("illegalUsers", attrs, opts);
+	app.keepworkModel.illegalUsers = app.keepworkModel.define("illegalUsers", attrs, opts);
 
-	const model = app.model.define("users", attrs, opts);
+	const model = app.keepworkModel.define("users", attrs, opts);
 
 	// model.sync({force:true});
 
@@ -91,7 +91,7 @@ module.exports = app => {
 	};
 
 	model.getByName = async function (username) {
-		const data = await app.model.users.findOne({
+		const data = await app.keepworkModel.Users.findOne({
 			where: { username },
 			attributes: {
 				exclude: ["password"],
@@ -104,7 +104,7 @@ module.exports = app => {
 	model.getBaseInfoById = async function (userId) {
 		const attributes = [["id", "userId"], "username", "nickname", "portrait", "description"];
 
-		const data = await app.model.users.findOne({ where: { id: userId }, attributes });
+		const data = await app.keepworkModel.Users.findOne({ where: { id: userId }, attributes });
 		if (!data) return {};
 
 		const user = data.get({ plain: true });
@@ -114,7 +114,7 @@ module.exports = app => {
 	};
 
 	model.getById = async function (userId) {
-		const data = await app.model.users.findOne({
+		const data = await app.keepworkModel.Users.findOne({
 			where: { id: userId },
 			attributes: {
 				exclude: ["password"],
@@ -126,7 +126,7 @@ module.exports = app => {
 
 	model.getUsers = async function (userIds = []) {
 		const attributes = [["id", "userId"], "username", "nickname", "portrait", "description"];
-		const list = await app.model.users.findAll({
+		const list = await app.keepworkModel.Users.findAll({
 			attributes,
 			where: {
 				id: {
@@ -144,7 +144,7 @@ module.exports = app => {
 		return users;
 	};
 
-	app.model.users = model;
+	app.keepworkModel.Users = model;
 	return model;
 };
 

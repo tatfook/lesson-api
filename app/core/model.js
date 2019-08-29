@@ -52,7 +52,7 @@ module.exports = app => {
 		const list = await getList(options);
 		for (let i = 0; i < list.length; i++) {
 			await app.model.PackageLessons.destroy({ where: { packageId: list[i].id }});
-			await app.keepworkModel.lessonOrganizationPackages.destroy({ where: { packageId: list[i].id }});
+			await app.model.lessonOrganizationPackages.destroy({ where: { packageId: list[i].id }});
 			await app.api[tableName + "Destroy"](list[i]);
 		}
 	});

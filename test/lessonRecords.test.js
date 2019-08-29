@@ -46,7 +46,7 @@ describe("LearnRecords", () => {
 		}).expect(200).then(res => res.body);
 		assert.equal(lesson.id, 1);
 
-		const package_ = await app.httpRequest().post("/packages").send({
+		await app.httpRequest().post("/packages").send({
 			packageName: "前端",
 			lessons: [1],
 			subjectId: 1,

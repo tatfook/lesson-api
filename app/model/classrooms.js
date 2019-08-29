@@ -135,7 +135,7 @@ module.exports = app => {
 		const classroom = await app.model.Classrooms.getById(classroomId);
 		if (~~classroom.state !== CLASSROOM_STATE_USING) return;
 
-		app.keepworkModel.lessonOrganizationLogs.classroomLog({ classroom, action: "quit", handleId: studentId, username });
+		app.model.lessonOrganizationLogs.classroomLog({ classroom, action: "quit", handleId: studentId, username });
 		app.model.LearnRecords.destroy({
 			where: {
 				classroomId,
@@ -155,7 +155,6 @@ module.exports = app => {
 		let data = await app.model.Classrooms.findOne({ where: { key }});
 		if (!data) return;
 		data = data.get({ plain: true });
-
 		const classroomId = data.id;
 		const lessonId = data.lessonId;
 		// 课程未开始或结束
@@ -210,7 +209,7 @@ module.exports = app => {
 		if (!data) return false;
 		data = data.get({ plain: true });
 
-		app.keepworkModel.lessonOrganizationLogs.classroomLog({ classroom: data, action: "dismiss", handleId: userId, username });
+		app.model.lessonOrganizationLogs.classroomLog({ classroom: data, action: "dismiss", handleId: userId, username });
 		// 更新课堂状态
 		await app.model.Classrooms.update({
 			state: CLASSROOM_STATE_USED,

@@ -5,6 +5,7 @@ module.exports = app => {
 		INTEGER,
 		STRING,
 		JSON,
+		DATE
 	} = app.Sequelize;
 
 	const model = app.model.define("lessonOrganizationClassMembers", {
@@ -46,6 +47,13 @@ module.exports = app => {
 		extra: {
 			type: JSON,
 			defaultValue: {},
+		},
+		createdAt: {
+			type: DATE,
+		},
+
+		updatedAt: {
+			type: DATE,
 		}
 
 	}, {

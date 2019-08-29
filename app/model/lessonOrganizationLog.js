@@ -8,6 +8,7 @@ module.exports = app => {
 		STRING,
 		TEXT,
 		JSON,
+		DATE
 	} = app.Sequelize;
 
 	const model = app.model.define("lessonOrganizationLogs", {
@@ -45,6 +46,13 @@ module.exports = app => {
 			type: JSON,
 			defaultValue: {},
 		},
+		createdAt: {
+			type: DATE,
+		},
+
+		updatedAt: {
+			type: DATE,
+		}
 
 	}, {
 		underscored: false,
@@ -86,7 +94,7 @@ module.exports = app => {
 		} else {
 			return;
 		}
-		await app.keepworkModel.lessonOrganizationLogs.create(log);
+		await app.model.lessonOrganizationLogs.create(log);
 	};
 
 	return model;

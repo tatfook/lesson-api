@@ -81,7 +81,7 @@ class ClassroomsController extends Controller {
 
 		const data = await ctx.model.Classrooms.createClassroom(params);
 
-		this.app.keepworkModel.lessonOrganizationLogs.classroomLog({ classroom: data, action: "create", handleId: userId, username, organizationId });
+		this.app.model.lessonOrganizationLogs.classroomLog({ classroom: data, action: "create", handleId: userId, username, organizationId });
 
 		return this.success(data);
 	}
@@ -125,10 +125,12 @@ class ClassroomsController extends Controller {
 		// const {userId, organizationId} = this.enauthenticated();
 		const { userId = 0, organizationId, username } = this.getUser();
 		const classroom = await this.model.Classrooms.findOne({ where: { key: params.key }}).then(o => o && o.toJSON());
+		console.log("classroom---");
+		console.log(classroom);
+		console.log("classroom---");
 		if (!classroom) return this.fail(1);
-
 		if (classroom.classId && userId) {
-			const member = await this.app.keepworkModel.lessonOrganizationClassMembers.findOne({
+			const member = await this.app.model.lessonOrganizationClassMembers.findOne({
 				where: { classId: classroom.classId, memberId: userId }
 			}).then(o => o && o.toJSON());
 			if (!member) return this.throw(400, "不是该班级学生");
@@ -138,12 +140,12 @@ class ClassroomsController extends Controller {
 		// if (count >= 50) return this.fail(2);
 
 		// const userId = this.getUser().userId || 0;
+		console.log(userId, params.key, params.username);
 		const data = await ctx.model.Classrooms.join(userId, params.key, params.username);
 		if (!data) return this.fail(-1);
-
 		// if (!userId) data.token = this.app.util.jwt_encode({userId:0, username:"匿名用户"}, this.app.config.self.secret, 3600 * 24);
 
-		this.app.keepworkModel.lessonOrganizationLogs.classroomLog({ classroom, action: "join", handleId: userId, username, organizationId });
+		this.app.model.lessonOrganizationLogs.classroomLog({ classroom, action: "join", handleId: userId, username, organizationId });
 		return this.success(data);
 	}
 
@@ -246,6 +248,7 @@ class ClassroomsController extends Controller {
 
 	// 下课
 	async dismiss() {
+		console.log("---dismiss----");
 		const { ctx } = this;
 		const { userId, username } = this.enauthenticated();
 		const id = _.toNumber(ctx.params.id);

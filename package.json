@@ -28,6 +28,7 @@
   },
   "devDependencies": {
     "egg-bin": "^4.7.1",
-    "egg-mock": "^3.17.3"
+    "egg-mock": "^3.17.3",
+    "sequelize-cli": "^5.5.0"
   }
 }

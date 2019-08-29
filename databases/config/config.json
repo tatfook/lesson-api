@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "root",
+    "password": "tf.123456",
+    "database": "lesson-dev",
+    "host": "10.28.18.62",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  },
+  "test": {
+    "username": "root",
+    "password": "tf.123456",
+    "database": "lesson-dev",
+    "host": "10.28.18.62",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  },
+  "production": {
+    "username": "root",
+    "password": "tf.123456",
+    "database": "lesson-dev",
+    "host": "10.28.18.62",
+    "dialect": "mysql",
+    "operatorsAliases": false
+  }
+}

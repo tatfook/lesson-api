@@ -58,6 +58,14 @@ module.exports = app => {
 			defaultValue: {},
 		},
 
+		createdAt: {
+			type: DATE,
+		},
+
+		updatedAt: {
+			type: DATE,
+		}
+
 	}, {
 		underscored: false,
 		charset: "utf8mb4",
