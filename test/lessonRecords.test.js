@@ -19,7 +19,10 @@ describe("LearnRecords", () => {
 		await app.model.Classrooms.sync({ force: true });
 		await app.model.Users.sync({ force: true });
 
-		await app.httpRequest().get("/users").expect(200);
+		const token = await app.login().then(o => o.token);
+		assert.ok(token);
+
+		await app.httpRequest().get("/users").set("Authorization", `Bearer ${token}`).expect(200);
 
 		await app.model.Subjects.create({
 			subjectName: "前端",
@@ -43,7 +46,7 @@ describe("LearnRecords", () => {
 				coverUrl: "http://www.baidu.com",
 				vedioUrl: "http://www.baidu.com",
 			}
-		}).expect(200).then(res => res.body);
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.equal(lesson.id, 1);
 
 		await app.httpRequest().post("/packages").send({
@@ -55,36 +58,50 @@ describe("LearnRecords", () => {
 			intro: "前端学习",
 			rmb: 20,
 			coin: 200,
+			state: 2,
 			extra: {
 				coverUrl: "http://www.baidu.com",
 			},
-		}).expect(200).then(res => res.body);
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 	});
 
 
 	it("lesson reward", async () => {
+		const token = await app.login().then(o => o.token);
+		assert.ok(token);
+
 		let data = await app.httpRequest().post("/learnRecords").send({
 			packageId: 1,
 			lessonId: 1,
 			state: 1,
-		}).expect(200).then(res => res.body);
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.equal(data.id, 1);
 
-		let reward = await app.httpRequest().post("/learnRecords/1/reward").expect(200).then(res => res.body);
+		let reward = await app.httpRequest()
+			.post("/learnRecords/1/reward")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
 		assert.equal(reward.coin, 0);
-		assert.equal(reward.bean, 10);
+		assert.equal(reward.bean, 0);
 		// console.log(reward);
 
 		await app.model.Users.update({ lockCoin: 100 }, { where: { id: 1 }});
-		reward = await app.httpRequest().post("/learnRecords/1/reward").expect(200).then(res => res.body);
-		assert.ok(reward.coin > 0);
+		reward = await app.httpRequest()
+			.post("/learnRecords/1/reward")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+		assert.ok(!reward.coin);
 		assert.equal(reward.bean, 0);
 
-		reward = await app.httpRequest().post("/learnRecords/1/reward").expect(200).then(res => res.body);
+		reward = await app.httpRequest().post("/learnRecords/1/reward")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
 		assert.equal(reward.coin, 0);
 		assert.equal(reward.bean, 0);
 
-		reward = await app.httpRequest().get("/learnRecords/reward?packageId=1&lessonId=1").expect(200).then(res => res.body);
+		reward = await app.httpRequest()
+			.get("/learnRecords/reward?packageId=1&lessonId=1")
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.ok(reward.coin > 0);
 		assert.equal(reward.bean, 10);
 	});
