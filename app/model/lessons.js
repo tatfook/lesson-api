@@ -71,10 +71,12 @@ module.exports = app => {
 				id: lessonId,
 			}
 		});
-
+		console.log("data----", userId);
+		console.log(data);
 		if (!data) return false;
 
 		data = await app.model.Skills.findOne({ where: { id: skillId }});
+		console.log(data);
 		if (!data) return false;
 
 		data = await app.model.LessonSkills.create({
@@ -83,7 +85,7 @@ module.exports = app => {
 			skillId,
 			score,
 		});
-
+		console.log(data);
 		if (!data) return false;
 
 		return true;

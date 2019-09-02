@@ -10,7 +10,6 @@ module.exports = (options, app) => {
 		const token = Authorization.split(" ")[1] || "";
 		const headers = { "Authorization": Authorization };
 		let user = undefined;
-
 		try {
 			user = jwt.decode(token, config.secret);
 			// 验证token是否有效

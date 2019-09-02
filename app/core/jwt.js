@@ -147,7 +147,6 @@ jwt.encode = function jwt_encode(payload, key, algorithm, options) {
 	segments.push(base64urlEncode(JSON.stringify(header)));
 	segments.push(base64urlEncode(JSON.stringify(payload)));
 	segments.push(sign(segments.join("."), key, signingMethod, signingType));
-
 	return segments.join(".");
 };
 

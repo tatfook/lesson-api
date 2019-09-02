@@ -138,11 +138,11 @@ class PackagesController extends Controller {
 			let lessonId = lessons[i];
 			records.push({ userId, packageId: id, lessonId, extra: { lessonNo: i + 1 } });
 		}
+
 		if (records.length > 0) {
 			await ctx.model.PackageLessons.destroy({ where: { packageId: id } });
 			await ctx.model.PackageLessons.bulkCreate(records);
 		}
-
 		//await ctx.model.Packages.audit(id, userId, params.state);
 
 		return this.success(result);

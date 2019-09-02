@@ -76,13 +76,11 @@ module.exports = app => {
 
 	model.getById = async function (userId, username) {
 		let data = await app.model.Users.findOne({ where: { id: userId }});
-
 		const amount = 0;
 		if (!data && userId) {
-			console.log(userId, username);
 			data = await app.model.Users.create({
 				id: userId,
-				username,
+				username: username || "",
 				coin: amount,
 			});
 
@@ -111,7 +109,9 @@ module.exports = app => {
 	};
 
 	model.learn = async function (userId) {
+		console.log("1212", userId);
 		const user = await this.getById(userId);
+		console.log("0;", user);
 		if (!user) return;
 
 		const datestr = app.util.getDate().datestr;

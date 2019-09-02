@@ -211,7 +211,7 @@ class LessonsController extends Controller {
 
 		this.enauthenticated();
 		const userId = this.getUser().userId;
-
+		console.log("hey.", id, userId);
 		const lesson = await ctx.model.Lessons.getById(id, userId);
 		if (!lesson) ctx.throw(400, "args error");
 
@@ -246,7 +246,7 @@ class LessonsController extends Controller {
 
 		params.userId = userId;
 		params.lessonId = id;
-
+		console.log("-------", params);
 		const data = await ctx.model.LearnRecords.createLearnRecord(params);
 
 		return this.success(data);

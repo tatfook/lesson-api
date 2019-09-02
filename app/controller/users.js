@@ -70,8 +70,10 @@ class UsersController extends Controller {
 		data.rmb = account.rmb;
 		data.coin = account.coin;
 		data.bean = account.bean;
-		data.tutorService = await this.model.tutors.getByUserId(user.userId);
+
+		data.tutorService = await this.model.tutors.getByUserId(userId);
 		data.teacher = await this.model.teachers.getByUserId(userId);
+
 		data.allianceMember = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId);
 		data.tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId);
 
@@ -138,7 +140,15 @@ class UsersController extends Controller {
 		const startTime = new Date().getTime();
 
 		user.identify = (user.identify | USER_IDENTIFY_TEACHER) & (~USER_IDENTIFY_APPLY_TEACHER);
-		const teacher = await this.model.Teachers.findOne({ where: { userId: id }}).then(o => o && o.toJSON()) || { userId: id, startTime, endTime: startTime, key, school, privilege: TEACHER_PRIVILEGE_TEACH };
+		const teacher = await this.model.Teachers.findOne({
+			where: { userId: id }
+		})
+			.then(o => o && o.toJSON())
+			|| {
+				userId: id, startTime, endTime: startTime,
+				key, school, privilege: TEACHER_PRIVILEGE_TEACH
+			};
+
 		if (teacher.endTime < startTime) {
 			teacher.endTime = teacher.startTime = startTime;
 		}

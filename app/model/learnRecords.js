@@ -88,16 +88,18 @@ module.exports = app => {
 
 	model.createLearnRecord = async function (params) {
 		const userId = params.userId;
-
+		console.log("9090", userId);
 		if (userId) {
 			await app.model.Users.learn(userId);
 		}
 
 		let lr = await app.model.LearnRecords.create(params);
+		console.log("7878", lr);
 		if (!lr) return console.log("create learn records failed", params);
 
 		lr = lr.get({ plain: true });
 		if (lr.userId && ~~lr.state === LEARN_RECORD_STATE_FINISH) {
+			console.log("6767");
 			await this.learnFinish(params);
 		}
 
