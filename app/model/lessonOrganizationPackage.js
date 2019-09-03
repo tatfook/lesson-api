@@ -1,4 +1,8 @@
 
+// const lessonOrganizations = require("./lessonOrganization");
+// const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
+// const lessonOrganizationClasses = require("./lessonOrganizationClass");
+
 module.exports = app => {
 	const {
 		BIGINT,
@@ -58,6 +62,25 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
+
+	// model.belongsTo(lessonOrganizations(app), {
+	// 	as: "lessonOrganizations",
+	// 	foreignKey: "organizationId",
+	// 	targetKey: "id",
+	// 	constraints: false,
+	// });
+	// model.belongsTo(lessonOrganizationClassMembers(app), {
+	// 	as: "lessonOrganizationClassMembers",
+	// 	foreignKey: "classId",
+	// 	targetKey: "classId",
+	// 	constraints: false,
+	// });
+	// model.belongsTo(lessonOrganizationClasses(app), {
+	// 	as: "lessonOrganizationClasses",
+	// 	foreignKey: "classId",
+	// 	targetKey: "id",
+	// 	constraints: false,
+	// });
 
 	app.model.lessonOrganizationPackages = model;
 

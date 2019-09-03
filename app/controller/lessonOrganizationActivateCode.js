@@ -59,7 +59,7 @@ const LessonOrganizationActivateCode = class extends Controller {
 
 		where.organizationId = organizationId;
 
-		const data = await this.model.lessonOrganizationActivateCodes.findAndCount({
+		const data = await this.model.lessonOrganizationActivateCodes.findAndCountAll({
 			...this.queryOptions,
 			where,
 			include: [

@@ -83,4 +83,131 @@ module.exports = app => {
 		targetKey: "id",
 		constraints: false,
 	});
+
+	// app.model.users.hasMany(app.model.lessonOrganizations, {
+	// 	as: "lessonOrganizations",
+	// 	foreignKey: "userId",
+	// 	sourceKey: "id",
+	// 	constraints: false,
+	// });
+
+	// app.model.lessonOrganizations.belongsTo(app.model.users, {
+	// 	as: "users",
+	// 	foreignKey: "userId",
+	// 	targetKey: "id",
+	// 	constraints: false,
+	// });
+
+	app.model.lessonOrganizations.hasMany(app.model.lessonOrganizationPackages, {
+		as: "lessonOrganizationPackages",
+		foreignKey: "organizationId",
+		sourceKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizations, {
+		as: "lessonOrganizations",
+		foreignKey: "organizationId",
+		targetKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizations.hasMany(app.model.lessonOrganizationClassMembers, {
+		as: "lessonOrganizationClassMembers",
+		foreignKey: "organizationId",
+		sourceKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationClassMembers.belongsTo(app.model.lessonOrganizations, {
+		as: "lessonOrganizations",
+		foreignKey: "organizationId",
+		targetKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationClassMembers, {
+		as: "lessonOrganizationClassMembers",
+		foreignKey: "classId",
+		sourceKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationClassMembers.belongsTo(app.model.lessonOrganizationClasses, {
+		as: "lessonOrganizationClasses",
+		foreignKey: "classId",
+		targetKey: "id",
+		constraints: false,
+	});
+
+	// app.model.users.hasOne(app.model.lessonOrganizationClassMembers, {
+	// 	as: "lessonOrganizationClassMembers",
+	// 	foreignKey: "memberId",
+	// 	sourceKey: "id",
+	// 	constraints: false,
+	// });
+
+	// app.model.lessonOrganizationClassMembers.belongsTo(app.model.users, {
+	// 	as: "users",
+	// 	foreignKey: "memberId",
+	// 	targetKey: "id",
+	// 	constraints: false,
+	// });
+
+	app.model.lessonOrganizationClassMembers.hasMany(app.model.lessonOrganizationPackages, {
+		as: "lessonOrganizationPackages",
+		foreignKey: "classId",
+		sourceKey: "classId",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClassMembers, {
+		as: "lessonOrganizationClassMembers",
+		foreignKey: "classId",
+		targetKey: "classId",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationPackages, {
+		as: "lessonOrganizationPackages",
+		foreignKey: "classId",
+		sourceKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClasses, {
+		as: "lessonOrganizationClasses",
+		foreignKey: "classId",
+		targetKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationActivateCodes, {
+		as: "lessonOrganizationActivateCodes",
+		foreignKey: "classId",
+		sourceKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationActivateCodes.belongsTo(app.model.lessonOrganizationClasses, {
+		as: "lessonOrganizationClasses",
+		foreignKey: "classId",
+		targetKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationForms.hasMany(app.model.lessonOrganizationFormSubmits, {
+		as: "lessonOrganizationFormSubmits",
+		foreignKey: "formId",
+		sourceKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationFormSubmits.belongsTo(app.model.lessonOrganizationForms, {
+		as: "lessonOrganizationForms",
+		foreignKey: "formId",
+		targetKey: "id",
+		constraints: false,
+	});
+
 };

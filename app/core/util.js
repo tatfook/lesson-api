@@ -2,6 +2,7 @@ const _ = require("lodash");
 // const jwt = require("jwt-simple");
 const jwt = require("./jwt.js");
 const crypto = require("crypto");
+const md5 = require("blueimp-md5");
 
 const util = {};
 
@@ -37,6 +38,10 @@ util.rsaEncrypt = function (prvKey, message) {
 
 util.rsaDecrypt = function (pubKey, sig) {
 	return crypto.publicDecrypt(pubKey, Buffer.from(sig, "hex")).toString("utf8");
+};
+
+util.md5 = function (str) {
+	return md5(str);
 };
 
 module.exports = util;

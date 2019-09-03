@@ -39,15 +39,14 @@ const LessonOrganization = class extends Controller {
 
 	async login() {
 		let { username, password, organizationId, organizationName } = this.validate({ username: "string", password: "string" });
-		const user = await this.keepworkModel.users.findOne({
+		const user = await this.ctx.keepworkModel.Users.findOne({
 			where: {
-				[this.keepworkModel.Op.or]: [{ username: username }, { cellphone: username }, { email: username }],
+				[this.ctx.keepworkModel.Op.or]: [{ username: username }, { cellphone: username }, { email: username }],
 				password: this.app.util.md5(password)
 			}
 		}).then(o => o && o.toJSON());
 
 		if (!user) return this.fail(1);
-
 		if (!organizationId) {
 			if (!organizationName) return this.throw(400);
 			const organ = await this.model.lessonOrganizations.findOne({ where: { name: organizationName }}).then(o => o && o.toJSON());
@@ -239,7 +238,7 @@ const LessonOrganization = class extends Controller {
 			await this.model.lessonOrganizationClassMembers.bulkCreate(members);
 		}
 
-		return this.success();
+		return this.success("ok");
 	}
 
 	mergePackages(list = [], roleId) {

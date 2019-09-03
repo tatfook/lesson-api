@@ -115,13 +115,12 @@ class LearnRecordsController extends Controller {
 		const userId = this.getUser().userId;
 
 		const lr = await ctx.model.LearnRecords.getById(id, userId);
-		console.log("lr is --------------------", lr);
 		const pack = await ctx.model.Packages.getById(lr.packageId);
-		console.log("pack is --------------------", pack);
+
 		if (!pack || pack.state != PACKAGE_STATE_AUDIT_SUCCESS) return this.success({ coin: 0, bean: 0 });
 
 		const data = await ctx.model.LessonRewards.rewards(userId, lr.packageId, lr.lessonId);
-		console.log('data is -------------', data);
+
 		return this.success(data || { coin: 0, bean: 0 });
 	}
 

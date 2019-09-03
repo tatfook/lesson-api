@@ -1,7 +1,8 @@
 
 /* 机构表单 */
 
-const _ = require("lodash");
+// const _ = require("lodash");
+// const lessonOrganizationForms = require("./lessonOrganizationForm");
 
 module.exports = app => {
 	const {
@@ -68,9 +69,15 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
+
+	// model.belongsTo(lessonOrganizationForms(app), {
+	// 	as: "lessonOrganizationForms",
+	// 	foreignKey: "formId",
+	// 	targetKey: "id",
+	// 	constraints: false,
+	// });
+
 	app.model.lessonOrganizationFormSubmits = model;
 
 	return model;
 };
-
-

@@ -1,3 +1,7 @@
+// const lessonOrganizations = require("./lessonOrganization");
+// const Users = require("./users");
+// const lessonOrganizationPackages = require("./lessonOrganizationPackage");
+// const lessonOrganizationClasses = require("./lessonOrganizationClass");
 
 module.exports = app => {
 	const {
@@ -71,6 +75,35 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
+
+
+	// model.belongsTo(lessonOrganizations(app), {
+	// 	as: "lessonOrganizations",
+	// 	foreignKey: "organizationId",
+	// 	targetKey: "id",
+	// 	constraints: false,
+	// });
+
+	// model.belongsTo(lessonOrganizationClasses(app), {
+	// 	as: "lessonOrganizationClasses",
+	// 	foreignKey: "classId",
+	// 	targetKey: "id",
+	// 	constraints: false,
+	// });
+
+	// model.belongsTo(Users(app), {
+	// 	as: "users",
+	// 	foreignKey: "memberId",
+	// 	targetKey: "id",
+	// 	constraints: false,
+	// });
+
+	// model.hasMany(lessonOrganizationPackages(app), {
+	// 	as: "lessonOrganizationPackages",
+	// 	foreignKey: "classId",
+	// 	sourceKey: "classId",
+	// 	constraints: false,
+	// });
 
 	app.model.lessonOrganizationClassMembers = model;
 

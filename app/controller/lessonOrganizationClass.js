@@ -149,7 +149,7 @@ const LessonOrganizationClass = class extends Controller {
 			await this.model.lessonOrganizationPackages.bulkCreate(datas);
 		}
 
-		return this.success();
+		return this.success('ok');
 	}
 
 	// 删除班级

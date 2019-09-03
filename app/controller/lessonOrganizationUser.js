@@ -15,6 +15,8 @@ const LessonOrganizationUser = class extends Controller {
 	}
 
 	async batchCreateUser() {
+		console.log("------------------------");
+		const ctx = this.ctx;
 		let { userId, organizationId, roleId } = this.authenticated();
 		const params = this.validate({ classId: "number", count: "number" });
 		if (params.organizationId && ~~params.organizationId !== ~~organizationId) {
@@ -22,6 +24,7 @@ const LessonOrganizationUser = class extends Controller {
 			roleId = await this.ctx.service.organization.getRoleId(organizationId, userId);
 		}
 		if (roleId < CLASS_MEMBER_ROLE_TEACHER) return this.throw(400, "无权限操作");
+		console.log("------------------------");
 
 		let { classId, handlerId, count, password } = params;;
 		handlerId = handlerId || userId;
@@ -36,12 +39,12 @@ const LessonOrganizationUser = class extends Controller {
 		for (let i = 1; i <= count; i++) {
 			userdatas.push({
 				password: this.app.util.md5(password || "123456"),
-				realname: cellphone,
+				realname: cellphone
 			});
 		}
 
 		// 批量创建返回结果有 BUG
-		const users = await this.model.users.bulkCreate(userdatas).then(list => list.map(o => o.toJSON()));
+		const users = await ctx.keepworkModel.Users.bulkCreate(userdatas).then(list => list.map(o => o.toJSON()));
 		const ids = users.filter(o => o.id).map(o => o.id);
 		// users = await this.model.users.findAll({
 		// attributes:["id","username"],
@@ -89,14 +92,14 @@ const LessonOrganizationUser = class extends Controller {
 
 		await this.model.lessonOrganizationClassMembers.update({ state: 0 }, { where: { classId, organizationId, bind: 1 }});
 		const ids = members.map(o => o.memberId);
-		await this.keepModel.users.update({ realname: null }, { where: { id: { "$in": ids }}});
+		await this.ctx.keepworkModel.Users.update({ realname: null }, { where: { id: { "$in": ids }}});
 
 		// const users = await this.model.lessonOrganizationUsers.findAll({where:{classId, organizationId}}).then(list => list.map(o => o.toJSON()));
 		// await this.model.lessonOrganizationUsers.update({state: 0}, {where:{classId, organizationId}});
 		// const ids = users.map(o => o.userId);
 		// await this.model.users.update({realname:null}, {where:{id: {"$in": ids}}});
 
-		return this.success();
+		return this.success("ok");
 	}
 
 	async setpwd() {
@@ -116,7 +119,7 @@ const LessonOrganizationUser = class extends Controller {
 			password: this.app.util.md5(password || "123456"),
 		}, { where: { id: memberId }});
 
-		return this.success();
+		return this.success("ok");
 	}
 };
 

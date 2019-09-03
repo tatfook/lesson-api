@@ -1,4 +1,8 @@
 
+// const Users = require("./users");
+// const lessonOrganizationPackages = require("./lessonOrganizationPackage");
+// const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
+
 module.exports = app => {
 	const {
 		BIGINT,
@@ -155,6 +159,28 @@ module.exports = app => {
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
 		return list;
 	};
+
+
+	// model.belongsTo(Users(app), {
+	// 	as: "users",
+	// 	foreignKey: "userId",
+	// 	targetKey: "id",
+	// 	constraints: false,
+	// });
+
+	// model.hasMany(lessonOrganizationPackages(app), {
+	// 	as: "lessonOrganizationPackages",
+	// 	foreignKey: "organizationId",
+	// 	sourceKey: "id",
+	// 	constraints: false,
+	// });
+
+	// model.hasMany(lessonOrganizationClassMembers(app), {
+	// 	as: "lessonOrganizationClassMembers",
+	// 	foreignKey: "organizationId",
+	// 	sourceKey: "id",
+	// 	constraints: false,
+	// });
 
 	app.model.lessonOrganizations = model;
 

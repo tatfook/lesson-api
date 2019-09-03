@@ -9,15 +9,15 @@ class User extends Service {
 	getSimpleUser() {
 	}
 
-	async getUser({userId, kid, username, cellphone, email}) {
+	async getUser({ userId, kid, username, cellphone, email }) {
 		const user = await this.app.keepworkModel.users.findOne({
 			where: {
-				"$or" : [
-				{id: _.toNumber(userId) || 0},
-				//{userId: (_.toNumber(kid) || 0) - 10000},
-				{username: username},
-				{cellphone: cellphone},
-				{email: email},
+				"$or": [
+					{ id: _.toNumber(userId) || 0 },
+					//{userId: (_.toNumber(kid) || 0) - 10000},
+					{ username: username },
+					{ cellphone: cellphone },
+					{ email: email },
 				]
 			}
 		}).then(o => o && o.toJSON());
@@ -35,12 +35,12 @@ class User extends Service {
 	}
 
 	async getUserByUserId(userId) {
-		return await this.app.keepworkModel.users.findOne({where:{id:userId}}).then(o => o && o.toJSON());
+		return await this.app.keepworkModel.Users.findOne({ where: { id: userId } }).then(o => o && o.toJSON());
 	}
 
 	async getUserinfoByUserId(userId) {
-		const userinfo = await this.app.keepworkModel.userinfos.findOne({where:{userId}}).then(o => o && o.toJSON());
-		if (!userinfo) await this.app.userinfos.upsert({userId});
+		const userinfo = await this.app.keepworkModel.userinfos.findOne({ where: { userId } }).then(o => o && o.toJSON());
+		if (!userinfo) await this.app.userinfos.upsert({ userId });
 		return userinfo;
 	}
 
@@ -55,10 +55,10 @@ class User extends Service {
 	}
 	// used
 	async setToken(userId, token, clear = false) {
-		this.ctx.state.user = {userId};
+		this.ctx.state.user = { userId };
 
 		const data = await this.app.keepworkModel.userdatas.get(userId);
-		
+
 		data.tokens = data.tokens || [];
 		if (clear) data.tokens = [];
 
@@ -77,20 +77,20 @@ class User extends Service {
 
 	async createRegisterMsg(user) {
 		const msg = await this.app.keepworkModel.messages.create({
-			sender:0,
+			sender: 0,
 			type: 0,
 			all: 0,
 			msg: {
-				type: 1, 
+				type: 1,
 				user: {
 					...user,
 					password: undefined,
 				},
 			},
-			extra:{},
+			extra: {},
 		}).then(o => o && o.toJSON());
 		return await this.app.keepworkModel.userMessages.create({
-			userId: user.id, messageId:msg.id, state:0
+			userId: user.id, messageId: msg.id, state: 0
 		}).then(o => o && o.toJSON());
 	}
 

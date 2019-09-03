@@ -16,6 +16,7 @@ const LessonOrganizationClassMember = class extends Controller {
 	}
 
 	async teacher() {
+		const { ctx } = this;
 		const { organizationId } = this.authenticated();
 		const { classId } = this.validate({ classId: "number_optional" });
 		//const organizationId = 25;
@@ -27,11 +28,11 @@ const LessonOrganizationClassMember = class extends Controller {
 		const curtime = new Date();
 		const list = await this.model.lessonOrganizationClassMembers.findAll({
 			include: [
-				{
-					as: "users",
-					attributes: ["id", "username", "nickname", "portrait"],
-					model: this.model.users,
-				},
+				// {
+				// 	as: "users",
+				// 	attributes: ["id", "username", "nickname", "portrait"],
+				// 	model: this.model.users,
+				// },
 				{
 					as: "lessonOrganizationClasses",
 					model: this.model.lessonOrganizationClasses,
@@ -49,13 +50,21 @@ const LessonOrganizationClassMember = class extends Controller {
 			}
 		}).then(list => list.map(o => o.toJSON()));
 		//}).then(list => list.map(o => o.toJSON()).filter(o => o.classId == 0 || o.lessonOrganizationClasses));
+
+		const users = await ctx.keepworkModel.Users.findAll({ attributes: ["id", "username"], where: { id: { $in: memberIds } } });
+
 		const map = {};
 		_.each(list, o => {
 			if (!(o.roleId & CLASS_MEMBER_ROLE_TEACHER)) return;
 			map[o.memberId] = map[o.memberId] || o;
 			map[o.memberId].classes = map[o.memberId].classes || [];
 			o.lessonOrganizationClasses && map[o.memberId].classes.push(o.lessonOrganizationClasses);
-			map[o.memberId].username = o.users.username;
+			// map[o.memberId].username = o.users.username;
+
+			const index = _.findIndex(users, obj => { return obj.id === o.memberId });
+			if (index > -1) {
+				map[o.memberId].username = users[index].username;
+			}
 			map[o.memberId].realname = map[o.memberId].realname || o.realname;
 			delete o.lessonOrganizationClasses;
 		});
@@ -65,6 +74,7 @@ const LessonOrganizationClassMember = class extends Controller {
 	}
 
 	async student() {
+		const { ctx } = this;
 		const { organizationId } = this.authenticated();
 		//const organizationId = 11;
 		const { classId } = this.validate({ classId: "number_optional" });
@@ -74,11 +84,11 @@ const LessonOrganizationClassMember = class extends Controller {
 		const curtime = new Date();
 		const list = await this.model.lessonOrganizationClassMembers.findAll({
 			include: [
-				{
-					as: "users",
-					attributes: ["id", "username", "nickname", "portrait"],
-					model: this.model.users,
-				},
+				// {
+				// 	as: "users",
+				// 	attributes: ["id", "username", "nickname", "portrait"],
+				// 	model: this.keepworkModel.Users,
+				// },
 				{
 					as: "lessonOrganizationClasses",
 					model: this.model.lessonOrganizationClasses,
@@ -93,6 +103,9 @@ const LessonOrganizationClassMember = class extends Controller {
 				memberId: { $in: memberIds }
 			},
 		}).then(list => list.map(o => o.toJSON()));
+
+		const users = await ctx.keepworkModel.Users.findAll({ attributes: ["id", "username", "nickname", "portrait"], where: { id: { $in: memberIds } } });
+
 		const map = {};
 		const rows = [];
 		let count = 0;
@@ -102,6 +115,11 @@ const LessonOrganizationClassMember = class extends Controller {
 				count++;
 				map[o.memberId] = o;
 				o.classes = [];
+
+				const index = _.findIndex(users, obj => { return obj.id === o.memberId });
+				if (index > -1) {
+					o.users = users[index].get();
+				}
 				rows.push(o);
 			}
 			map[o.memberId].realname = map[o.memberId].realname || o.realname;

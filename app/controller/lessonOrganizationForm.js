@@ -37,8 +37,10 @@ const LessonOrganizationForm = class extends Controller {
 	}
 
 	async create() {
+
 		let { organizationId, userId, roleId } = this.authenticated();
 		const params = this.validate();
+
 		if (!organizationId && !params.organizationId) return this.throw(400);
 		if (params.organizationId && params.organizationId != organizationId) {
 			organizationId = params.organizationId;
