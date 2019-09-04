@@ -246,7 +246,7 @@ class LessonsController extends Controller {
 
 		params.userId = userId;
 		params.lessonId = id;
-		console.log("-------", params);
+
 		const data = await ctx.model.LearnRecords.createLearnRecord(params);
 
 		return this.success(data);

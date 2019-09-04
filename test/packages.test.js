@@ -1,5 +1,6 @@
 
 const { app, mock, assert } = require("egg-mock/bootstrap");
+const md5 = require("blueimp-md5");
 
 describe("test/controller/packages.test.js", () => {
 	before(async () => {
@@ -15,6 +16,7 @@ describe("test/controller/packages.test.js", () => {
 		await skills.truncate();
 		await app.model.LessonSkills.truncate();
 		await app.model.Subscribes.truncate();
+		await app.model.PackageSorts.truncate();
 		await app.model.Users.truncate();
 
 		await subjects.create({
@@ -118,7 +120,7 @@ describe("test/controller/packages.test.js", () => {
 		assert.ok(data.teachedLessons);
 	});
 
-	it("GET|POST|DELETE /packages/1/lessons", async () => {
+	it("GET|POST|PUT|DELETE /packages/1/lessons", async () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
@@ -153,30 +155,39 @@ describe("test/controller/packages.test.js", () => {
 			.expect(200).then(res => res.body);
 
 		assert.equal(lessons.length, 1);
+
+		await app.httpRequest().put(url).send({
+			lessonId: 1,
+			lessonNo: 8
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+
 	});
 
-	// it("POST /packages/1/subscribe", async () => {
-	// 	const token = await app.login().then(o => o.token);
-	// 	assert.ok(token);
+	it("POST /packages/1/subscribe", async () => {
+		const token = await app.login().then(o => o.token);
+		assert.ok(token);
 
-	// 	const users = app.model.Users;
-	// 	await users.update({ coin: 300, lockCoin: 0 }, { where: { id: 1 }});
+		await app.model.Packages.create({ id: 1, userId: 2, packageName: "test" });
+		await app.model.Users.create({ username: "test", password: md5("123456") });
 
-	// 	await app.httpRequest().post("/packages/1/subscribe").send({ packageId: 1 })
-	// 		.set("Authorization", `Bearer ${token}`)
-	// 		.expect(200).then(res => res.body);
+		const users = app.model.Users;
+		await users.update({ coin: 300, lockCoin: 0 }, { where: { id: 1 }});
 
-	// 	const isSubscribe = await app.httpRequest().get("/packages/1/isSubscribe")
-	// 		.set("Authorization", `Bearer ${token}`)
-	// 		.expect(200).then(res => res.body);
-	// 	assert.ok(isSubscribe);
+		await app.httpRequest().post("/packages/1/subscribe").send({ packageId: 1 })
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
 
-	// 	let user = await users.findOne({ where: { id: 1 }});
-	// 	user = user.get({ plain: true });
+		const isSubscribe = await app.httpRequest().get("/packages/1/isSubscribe")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+		assert.ok(isSubscribe);
 
-	// 	assert.equal(user.coin, 200);
-	// 	assert.equal(user.lockCoin, 10);
-	// });
+		let user = await users.findOne({ where: { id: 1 }});
+		user = user.get({ plain: true });
+
+		assert.equal(user.coin, 300);
+		assert.equal(user.lockCoin, 0);
+	});
 
 	it("POST /packages/1/audit", async () => {
 		const token = await app.login().then(o => o.token);
@@ -202,6 +213,168 @@ describe("test/controller/packages.test.js", () => {
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200);
 	});
+
+	it("GET /packages/search", async () => {
+		const token = await app.login().then(o => o.token);
+		assert.ok(token);
+
+		let package_ = await app.httpRequest().post("/packages").send({
+			packageName: "前端",
+			lessons: [1],
+			subjectId: 1,
+			minAge: 1,
+			maxAge: 100,
+			intro: "前端学习",
+			rmb: 10,
+			coin: 100,
+			extra: {
+				coverUrl: "http://www.baidu.com",
+			},
+		}).set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+		assert(package_.id === 1);
+
+
+		package_ = await app.httpRequest()
+			.get("/packages/search?state=0")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+		assert(package_.count === 1);
+
+
+		package_ = await app.httpRequest()
+			.get("/packages/search")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+		assert(package_.count === 0);
+
+		await app.httpRequest()
+			.post("/packages/1/audit")
+			.send({ state: 1 })
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200);
+
+		package_ = await app.httpRequest()
+			.get("/packages/search?state=1")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+		assert(package_.count === 1);
+	});
+
+	it("GET /packages/hots", async () => {
+		const token = await app.login().then(o => o.token);
+		assert.ok(token);
+
+		await app.httpRequest().post("/packages").send({
+			packageName: "前端",
+			lessons: [1],
+			subjectId: 1,
+			minAge: 1,
+			maxAge: 100,
+			intro: "前端学习",
+			rmb: 10,
+			coin: 100,
+			extra: {
+				coverUrl: "http://www.baidu.com",
+			},
+		}).set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+		await app.httpRequest().post("/packages").send({
+			packageName: "后端",
+			lessons: [1],
+			subjectId: 1,
+			minAge: 1,
+			maxAge: 100,
+			intro: "后端学习",
+			rmb: 10,
+			coin: 100,
+			extra: {
+				coverUrl: "http://www.baidu.com",
+			},
+		}).set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+
+		const admintoken = await app.adminLogin().then(o => o.token);
+		assert.ok(token);
+
+		await app.httpRequest().post("/admins/PackageSorts").send({
+			packageId: 1,
+			hotNo: 1
+		}).set("Authorization", `Bearer ${admintoken}`)
+			.expect(200).then(res => res.body);
+
+		await app.httpRequest().post("/admins/PackageSorts").send({
+			packageId: 2,
+			hotNo: 2
+		}).set("Authorization", `Bearer ${admintoken}`)
+			.expect(200).then(res => res.body);
+
+		package_ = await app.httpRequest()
+			.get("/packages/hots")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+		assert(package_.length === 2);
+
+	});
+
+	it("GET /packages", async () => {
+		const token = await app.login().then(o => o.token);
+		assert.ok(token);
+
+		await app.httpRequest().post("/packages").send({
+			packageName: "前端",
+			lessons: [1],
+			subjectId: 1,
+			minAge: 1,
+			maxAge: 100,
+			intro: "前端学习",
+			rmb: 10,
+			coin: 100,
+			extra: {
+				coverUrl: "http://www.baidu.com",
+			},
+		}).set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+		let packages_ = await app.httpRequest().get("/packages")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+		assert(packages_.count === 1);
+
+	});
+
+	it("DELETE /packages/:id", async () => {
+		const token = await app.login().then(o => o.token);
+		assert.ok(token);
+
+		await app.httpRequest().post("/packages").send({
+			packageName: "前端",
+			lessons: [1],
+			subjectId: 1,
+			minAge: 1,
+			maxAge: 100,
+			intro: "前端学习",
+			rmb: 10,
+			coin: 100,
+			extra: {
+				coverUrl: "http://www.baidu.com",
+			},
+		}).set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+		await app.httpRequest().delete("/packages/1")
+			.set("Authorization", `Bearer ${token}`).expect(200);
+
+		let package_ = await app.httpRequest().get("/packages/1")
+			.then(res => res.body);
+
+		assert(JSON.stringify(package_) === "{}");
+	});
 });
-
-

@@ -15,7 +15,7 @@ class PackagesController extends Controller {
 		const { ctx } = this;
 		const query = ctx.query || {};
 
-		if (query.state == undefined) query.state = PACKAGE_STATE_AUDIT_SUCCESS;
+		if (query.state === undefined) query.state = PACKAGE_STATE_AUDIT_SUCCESS;
 
 		const data = await ctx.model.Packages.findAndCount({ ...this.queryOptions, where: query });
 		//const data = await ctx.model.Packages.findAndCount({where:query});
@@ -39,7 +39,7 @@ class PackagesController extends Controller {
 		const userId = this.getUser().userId;
 		query.userId = userId;
 
-		const result = await ctx.model.Packages.findAndCount({ where: query });
+		const result = await ctx.model.Packages.findAndCountAll({ where: query });
 
 		return this.success(result);
 	}
@@ -159,7 +159,7 @@ class PackagesController extends Controller {
 		const result = await ctx.model.Packages.destroy({ where: { id, userId } });
 
 		await ctx.model.PackageLessons.destroy({ where: { packageId: id, userId } });
-		await ctx.keepworkModel.lessonOrganizationPackages.destroy({ where: { packageId: id } });
+		await ctx.model.lessonOrganizationPackages.destroy({ where: { packageId: id } });
 
 		return this.success(result);
 	}

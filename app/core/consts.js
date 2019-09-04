@@ -1,5 +1,11 @@
 
 module.exports = {
+
+	// BAD_REQUEST: 400,
+	// FORBIDDEN: 403,
+	// NOT_FOUND: 404,
+
+
 	PACKAGE_STATE_UNAUDIT: 0, // 课程包状态 未审核
 	PACKAGE_STATE_AUDITING: 1, // 课程包状态 审核中
 	PACKAGE_STATE_AUDIT_SUCCESS: 2, // 课程包状态 审核成功
