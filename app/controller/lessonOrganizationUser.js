@@ -15,7 +15,6 @@ const LessonOrganizationUser = class extends Controller {
 	}
 
 	async batchCreateUser() {
-		console.log("------------------------");
 		const ctx = this.ctx;
 		let { userId, organizationId, roleId } = this.authenticated();
 		const params = this.validate({ classId: "number", count: "number" });
@@ -24,7 +23,6 @@ const LessonOrganizationUser = class extends Controller {
 			roleId = await this.ctx.service.organization.getRoleId(organizationId, userId);
 		}
 		if (roleId < CLASS_MEMBER_ROLE_TEACHER) return this.throw(400, "无权限操作");
-		console.log("------------------------");
 
 		let { classId, handlerId, count, password } = params;;
 		handlerId = handlerId || userId;

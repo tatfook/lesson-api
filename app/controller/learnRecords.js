@@ -141,7 +141,6 @@ class LearnRecordsController extends Controller {
 			}
 		});
 		data = data ? data.get({ plain: true }) : { coin: 0, bean: 0 };
-
 		return this.success(data);
 	}
 }

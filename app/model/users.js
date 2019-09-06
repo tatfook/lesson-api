@@ -109,9 +109,7 @@ module.exports = app => {
 	};
 
 	model.learn = async function (userId) {
-		console.log("1212", userId);
 		const user = await this.getById(userId);
-		console.log("0;", user);
 		if (!user) return;
 
 		const datestr = app.util.getDate().datestr;

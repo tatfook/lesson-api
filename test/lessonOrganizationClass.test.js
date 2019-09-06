@@ -4,6 +4,10 @@ const { app, assert } = require("egg-mock/bootstrap");
 describe("lesson organization class", () => {
 	before(async () => {
 		await app.keepworkModel.Users.sync({ force: true });
+		// await app.model.lessonOrganizations.sync({ force: true });
+		// await app.model.lessonOrganizationClassMembers.sync({ force: true });
+		// await app.model.lessonOrganizationClasses.sync({ force: true });
+
 	});
 
 	it("001 班级结业与恢复", async () => {
@@ -11,20 +15,44 @@ describe("lesson organization class", () => {
 		const user = await app.keepworkModel.Users.create({ username: "user009", password: md5("123456") });
 		// 创建机构
 		const organ = await app.model.lessonOrganizations.create({ name: "org0000", count: 1 }).then(o => o.toJSON());
-
-		// 创建班级
-		let cls = await app.model.lessonOrganizationClasses.create({
-			name: "clss000", organizationId: organ.id, begin: new Date(), end: new Date().getTime() + 1000 * 60 * 60 * 24
-		}).then(o => o.toJSON());
-
 		// 创建班级成员
 		await app.model.lessonOrganizationClassMembers.create({ organizationId: organ.id, memberId: user.id, roleId: 64, classId: 0 });
-		await app.model.lessonOrganizationClassMembers.create({ organizationId: organ.id, memberId: 1, roleId: 1, classId: cls.id });
 
 		// 登录机构
 		const token = await app.httpRequest().post("/lessonOrganizations/login").send({
 			organizationId: organ.id, username: "user009", password: "123456"
 		}).expect(200).then(res => res.body.token).catch(e => console.log(e));
+
+		// 创建班级
+		let cls = await app.httpRequest().post("/lessonOrganizationClasses")
+			.send({
+				name: "clss000", organizationId: organ.id, begin: new Date(), end: new Date().getTime() + 1000 * 60 * 60 * 24
+			})
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+
+		await app.model.lessonOrganizationClassMembers.create({ organizationId: organ.id, memberId: 1, roleId: 1, classId: cls.id });
+
+		// 更新班级;
+		await app.httpRequest().put(`/lessonOrganizationClasses/${cls.id}`).send({
+			name: "newClassName"
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+
+		// 班级列表
+		let class_ = await app.httpRequest().get("/lessonOrganizationClasses")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+		assert(class_.length === 1);
+		assert(class_[0].name === "newClassName");
+
+		class_ = await app.httpRequest().get("/lessonOrganizationClasses?roleId=1")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+		assert(class_.length === 1);
+
+		class_ = await app.httpRequest().get("/lessonOrganizationClasses?roleId=64")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+		assert(class_.length === 0);
 
 		// 结业班级
 		await app.httpRequest().put("/lessonOrganizationClasses/" + cls.id).send({

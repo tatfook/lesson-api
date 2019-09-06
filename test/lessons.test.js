@@ -105,6 +105,9 @@ describe("test/controller/lessons.test.js", () => {
 		// console.log(lesson);
 		assert.equal(lesson.skills.length, 2);
 		assert.equal(lesson.packages.length, 1);
+
+		await app.httpRequest().delete("/lessons/1")
+			.set("Authorization", `Bearer ${token}`).expect(200);
 	});
 
 	it("POST|DELETE|GET /lessons/1/skills", async () => {
@@ -123,9 +126,13 @@ describe("test/controller/lessons.test.js", () => {
 		// }).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
 		const url = "/lessons/1/skills";
+		// app.model.Lessons
 
 		await app.httpRequest().delete(url + "?skillId=1")
 			.set("Authorization", `Bearer ${token}`).expect(200);
+
+		await app.model.LessonSkills.create({ lessonId: 1, userId: 1, skillId: 1 });
+		await app.model.Skills.create({ skillName: "test", enSkillName: "test" });
 
 		let list = await app.httpRequest().get(url)
 			.set("Authorization", `Bearer ${token}`)
@@ -160,7 +167,9 @@ describe("test/controller/lessons.test.js", () => {
 			.expect(200).then(res => res.body);
 		assert.equal(lr.id, 1);
 
-		let list = await app.httpRequest().get(url).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+		let list = await app.httpRequest().get(url)
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
 		assert(list.length, 1);
 
 		await app.httpRequest().put(url).send({
@@ -168,9 +177,18 @@ describe("test/controller/lessons.test.js", () => {
 			packageId: 1,
 			state: 1,
 			reward: true,
-		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+		}).set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
 
-		const user = await app.httpRequest().get("/users/1").set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+		list = await app.httpRequest().get(url)
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+		assert(list[0].state === 1);
+
+		const user = await app.httpRequest().get("/users/1")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
 		assert.ok(user.lockCoin < 20); // 成功领取奖励
 	});
 

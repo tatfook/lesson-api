@@ -71,12 +71,9 @@ module.exports = app => {
 				id: lessonId,
 			}
 		});
-		console.log("data----", userId);
-		console.log(data);
 		if (!data) return false;
 
 		data = await app.model.Skills.findOne({ where: { id: skillId }});
-		console.log(data);
 		if (!data) return false;
 
 		data = await app.model.LessonSkills.create({
@@ -85,12 +82,10 @@ module.exports = app => {
 			skillId,
 			score,
 		});
-		console.log(data);
 		if (!data) return false;
 
 		return true;
 	};
-
 
 	model.getSkills = async function (lessonId) {
 		const skills = [];
@@ -99,14 +94,15 @@ module.exports = app => {
 				lessonId,
 			}
 		});
-
 		for (let i = 0; i < list.length; i++) {
 			let lessonSkill = list[i].get({ plain: true });
 			let skill = await app.model.Skills.findOne({
 				where: { id: lessonSkill.skillId },
 			});
-			if (skill) skill = skill.get({ plain: true });
-			lessonSkill.skillName = skill.skillName;
+			if (skill) {// 据说这个一定是真
+				skill = skill.get({ plain: true });
+				lessonSkill.skillName = skill.skillName;
+			}
 			skills.push(lessonSkill);
 		}
 

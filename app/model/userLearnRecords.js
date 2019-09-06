@@ -86,6 +86,7 @@ module.exports = app => {
 
 		return lessons;
 	};
+	app.model.userLearnRecords = model;
 
 	return model;
 };

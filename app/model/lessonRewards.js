@@ -82,7 +82,6 @@ module.exports = app => {
 
 		lessonReward.coin = lessonReward.coin + coinCount;
 		lessonReward.bean = lessonReward.bean + beanCount;
-
 		if (~~coinCount === 0 && ~~beanCount === 0) return { coin: coinCount, bean: beanCount };
 
 		// 创建返还记录

@@ -1,5 +1,5 @@
 const md5 = require("blueimp-md5");
-const { app } = require("egg-mock/bootstrap");
+const { app, assert } = require("egg-mock/bootstrap");
 
 describe("机构", () => {
 	before(async () => {
@@ -36,6 +36,67 @@ describe("机构", () => {
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body.data).catch(e => console.log(e));
 
-		// 获取学生
+		const token2 = await app.login().then(o => o.token);
+		assert.ok(token2);
+
+		// 我的机构
+		let org = await app.httpRequest().get("/lessonOrganizations")
+			.set("Authorization", `Bearer ${token2}`)
+			.expect(200).then(res => res.body);
+		assert(org.length === 1);
+
 	});
+
+	it("002 机构 创建机构 更新机构", async () => {
+		const adminToken = await app.adminLogin().then(o => o.token);
+		assert.ok(adminToken);
+
+		await app.keepworkModel.Users.create({ username: "user002", password: md5("123456"), roleId: 64 });
+
+		// 创建机构
+		let organ = await app.httpRequest().post("/lessonOrganizations").send({
+			name: "organ002",
+			count: 1,
+			usernames: ["user001"],
+			packages: [{
+				packageId: 1,
+				lessons: [{ lessonId: 1, lessonNo: 1 }]
+			}]
+		}).set("Authorization", `Bearer ${adminToken}`)
+			.expect(200).then(res => res.body);
+
+		// 更新机构
+		await app.httpRequest().put(`/lessonOrganizations/${organ.id}`).send({
+			name: "newname",
+			logo: "https://www.baidu.com",
+			usernames: ["user002"]
+		}).set("Authorization", `Bearer ${adminToken}`)
+			.expect(200).then(res => res.body);
+
+		// 机构获取
+		organ = await app.httpRequest().get(`/lessonOrganizations/${organ.id}`)
+			.set("Authorization", `Bearer ${adminToken}`)
+			.expect(200).then(res => res.body);
+
+		assert(organ.name === "newname" && organ.logo === "https://www.baidu.com");
+
+		// 登录机构
+		const token = await app.httpRequest()
+			.post("/lessonOrganizations/login")
+			.send({ organizationId: organ.id, username: "user002", password: "123456" })
+			.expect(200).then(res => res.body.token).catch(e => console.log(e));
+
+		// 课程包列表
+		organ = await app.httpRequest().get(`/lessonOrganizations/packages`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+
+		assert(organ.length === 1 && organ[0].packageId === 1);
+
+		// 课程详情
+		let detail = await app.httpRequest()
+			.get("/lessonOrganizations/packageDetail?packageId=1&classId=0")
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+		assert(detail.id && detail.packageId);
+	});
+
 });

@@ -1,7 +1,7 @@
 
 const { app, assert } = require("egg-mock/bootstrap");
 
-describe("test/controller/skills.test.js", () => {
+describe("test/controller/classrooms.test.js", () => {
 	before(async () => {
 		const lessons = app.model.Lessons;
 		const subjects = app.model.Subjects;
@@ -79,11 +79,26 @@ describe("test/controller/skills.test.js", () => {
 		const classroomId = classroom.id;
 		assert.equal(classroom.id, 1);
 
+		// 课堂列表
+		let classroom2 = await app.httpRequest()
+			.get("/classrooms")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+
+		assert(classroom2.count === 1);
+		assert(classroom2.rows.length === 1);
+
 		// 进入课堂
 		const token2 = app.util.jwt_encode({ userId: 2, username: "wxatest" }, app.config.self.secret);
 		await app.httpRequest().get("/users").set("Authorization", `Bearer ${token2}`)
 			.expect(res => assert(res.statusCode === 200))
 			.then(res => res.body);
+
+		const valid = await app.httpRequest()
+			.get(`/classrooms/valid?key=${classroom.key}`)
+			.expect(200).then(res => res.body);
+		assert(valid === true);
+
 		await app.httpRequest().post("/classrooms/join").send({
 			key: classroom.key
 		})
@@ -127,14 +142,36 @@ describe("test/controller/skills.test.js", () => {
 	});
 
 	it("002", async () => {
-		// const url = "/classrooms/1/learnRecords";
-		// let lr = await app.httpRequest().post(url).send({userId:1}).expect(200).then(res => res.body);
-		// assert.equal(lr.id, 1);
+		const token = app.util.jwt_encode({ userId: 1, username: "xiaoyao" }, app.config.self.secret);
 
-		// await app.httpRequest().put(url).send({id:1, userId:1, extra:{key:1}}).expect(200);
+		await app.model.PackageLessons.create({ packageId: 1, lessonId: 1, userId: 2 });
+		await app.model.Packages.create({ userId: 1, packageName: "unique" });
+		await app.model.Lessons.create({ userId: 1, lessonName: "unique", url: "hahh" });
 
-		// const list = await app.httpRequest().get(url).expect(200).then(res => res.body);
-		// assert.equal(list[0].extra.key, 1);
+		// 创建课堂
+		let classroom = await app.httpRequest().post("/classrooms").send({
+			packageId: 1, lessonId: 1
+		}).set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+		assert.equal(classroom.id, 1);
+
+		await app.httpRequest().put("/classrooms/1").send({
+			packageId: 2
+		}).set("Authorization", `Bearer ${token}`).expect(200);
+
+		classroom = await app.httpRequest().get("/classrooms/1").then(res => res.body);
+
+		assert(classroom.packageId === 2);
+
+		classroom = await app.httpRequest()
+			.get(`/classrooms/getByKey?key=${classroom.key}`)
+			.expect(200).then(res => res.body);
+
+		assert(classroom.packageId === 2);
+
+		classroom = await app.httpRequest().get("/classrooms/current")
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+		assert.equal(classroom.id, 1);
 	});
 });
 

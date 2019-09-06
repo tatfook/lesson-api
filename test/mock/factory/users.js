@@ -2,7 +2,6 @@
 module.exports = app => {
 	const { factory } = app;
 	const tableName = "users";
-	console.log("hahah----ohyeah");
 	factory.define(tableName, app.model[tableName], {
 		username: factory.chance("word", { length: 10 }),
 		password: factory.chance("string", { length: 10 }),

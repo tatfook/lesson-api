@@ -153,6 +153,7 @@ class UsersController extends Controller {
 			teacher.endTime = teacher.startTime = startTime;
 		}
 		teacher.endTime += cdKey.expire;
+
 		await this.model.Teachers.upsert(teacher);
 		const result = await this.model.Users.update(user, { where: { id }});
 

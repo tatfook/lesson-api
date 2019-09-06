@@ -58,11 +58,13 @@ describe("LearnRecords", () => {
 			intro: "前端学习",
 			rmb: 20,
 			coin: 200,
-			state: 2,
+			state: 2, // 嘿嘿，小妖怪，骗我
 			extra: {
 				coverUrl: "http://www.baidu.com",
 			},
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+
+		await app.model.Packages.update({ state: 2 }, { where: { id: 1 } });
 	});
 
 
@@ -70,6 +72,7 @@ describe("LearnRecords", () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
+		// 提交学习记录
 		let data = await app.httpRequest().post("/learnRecords").send({
 			packageId: 1,
 			lessonId: 1,
@@ -77,20 +80,22 @@ describe("LearnRecords", () => {
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.equal(data.id, 1);
 
+		// 领取学习j奖励
 		let reward = await app.httpRequest()
 			.post("/learnRecords/1/reward")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.equal(reward.coin, 0);
-		assert.equal(reward.bean, 0);
+		assert.equal(reward.bean, 10);
 		// console.log(reward);
 
-		await app.model.Users.update({ lockCoin: 100 }, { where: { id: 1 }});
+		// accounts表的lockCoin
+		await app.keepworkModel.accounts.update({ lockCoin: 100 }, { where: { id: 1 } });
 		reward = await app.httpRequest()
 			.post("/learnRecords/1/reward")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.ok(!reward.coin);
+		assert.ok(reward.coin > 0);
 		assert.equal(reward.bean, 0);
 
 		reward = await app.httpRequest().post("/learnRecords/1/reward")

@@ -68,7 +68,8 @@ const LessonOrganization = class extends Controller {
 				}
 			],
 			where: { organizationId, memberId: user.id }
-		}).then(list => list.map(o => o.toJSON()).filter(o => ~~o.classId === 0 || o.lessonOrganizationClasses));
+		}).then(list => list.map(o => o.toJSON())
+			.filter(o => ~~o.classId === 0 || o.lessonOrganizationClasses));
 
 		if (members.length === 0) return this.throw(400, "成员不存在");
 
@@ -148,7 +149,7 @@ const LessonOrganization = class extends Controller {
 		}
 
 		if (params.usernames) {
-			const users = await this.keepworkModel.users.findAll({
+			const users = await this.ctx.keepworkModel.Users.findAll({
 				where: {
 					username: { [this.model.Op.in]: params.usernames }
 				}
@@ -225,8 +226,8 @@ const LessonOrganization = class extends Controller {
 
 		if (params.usernames) {
 			await this.model.lessonOrganizationClassMembers.destroy({ where: { classId: 0, organizationId: id }});
-			const users = await this.keepworkModel.users.findAll({
-				where: { username: { [this.keepworkModel.Op.in]: params.usernames }}
+			const users = await this.ctx.keepworkModel.Users.findAll({
+				where: { username: { [this.ctx.keepworkModel.Op.in]: params.usernames }}
 			}).then(list => _.map(list, o => o.toJSON()));
 
 			const members = _.map(users, o => ({
