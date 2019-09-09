@@ -45,6 +45,27 @@ describe("机构", () => {
 			.expect(200).then(res => res.body);
 		assert(org.length === 1);
 
+		const adminToken = await app.adminLogin().then(o => o.token);
+
+		// 更改用户密码
+		const ret = await app.httpRequest().post("/organizations/changepwd")
+			.send({
+				memberId: user.id,
+				password: "456789"
+			})
+			.set("Authorization", `Bearer ${adminToken}`).expect(200);
+
+		assert(ret);
+
+		await app.httpRequest()
+			.post("/lessonOrganizations/login")
+			.send({ organizationId: organ.id, username: "user001", password: "123456" })
+			.expect(400).then(res => res.body.token).catch(e => console.log(e));
+
+		await app.httpRequest()
+			.post("/lessonOrganizations/login")
+			.send({ organizationId: organ.id, username: "user001", password: "456789" })
+			.expect(200).then(res => res.body.token).catch(e => console.log(e));
 	});
 
 	it("002 机构 创建机构 更新机构", async () => {
@@ -98,5 +119,4 @@ describe("机构", () => {
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert(detail.id && detail.packageId);
 	});
-
 });

@@ -17,7 +17,7 @@ const Index = class extends Controller {
 		const isMember = await this.ctx.service.organization.isMember({ organizationId, memberId: params.memberId });
 		if (!isMember) return this.success(false);
 
-		const ok = await ctx.model.users.update({
+		const ok = await this.ctx.keepworkModel.Users.update({
 			password: app.util.md5(params.password),
 		}, { where: { id: params.memberId }});
 
