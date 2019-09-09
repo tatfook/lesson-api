@@ -4,19 +4,22 @@ const { app, assert } = require("egg-mock/bootstrap");
 describe("lesson organization class", () => {
 	before(async () => {
 		await app.keepworkModel.Users.sync({ force: true });
-		// await app.model.lessonOrganizations.sync({ force: true });
-		// await app.model.lessonOrganizationClassMembers.sync({ force: true });
-		// await app.model.lessonOrganizationClasses.sync({ force: true });
-
+		await app.model.lessonOrganizations.sync({ force: true });
+		await app.model.lessonOrganizationClassMembers.sync({ force: true });
+		await app.model.lessonOrganizationClasses.sync({ force: true });
 	});
 
-	it("001 班级结业与恢复", async () => {
+	it("001 班级结业与恢复 删除班级 班级列表", async () => {
 		// const user = await app.factory.create("users", { username: "user009", password: md5("123456") });
 		const user = await app.keepworkModel.Users.create({ username: "user009", password: md5("123456") });
+		await app.keepworkModel.Users.create({ username: "user007", password: md5("123456") });
+
 		// 创建机构
 		const organ = await app.model.lessonOrganizations.create({ name: "org0000", count: 1 }).then(o => o.toJSON());
 		// 创建班级成员
-		await app.model.lessonOrganizationClassMembers.create({ organizationId: organ.id, memberId: user.id, roleId: 64, classId: 0 });
+		await app.model.lessonOrganizationClassMembers.create({
+			organizationId: organ.id, memberId: user.id, roleId: 64, classId: 0
+		});
 
 		// 登录机构
 		const token = await app.httpRequest().post("/lessonOrganizations/login").send({
@@ -30,7 +33,16 @@ describe("lesson organization class", () => {
 			})
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
-		await app.model.lessonOrganizationClassMembers.create({ organizationId: organ.id, memberId: 1, roleId: 1, classId: cls.id });
+		await app.model.lessonOrganizationClassMembers.create({
+			organizationId: organ.id, memberId: 1, roleId: 1, classId: cls.id
+		});
+
+		// 再创建一个班级
+		let class2 = await app.httpRequest().post("/lessonOrganizationClasses")
+			.send({
+				name: "clss008", organizationId: organ.id, begin: new Date(), end: new Date().getTime() + 1000 * 60 * 60 * 24
+			})
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
 		// 更新班级;
 		await app.httpRequest().put(`/lessonOrganizationClasses/${cls.id}`).send({
@@ -39,6 +51,17 @@ describe("lesson organization class", () => {
 
 		// 班级列表
 		let class_ = await app.httpRequest().get("/lessonOrganizationClasses")
+			.set("Authorization", `Bearer ${token}`)
+			.expect(200).then(res => res.body);
+		assert(class_.length === 2);
+		assert(class_[0].name === "clss008" || class_[0].name === "newClassName");
+		assert(class_[1].name === "newClassName" || class_[1].name === "clss008");
+
+		// 删除班级
+		await app.httpRequest().delete("/lessonOrganizationClasses/" + class2.id)
+			.set("Authorization", `Bearer ${token}`).expect(200);
+
+		class_ = await app.httpRequest().get("/lessonOrganizationClasses")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert(class_.length === 1);
@@ -60,11 +83,13 @@ describe("lesson organization class", () => {
 		}).set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body.data).catch(e => console.log(e));
 
-		cls = await app.model.lessonOrganizationClasses.findOne({ where: { id: cls.id }}).then(o => o && o.toJSON());
+		cls = await app.model.lessonOrganizationClasses.findOne({ where: { id: cls.id } }).then(o => o && o.toJSON());
 		assert(new Date(cls.end).getTime() === new Date("2019-01-01").getTime());
 
 		// 添加新成员
-		await app.model.lessonOrganizationClassMembers.create({ organizationId: organ.id, memberId: 2, roleId: 1, classId: cls.id });
+		await app.model.lessonOrganizationClassMembers.create({
+			organizationId: organ.id, memberId: 2, roleId: 1, classId: cls.id
+		});
 
 		// 恢复结业班级
 		await app.httpRequest().put("/lessonOrganizationClasses/" + cls.id).send({
@@ -72,8 +97,13 @@ describe("lesson organization class", () => {
 		}).set("Authorization", `Bearer ${token}`).expect((res) => {
 			assert(res.statusCode === 400);
 		});
-	});
 
+		// 历史班级
+		const hisClass = await app.httpRequest().get("/lessonOrganizationClasses/history")
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+
+		assert(hisClass.count === 1);
+	});
 
 	it("002 获取机构学生", async () => {
 		// await app.factory.createMany("users", 10);
@@ -132,7 +162,7 @@ describe("lesson organization class", () => {
 		});
 
 		// 过期机构
-		await app.model.lessonOrganizations.update({ endDate: "2019-01-01" }, { where: { id: organ.id }});
+		await app.model.lessonOrganizations.update({ endDate: "2019-01-01" }, { where: { id: organ.id } });
 
 		const token = await app.httpRequest().post("/lessonOrganizations/login")
 			.send({ organizationId: organ.id, username: "user002", password: "123456" })
@@ -146,7 +176,7 @@ describe("lesson organization class", () => {
 			.expect(400).then(res => res.body);
 
 		// 不过期机构
-		await app.model.lessonOrganizations.update({ endDate: "2119-01-01" }, { where: { id: organ.id }});
+		await app.model.lessonOrganizations.update({ endDate: "2119-01-01" }, { where: { id: organ.id } });
 		const list = await app.httpRequest()
 			.post("/lessonOrganizationActivateCodes")
 			.set("Authorization", `Bearer ${token}`)
@@ -162,4 +192,5 @@ describe("lesson organization class", () => {
 			.send({ key, organizationId: 1 }).expect(200).then(res => res.body).catch(e => console.log(e));
 		assert(ok);
 	});
+
 });

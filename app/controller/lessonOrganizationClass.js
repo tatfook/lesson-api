@@ -33,13 +33,13 @@ const LessonOrganizationClass = class extends Controller {
 				{
 					as: "lessonOrganizationClassMembers",
 					model: this.model.lessonOrganizationClassMembers,
-					include: [
-						{
-							as: "users",
-							attributes: ["id", "username", "nickname", "portrait"],
-							model: this.model.users,
-						},
-					]
+					// include: [
+					// 	{
+					// 		as: "users",
+					// 		attributes: ["id", "username", "nickname", "portrait"],
+					// 		model: this.model.users,
+					// 	},
+					// ]
 				},
 			],
 			where: {
@@ -48,8 +48,28 @@ const LessonOrganizationClass = class extends Controller {
 					$lte: curtime,
 				}
 			}
-		});
+		}).map(r => r.get());
 
+		const userIds = list.map(r => r.lessonOrganizationClassMembers)
+			.map(r => r.map(rr => rr.get().memberId)).join().split(',');
+
+		const users = await this.ctx.keepworkModel.Users.findAll({
+			attributes: ["id", "username", "nickname", "portrait"],
+			where: {
+				id: {
+					$in: userIds
+				}
+			}
+		}).map(r => r.get());
+
+		for (let i = 0; i < list.length; i++) {
+			const members = list[i].lessonOrganizationClassMembers;
+			for (let j = 0; j < members.length; j++) {
+				members[j] = members[j].get();
+				const index = _.findIndex(users, obj => obj.id === members[j].memberId);
+				if (index > -1) members[j].users = users[index];
+			}
+		}
 		return this.success({ count, rows: list });
 	}
 
@@ -162,7 +182,7 @@ const LessonOrganizationClass = class extends Controller {
 		await this.model.lessonOrganizationClasses.destroy({ where: { id, organizationId } });
 		await this.model.lessonOrganizationPackages.destroy({ where: { classId: id, organizationId } });
 
-		return this.success();
+		return this.success('ok');
 	}
 }
 
