@@ -162,7 +162,7 @@ describe("test/controller/lessons.test.js", () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
-		app.model.Users.create({
+		await app.model.Users.create({
 			id: 1, username: "user001", password: md5("123456")
 		});
 
