@@ -110,10 +110,13 @@ const LessonOrganizationUser = class extends Controller {
 		if (roleId < CLASS_MEMBER_ROLE_TEACHER) return this.throw(400, "无权限操作");
 		const { password, classId, memberId } = params;
 
-		const member = await this.model.lessonOrganizationClassMembers.findOne({ where: { organizationId, classId, memberId }}).then(o => o && o.toJSON());
+		const member = await this.model.lessonOrganizationClassMembers.findOne({
+			where: { organizationId, classId, memberId }
+		}).then(o => o && o.toJSON());
+
 		if (!member || ~~member.bind === 0) this.throw(400, "成员不存在或未绑定本机构");
 
-		await this.keepworkModel.users.update({
+		await this.ctx.keepworkModel.Users.update({
 			password: this.app.util.md5(password || "123456"),
 		}, { where: { id: memberId }});
 

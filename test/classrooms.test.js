@@ -79,6 +79,11 @@ describe("test/controller/classrooms.test.js", () => {
 		const classroomId = classroom.id;
 		assert.equal(classroom.id, 1);
 
+		await app.httpRequest().post("/classrooms").send({ // packageId && lessonId错误
+			packageId: 999, lessonId: 999
+		}).set("Authorization", `Bearer ${token}`)
+			.expect(400).then(res => res.body);
+
 		// 课堂列表
 		let classroom2 = await app.httpRequest()
 			.get("/classrooms")
@@ -122,6 +127,14 @@ describe("test/controller/classrooms.test.js", () => {
 			.then(res => res.body);
 		assert.equal(classroom.state, 2);
 
+		// 课堂不存在
+		let ret = await app.httpRequest().post("/classrooms/join").send({
+			key: "abc"
+		})
+			.set("Authorization", `Bearer ${token2}`)
+			.expect(400).then(res => res.body);
+		assert(ret.code === 1);
+
 		// 自学
 		await app.httpRequest().post("/learnRecords")
 			.send({ packageId: 1, lessonId: 1, state: 1 })
@@ -129,16 +142,6 @@ describe("test/controller/classrooms.test.js", () => {
 			.expect(res => assert(res.statusCode === 200))
 			.then(res => res.body);
 
-		// 获取课堂
-		// classroom = await app.httpRequest().get("/classrooms/1").expect(200).then(res => res.body);
-		// assert.equal(classroom.id,1);
-		// assert.equal(classroom.state, 1);
-
-		// 当前课堂
-		// classroom = await app.httpRequest().get("/classrooms/current").expect(200).then(res => res.body);
-		// assert.equal(classroom.id,1);
-
-		// 关闭课堂
 	});
 
 	it("002", async () => {
@@ -155,7 +158,7 @@ describe("test/controller/classrooms.test.js", () => {
 			.expect(200).then(res => res.body);
 		assert.equal(classroom.id, 1);
 
-		await app.httpRequest().put("/classrooms/1").send({
+		await app.httpRequest().put("/classrooms/1").send({ // 修改课堂
 			packageId: 2
 		}).set("Authorization", `Bearer ${token}`).expect(200);
 
@@ -163,13 +166,13 @@ describe("test/controller/classrooms.test.js", () => {
 
 		assert(classroom.packageId === 2);
 
-		classroom = await app.httpRequest()
+		classroom = await app.httpRequest()// 通过key获取课堂
 			.get(`/classrooms/getByKey?key=${classroom.key}`)
 			.expect(200).then(res => res.body);
 
 		assert(classroom.packageId === 2);
 
-		classroom = await app.httpRequest().get("/classrooms/current")
+		classroom = await app.httpRequest().get("/classrooms/current")// 当前课堂
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.equal(classroom.id, 1);
 	});

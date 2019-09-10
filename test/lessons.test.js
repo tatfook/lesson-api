@@ -43,6 +43,7 @@ describe("test/controller/lessons.test.js", () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
+		// 创建lesson
 		let lesson = await app.httpRequest().post("/lessons").send({
 			lessonName: "HTML",
 			subjectId: 1,
@@ -56,6 +57,7 @@ describe("test/controller/lessons.test.js", () => {
 
 		assert.equal(lesson.id, 1);
 
+		// 获取全部lesson
 		let data = await app.httpRequest()
 			.get("/lessons")
 			.set("Authorization", `Bearer ${token}`)
@@ -65,6 +67,7 @@ describe("test/controller/lessons.test.js", () => {
 
 		const token2 = await app.login({ id: 2, username: "user002" }).then(o => o.token);
 
+		// 创建package
 		await app.httpRequest().post("/packages").send({
 			packageName: "前端",
 			lessons: [1],
@@ -85,18 +88,21 @@ describe("test/controller/lessons.test.js", () => {
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(200).then(res => res.body);
 
+		// 修改lesson
 		await app.httpRequest()
 			.put("/lessons/1")
 			.send({ subjectId: 2 })
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 
+		// 获取指定lesson
 		lesson = await app.httpRequest()
 			.get("/lessons/1")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.equal(lesson.subjectId, 2);
 
+		// 获取指定lesson详情
 		lesson = await app.httpRequest()
 			.get("/lessons/1/detail")
 			.set("Authorization", `Bearer ${token}`)

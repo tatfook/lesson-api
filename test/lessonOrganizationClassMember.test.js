@@ -75,7 +75,7 @@ describe("机构学生", () => {
 
 		let user3 = app.keepworkModel.Users.create({ username: "jacky", password: md5("123456") });
 		user3 = user3.get();
-		app.model.lessonOrganizationClassMembers.create({
+		await app.model.lessonOrganizationClassMembers.create({
 			organizationId: organ.id, classId: cls2.id, roleId: 2, memberId: user3.id
 		});
 

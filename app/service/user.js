@@ -1,5 +1,3 @@
-const crypto = require("crypto");
-const pingpp = require("pingpp");
 const _ = require('lodash');
 const Service = require('egg').Service;
 

@@ -83,7 +83,7 @@ describe("lesson organization class", () => {
 		}).set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body.data).catch(e => console.log(e));
 
-		cls = await app.model.lessonOrganizationClasses.findOne({ where: { id: cls.id } }).then(o => o && o.toJSON());
+		cls = await app.model.lessonOrganizationClasses.findOne({ where: { id: cls.id }}).then(o => o && o.toJSON());
 		assert(new Date(cls.end).getTime() === new Date("2019-01-01").getTime());
 
 		// 添加新成员
@@ -135,19 +135,20 @@ describe("lesson organization class", () => {
 		// 获取学生0
 		let students = await app.httpRequest().get("/lessonOrganizationClassMembers/student")
 			.set("Authorization", `Bearer ${token}`).expect(res => assert(res.statusCode == 200)).then(res => res.body);
-		assert(students.count == 2);
+		assert(students.count === 2);
 
 		students = await app.httpRequest()
 			.get("/lessonOrganizationClassMembers/student?classId=" + cls1.id)
 			.set("Authorization", `Bearer ${token}`)
-			.expect(res => assert(res.statusCode == 200)).then(res => res.body);
-		assert(students.count == 1);
+			.expect(res => assert(res.statusCode === 200)).then(res => res.body);
+		assert(students.count === 1);
 
+		// 获取老师
 		let teachers = await app.httpRequest()
 			.get("/lessonOrganizationClassMembers/teacher")
 			.set("Authorization", `Bearer ${token}`)
-			.expect(res => assert(res.statusCode == 200)).then(res => res.body);
-		assert(teachers.length == 2);
+			.expect(res => assert(res.statusCode === 200)).then(res => res.body);
+		assert(teachers.length === 2);
 	});
 
 	it("003 机构过期测试", async () => {
@@ -162,7 +163,7 @@ describe("lesson organization class", () => {
 		});
 
 		// 过期机构
-		await app.model.lessonOrganizations.update({ endDate: "2019-01-01" }, { where: { id: organ.id } });
+		await app.model.lessonOrganizations.update({ endDate: "2019-01-01" }, { where: { id: organ.id }});
 
 		const token = await app.httpRequest().post("/lessonOrganizations/login")
 			.send({ organizationId: organ.id, username: "user002", password: "123456" })
@@ -176,12 +177,12 @@ describe("lesson organization class", () => {
 			.expect(400).then(res => res.body);
 
 		// 不过期机构
-		await app.model.lessonOrganizations.update({ endDate: "2119-01-01" }, { where: { id: organ.id } });
+		await app.model.lessonOrganizations.update({ endDate: "2119-01-01" }, { where: { id: organ.id }});
 		const list = await app.httpRequest()
 			.post("/lessonOrganizationActivateCodes")
 			.set("Authorization", `Bearer ${token}`)
 			.send({ classId: cls1.id, count: 2 }).expect(200).then(res => res.body);
-		assert(list.length == 2);
+		assert(list.length === 2);
 
 		const usertoken = await app.login().then(o => o.token);
 		const key = list[0].key;

@@ -64,7 +64,7 @@ describe("LearnRecords", () => {
 			},
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
-		await app.model.Packages.update({ state: 2 }, { where: { id: 1 } });
+		await app.model.Packages.update({ state: 2 }, { where: { id: 1 }});
 	});
 
 
@@ -90,7 +90,7 @@ describe("LearnRecords", () => {
 		// console.log(reward);
 
 		// accounts表的lockCoin
-		await app.keepworkModel.accounts.update({ lockCoin: 100 }, { where: { id: 1 } });
+		await app.keepworkModel.accounts.update({ lockCoin: 100 }, { where: { id: 1 }});
 		reward = await app.httpRequest()
 			.post("/learnRecords/1/reward")
 			.set("Authorization", `Bearer ${token}`)
@@ -98,12 +98,14 @@ describe("LearnRecords", () => {
 		assert.ok(reward.coin > 0);
 		assert.equal(reward.bean, 0);
 
+		// 不可重复领取
 		reward = await app.httpRequest().post("/learnRecords/1/reward")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.equal(reward.coin, 0);
 		assert.equal(reward.bean, 0);
 
+		// 获取领奖记录
 		reward = await app.httpRequest()
 			.get("/learnRecords/reward?packageId=1&lessonId=1")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);

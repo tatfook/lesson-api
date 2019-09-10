@@ -48,5 +48,16 @@ describe("test/controller/admins.test.js", () => {
 		assert(users.count === 2);
 		assert(users.rows[0].username === "test3");
 		assert(users.rows[1].username === "test2");
+
+		await app.httpRequest().delete(`/admins/users/${users.rows[0].id}`)// 删除资源
+			.set("Authorization", `Bearer ${token2}`)
+			.expect(200).then(res => res.body);
+
+		users = await app.httpRequest().get("/admins/users")// 获取全部资源
+			.set("Authorization", `Bearer ${token2}`)
+			.expect(200).then(res => res.body);
+
+		assert(users.count === 1);
+		assert(users.rows[0].username === "test2");
 	});
 });

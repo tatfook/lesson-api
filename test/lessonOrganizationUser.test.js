@@ -8,8 +8,8 @@ describe("机构用户", () => {
 	});
 
 	it("001 用户绑定 解绑", async () => {
-		const user = await app.adminLogin();
-		const token = user.token;
+		// const user = await app.adminLogin();
+		// const token = user.token;
 
 		await app.keepworkModel.Users.create({ id: 1, realname: "110", username: "test", roleId: 64, password: md5("123456") });
 
@@ -25,10 +25,10 @@ describe("机构用户", () => {
 
 		// 创建班级成员
 		await app.model.lessonOrganizationClassMembers.create({
-			organizationId: organ.id, memberId: user.id, roleId: 64, classId: 0
+			organizationId: organ.id, memberId: 1, roleId: 64, classId: cls.id, bind: 1
 		});
 
-		// 修改机构过期时间
+		// 接口废弃
 		// const users = await app.httpRequest().post("/lessonOrganizationUsers/batch").send({
 		// 	classId: cls.id,
 		// 	organizationId: organ.id,
@@ -37,18 +37,19 @@ describe("机构用户", () => {
 		// 	.expect(200).then(res => res.body).catch(e => console.log(e));
 		// assert(users.length == 3);
 
-		// 修改绑定用户密码
+		// 修改绑定用户密码; 接口废弃
 		// await app.httpRequest().post("/lessonOrganizationUsers/setpwd").send({
 		// 	classId: cls.id,
 		// 	organizationId: organ.id,
-		// 	memberId: users[0].id,
+		// 	memberId: 1,
 		// 	password: "xiaoyao",
-		// }).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body).catch(e => console.log(e));
+		// }).set("Authorization", `Bearer ${token}`)
+		// 	.expect(200).then(res => res.body).catch(e => console.log(e));
 
-		// 解绑用户
-		await app.httpRequest().post("/lessonOrganizationUsers/unbind").send({
-			classId: cls.id,
-			organizationId: organ.id,
-		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body).catch(e => console.log(e));
+		// 解绑用户 接口废弃
+		// await app.httpRequest().post("/lessonOrganizationUsers/unbind").send({
+		// 	classId: cls.id,
+		// 	organizationId: organ.id,
+		// }).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body).catch(e => console.log(e));
 	});
 });
