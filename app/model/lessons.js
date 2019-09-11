@@ -1,4 +1,3 @@
-const packageLessons = require("./packageLessons");
 
 module.exports = app => {
 	const {
@@ -137,14 +136,16 @@ module.exports = app => {
 	};
 
 	app.model.lessons = model;
-	// app.model.packageLessons = app.model.packageLessons || packageLessons(app);
 
-	app.model.lessons.hasMany(app.model.packageLessons, {
-		as: "packageLessons",
-		foreignKey: "lessonId",
-		sourceKey: "id",
-		constraints: false,
-	});
+	model.associate = () => {
+		app.model.lessons.hasMany(app.model.packageLessons, {
+			as: "packageLessons",
+			foreignKey: "lessonId",
+			sourceKey: "id",
+			constraints: false,
+		});
+	};
+
 
 	return model;
 };

@@ -1,8 +1,4 @@
 
-const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
-const lessonOrganizationPackages = require("./lessonOrganizationPackage");
-const lessonOrganizationActivateCodes = require("./lessonOrganizationActivateCode");
-
 module.exports = app => {
 	const {
 		BIGINT,
@@ -68,54 +64,30 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-
-	// model.hasMany(lessonOrganizationClassMembers(app), {
-	// 	as: "lessonOrganizationClassMembers",
-	// 	foreignKey: "classId",
-	// 	sourceKey: "id",
-	// 	constraints: false,
-	// });
-
-	// model.hasMany(lessonOrganizationPackages(app), {
-	// 	as: "lessonOrganizationPackages",
-	// 	foreignKey: "classId",
-	// 	sourceKey: "id",
-	// 	constraints: false,
-	// });
-
-	// model.hasMany(lessonOrganizationActivateCodes(app), {
-	// 	as: "lessonOrganizationActivateCodes",
-	// 	foreignKey: "classId",
-	// 	sourceKey: "id",
-	// 	constraints: false,
-	// });
-
 	app.model.lessonOrganizationClasses = model;
 
-	// app.model.lessonOrganizationActivateCodes = app.model.lessonOrganizationActivateCodes || lessonOrganizationActivateCodes(app);
-	// app.model.lessonOrganizationPackages = app.model.lessonOrganizationPackages || lessonOrganizationPackages(app);
-	// app.model.lessonOrganizationClassMembers = app.model.lessonOrganizationClassMembers || lessonOrganizationClassMembers(app);
+	model.associate = () => {
+		app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationActivateCodes, {
+			as: "lessonOrganizationActivateCodes",
+			foreignKey: "classId",
+			sourceKey: "id",
+			constraints: false,
+		});
 
-	app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationActivateCodes, {
-		as: "lessonOrganizationActivateCodes",
-		foreignKey: "classId",
-		sourceKey: "id",
-		constraints: false,
-	});
+		app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationPackages, {
+			as: "lessonOrganizationPackages",
+			foreignKey: "classId",
+			sourceKey: "id",
+			constraints: false,
+		});
 
-	app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationPackages, {
-		as: "lessonOrganizationPackages",
-		foreignKey: "classId",
-		sourceKey: "id",
-		constraints: false,
-	});
-
-	app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationClassMembers, {
-		as: "lessonOrganizationClassMembers",
-		foreignKey: "classId",
-		sourceKey: "id",
-		constraints: false,
-	});
+		app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationClassMembers, {
+			as: "lessonOrganizationClassMembers",
+			foreignKey: "classId",
+			sourceKey: "id",
+			constraints: false,
+		});
+	};
 
 	return model;
 };

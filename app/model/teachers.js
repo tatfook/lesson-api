@@ -1,11 +1,4 @@
 
-const consts = require("../core/consts.js");
-// const { 
-// 	TEACHER_PRIVILEGE_TEACH,
-// } = consts;
-
-const teacherCDKeys = require("./teacherCDKeys");
-const Users = require("./users");
 module.exports = app => {
 	const {
 		BIGINT,
@@ -85,22 +78,22 @@ module.exports = app => {
 	};
 
 	app.model.teachers = model;
-	// app.model.teacherCDKeys = app.model.teacherCDKeys || teacherCDKeys(app);
-	// app.model.users = app.model.users || Users(app);
 
-	app.model.teachers.belongsTo(app.model.users, {
-		as: "users",
-		foreignKey: "userId",
-		targetKey: "id",
-		constraints: false,
-	});
+	model.associate = () => {
+		app.model.teachers.belongsTo(app.model.users, {
+			as: "users",
+			foreignKey: "userId",
+			targetKey: "id",
+			constraints: false,
+		});
 
-	app.model.teachers.hasMany(app.model.teacherCDKeys, {
-		as: "teacherCDKeys",
-		foreignKey: "userId",
-		sourceKey: "userId",
-		constraints: false,
-	});
+		app.model.teachers.hasMany(app.model.teacherCDKeys, {
+			as: "teacherCDKeys",
+			foreignKey: "userId",
+			sourceKey: "userId",
+			constraints: false,
+		});
+	};
 
 	return model;
 };

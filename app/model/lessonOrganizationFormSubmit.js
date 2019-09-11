@@ -1,9 +1,6 @@
 
 /* 机构表单 */
 
-// const _ = require("lodash");
-const lessonOrganizationForms = require("./lessonOrganizationForm");
-
 module.exports = app => {
 	const {
 		BIGINT,
@@ -69,24 +66,16 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-
-	// model.belongsTo(lessonOrganizationForms(app), {
-	// 	as: "lessonOrganizationForms",
-	// 	foreignKey: "formId",
-	// 	targetKey: "id",
-	// 	constraints: false,
-	// });
-
 	app.model.lessonOrganizationFormSubmits = model;
 
-	// app.model.lessonOrganizationForms = app.model.lessonOrganizationForms || lessonOrganizationForms(app);
-
-	app.model.lessonOrganizationFormSubmits.belongsTo(app.model.lessonOrganizationForms, {
-		as: "lessonOrganizationForms",
-		foreignKey: "formId",
-		targetKey: "id",
-		constraints: false,
-	});
+	model.associate = () => {
+		app.model.lessonOrganizationFormSubmits.belongsTo(app.model.lessonOrganizationForms, {
+			as: "lessonOrganizationForms",
+			foreignKey: "formId",
+			targetKey: "id",
+			constraints: false,
+		});
+	};
 
 	return model;
 };

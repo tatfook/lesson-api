@@ -1,5 +1,5 @@
 const consts = require("../core/consts.js");
-const teachers = require("./teachers");
+
 const {
 	TEACHER_KEY_STATE_USING,
 	TEACHER_KEY_STATE_DISABLE,
@@ -81,13 +81,15 @@ module.exports = app => {
 	};
 
 	app.model.teacherCDKeys = model;
-	// app.model.teachers = app.model.teachers || teachers(app);
 
-	app.model.teacherCDKeys.belongsTo(app.model.teachers, {
-		as: "teachers",
-		foreignKey: "userId",
-		targetKey: "userId",
-		constraints: false,
-	});
+	model.associate = () => {
+		app.model.teacherCDKeys.belongsTo(app.model.teachers, {
+			as: "teachers",
+			foreignKey: "userId",
+			targetKey: "userId",
+			constraints: false,
+		});
+	};
+
 	return model;
 };

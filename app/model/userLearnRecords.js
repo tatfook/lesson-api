@@ -1,11 +1,4 @@
 
-// const _ = require("lodash");
-// const consts = require("../core/consts.js");
-// const { 
-// 	LEARN_RECORD_STATE_START,
-// 	LEARN_RECORD_STATE_FINISH,
-// } = consts;
-
 module.exports = app => {
 	const {
 		BIGINT,

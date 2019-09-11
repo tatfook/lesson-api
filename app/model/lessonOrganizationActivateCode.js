@@ -1,4 +1,3 @@
-const lessonOrganizationClasses = require("./lessonOrganizationClass");
 
 module.exports = app => {
 	const {
@@ -75,24 +74,16 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-
-	// model.belongsTo(lessonOrganizationClasses(app), {
-	// 	as: "lessonOrganizationClasses",
-	// 	foreignKey: "classId",
-	// 	targetKey: "id",
-	// 	constraints: false,
-	// });
-
 	app.model.lessonOrganizationActivateCodes = model;
 
-	// app.model.lessonOrganizationClasses = app.model.lessonOrganizationClasses || lessonOrganizationClasses(app);
-
-	app.model.lessonOrganizationActivateCodes.belongsTo(app.model.lessonOrganizationClasses, {
-		as: "lessonOrganizationClasses",
-		foreignKey: "classId",
-		targetKey: "id",
-		constraints: false,
-	});
+	model.associate = () => {
+		app.model.lessonOrganizationActivateCodes.belongsTo(app.model.lessonOrganizationClasses, {
+			as: "lessonOrganizationClasses",
+			foreignKey: "classId",
+			targetKey: "id",
+			constraints: false,
+		});
+	};
 
 	return model;
 };

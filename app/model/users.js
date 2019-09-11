@@ -5,11 +5,6 @@ const {
 	USER_IDENTIFY_TEACHER
 } = consts;
 
-const tutors = require("./tutors");
-const teachers = require("./teachers");
-const lessonOrganizations = require("./lessonOrganization");
-const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
-
 module.exports = app => {
 	const {
 		BIGINT,
@@ -129,37 +124,36 @@ module.exports = app => {
 	};
 
 	app.model.users = model;
-	// app.model.tutors = app.model.tutors || tutors(app);
-	// app.model.teachers = app.model.teachers || teachers(app);
-	// app.model.lessonOrganizations = app.model.lessonOrganizations || lessonOrganizations(app);
-	// app.model.lessonOrganizationClassMembers = app.model.lessonOrganizationClassMembers || lessonOrganizationClassMembers(app);
 
-	app.model.users.hasOne(app.model.tutors, {
-		as: "student",
-		foreignKey: "userId",
-		constraints: false,
-	});
-	app.model.users.hasOne(app.model.tutors, {
-		as: "tutor",
-		foreignKey: "tutorId",
-		constraints: false,
-	});
-	app.model.users.hasOne(app.model.teachers, {
-		as: "teachers",
-		foreignKey: "userId",
-		constraints: false,
-	});
-	app.model.users.hasMany(app.model.lessonOrganizations, {
-		as: "lessonOrganizations",
-		foreignKey: "userId",
-		sourceKey: "id",
-		constraints: false,
-	});
-	app.model.users.hasOne(app.model.lessonOrganizationClassMembers, {
-		as: "lessonOrganizationClassMembers",
-		foreignKey: "memberId",
-		sourceKey: "id",
-		constraints: false,
-	});
+	model.associate = () => {
+		app.model.users.hasOne(app.model.tutors, {
+			as: "student",
+			foreignKey: "userId",
+			constraints: false,
+		});
+		app.model.users.hasOne(app.model.tutors, {
+			as: "tutor",
+			foreignKey: "tutorId",
+			constraints: false,
+		});
+		app.model.users.hasOne(app.model.teachers, {
+			as: "teachers",
+			foreignKey: "userId",
+			constraints: false,
+		});
+		app.model.users.hasMany(app.model.lessonOrganizations, {
+			as: "lessonOrganizations",
+			foreignKey: "userId",
+			sourceKey: "id",
+			constraints: false,
+		});
+		app.model.users.hasOne(app.model.lessonOrganizationClassMembers, {
+			as: "lessonOrganizationClassMembers",
+			foreignKey: "memberId",
+			sourceKey: "id",
+			constraints: false,
+		});
+	};
+
 	return model;
 };

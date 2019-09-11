@@ -1,8 +1,4 @@
 
-const lessonOrganizations = require("./lessonOrganization");
-const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
-const lessonOrganizationClasses = require("./lessonOrganizationClass");
-
 module.exports = app => {
 	const {
 		BIGINT,
@@ -63,51 +59,30 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	// model.belongsTo(lessonOrganizations(app), {
-	// 	as: "lessonOrganizations",
-	// 	foreignKey: "organizationId",
-	// 	targetKey: "id",
-	// 	constraints: false,
-	// });
-	// model.belongsTo(lessonOrganizationClassMembers(app), {
-	// 	as: "lessonOrganizationClassMembers",
-	// 	foreignKey: "classId",
-	// 	targetKey: "classId",
-	// 	constraints: false,
-	// });
-	// model.belongsTo(lessonOrganizationClasses(app), {
-	// 	as: "lessonOrganizationClasses",
-	// 	foreignKey: "classId",
-	// 	targetKey: "id",
-	// 	constraints: false,
-	// });
-
 	app.model.lessonOrganizationPackages = model;
 
-	// app.model.lessonOrganizations = app.model.lessonOrganizations || lessonOrganizations(app);
-	// app.model.lessonOrganizationClassMembers = app.model.lessonOrganizationClassMembers || lessonOrganizationClassMembers(app);
-	// app.model.lessonOrganizationClasses = app.model.lessonOrganizationClasses || lessonOrganizationClasses(app);
+	model.associate = () => {
+		app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizations, {
+			as: "lessonOrganizations",
+			foreignKey: "organizationId",
+			targetKey: "id",
+			constraints: false,
+		});
 
-	app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizations, {
-		as: "lessonOrganizations",
-		foreignKey: "organizationId",
-		targetKey: "id",
-		constraints: false,
-	});
+		app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClassMembers, {
+			as: "lessonOrganizationClassMembers",
+			foreignKey: "classId",
+			targetKey: "classId",
+			constraints: false,
+		});
 
-	app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClassMembers, {
-		as: "lessonOrganizationClassMembers",
-		foreignKey: "classId",
-		targetKey: "classId",
-		constraints: false,
-	});
-
-	app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClasses, {
-		as: "lessonOrganizationClasses",
-		foreignKey: "classId",
-		targetKey: "id",
-		constraints: false,
-	});
+		app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClasses, {
+			as: "lessonOrganizationClasses",
+			foreignKey: "classId",
+			targetKey: "id",
+			constraints: false,
+		});
+	};
 
 	return model;
 };

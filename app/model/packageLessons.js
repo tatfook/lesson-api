@@ -1,6 +1,5 @@
 
 const _ = require("lodash");
-const packages = require("./packages");
 
 module.exports = app => {
 	const {
@@ -71,20 +70,20 @@ module.exports = app => {
 
 	app.model.packageLessons = model;
 
-	// app.model.packages = app.model.packages || packages(app);
-	// app.model.lessons = app.model.lessons || lessons(app);
+	model.associate = () => {
+		app.model.packageLessons.belongsTo(app.model.packages, {
+			as: "packages",
+			foreignKey: "packageId",
+			targetKey: "id",
+			constraints: false,
+		});
+		app.model.packageLessons.belongsTo(app.model.lessons, {
+			as: "lessons",
+			foreignKey: "lessonId",
+			targetKey: "id",
+			constraints: false,
+		});
+	};
 
-	app.model.packageLessons.belongsTo(app.model.packages, {
-		as: "packages",
-		foreignKey: "packageId",
-		targetKey: "id",
-		constraints: false,
-	});
-	app.model.packageLessons.belongsTo(app.model.lessons, {
-		as: "lessons",
-		foreignKey: "lessonId",
-		targetKey: "id",
-		constraints: false,
-	});
 	return model;
 };
