@@ -1,12 +1,6 @@
 const _ = require("lodash");
 
 module.exports = app => {
-	// app.model.afterCreate((instance, options) => {
-	// console.log(instance,_modelOptions);
-	// instance = instance.get({plain:true});
-	// console.log(instance, options);
-	// console.log("--------");
-	// });
 
 	const models = { "packages": "Packages" };
 
@@ -28,7 +22,7 @@ module.exports = app => {
 		const cls = inst.constructor;
 		const tableName = cls.getTableName();
 		const modelName = models[tableName];
-		// console.log("------------", tableName, modelName);
+
 		if (!modelName) return;
 
 		inst = inst.get({ plain: true });

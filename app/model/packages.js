@@ -1,5 +1,5 @@
 const _ = require("lodash");
-
+const hooks = require("../core/sequelizeHooks");
 const {
 	PACKAGE_STATE_AUDIT_SUCCESS
 } = require("../core/consts.js");
@@ -182,6 +182,8 @@ module.exports = app => {
 	};
 
 	app.model.packages = model;
+
+	hooks(app);
 
 	return model;
 };
