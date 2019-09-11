@@ -1,4 +1,6 @@
 
+const Users = require("./users");
+
 module.exports = app => {
 	const {
 		BIGINT,
@@ -50,5 +52,20 @@ module.exports = app => {
 	};
 
 	app.model.tutors = model;
+	// app.model.users = app.model.users || Users(app);
+
+	app.model.tutors.belongsTo(app.model.users, {
+		as: "student",
+		foreignKey: "userId",
+		targetKey: "id",
+		constraints: false,
+	});
+	app.model.tutors.belongsTo(app.model.users, {
+		as: "tutor",
+		foreignKey: "tutorId",
+		targetKey: "id",
+		constraints: false,
+	});
+
 	return model;
 };

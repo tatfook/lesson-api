@@ -1,7 +1,7 @@
 
-// const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
-// const lessonOrganizationPackages = require("./lessonOrganizationPackage");
-// const lessonOrganizationActivateCodes = require("./lessonOrganizationActivateCode");
+const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
+const lessonOrganizationPackages = require("./lessonOrganizationPackage");
+const lessonOrganizationActivateCodes = require("./lessonOrganizationActivateCode");
 
 module.exports = app => {
 	const {
@@ -91,6 +91,31 @@ module.exports = app => {
 	// });
 
 	app.model.lessonOrganizationClasses = model;
+
+	// app.model.lessonOrganizationActivateCodes = app.model.lessonOrganizationActivateCodes || lessonOrganizationActivateCodes(app);
+	// app.model.lessonOrganizationPackages = app.model.lessonOrganizationPackages || lessonOrganizationPackages(app);
+	// app.model.lessonOrganizationClassMembers = app.model.lessonOrganizationClassMembers || lessonOrganizationClassMembers(app);
+
+	app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationActivateCodes, {
+		as: "lessonOrganizationActivateCodes",
+		foreignKey: "classId",
+		sourceKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationPackages, {
+		as: "lessonOrganizationPackages",
+		foreignKey: "classId",
+		sourceKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationClassMembers, {
+		as: "lessonOrganizationClassMembers",
+		foreignKey: "classId",
+		sourceKey: "id",
+		constraints: false,
+	});
 
 	return model;
 };

@@ -3,6 +3,7 @@ const hooks = require("../core/sequelizeHooks");
 const {
 	PACKAGE_STATE_AUDIT_SUCCESS
 } = require("../core/consts.js");
+const packageLessons = require("./packageLessons");
 
 module.exports = app => {
 	const {
@@ -182,6 +183,14 @@ module.exports = app => {
 	};
 
 	app.model.packages = model;
+	// app.model.packageLessons = app.model.packageLessons || packageLessons(app);
+
+	app.model.packages.hasMany(app.model.packageLessons, {
+		as: "packageLessons",
+		foreignKey: "packageId",
+		sourceKey: "id",
+		constraints: false,
+	});
 
 	hooks(app);
 

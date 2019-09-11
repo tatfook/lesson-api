@@ -1,7 +1,7 @@
 
-// const lessonOrganizations = require("./lessonOrganization");
-// const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
-// const lessonOrganizationClasses = require("./lessonOrganizationClass");
+const lessonOrganizations = require("./lessonOrganization");
+const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
+const lessonOrganizationClasses = require("./lessonOrganizationClass");
 
 module.exports = app => {
 	const {
@@ -83,6 +83,31 @@ module.exports = app => {
 	// });
 
 	app.model.lessonOrganizationPackages = model;
+
+	// app.model.lessonOrganizations = app.model.lessonOrganizations || lessonOrganizations(app);
+	// app.model.lessonOrganizationClassMembers = app.model.lessonOrganizationClassMembers || lessonOrganizationClassMembers(app);
+	// app.model.lessonOrganizationClasses = app.model.lessonOrganizationClasses || lessonOrganizationClasses(app);
+
+	app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizations, {
+		as: "lessonOrganizations",
+		foreignKey: "organizationId",
+		targetKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClassMembers, {
+		as: "lessonOrganizationClassMembers",
+		foreignKey: "classId",
+		targetKey: "classId",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClasses, {
+		as: "lessonOrganizationClasses",
+		foreignKey: "classId",
+		targetKey: "id",
+		constraints: false,
+	});
 
 	return model;
 };

@@ -1,7 +1,7 @@
 
-// const Users = require("./users");
-// const lessonOrganizationPackages = require("./lessonOrganizationPackage");
-// const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
+const Users = require("./users");
+const lessonOrganizationPackages = require("./lessonOrganizationPackage");
+const lessonOrganizationClassMembers = require("./lessonOrganizationClassMembers");
 
 module.exports = app => {
 	const {
@@ -160,29 +160,32 @@ module.exports = app => {
 		return list;
 	};
 
-
-	// model.belongsTo(Users(app), {
-	// 	as: "users",
-	// 	foreignKey: "userId",
-	// 	targetKey: "id",
-	// 	constraints: false,
-	// });
-
-	// model.hasMany(lessonOrganizationPackages(app), {
-	// 	as: "lessonOrganizationPackages",
-	// 	foreignKey: "organizationId",
-	// 	sourceKey: "id",
-	// 	constraints: false,
-	// });
-
-	// model.hasMany(lessonOrganizationClassMembers(app), {
-	// 	as: "lessonOrganizationClassMembers",
-	// 	foreignKey: "organizationId",
-	// 	sourceKey: "id",
-	// 	constraints: false,
-	// });
-
 	app.model.lessonOrganizations = model;
+
+	// app.model.users = app.model.users || Users(app);
+	// app.model.lessonOrganizationPackages = app.model.lessonOrganizationPackages || lessonOrganizationPackages(app);
+	// app.model.lessonOrganizationClassMembers = app.model.lessonOrganizationClassMembers || lessonOrganizationClassMembers(app);
+
+	app.model.lessonOrganizations.belongsTo(app.model.users, {
+		as: "users",
+		foreignKey: "userId",
+		targetKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizations.hasMany(app.model.lessonOrganizationPackages, {
+		as: "lessonOrganizationPackages",
+		foreignKey: "organizationId",
+		sourceKey: "id",
+		constraints: false,
+	});
+
+	app.model.lessonOrganizations.hasMany(app.model.lessonOrganizationClassMembers, {
+		as: "lessonOrganizationClassMembers",
+		foreignKey: "organizationId",
+		sourceKey: "id",
+		constraints: false,
+	});
 
 	return model;
 };

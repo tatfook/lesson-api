@@ -2,7 +2,7 @@
 /* 机构表单 */
 
 // const _ = require("lodash");
-// const lessonOrganizationFormSubmits = require("./lessonOrganizationFormSubmit");
+const lessonOrganizationFormSubmits = require("./lessonOrganizationFormSubmit");
 
 module.exports = app => {
 	const {
@@ -93,6 +93,14 @@ module.exports = app => {
 	// });
 
 	app.model.lessonOrganizationForms = model;
+	// app.model.lessonOrganizationFormSubmits = app.model.lessonOrganizationFormSubmits || lessonOrganizationFormSubmits(app);
+
+	app.model.lessonOrganizationForms.hasMany(app.model.lessonOrganizationFormSubmits, {
+		as: "lessonOrganizationFormSubmits",
+		foreignKey: "formId",
+		sourceKey: "id",
+		constraints: false,
+	});
 
 	return model;
 };
