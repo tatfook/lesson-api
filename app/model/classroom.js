@@ -255,8 +255,5 @@ module.exports = app => {
 		return count;
 	};
 
-
-	app.model.Classroom = model;
-
 	return model;
 };

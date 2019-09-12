@@ -74,8 +74,6 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	app.model.LessonOrganizationActivateCode = model;
-
 	model.associate = () => {
 		app.model.LessonOrganizationActivateCode.belongsTo(app.model.LessonOrganizationClass, {
 			as: "lessonOrganizationClasses",

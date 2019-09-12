@@ -80,8 +80,6 @@ module.exports = app => {
 		return true;
 	};
 
-	app.model.TeacherCDKey = model;
-
 	model.associate = () => {
 		app.model.TeacherCDKey.belongsTo(app.model.Teacher, {
 			as: "teachers",

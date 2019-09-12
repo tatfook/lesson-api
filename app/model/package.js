@@ -182,8 +182,6 @@ module.exports = app => {
 		await this.audit(obj.id, obj.userId, obj.state);
 	};
 
-	app.model.Package = model;
-
 	model.associate = () => {
 		app.model.Package.hasMany(app.model.PackageLesson, {
 			as: "packageLessons",

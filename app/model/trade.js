@@ -46,7 +46,6 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
-	app.model.trades = model;
 
 	return model;
 };

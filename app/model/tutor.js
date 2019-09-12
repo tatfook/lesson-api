@@ -49,8 +49,6 @@ module.exports = app => {
 		return await app.model.Tutor.findOne({ where: { userId }}).then(o => o && o.toJSON());
 	};
 
-	app.model.Tutor = model;
-
 	model.associate = () => {
 		app.model.Tutor.belongsTo(app.model.User, {
 			as: "student",

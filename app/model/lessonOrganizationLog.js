@@ -59,8 +59,6 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	app.model.LessonOrganizationLog = model;
-
 	model.classroomLog = async function ({ classroom = {}, lr, action = "create", username, handleId, organizationId }) {
 		const log = {
 			organizationId: organizationId || classroom.organizationId,

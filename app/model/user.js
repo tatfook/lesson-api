@@ -123,8 +123,6 @@ module.exports = app => {
 		}
 	};
 
-	app.model.User = model;
-
 	model.associate = () => {
 		app.model.User.hasOne(app.model.Tutor, {
 			as: "student",

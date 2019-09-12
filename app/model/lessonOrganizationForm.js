@@ -81,8 +81,6 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	app.model.LessonOrganizationForm = model;
-
 	model.associate = () => {
 		app.model.LessonOrganizationForm.hasMany(app.model.LessonOrganizationFormSubmit, {
 			as: "lessonOrganizationFormSubmits",

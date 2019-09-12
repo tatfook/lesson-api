@@ -156,8 +156,6 @@ module.exports = app => {
 		return list;
 	};
 
-	app.model.LessonOrganization = model;
-
 	model.associate = () => {
 		app.model.LessonOrganization.belongsTo(app.model.User, {
 			as: "users",

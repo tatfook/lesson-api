@@ -135,8 +135,6 @@ module.exports = app => {
 		return list;
 	};
 
-	app.model.Lesson = model;
-
 	model.associate = () => {
 		app.model.Lesson.hasMany(app.model.PackageLesson, {
 			as: "packageLessons",

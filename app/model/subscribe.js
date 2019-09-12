@@ -187,6 +187,5 @@ module.exports = app => {
 		}
 	};
 
-	app.model.Subscribe = model;
 	return model;
 };

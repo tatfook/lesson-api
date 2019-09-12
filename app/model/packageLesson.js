@@ -68,8 +68,6 @@ module.exports = app => {
 		return count;
 	};
 
-	app.model.PackageLesson = model;
-
 	model.associate = () => {
 		app.model.PackageLesson.belongsTo(app.model.Package, {
 			as: "packages",

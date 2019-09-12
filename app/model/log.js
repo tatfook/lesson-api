@@ -24,6 +24,5 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	app.model.Log = model;
 	return model;
 };

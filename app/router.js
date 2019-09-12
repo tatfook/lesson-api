@@ -12,7 +12,7 @@ module.exports = app => {
 	const email = controller.email;
 	router.resources(prefix + "emails", email);
 
-	const users = controller.users;
+	const users = controller.user;
 	router.get(prefix + "users/token", users.token);
 	router.get(prefix + "users/tokeninfo", users.tokeninfo);
 	router.post(prefix + "users/expense", users.expense);
@@ -29,7 +29,7 @@ module.exports = app => {
 	router.post(prefix + "users/tutorServiceCB", users.tutorServiceCB);
 	router.post(prefix + "users/allianceMemberCB", users.allianceMemberCB);
 
-	const packages = controller.packages;
+	const packages = controller.package;
 	router.get(prefix + "packages/teach", packages.teach);
 	router.get(prefix + "packages/hots", packages.hots);
 	router.get(prefix + "packages/search", packages.search);
@@ -44,7 +44,7 @@ module.exports = app => {
 	router.get(prefix + "packages/:id/isSubscribe", packages.isSubscribe);
 	router.post(prefix + "packages/:id/audit", packages.audit);
 
-	const lessons = controller.lessons;
+	const lessons = controller.lesson;
 	router.get(prefix + "lessons/detail", lessons.detailByUrl);
 	router.resources("lessons", prefix + "lessons", lessons);
 	router.post(prefix + "lessons/:id/skills", lessons.addSkill);
@@ -57,11 +57,11 @@ module.exports = app => {
 	router.get(prefix + "lessons/:id/contents", lessons.content);
 	router.get(prefix + "lessons/:id/detail", lessons.detail);
 
-	const packageLessons = controller.packageLessons;
+	const packageLessons = controller.packageLesson;
 	router.post(prefix + "packageLessons/search", packageLessons.search);
 	// router.resources(prefix + "packageLessons", packageLessons);
 
-	const classrooms = controller.classrooms;
+	const classrooms = controller.classroom;
 	router.get(prefix + "classrooms/getByKey", classrooms.getByKey);
 	router.get(prefix + "classrooms/current", classrooms.current);
 	router.get(prefix + "classrooms/valid", classrooms.valid);
@@ -73,33 +73,33 @@ module.exports = app => {
 	router.post(prefix + "classrooms/:id/learnRecords", classrooms.createLearnRecords);
 	router.put(prefix + "classrooms/:id/dismiss", classrooms.dismiss);
 
-	const learnRecords = controller.learnRecords;
+	const learnRecords = controller.learnRecord;
 	router.get(prefix + "learnRecords/reward", learnRecords.getReward);
 	router.post(prefix + "learnRecords/:id/reward", learnRecords.createReward);
 	router.resources(prefix + "learnRecords", learnRecords);
 
-	const subjects = controller.subjects;
+	const subjects = controller.subject;
 	router.resources("subjects", prefix + "subjects", subjects);
 	// router.resources("subjects", prefix + "admins/subjects", subjects);
-	const skills = controller.skills;
+	const skills = controller.skill;
 	router.resources("skills", prefix + "skills", skills);
 	// router.resources("skills", prefix + "admins/skills", skills);
 
-	const teacherCDKeys = controller.teacherCDKeys;
+	const teacherCDKeys = controller.teacherCDKey;
 	router.post(prefix + "admins/teacherCDKeys/generate", teacherCDKeys.generate);
 	router.resources("teacherCDKeys", prefix + "admins/teacherCDKeys", teacherCDKeys);
 
-	const admins = controller.admins;
+	const admins = controller.admin;
 	router.post(`${prefix}admins/query`, admins.query);
 	router.post(`${prefix}admins/:resources/query`, admins.resourcesQuery);
 	router.resources("admins", prefix + "admins/:resources", admins);
 	router.post("admins", prefix + "admins/:resources/search", admins.search);
 
-	const pays = controller.pays;
+	const pays = controller.pay;
 	router.post("pays", prefix + "pays/callback", pays.callback);
 	router.resources(prefix + "pays", pays);
 
-	const trades = controller.trades;
+	const trades = controller.trade;
 	router.resources(prefix + "trades", trades);
 
 	// -----------------------------add from coreservice--------------------------------------------------------
