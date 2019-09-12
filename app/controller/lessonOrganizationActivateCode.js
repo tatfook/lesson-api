@@ -15,7 +15,7 @@ const LessonOrganizationActivateCode = class extends Controller {
 	}
 
 	async create() {
-		let { userId, organizationId, roleId } = this.authenticated();
+		let { userId, organizationId, roleId, username } = this.authenticated();
 		const params = this.validate({ count: "number", classId: "number" });
 
 		if (params.organizationId && params.organizationId != organizationId) {
@@ -24,8 +24,11 @@ const LessonOrganizationActivateCode = class extends Controller {
 		}
 
 		const classId = params.classId;
-		const names = params.name || [];
+		const names = params.names || [];
 		const count = params.count || names.length || 1;
+
+		const cls = await this.model.LessonOrganizationClass.findOne({ where: { id: classId } }).then(o => o && o.toJSON());
+		if (!cls) return this.throw(400);
 
 		if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) return this.throw(411);
 
@@ -41,7 +44,11 @@ const LessonOrganizationActivateCode = class extends Controller {
 				extra: names.length > i ? { name: names[i] } : {},
 			});
 		}
+
 		const list = await this.model.LessonOrganizationActivateCode.bulkCreate(datas);
+
+		this.model.LessonOrganizationLog.classLog({ organizationId, cls, action: "activateCode", count, handleId: userId, username });
+
 		return this.success(list);
 	}
 
@@ -75,7 +82,7 @@ const LessonOrganizationActivateCode = class extends Controller {
 
 	async activate() {
 		const { userId, username } = this.authenticated();
-		const { key, realname, organizationId } = this.validate({ key: "string", organizationId: "number" });
+		let { key, realname, organizationId } = this.validate({ key: "string", organizationId: "number" });
 
 		const curtime = new Date().getTime();
 		const data = await this.model.LessonOrganizationActivateCode.findOne({
@@ -83,14 +90,15 @@ const LessonOrganizationActivateCode = class extends Controller {
 		}).then(o => o && o.toJSON());
 		if (!data) return this.fail({ code: 2, message: "无效激活码" });
 
-		if (data.organizationId != organizationId) return this.fail({ code: 7, message: "激活码不属于这个机构" });
+		if (organizationId && data.organizationId != organizationId) return this.fail({ code: 7, message: "激活码不属于这个机构" });
+		organizationId = data.organizationId;
 
 		const cls = await this.model.LessonOrganizationClass.findOne({
 			where: { id: data.classId }
 		}).then(o => o && o.toJSON());
 
 		if (!cls) return this.fail({ code: 2, message: "无效激活码" });
-		const begin = new Date(cls.begin).getTime();
+		// const begin = new Date(cls.begin).getTime();
 		const end = new Date(cls.end).getTime();
 		if (curtime > end) return this.fail({ code: 3, message: "班级结束" });
 		//if (curtime < begin) return this.fail({code:4, message:"班级未开始"});
@@ -113,15 +121,19 @@ const LessonOrganizationActivateCode = class extends Controller {
 			if (organ.count <= usedCount) return this.fail({ code: 5, message: "人数已达上限" });
 		}
 
-		const m = _.find(ms, o => o.classId == data.classId);
+		let m = _.find(ms, o => o.classId == data.classId);
 		const roleId = m ? (m.roleId | CLASS_MEMBER_ROLE_STUDENT) : CLASS_MEMBER_ROLE_STUDENT;
-		const member = await this.model.LessonOrganizationClassMember.upsert({
-			organizationId: data.organizationId,
-			classId: data.classId,
-			memberId: userId,
-			roleId,
-			realname,
-		});
+		if (m) {
+			await this.model.LessonOrganizationClassMember.update({ roleId, realname }, { where: { id: m.id } });
+		} else {
+			m = await this.model.LessonOrganizationClassMember.create({
+				organizationId: data.organizationId,
+				classId: data.classId,
+				memberId: userId,
+				roleId,
+				realname,
+			}).then(o => o.toJSON());
+		}
 
 		await this.model.LessonOrganizationClassMember.update({ realname }, { where: { organizationId, memberId: userId } });
 
@@ -129,7 +141,7 @@ const LessonOrganizationActivateCode = class extends Controller {
 			activateTime: new Date(), activateUserId: userId, state: 1, username, realname
 		}, { where: { key } });
 
-		return this.success(member);
+		return this.success({ ...m, roleId, realname });
 	}
 }
 

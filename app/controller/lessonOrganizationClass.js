@@ -104,7 +104,7 @@ const LessonOrganizationClass = class extends Controller {
 	}
 
 	async create() {
-		const { roleId, organizationId } = this.authenticated();
+		const { roleId, organizationId, userId, username } = this.authenticated();
 		const params = this.validate({ name: "string" });
 		if (!organizationId) return this.throw(400);
 		if (roleId & CLASS_MEMBER_ROLE_ADMIN == 0) return this.throw(411, "无权限");
@@ -127,12 +127,14 @@ const LessonOrganizationClass = class extends Controller {
 
 		await this.model.LessonOrganizationPackage.bulkCreate(datas);
 
+		this.model.LessonOrganizationLog.classLog({ organizationId, cls, params, action: "createClass", handleId: userId, username });
+
 		return this.success(cls);
 	}
 
 	// 禁止更新
 	async update() {
-		const { roleId, organizationId } = this.authenticated();
+		const { roleId, organizationId, userId, username } = this.authenticated();
 		const params = this.validate({ id: "number" });
 		if (!organizationId) return this.throw(400);
 		if (roleId & CLASS_MEMBER_ROLE_ADMIN == 0) return this.throw(411, "无权限");
@@ -168,7 +170,7 @@ const LessonOrganizationClass = class extends Controller {
 			await this.model.LessonOrganizationPackage.destroy({ where: { classId: params.id, organizationId } });
 			await this.model.LessonOrganizationPackage.bulkCreate(datas);
 		}
-
+		this.model.LessonOrganizationLog.classLog({ organizationId, cls, params, action: "updateClass", handleId: userId, username });
 		return this.success('ok');
 	}
 
@@ -183,6 +185,34 @@ const LessonOrganizationClass = class extends Controller {
 		await this.model.LessonOrganizationPackage.destroy({ where: { classId: id, organizationId } });
 
 		return this.success('ok');
+	}
+
+	// 班级最近项目
+	async latestProject() {
+		const { organizationId } = this.authenticated();
+		const { id } = this.validate({ id: "number" });
+
+		const members = await this.model.lessonOrganizationClassMembers.findAll({
+			include: [
+				{
+					as: "users",
+					model: this.model.users,
+					attributes: ["id", "username", "nickname", "portrait"],
+				}
+			],
+			where: { organizationId, classId: id },
+		}).then(list => list.map(o => o.toJSON()));
+		if (members.length == 0) return this.success([]);
+		const userIds = members.map(o => o.memberId);
+		const projects = await this.model.projects.findAll({
+			order: [["updatedAt", "desc"]],
+			userId: { "$in": userIds },
+			type: 0, // 只取 paracraft 
+		}).then(list => list.map(o => o.toJSON()));
+
+		_.each(members, m => m.projects = projects.filter(o => o.userId == m.memberId).slice(0, 2));
+
+		return this.success(members);
 	}
 }
 

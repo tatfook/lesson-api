@@ -122,6 +122,7 @@ module.exports = app => {
 	router.get(`${prefix}lessonOrganizationClasses`, lessonOrganizationClass.index);
 	router.get(`${prefix}lessonOrganizationClasses/history`, lessonOrganizationClass.history);
 	router.post(`${prefix}lessonOrganizationClasses`, lessonOrganizationClass.create);
+	router.get(`${prefix}lessonOrganizationClasses/:id/project`, lessonOrganizationClass.latestProject);
 	router.put(`${prefix}lessonOrganizationClasses/:id`, lessonOrganizationClass.update);
 	router.delete(`${prefix}lessonOrganizationClasses/:id`, lessonOrganizationClass.destroy);
 
@@ -154,6 +155,7 @@ module.exports = app => {
 
 	// organization 
 	const organization = controller.organizationIndex;
+	router.post(`${prefix}organizations/log`, organization.log);
 	router.post(`${prefix}organizations/changepwd`, organization.changepwd);
 	// -----------------------------add from coreservice--------------------------------------------------------
 };

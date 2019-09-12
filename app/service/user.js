@@ -22,6 +22,7 @@ class User extends Service {
 
 		if (!user) return;
 
+		user.isRealname = user.realname ? true : false;
 		user.cellphone = undefined;
 		user.email = undefined;
 		user.password = undefined;

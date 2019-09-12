@@ -8,6 +8,7 @@ describe("机构", () => {
 		await app.model.LessonOrganizationClassMember.sync({ force: true });
 		await app.model.LessonOrganization.sync({ force: true });
 		await app.model.LessonOrganizationClass.sync({ force: true });
+		await app.model.LessonOrganizationPackage.sync({ force: true });
 	});
 
 	it("001 机构", async () => {
@@ -55,7 +56,8 @@ describe("机构", () => {
 		const ret = await app.httpRequest().post("/organizations/changepwd")
 			.send({
 				memberId: user.id,
-				password: "456789"
+				password: "456789",
+				classId: cls.id
 			})
 			.set("Authorization", `Bearer ${adminToken}`).expect(200);
 

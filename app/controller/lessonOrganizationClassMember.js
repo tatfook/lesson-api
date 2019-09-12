@@ -46,7 +46,8 @@ const LessonOrganizationClassMember = class extends Controller {
 				organizationId,
 				memberId: {
 					[this.model.Op.in]: memberIds,
-				}
+				},
+				classId: classId ? classId : { "$gte": 0 }
 			}
 		}).then(list => list.map(o => o.toJSON()));
 		//}).then(list => list.map(o => o.toJSON()).filter(o => o.classId == 0 || o.lessonOrganizationClasses));
@@ -102,7 +103,8 @@ const LessonOrganizationClassMember = class extends Controller {
 			],
 			where: {
 				organizationId,
-				memberId: { $in: memberIds }
+				memberId: { $in: memberIds },
+				classId: classId ? classId : { "$gt": 0 },
 			},
 		}).then(list => list.map(o => o.toJSON()));
 
@@ -160,7 +162,7 @@ const LessonOrganizationClassMember = class extends Controller {
 	}
 
 	async create() {
-		let { organizationId, roleId, userId } = this.authenticated();
+		let { organizationId, roleId, userId, username } = this.authenticated();
 		const params = this.validate();
 
 		if (params.organizationId && params.organizationId != organizationId) {
@@ -192,10 +194,18 @@ const LessonOrganizationClassMember = class extends Controller {
 		// const curtime = new Date();
 		let oldmembers = await this.model.LessonOrganizationClassMember.findAll({
 			order: [["id", "desc"]],
-			include: [{ as: "lessonOrganizationClasses", model: this.model.LessonOrganizationClass }],
+			include: [{ as: "lessonOrganizationClasses", model: this.model.LessonOrganizationClass, required: false }],
 			where: { organizationId, memberId: params.memberId }
 		}).then(list => list.map(o => o.toJSON()));
-		oldmembers = _.filter(oldmembers, o => o.classId == 0 || new Date(o.lessonOrganizationClasses.end).getTime() > new Date().getTime());
+
+		oldmembers = _.filter(oldmembers, o => {
+			if (o.roleId == CLASS_MEMBER_ROLE_STUDENT
+				&& new Date(o.lessonOrganizationClasses.end).getTime() < new Date().getTime()
+			) return false;
+
+			return true;
+		});
+
 		const ids = _.map(oldmembers, o => o.id);
 
 		const organ = await this.model.LessonOrganization.findOne({ where: { id: organizationId } }).then(o => o.toJSON());
@@ -207,6 +217,8 @@ const LessonOrganizationClassMember = class extends Controller {
 			const usedCount = await this.model.LessonOrganization.getUsedCount(organizationId);
 			if (usedCount >= organCount && classIds.length > 0) return this.fail(1, "学生人数已达上限");
 		}
+
+		await this.model.LessonOrganizationLog.studentLog({ ...params, handleId: userId, username, classIds, oldmembers, organizationId });
 
 		// 合并其它身份
 		const datas = _.map(classIds, classId => ({
@@ -229,8 +241,12 @@ const LessonOrganizationClassMember = class extends Controller {
 		await this.model.LessonOrganizationClassMember.destroy({
 			where: { organizationId, memberId: params.memberId, roleId: 0 }
 		});
+
 		if (datas.length == 0) return this.success("ok");
+
 		const members = await this.model.LessonOrganizationClassMember.bulkCreate(datas);
+
+		if (params.realname) await this.model.LessonOrganizationClassMember.update({ realname: params.realname }, { where: { id: { "$in": ids } } });
 
 		if (params.realname && classIds.length) {
 			await this.model.LessonOrganizationActivateCode.update({ realname: params.realname }, {
@@ -251,6 +267,7 @@ const LessonOrganizationClassMember = class extends Controller {
 		const { id } = this.validate({ id: "number" });
 
 		const member = await this.model.LessonOrganizationClassMember.findOne({ where: { organizationId, id } }).then(o => o && o.toJSON());
+		if (!member) return this.success('ok');
 		if (member.roleId >= roleId) return this.throw(411);
 
 		if (roleId < CLASS_MEMBER_ROLE_ADMIN) {
@@ -260,7 +277,11 @@ const LessonOrganizationClassMember = class extends Controller {
 			if (organ.privilege && 2 == 0) return this.throw(411, "无权限");
 		}
 
-		await this.model.LessonOrganizationClassMember.destroy({ where: { id } });
+		if (!params.roleId || params.roleId == member.roleId) {
+			await this.model.LessonOrganizationClassMember.destroy({ where: { id } });
+		} else {
+			await this.model.LessonOrganizationClassMember.update({ roleId: member.roleId & (~params.roleId) }, { where: { id } });
+		}
 
 		return this.success("OK");
 	}

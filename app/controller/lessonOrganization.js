@@ -71,7 +71,7 @@ const LessonOrganization = class extends Controller {
 		}).then(list => list.map(o => o.toJSON())
 			.filter(o => ~~o.classId === 0 || o.lessonOrganizationClasses));
 
-		if (members.length === 0) return this.throw(400, "成员不存在");
+		// if (members.length === 0) return this.throw(400, "成员不存在");// 成员不存在允许登录
 
 		let roleId = 0;
 		_.each(members, o => { roleId = roleId | o.roleId; });
@@ -194,13 +194,26 @@ const LessonOrganization = class extends Controller {
 		const params = this.validate({ id: "number" });
 		const id = params.id;
 
+		const organ = await this.model.LessonOrganization.findOne({ where: { id }});
+		if (!organ) return this.throw(400);
+
 		delete params.userId;
 		if (this.ctx.state.admin && this.ctx.state.admin.userId) {
 			await this.model.LessonOrganization.update(params, { where: { id }});
 		} else {
-			const { roleId = 0 } = this.authenticated();
+			const { userId, roleId = 0, username } = this.authenticated();
 			if (roleId < CLASS_MEMBER_ROLE_ADMIN) return this.throw(411, "无效token");
 			await this.model.LessonOrganization.update(params, { where: { id }});
+
+			if (params.privilege && organ.privilege !== params.privilege) {
+				await this.model.LessonOrganizationLog.create({
+					organizationId: id,
+					type: "系统",
+					description: params.privilege === 0 ? "不允许任课教师管理学生信息" : "允许任课教师管理学生信息",
+					handleId: userId,
+					username,
+				});
+			}
 		}
 
 		if (params.packages) {
