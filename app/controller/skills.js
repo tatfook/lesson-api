@@ -8,7 +8,7 @@ class SkillsController extends Controller {
 		const { ctx } = this;
 		const query = ctx.query || {};
 
-		const list = await ctx.model.Skills.findAll({ ...this.queryOptions, where: query });
+		const list = await ctx.model.Skill.findAll({ ...this.queryOptions, where: query });
 
 		return this.success(list);
 	}
@@ -22,7 +22,7 @@ class SkillsController extends Controller {
 			skillName: "string",
 		}, params);
 
-		const result = await ctx.model.Skills.create(params);
+		const result = await ctx.model.Skill.create(params);
 
 		return this.success(result);
 	}
@@ -35,7 +35,7 @@ class SkillsController extends Controller {
 
 		const params = ctx.request.body;
 
-		const result = await ctx.model.Skills.update(params, { where: { id } });
+		const result = await ctx.model.Skill.update(params, { where: { id } });
 
 		return this.success(result);
 	}
@@ -46,7 +46,7 @@ class SkillsController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
-		const result = await ctx.model.Skills.destroy({
+		const result = await ctx.model.Skill.destroy({
 			where: { id },
 		});
 

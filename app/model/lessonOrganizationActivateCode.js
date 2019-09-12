@@ -74,10 +74,10 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	app.model.lessonOrganizationActivateCodes = model;
+	app.model.LessonOrganizationActivateCode = model;
 
 	model.associate = () => {
-		app.model.lessonOrganizationActivateCodes.belongsTo(app.model.lessonOrganizationClasses, {
+		app.model.LessonOrganizationActivateCode.belongsTo(app.model.LessonOrganizationClass, {
 			as: "lessonOrganizationClasses",
 			foreignKey: "classId",
 			targetKey: "id",

@@ -5,6 +5,9 @@ const { app, mock, assert } = require("egg-mock/bootstrap");
 describe("机构学生", () => {
 	before(async () => {
 		await app.keepworkModel.Users.sync({ force: true });
+		await app.model.LessonOrganization.sync({ force: true });
+		await app.model.LessonOrganizationClass.sync({ force: true });
+		await app.model.LessonOrganizationClassMember.sync({ force: true });
 	});
 
 	it("001 机构学生添加", async () => {
@@ -14,19 +17,19 @@ describe("机构学生", () => {
 		let user2 = await app.keepworkModel.Users.create({ username: "user005", password: md5("123456") });
 		user2 = user2.get();
 		// 创建机构
-		const organ = await app.model.lessonOrganizations.create({ name: "org0000", count: 1 }).then(o => o.toJSON());
+		const organ = await app.model.LessonOrganization.create({ name: "org0000", count: 1 }).then(o => o.toJSON());
 
 		// 创建班级
-		let cls = await app.model.lessonOrganizationClasses.create({
+		let cls = await app.model.LessonOrganizationClass.create({
 			name: "clss000", organizationId: organ.id, begin: new Date(), end: new Date().getTime() + 1000 * 60 * 60 * 24
 		}).then(o => o.toJSON());
 
-		let cls2 = await app.model.lessonOrganizationClasses.create({
+		let cls2 = await app.model.LessonOrganizationClass.create({
 			name: "clss001", organizationId: organ.id, begin: new Date(), end: new Date().getTime() + 1000 * 60 * 60 * 24
 		}).then(o => o.toJSON());
 
 		// 添加为管理员
-		await app.model.lessonOrganizationClassMembers.create({
+		await app.model.LessonOrganizationClassMember.create({
 			organizationId: organ.id, memberId: user.id, roleId: 64, classId: 0
 		});
 
@@ -75,7 +78,7 @@ describe("机构学生", () => {
 
 		let user3 = app.keepworkModel.Users.create({ username: "jacky", password: md5("123456") });
 		user3 = user3.get();
-		await app.model.lessonOrganizationClassMembers.create({
+		await app.model.LessonOrganizationClassMember.create({
 			organizationId: organ.id, classId: cls2.id, roleId: 2, memberId: user3.id
 		});
 

@@ -10,7 +10,7 @@ class TeacherCDKeysController extends Controller {
 		const { ctx } = this;
 		const query = ctx.query;
 
-		const list = await ctx.model.TeacherCDKeys.findAndCount({ ...this.queryOptions, where: query });
+		const list = await ctx.model.TeacherCDKey.findAndCount({ ...this.queryOptions, where: query });
 
 		return this.success(list);
 	}
@@ -25,7 +25,7 @@ class TeacherCDKeysController extends Controller {
 
 		for (let i = 0; i < count; i++) {
 			let key = uuidv1().replace(/\-/g, "");
-			let data = await ctx.model.TeacherCDKeys.create({ key });
+			let data = await ctx.model.TeacherCDKey.create({ key });
 			list.push(data);
 		}
 
@@ -41,7 +41,7 @@ class TeacherCDKeysController extends Controller {
 
 		delete params.key;
 		delete params.teacherId;
-		const result = await ctx.model.TeacherCDKeys.update(params, { where: { id } });
+		const result = await ctx.model.TeacherCDKey.update(params, { where: { id } });
 
 		return this.success(result);
 	}
@@ -52,7 +52,7 @@ class TeacherCDKeysController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
-		const result = await ctx.model.TeacherCDKeys.destroy({ where: { id } });
+		const result = await ctx.model.TeacherCDKey.destroy({ where: { id } });
 
 		return this.success(result);
 	}

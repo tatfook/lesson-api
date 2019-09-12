@@ -59,24 +59,24 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	app.model.lessonOrganizationPackages = model;
+	app.model.LessonOrganizationPackage = model;
 
 	model.associate = () => {
-		app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizations, {
+		app.model.LessonOrganizationPackage.belongsTo(app.model.LessonOrganization, {
 			as: "lessonOrganizations",
 			foreignKey: "organizationId",
 			targetKey: "id",
 			constraints: false,
 		});
 
-		app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClassMembers, {
+		app.model.LessonOrganizationPackage.belongsTo(app.model.LessonOrganizationClassMember, {
 			as: "lessonOrganizationClassMembers",
 			foreignKey: "classId",
 			targetKey: "classId",
 			constraints: false,
 		});
 
-		app.model.lessonOrganizationPackages.belongsTo(app.model.lessonOrganizationClasses, {
+		app.model.LessonOrganizationPackage.belongsTo(app.model.LessonOrganizationClass, {
 			as: "lessonOrganizationClasses",
 			foreignKey: "classId",
 			targetKey: "id",

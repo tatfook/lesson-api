@@ -21,14 +21,14 @@ class ClassroomsController extends Controller {
 
 		query.userId = userId;
 
-		const data = await ctx.model.Classrooms.findAndCount({ where: query });
+		const data = await ctx.model.Classroom.findAndCount({ where: query });
 		const rows = data.rows;
 		const packageIds = [];
 		_.each(rows, (o, i) => {
 			rows[i] = o.toJSON();
 			packageIds.push(rows[i].packageId);
 		});
-		const lessonCount = await ctx.model.PackageLessons.getLessonCountByPackageIds(packageIds);
+		const lessonCount = await ctx.model.PackageLesson.getLessonCountByPackageIds(packageIds);
 		_.each(rows, (o, i) => { o.lessonCount = lessonCount[o.packageId]; });
 
 		return this.success(data);
@@ -39,7 +39,7 @@ class ClassroomsController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
-		const data = await ctx.model.Classrooms.findOne({ where: { id }});
+		const data = await ctx.model.Classroom.findOne({ where: { id }});
 
 		return this.success(data);
 	}
@@ -57,7 +57,7 @@ class ClassroomsController extends Controller {
 		// const isTeacher = await this.model.teachers.isAllowTeach(userId);
 		// if (!isTeacher) return this.throw(400, "无权限");
 
-		const packageLesson = await ctx.model.PackageLessons.findOne({
+		const packageLesson = await ctx.model.PackageLesson.findOne({
 			where: {
 				packageId: params.packageId,
 				lessonId: params.lessonId,
@@ -65,8 +65,8 @@ class ClassroomsController extends Controller {
 		});
 		if (!packageLesson) ctx.throw(400);
 
-		const _package = await ctx.model.Packages.getById(params.packageId);
-		const lesson = await ctx.model.Lessons.getById(params.lessonId);
+		const _package = await ctx.model.Package.getById(params.packageId);
+		const lesson = await ctx.model.Lesson.getById(params.lessonId);
 
 		if (!_package || !lesson) ctx.throw(400, "args error");
 
@@ -79,9 +79,9 @@ class ClassroomsController extends Controller {
 		params.extra.coverUrl = (lesson.extra || {}).coverUrl;
 		params.extra.lessonNo = packageLesson.extra.lessonNo;
 
-		const data = await ctx.model.Classrooms.createClassroom(params);
+		const data = await ctx.model.Classroom.createClassroom(params);
 
-		this.app.model.lessonOrganizationLogs.classroomLog({ classroom: data, action: "create", handleId: userId, username, organizationId });
+		this.app.model.LessonOrganizationLog.classroomLog({ classroom: data, action: "create", handleId: userId, username, organizationId });
 
 		return this.success(data);
 	}
@@ -96,7 +96,7 @@ class ClassroomsController extends Controller {
 		const userId = this.getUser().userId;
 		params.userId = userId;
 
-		const data = await ctx.model.Classrooms.update(params, { where: { id, userId }});
+		const data = await ctx.model.Classroom.update(params, { where: { id, userId }});
 
 		return this.success(data);
 	}
@@ -104,7 +104,7 @@ class ClassroomsController extends Controller {
 	async valid() {
 		const { key } = this.validate({ key: "string" });
 
-		let data = await this.model.Classrooms.findOne({ where: { key }});
+		let data = await this.model.Classroom.findOne({ where: { key }});
 		if (!data) return this.success(false);
 		data = data.get({ plain: true });
 
@@ -113,7 +113,7 @@ class ClassroomsController extends Controller {
 
 	async getByKey() {
 		const { key } = this.validate({ key: "string" });
-		const classroom = await this.model.Classrooms.findOne({ where: { key }}).then(o => o && o.toJSON());
+		const classroom = await this.model.Classroom.findOne({ where: { key }}).then(o => o && o.toJSON());
 		if (!classroom) return this.fail(1);
 
 		return this.success(classroom);
@@ -124,11 +124,11 @@ class ClassroomsController extends Controller {
 		const params = this.validate({ key: "string" });
 		// const {userId, organizationId} = this.enauthenticated();
 		const { userId = 0, organizationId, username } = this.getUser();
-		const classroom = await this.model.Classrooms.findOne({ where: { key: params.key }}).then(o => o && o.toJSON());
+		const classroom = await this.model.Classroom.findOne({ where: { key: params.key }}).then(o => o && o.toJSON());
 
 		if (!classroom) return this.fail(1);
 		if (classroom.classId && userId) {
-			const member = await this.app.model.lessonOrganizationClassMembers.findOne({
+			const member = await this.app.model.LessonOrganizationClassMember.findOne({
 				where: { classId: classroom.classId, memberId: userId }
 			}).then(o => o && o.toJSON());
 			if (!member) return this.throw(400, "不是该班级学生");
@@ -139,18 +139,18 @@ class ClassroomsController extends Controller {
 
 		// const userId = this.getUser().userId || 0;
 
-		const data = await ctx.model.Classrooms.join(userId, params.key, params.username);
+		const data = await ctx.model.Classroom.join(userId, params.key, params.username);
 		if (!data) return this.fail(-1);
 		// if (!userId) data.token = this.app.util.jwt_encode({userId:0, username:"匿名用户"}, this.app.config.self.secret, 3600 * 24);
 
-		this.app.model.lessonOrganizationLogs.classroomLog({ classroom, action: "join", handleId: userId, username, organizationId });
+		this.app.model.LessonOrganizationLog.classroomLog({ classroom, action: "join", handleId: userId, username, organizationId });
 		return this.success(data);
 	}
 
 	async quit() {
 		const { userId, username } = this.enauthenticated();
 
-		await this.model.Classrooms.quit(userId, username);
+		await this.model.Classroom.quit(userId, username);
 
 		return this.success("OK");
 	}
@@ -161,12 +161,12 @@ class ClassroomsController extends Controller {
 		this.enauthenticated();
 		const userId = this.getUser().userId;
 
-		const user = await ctx.model.Users.getById(userId);
+		const user = await ctx.model.User.getById(userId);
 
 		const classroomId = user.extra.classroomId;
 		if (!classroomId) ctx.throw(404, "not found");
 
-		let classroom = await ctx.model.Classrooms.findOne({ where: { id: classroomId }});
+		let classroom = await ctx.model.Classroom.findOne({ where: { id: classroomId }});
 		if (!classroom) ctx.throw(404, "not found");
 
 		classroom = classroom.get({ plain: true });
@@ -177,7 +177,7 @@ class ClassroomsController extends Controller {
 			if (!cls) ctx.throw(400, "班级失效");
 		}
 
-		const learnRecord = await ctx.model.LearnRecords.findOne({ where: { classroomId: classroom.id, userId }});
+		const learnRecord = await ctx.model.LearnRecord.findOne({ where: { classroomId: classroom.id, userId }});
 		if (learnRecord) {
 			classroom.learnRecordId = learnRecord.get({ plain: true }).id;
 		}
@@ -192,7 +192,7 @@ class ClassroomsController extends Controller {
 		this.enauthenticated();
 		// const userId = this.getUser().userId;
 
-		const list = await ctx.model.LearnRecords.findAll({ where: { classroomId: id }});
+		const list = await ctx.model.LearnRecord.findAll({ where: { classroomId: id }});
 
 		return this.success(list);
 	}
@@ -207,14 +207,14 @@ class ClassroomsController extends Controller {
 		await this.ensureTeacher();
 		const userId = this.getUser().userId;
 
-		const classroom = await ctx.model.Classrooms.getById(id, userId);
+		const classroom = await ctx.model.Classroom.getById(id, userId);
 		if (!classroom) ctx.throw(400, "args error");
 
 		params.classroomId = id;
 		params.packageId = classroom.packageId;
 		params.lessonId = classroom.lessonId;
 		if (!params.userId) ctx.throw(400, "args error");
-		const lr = await ctx.model.LearnRecords.createLearnRecord(params);
+		const lr = await ctx.model.LearnRecord.createLearnRecord(params);
 
 		return this.success(lr);
 	}
@@ -229,7 +229,7 @@ class ClassroomsController extends Controller {
 		await this.ensureTeacher();
 		const userId = this.getUser().userId;
 
-		const classroom = await ctx.model.Classrooms.getById(id, userId);
+		const classroom = await ctx.model.Classroom.getById(id, userId);
 		if (!classroom) ctx.throw(400, "args error");
 
 		const learnRecords = _.isArray(params) ? params : [params];
@@ -238,7 +238,7 @@ class ClassroomsController extends Controller {
 			if (!record.id) continue;
 			if (!record.userId) delete record.userId;
 			record.classroomId = id;
-			await ctx.model.LearnRecords.updateLearnRecord(record);
+			await ctx.model.LearnRecord.updateLearnRecord(record);
 		}
 
 		return this.success("OK");
@@ -252,7 +252,7 @@ class ClassroomsController extends Controller {
 		if (!id) ctx.throw(400, "id invalid");
 		// const params = ctx.request.body;
 
-		const result = await ctx.model.Classrooms.dismiss(userId, id, username);
+		const result = await ctx.model.Classroom.dismiss(userId, id, username);
 		return this.success(result);
 	}
 }

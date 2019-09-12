@@ -4,21 +4,21 @@ const md5 = require("blueimp-md5");
 
 describe("test/controller/lessons.test.js", () => {
 	before(async () => {
-		const lessons = app.model.Lessons;
-		const subjects = app.model.Subjects;
-		const skills = app.model.Skills;
+		const lessons = app.model.Lesson;
+		const subjects = app.model.Subject;
+		const skills = app.model.Skill;
 		await lessons.truncate();
 		await subjects.truncate();
 		await skills.truncate();
-		await app.model.LessonSkills.truncate();
-		await app.model.LearnRecords.truncate();
-		await app.model.UserLearnRecords.truncate();
-		await app.model.Packages.truncate();
-		await app.model.Subscribes.truncate();
-		await app.model.LessonRewards.truncate();
-		await app.model.PackageLessons.truncate();
-		await app.model.LessonContents.truncate();
-		await app.model.Users.truncate();
+		await app.model.LessonSkill.truncate();
+		await app.model.LearnRecord.truncate();
+		await app.model.UserLearnRecord.truncate();
+		await app.model.Package.truncate();
+		await app.model.Subscribe.truncate();
+		await app.model.LessonReward.truncate();
+		await app.model.PackageLesson.truncate();
+		await app.model.LessonContent.truncate();
+		await app.model.User.truncate();
 
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
@@ -137,8 +137,8 @@ describe("test/controller/lessons.test.js", () => {
 		await app.httpRequest().delete(url + "?skillId=1")
 			.set("Authorization", `Bearer ${token}`).expect(200);
 
-		await app.model.LessonSkills.create({ lessonId: 1, userId: 1, skillId: 1 });
-		await app.model.Skills.create({ skillName: "test", enSkillName: "test" });
+		await app.model.LessonSkill.create({ lessonId: 1, userId: 1, skillId: 1 });
+		await app.model.Skill.create({ skillName: "test", enSkillName: "test" });
 
 		let list = await app.httpRequest().get(url)
 			.set("Authorization", `Bearer ${token}`)
@@ -162,8 +162,8 @@ describe("test/controller/lessons.test.js", () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
-		await app.model.Users.create({
-			id: 1, username: "user001", password: md5("123456")
+		await app.model.User.create({
+			username: "user001", password: md5("123456")
 		});
 
 		const url = "/lessons/1/learnRecords";
@@ -202,9 +202,9 @@ describe("test/controller/lessons.test.js", () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
-		const url = "/lessons/1/contents";
+		// const url = "/lessons/1/contents";
 
-		await app.httpRequest().post("/lessons").send({
+		let less = await app.httpRequest().post("/lessons").send({
 			lessonName: "HTML",
 			subjectId: 1,
 			skills: [{ id: 8, score: 10 }, { id: 9, score: 8 }],
@@ -215,25 +215,26 @@ describe("test/controller/lessons.test.js", () => {
 			}
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
-		let lc = await app.httpRequest().post(url)
+
+		let lc = await app.httpRequest().post(`/lessons/${less.id}/contents`)
 			.send({ content: "lesson content" })
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.equal(lc.id, 1);
 
-		lc = await app.httpRequest().post(url)
+		lc = await app.httpRequest().post(`/lessons/${less.id}/contents`)
 			.send({ content: "lesson content" })
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.equal(lc.id, 2);
 
 		lc = await app.httpRequest()
-			.get(url).set("Authorization", `Bearer ${token}`)
+			.get(`/lessons/${less.id}/contents`).set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.equal(lc.id, 2);
 
 		lc = await app.httpRequest()
-			.get(url + "?version=1")
+			.get(`/lessons/${less.id}/contents` + "?version=1")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 

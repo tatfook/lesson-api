@@ -1,26 +1,26 @@
 
 const { app, assert } = require("egg-mock/bootstrap");
 
-describe("test/controller/skills.test.js", () => {
+describe("test/controller/users.test.js", () => {
 	before(async () => {
-		const lessons = app.model.Lessons;
-		const subjects = app.model.Subjects;
-		const skills = app.model.Skills;
+		const lessons = app.model.Lesson;
+		const subjects = app.model.Subject;
+		const skills = app.model.Skill;
 		await lessons.truncate();
 		await subjects.truncate();
 		await skills.truncate();
-		await app.model.LessonSkills.truncate();
-		await app.model.LearnRecords.truncate();
-		await app.model.UserLearnRecords.truncate();
-		await app.model.Packages.truncate();
-		await app.model.Subscribes.truncate();
-		await app.model.LessonRewards.truncate();
-		await app.model.PackageLessons.truncate();
-		await app.model.LessonContents.truncate();
-		await app.model.Teachers.truncate();
-		await app.model.TeacherCDKeys.truncate();
-		await app.model.Classrooms.truncate();
-		await app.model.Users.truncate();
+		await app.model.LessonSkill.truncate();
+		await app.model.LearnRecord.truncate();
+		await app.model.UserLearnRecord.truncate();
+		await app.model.Package.truncate();
+		await app.model.Subscribe.truncate();
+		await app.model.LessonReward.truncate();
+		await app.model.PackageLesson.truncate();
+		await app.model.LessonContent.truncate();
+		await app.model.Teacher.truncate();
+		await app.model.TeacherCDKey.truncate();
+		await app.model.Classroom.truncate();
+		await app.model.User.truncate();
 
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);

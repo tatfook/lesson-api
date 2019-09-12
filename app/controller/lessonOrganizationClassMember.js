@@ -21,12 +21,12 @@ const LessonOrganizationClassMember = class extends Controller {
 		const { classId } = this.validate({ classId: "number_optional" });
 		//const organizationId = 25;
 
-		const members = await this.model.lessonOrganizations.getTeachers(organizationId, classId);
+		const members = await this.model.LessonOrganization.getTeachers(organizationId, classId);
 		const memberIds = members.map(o => o.memberId);
 		if (memberIds.length == 0) return this.success([]);
 
 		const curtime = new Date();
-		const list = await this.model.lessonOrganizationClassMembers.findAll({
+		const list = await this.model.LessonOrganizationClassMember.findAll({
 			include: [
 				// {
 				// 	as: "users",
@@ -35,7 +35,7 @@ const LessonOrganizationClassMember = class extends Controller {
 				// },
 				{
 					as: "lessonOrganizationClasses",
-					model: this.model.lessonOrganizationClasses,
+					model: this.model.LessonOrganizationClass,
 					where: {
 						end: { $gte: curtime },
 					},
@@ -80,11 +80,11 @@ const LessonOrganizationClassMember = class extends Controller {
 		const { organizationId } = this.authenticated();
 		//const organizationId = 11;
 		const { classId } = this.validate({ classId: "number_optional" });
-		const members = await this.model.lessonOrganizations.getMembers(organizationId, 1, classId);
+		const members = await this.model.LessonOrganization.getMembers(organizationId, 1, classId);
 		const memberIds = members.map(o => o.memberId);
 		if (memberIds.length == 0) return this.success({ count: 0, rows: [] });
 		const curtime = new Date();
-		const list = await this.model.lessonOrganizationClassMembers.findAll({
+		const list = await this.model.LessonOrganizationClassMember.findAll({
 			include: [
 				// {
 				// 	as: "users",
@@ -93,7 +93,7 @@ const LessonOrganizationClassMember = class extends Controller {
 				// },
 				{
 					as: "lessonOrganizationClasses",
-					model: this.model.lessonOrganizationClasses,
+					model: this.model.LessonOrganizationClass,
 					where: {
 						end: { $gte: curtime },
 					},
@@ -184,27 +184,27 @@ const LessonOrganizationClassMember = class extends Controller {
 
 		if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
 			if (roleId <= CLASS_MEMBER_ROLE_STUDENT) return this.throw(411, "无权限");
-			const organ = await this.model.lessonOrganizations.findOne({ where: { id: organizationId } }).then(o => o && o.toJSON());
+			const organ = await this.model.LessonOrganization.findOne({ where: { id: organizationId } }).then(o => o && o.toJSON());
 			if (!organ) return this.throw(500);
 			if (organ.privilege && 1 == 0) return this.throw(411, "无权限");
 		}
 
 		// const curtime = new Date();
-		let oldmembers = await this.model.lessonOrganizationClassMembers.findAll({
+		let oldmembers = await this.model.LessonOrganizationClassMember.findAll({
 			order: [["id", "desc"]],
-			include: [{ as: "lessonOrganizationClasses", model: this.model.lessonOrganizationClasses }],
+			include: [{ as: "lessonOrganizationClasses", model: this.model.LessonOrganizationClass }],
 			where: { organizationId, memberId: params.memberId }
 		}).then(list => list.map(o => o.toJSON()));
 		oldmembers = _.filter(oldmembers, o => o.classId == 0 || new Date(o.lessonOrganizationClasses.end).getTime() > new Date().getTime());
 		const ids = _.map(oldmembers, o => o.id);
 
-		const organ = await this.model.lessonOrganizations.findOne({ where: { id: organizationId } }).then(o => o.toJSON());
+		const organ = await this.model.LessonOrganization.findOne({ where: { id: organizationId } }).then(o => o.toJSON());
 		if (!organ) return this.throw(400);
 
 		const organCount = organ.count;
 		const isStudent = _.find(oldmembers, o => o.roleId & CLASS_MEMBER_ROLE_STUDENT) ? true : false;
 		if (!isStudent && (params.roleId & CLASS_MEMBER_ROLE_STUDENT)) {
-			const usedCount = await this.model.lessonOrganizations.getUsedCount(organizationId);
+			const usedCount = await this.model.LessonOrganization.getUsedCount(organizationId);
 			if (usedCount >= organCount && classIds.length > 0) return this.fail(1, "学生人数已达上限");
 		}
 
@@ -213,7 +213,7 @@ const LessonOrganizationClassMember = class extends Controller {
 			...params, classId, roleId: params.roleId | (_.find(oldmembers, m => m.classId == classId) || { roleId: 0 }).roleId
 		}));
 		// 删除要创建的
-		classIds.length && await this.model.lessonOrganizationClassMembers.destroy({
+		classIds.length && await this.model.LessonOrganizationClassMember.destroy({
 			where: { organizationId, memberId: params.memberId, classId: { $in: classIds } }
 		});
 		// 取消全部班级此身份
@@ -226,14 +226,14 @@ const LessonOrganizationClassMember = class extends Controller {
 			type: this.model.QueryTypes.UPDATE, replacements: { ids }
 		});
 		// 删除roleId=0为0的成员
-		await this.model.lessonOrganizationClassMembers.destroy({
+		await this.model.LessonOrganizationClassMember.destroy({
 			where: { organizationId, memberId: params.memberId, roleId: 0 }
 		});
 		if (datas.length == 0) return this.success("ok");
-		const members = await this.model.lessonOrganizationClassMembers.bulkCreate(datas);
+		const members = await this.model.LessonOrganizationClassMember.bulkCreate(datas);
 
 		if (params.realname && classIds.length) {
-			await this.model.lessonOrganizationActivateCodes.update({ realname: params.realname }, {
+			await this.model.LessonOrganizationActivateCode.update({ realname: params.realname }, {
 				where: {
 					organizationId,
 					activateUserId: params.memberId,
@@ -250,17 +250,17 @@ const LessonOrganizationClassMember = class extends Controller {
 		const { organizationId, roleId } = this.authenticated();
 		const { id } = this.validate({ id: "number" });
 
-		const member = await this.model.lessonOrganizationClassMembers.findOne({ where: { organizationId, id } }).then(o => o && o.toJSON());
+		const member = await this.model.LessonOrganizationClassMember.findOne({ where: { organizationId, id } }).then(o => o && o.toJSON());
 		if (member.roleId >= roleId) return this.throw(411);
 
 		if (roleId < CLASS_MEMBER_ROLE_ADMIN) {
 			if (roleId <= CLASS_MEMBER_ROLE_STUDENT) return this.throw(411, "无权限");
-			const organ = await this.model.lessonOrganizations.findOne({ where: { id: organizationId } }).then(o => o && o.toJSON());
+			const organ = await this.model.LessonOrganization.findOne({ where: { id: organizationId } }).then(o => o && o.toJSON());
 			if (!organ) return this.throw(500);
 			if (organ.privilege && 2 == 0) return this.throw(411, "无权限");
 		}
 
-		await this.model.lessonOrganizationClassMembers.destroy({ where: { id } });
+		await this.model.LessonOrganizationClassMember.destroy({ where: { id } });
 
 		return this.success("OK");
 	}

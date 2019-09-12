@@ -63,13 +63,13 @@ module.exports = app => {
 	model.getById = async function (id, userId) {
 		const where = { id };
 		if (userId) where.userId = userId;
-		const data = await app.model.LearnRecords.findOne({ where });
+		const data = await app.model.LearnRecord.findOne({ where });
 
 		return data && data.get({ plain: true });
 	};
 
 	model.isLearned = async function (userId, packageId, lessonId) {
-		const data = await app.model.UserLearnRecords.findOne({
+		const data = await app.model.UserLearnRecord.findOne({
 			where: {
 				userId,
 				packageId,
@@ -83,16 +83,16 @@ module.exports = app => {
 	};
 
 	model.learnFinish = async function (params) {
-		await app.model.UserLearnRecords.upsert(params);
+		await app.model.UserLearnRecord.upsert(params);
 	};
 
 	model.createLearnRecord = async function (params) {
 		const userId = params.userId;
 
 		if (userId) {
-			await app.model.Users.learn(userId);
+			await app.model.User.learn(userId);
 		}
-		let lr = await app.model.LearnRecords.create(params);
+		let lr = await app.model.LearnRecord.create(params);
 
 		if (!lr) return console.log("create learn records failed", params);
 
@@ -111,7 +111,7 @@ module.exports = app => {
 		if (params.userId) where.userId = params.userId;
 		if (params.classroomId) where.classroomId = params.classroomId;
 
-		let lr = await app.model.LearnRecords.findOne({ where });
+		let lr = await app.model.LearnRecord.findOne({ where });
 		if (!lr) return;
 		lr = lr.get({ plain: true });
 
@@ -120,15 +120,15 @@ module.exports = app => {
 		if (params.extra) lr.extra = params.extra;
 		if (params.classroomId) lr.classroomId = params.classroomId;
 
-		await app.model.LearnRecords.update(lr, { where });
+		await app.model.LearnRecord.update(lr, { where });
 
 		if (lr.userId && ~~params.state === LEARN_RECORD_STATE_FINISH) {
 			await this.learnFinish(lr);
-			await app.model.Subscribes.addLearnedLesson(lr.userId, lr.packageId, lr.lessonId);
+			await app.model.Subscribe.addLearnedLesson(lr.userId, lr.packageId, lr.lessonId);
 		}
 	};
 
-	app.model.learnRecords = model;
+	app.model.LearnRecord = model;
 
 	return model;
 };

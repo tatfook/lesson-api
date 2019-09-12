@@ -5,7 +5,7 @@ const Service = require("../core/service.js");
 class Organization extends Service {
 
 	async getRoleId(organizationId, userId) {
-		const members = await this.app.model.lessonOrganizationClassMembers.findAll({
+		const members = await this.app.model.LessonOrganizationClassMember.findAll({
 			where: { organizationId, memberId: userId }
 		}).then(list => list.map(o => o.toJSON()));
 
@@ -16,11 +16,11 @@ class Organization extends Service {
 	}
 
 	async isMember({ organizationId, memberId }) {
-		const member = await this.app.model.lessonOrganizationClassMembers.findAll({
+		const member = await this.app.model.LessonOrganizationClassMember.findAll({
 			include: [
 				{
 					as: "lessonOrganizationClasses",
-					model: this.app.model.lessonOrganizationClasses,
+					model: this.app.model.LessonOrganizationClass,
 					where: {
 						end: {
 							"$gt": new Date(),

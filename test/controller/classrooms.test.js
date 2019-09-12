@@ -3,26 +3,26 @@ const { app, assert } = require("egg-mock/bootstrap");
 
 describe("test/controller/classrooms.test.js", () => {
 	before(async () => {
-		const lessons = app.model.Lessons;
-		const subjects = app.model.Subjects;
-		const skills = app.model.Skills;
+		const lessons = app.model.Lesson;
+		const subjects = app.model.Subject;
+		const skills = app.model.Skill;
 		await lessons.sync({ force: true });
 		await subjects.sync({ force: true });
 		await skills.sync({ force: true });
-		await app.model.LessonSkills.sync({ force: true });
-		await app.model.LearnRecords.sync({ force: true });
-		await app.model.UserLearnRecords.sync({ force: true });
-		await app.model.Packages.sync({ force: true });
-		await app.model.Subscribes.sync({ force: true });
-		await app.model.LessonRewards.sync({ force: true });
-		await app.model.PackageLessons.sync({ force: true });
-		await app.model.LessonContents.sync({ force: true });
-		await app.model.Teachers.sync({ force: true });
-		await app.model.TeacherCDKeys.sync({ force: true });
-		await app.model.Classrooms.sync({ force: true });
-		await app.model.Users.sync({ force: true });
+		await app.model.LessonSkill.sync({ force: true });
+		await app.model.LearnRecord.sync({ force: true });
+		await app.model.UserLearnRecord.sync({ force: true });
+		await app.model.Package.sync({ force: true });
+		await app.model.Subscribe.sync({ force: true });
+		await app.model.LessonReward.sync({ force: true });
+		await app.model.PackageLesson.sync({ force: true });
+		await app.model.LessonContent.sync({ force: true });
+		await app.model.Teacher.sync({ force: true });
+		await app.model.TeacherCDKey.sync({ force: true });
+		await app.model.Classroom.sync({ force: true });
+		await app.model.User.sync({ force: true });
 		await app.keepworkModel.Users.sync({ force: true });
-		await app.model.lessonOrganizationLogs.sync({ force: true });
+		await app.model.LessonOrganizationLog.sync({ force: true });
 
 		await subjects.create({
 			subjectName: "前端",
@@ -147,16 +147,18 @@ describe("test/controller/classrooms.test.js", () => {
 	it("002", async () => {
 		const token = app.util.jwt_encode({ userId: 1, username: "xiaoyao" }, app.config.self.secret);
 
-		await app.model.PackageLessons.create({ packageId: 1, lessonId: 1, userId: 2 });
-		await app.model.Packages.create({ userId: 1, packageName: "unique" });
-		await app.model.Lessons.create({ userId: 1, lessonName: "unique", url: "hahh" });
+		// await app.model.PackageLesson.create({ packageId: 1, lessonId: 1, userId: 2 });
+
+		await app.model.Package.create({ userId: 1, packageName: "unique" });
+
+		await app.model.Lesson.create({ userId: 1, lessonName: "unique", url: "hahh" });
 
 		// 创建课堂
 		let classroom = await app.httpRequest().post("/classrooms").send({
 			packageId: 1, lessonId: 1
 		}).set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.equal(classroom.id, 1);
+		assert.equal(classroom.id, 2);
 
 		await app.httpRequest().put("/classrooms/1").send({ // 修改课堂
 			packageId: 2
@@ -174,7 +176,7 @@ describe("test/controller/classrooms.test.js", () => {
 
 		classroom = await app.httpRequest().get("/classrooms/current")// 当前课堂
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(classroom.id, 1);
+		assert.equal(classroom.id, 2);
 	});
 });
 

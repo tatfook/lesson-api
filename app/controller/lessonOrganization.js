@@ -15,7 +15,7 @@ const LessonOrganization = class extends Controller {
 	async token() {
 		const { userId, username } = this.authenticated();
 		const { organizationId } = this.validate({ organizationId: "number" });
-		const members = await this.model.lessonOrganizationClassMembers.findAll({
+		const members = await this.model.LessonOrganizationClassMember.findAll({
 			where: {
 				organizationId, memberId: userId
 			}
@@ -49,17 +49,17 @@ const LessonOrganization = class extends Controller {
 		if (!user) return this.fail(1);
 		if (!organizationId) {
 			if (!organizationName) return this.throw(400);
-			const organ = await this.model.lessonOrganizations.findOne({ where: { name: organizationName }}).then(o => o && o.toJSON());
+			const organ = await this.model.LessonOrganization.findOne({ where: { name: organizationName }}).then(o => o && o.toJSON());
 			if (!organ) return this.throw(400);
 			organizationId = organ.id;
 		}
 
 		const curtime = new Date();
-		const members = await this.model.lessonOrganizationClassMembers.findAll({
+		const members = await this.model.LessonOrganizationClassMember.findAll({
 			include: [
 				{
 					as: "lessonOrganizationClasses",
-					model: this.model.lessonOrganizationClasses,
+					model: this.model.LessonOrganizationClass,
 					where: {
 						// begin: {$lte: curtime},
 						end: { $gte: curtime },
@@ -99,14 +99,14 @@ const LessonOrganization = class extends Controller {
 		const { userId } = this.authenticated();
 		const sql = `select organizationId from lessonOrganizationClassMembers where memberId = ${userId} group by organizationId`;
 		const ids = await this.model.query(sql, { type: this.model.QueryTypes.SELECT }).then(list => list.map(o => o.organizationId));
-		const list = await this.model.lessonOrganizations.findAll({ where: { id: { $in: ids }}}).then(list => list.map(o => o.toJSON()));
+		const list = await this.model.LessonOrganization.findAll({ where: { id: { $in: ids }}}).then(list => list.map(o => o.toJSON()));
 		return this.success(list);
 	}
 
 	async show() {
 		const { id } = this.validate({ id: "number" });
 
-		const organ = await this.model.lessonOrganizations.findOne({ where: { id }});
+		const organ = await this.model.LessonOrganization.findOne({ where: { id }});
 		if (!organ) return this.throw(404);
 
 		return this.success(organ);
@@ -115,7 +115,7 @@ const LessonOrganization = class extends Controller {
 	async getByUrl() {
 		const { url } = this.validate({ url: "string" });
 
-		const organ = await this.model.lessonOrganizations.findOne({ where: { loginUrl: url }});
+		const organ = await this.model.LessonOrganization.findOne({ where: { loginUrl: url }});
 		if (!organ) return this.throw(404);
 
 		return this.success(organ);
@@ -124,7 +124,7 @@ const LessonOrganization = class extends Controller {
 	async getByName() {
 		const { name } = this.validate({ name: "string" });
 
-		const organ = await this.model.lessonOrganizations.findOne({ where: { name }});
+		const organ = await this.model.LessonOrganization.findOne({ where: { name }});
 		if (!organ) return this.throw(404);
 
 		return this.success(organ);
@@ -135,7 +135,7 @@ const LessonOrganization = class extends Controller {
 
 		const params = this.validate();
 
-		const organ = await this.model.lessonOrganizations.create(params).then(o => o && o.toJSON());
+		const organ = await this.model.LessonOrganization.create(params).then(o => o && o.toJSON());
 		if (!organ) return this.throw(500);
 
 		if (params.packages) {
@@ -145,7 +145,7 @@ const LessonOrganization = class extends Controller {
 				packageId: pkg.packageId,
 				lessons: pkg.lessons,
 			}));
-			await this.model.lessonOrganizationPackages.bulkCreate(packages);
+			await this.model.LessonOrganizationPackage.bulkCreate(packages);
 		}
 
 		if (params.usernames) {
@@ -161,14 +161,14 @@ const LessonOrganization = class extends Controller {
 				memberId: o.id,
 				roleId: CLASS_MEMBER_ROLE_ADMIN,
 			}));
-			await this.model.lessonOrganizationClassMembers.bulkCreate(members);
+			await this.model.LessonOrganizationClassMember.bulkCreate(members);
 		}
 
 		return this.success(organ);
 	}
 
 	async fixedClassPackage(organizationId, packages) {
-		const pkgs = await this.model.lessonOrganizationPackages.findAll({
+		const pkgs = await this.model.LessonOrganizationPackage.findAll({
 			where: { organizationId, classId: { $gt: 0 }}
 		}).then(list => list.map(o => o.toJSON()));
 
@@ -185,8 +185,8 @@ const LessonOrganization = class extends Controller {
 			datas.push(o);
 		});
 
-		await this.model.lessonOrganizationPackages.destroy({ where: { organizationId, classId: { $gt: 0 }}});
-		await this.model.lessonOrganizationPackages.bulkCreate(datas);
+		await this.model.LessonOrganizationPackage.destroy({ where: { organizationId, classId: { $gt: 0 }}});
+		await this.model.LessonOrganizationPackage.bulkCreate(datas);
 	}
 
 	// 禁止更新
@@ -196,27 +196,27 @@ const LessonOrganization = class extends Controller {
 
 		delete params.userId;
 		if (this.ctx.state.admin && this.ctx.state.admin.userId) {
-			await this.model.lessonOrganizations.update(params, { where: { id }});
+			await this.model.LessonOrganization.update(params, { where: { id }});
 		} else {
 			const { roleId = 0 } = this.authenticated();
 			if (roleId < CLASS_MEMBER_ROLE_ADMIN) return this.throw(411, "无效token");
-			await this.model.lessonOrganizations.update(params, { where: { id }});
+			await this.model.LessonOrganization.update(params, { where: { id }});
 		}
 
 		if (params.packages) {
-			await this.model.lessonOrganizationPackages.destroy({ where: { organizationId: id, classId: 0 }});
+			await this.model.LessonOrganizationPackage.destroy({ where: { organizationId: id, classId: 0 }});
 			const datas = _.map(params.packages, pkg => ({
 				organizationId: id,
 				classId: 0,
 				packageId: pkg.packageId,
 				lessons: pkg.lessons,
 			}));
-			await this.model.lessonOrganizationPackages.bulkCreate(datas);
+			await this.model.LessonOrganizationPackage.bulkCreate(datas);
 			await this.fixedClassPackage(id, params.packages);
 		}
 
 		if (params.endDate) {
-			await this.model.lessonOrganizationClasses.update({ end: params.endDate }, {
+			await this.model.LessonOrganizationClass.update({ end: params.endDate }, {
 				where: {
 					organizationId: id,
 					end: { $gt: params.endDate },
@@ -225,7 +225,7 @@ const LessonOrganization = class extends Controller {
 		}
 
 		if (params.usernames) {
-			await this.model.lessonOrganizationClassMembers.destroy({ where: { classId: 0, organizationId: id }});
+			await this.model.LessonOrganizationClassMember.destroy({ where: { classId: 0, organizationId: id }});
 			const users = await this.ctx.keepworkModel.Users.findAll({
 				where: { username: { [this.ctx.keepworkModel.Op.in]: params.usernames }}
 			}).then(list => _.map(list, o => o.toJSON()));
@@ -236,7 +236,7 @@ const LessonOrganization = class extends Controller {
 				memberId: o.id,
 				roleId: CLASS_MEMBER_ROLE_ADMIN,
 			}));
-			await this.model.lessonOrganizationClassMembers.bulkCreate(members);
+			await this.model.LessonOrganizationClassMember.bulkCreate(members);
 		}
 
 		return this.success("ok");
@@ -274,18 +274,18 @@ const LessonOrganization = class extends Controller {
 		let list = [];
 		// const curtime = new Date();
 		if (classId) {
-			list = await this.model.lessonOrganizationPackages.findAll({
+			list = await this.model.LessonOrganizationPackage.findAll({
 				where: {
 					organizationId,
 					classId,
 				},
 			}).then(list => _.map(list, o => o.toJSON()));
 		} else {
-			list = await this.model.lessonOrganizationPackages.findAll({
+			list = await this.model.LessonOrganizationPackage.findAll({
 				include: [
 					{
 						as: "lessonOrganizationClassMembers",
-						model: this.model.lessonOrganizationClassMembers,
+						model: this.model.LessonOrganizationClassMember,
 						where: {
 							memberId: userId,
 							classId: roleId & CLASS_MEMBER_ROLE_ADMIN ? { $gte: 0 } : { $gt: 0 }
@@ -293,7 +293,7 @@ const LessonOrganization = class extends Controller {
 					},
 					{
 						as: "lessonOrganizationClasses",
-						model: this.model.lessonOrganizationClasses,
+						model: this.model.LessonOrganizationClass,
 					},
 				],
 				where: {
@@ -308,7 +308,7 @@ const LessonOrganization = class extends Controller {
 		for (let i = 0; i < list.length; i++) {
 			const pkg = list[i];
 			const ids = _.map(pkg.lessons, o => o.lessonId);
-			const lrs = await this.app.model.userLearnRecords.findAll({
+			const lrs = await this.app.model.UserLearnRecord.findAll({
 				where: {
 					userId,
 					packageId: pkg.packageId,
@@ -321,12 +321,12 @@ const LessonOrganization = class extends Controller {
 		}
 
 		const pkgIds = _.map(list, o => o.packageId);
-		const pkgs = await this.app.model.packages.findAll({
+		const pkgs = await this.app.model.Package.findAll({
 			where: { id: { [this.model.Op.in]: pkgIds }}
 		}).then(list => _.map(list, o => o.toJSON()));
 
 		if (classId) {
-			const classrooms = await this.app.model.classrooms.findAll({
+			const classrooms = await this.app.model.Classroom.findAll({
 				where: { userId, classId, packageId: { $in: pkgIds }}
 			}).then(list => list.map(o => o.toJSON()));
 
@@ -345,12 +345,12 @@ const LessonOrganization = class extends Controller {
 		const { userId, organizationId } = this.authenticated();
 		let list = [];
 		if (classId !== undefined) {
-			list = await this.model.lessonOrganizationPackages.findAll({
+			list = await this.model.LessonOrganizationPackage.findAll({
 				where: { organizationId, packageId, classId }
 			}).then(list => _.map(list, o => o.toJSON()));
 		} else {
-			const classIds = await this.model.lessonOrganizationClassMembers.getAllClassIds({ memberId: userId, roleId, organizationId });
-			list = await this.model.lessonOrganizationPackages.findAll({
+			const classIds = await this.model.lessonOrganizationClassMember.getAllClassIds({ memberId: userId, roleId, organizationId });
+			list = await this.model.LessonOrganizationPackage.findAll({
 				where: {
 					organizationId,
 					packageId,
@@ -372,15 +372,15 @@ const LessonOrganization = class extends Controller {
 		const pkg = await this.getPackage(packageId, classId, roleId);
 		if (!pkg) return this.throw(400);
 
-		const pkginfo = await this.app.model.packages.findOne({ where: { id: pkg.packageId }}).then(o => o && o.toJSON());
+		const pkginfo = await this.app.model.Package.findOne({ where: { id: pkg.packageId }}).then(o => o && o.toJSON());
 		const lessonIds = _.map(pkg.lessons, o => o.lessonId);
-		const lessons = await this.app.model.lessons.findAll({
+		const lessons = await this.app.model.Lesson.findAll({
 			where: { id: { [this.model.Op.in]: lessonIds }}
 		}).then(list => _.map(list, o => o.toJSON()));
 
 		_.each(pkg.lessons, o => { o.lesson = _.find(lessons, l => l.id === o.lessonId); });
 		// 授课记录
-		const classrooms = await this.app.model.classrooms.findAll({
+		const classrooms = await this.app.model.Classroom.findAll({
 			attributes: ["packageId", "lessonId", "classId"],
 			where: {
 				userId,
@@ -391,7 +391,7 @@ const LessonOrganization = class extends Controller {
 				},
 			}
 		});
-		const learnRecords = await this.app.model.learnRecords.findAll({
+		const learnRecords = await this.app.model.LearnRecord.findAll({
 			attributes: ["packageId", "lessonId", "classId"],
 			where: {
 				userId,

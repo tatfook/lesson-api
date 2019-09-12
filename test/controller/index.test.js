@@ -1,11 +1,11 @@
 
 const { app, mock, assert } = require("egg-mock/bootstrap");
 
-const asyncfunc = async () => {
-	return await new Promise((resolve, reject) => {
-		setTimeout(resolve, 2000);
-	});
-};
+// const asyncfunc = async () => {
+// 	return await new Promise((resolve, reject) => {
+// 		setTimeout(resolve, 2000);
+// 	});
+// };
 
 describe("test/controller/index.test.js", () => {
 	// before(() => console.log('order 1'));

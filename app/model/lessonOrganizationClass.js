@@ -64,24 +64,24 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	app.model.lessonOrganizationClasses = model;
+	app.model.LessonOrganizationClass = model;
 
 	model.associate = () => {
-		app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationActivateCodes, {
+		app.model.LessonOrganizationClass.hasMany(app.model.LessonOrganizationActivateCode, {
 			as: "lessonOrganizationActivateCodes",
 			foreignKey: "classId",
 			sourceKey: "id",
 			constraints: false,
 		});
 
-		app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationPackages, {
+		app.model.LessonOrganizationClass.hasMany(app.model.LessonOrganizationPackage, {
 			as: "lessonOrganizationPackages",
 			foreignKey: "classId",
 			sourceKey: "id",
 			constraints: false,
 		});
 
-		app.model.lessonOrganizationClasses.hasMany(app.model.lessonOrganizationClassMembers, {
+		app.model.LessonOrganizationClass.hasMany(app.model.LessonOrganizationClassMember, {
 			as: "lessonOrganizationClassMembers",
 			foreignKey: "classId",
 			sourceKey: "id",

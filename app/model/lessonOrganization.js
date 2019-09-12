@@ -99,7 +99,7 @@ module.exports = app => {
 
 	model.getValidOrganizationById = async function (organizationId) {
 		// const curdate = new Date();
-		return await app.model.lessonOrganizations.findOne({
+		return await app.model.LessonOrganization.findOne({
 			where: {
 				id: organizationId,
 				endDate: { $gte: new Date() },
@@ -156,24 +156,24 @@ module.exports = app => {
 		return list;
 	};
 
-	app.model.lessonOrganizations = model;
+	app.model.LessonOrganization = model;
 
 	model.associate = () => {
-		app.model.lessonOrganizations.belongsTo(app.model.users, {
+		app.model.LessonOrganization.belongsTo(app.model.User, {
 			as: "users",
 			foreignKey: "userId",
 			targetKey: "id",
 			constraints: false,
 		});
 
-		app.model.lessonOrganizations.hasMany(app.model.lessonOrganizationPackages, {
+		app.model.LessonOrganization.hasMany(app.model.LessonOrganizationPackage, {
 			as: "lessonOrganizationPackages",
 			foreignKey: "organizationId",
 			sourceKey: "id",
 			constraints: false,
 		});
 
-		app.model.lessonOrganizations.hasMany(app.model.lessonOrganizationClassMembers, {
+		app.model.LessonOrganization.hasMany(app.model.LessonOrganizationClassMember, {
 			as: "lessonOrganizationClassMembers",
 			foreignKey: "organizationId",
 			sourceKey: "id",

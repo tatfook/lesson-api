@@ -68,16 +68,16 @@ module.exports = app => {
 		return count;
 	};
 
-	app.model.packageLessons = model;
+	app.model.PackageLesson = model;
 
 	model.associate = () => {
-		app.model.packageLessons.belongsTo(app.model.packages, {
+		app.model.PackageLesson.belongsTo(app.model.Package, {
 			as: "packages",
 			foreignKey: "packageId",
 			targetKey: "id",
 			constraints: false,
 		});
-		app.model.packageLessons.belongsTo(app.model.lessons, {
+		app.model.PackageLesson.belongsTo(app.model.Lesson, {
 			as: "lessons",
 			foreignKey: "lessonId",
 			targetKey: "id",

@@ -86,7 +86,7 @@ module.exports = app => {
 
 		for (let i = 0; i < list.length; i++) {
 			let data = list[i].get ? list[i].get({ plain: true }) : list[i];
-			data.lessons = await app.model.Packages.lessons(data.id);
+			data.lessons = await app.model.Package.lessons(data.id);
 			data.learnedLessons = data.subscribeExtra.learnedLessons || [];
 			data.teachedLessons = data.subscribeExtra.teachedLessons || [];
 
@@ -97,7 +97,7 @@ module.exports = app => {
 	};
 
 	model.isSubscribePackage = async function (userId, packageId) {
-		let data = await app.model.Subscribes.findOne({
+		let data = await app.model.Subscribe.findOne({
 			where: {
 				userId,
 				packageId,
@@ -110,7 +110,7 @@ module.exports = app => {
 	};
 
 	model.packageReward = async function (userId, packageId) {
-		const data = await app.model.Subscribes.findOne({
+		const data = await app.model.Subscribe.findOne({
 			where: {
 				userId,
 				packageId,
@@ -119,19 +119,19 @@ module.exports = app => {
 		});
 		if (!data) return;
 
-		const _package = await app.model.Packages.getById(packageId);
+		const _package = await app.model.Package.getById(packageId);
 		if (!_package) return;
 
-		const user = await app.model.Users.getById(userId);
+		const user = await app.model.User.getById(userId);
 		if (!user) return;
 
-		await app.model.Users.update({
+		await app.model.User.update({
 			coin: user.coin + _package.reward,
 		}, {
 			where: { id: userId }
 		});
 
-		await app.model.Coins.create({
+		await app.model.Coin.create({
 			userId,
 			amount: _package.reward,
 			type: COIN_TYPE_PACKAGE_REWARD,
@@ -139,7 +139,7 @@ module.exports = app => {
 	};
 
 	model.addTeachedLesson = async function (userId, packageId, lessonId) {
-		let subscribe = await app.model.Subscribes.findOne({
+		let subscribe = await app.model.Subscribe.findOne({
 			where: {
 				userId,
 				packageId,
@@ -152,7 +152,7 @@ module.exports = app => {
 		const index = _.findIndex(extra.teachedLessons, val => ~~val === ~~lessonId);
 		if (index === -1) {
 			extra.teachedLessons.push(lessonId);
-			await app.model.Subscribes.update({
+			await app.model.Subscribe.update({
 				extra,
 			}, {
 				where: {
@@ -163,7 +163,7 @@ module.exports = app => {
 	};
 
 	model.addLearnedLesson = async function (userId, packageId, lessonId) {
-		let subscribe = await app.model.Subscribes.findOne({
+		let subscribe = await app.model.Subscribe.findOne({
 			where: {
 				userId,
 				packageId,
@@ -177,7 +177,7 @@ module.exports = app => {
 		const index = _.findIndex(extra.learnedLessons, val => ~~val === ~~lessonId);
 		if (index === -1) {
 			extra.learnedLessons.push(lessonId);
-			await app.model.Subscribes.update({
+			await app.model.Subscribe.update({
 				extra,
 			}, {
 				where: {
@@ -187,6 +187,6 @@ module.exports = app => {
 		}
 	};
 
-	app.model.Subscribes = model;
+	app.model.Subscribe = model;
 	return model;
 };

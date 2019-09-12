@@ -29,39 +29,39 @@ class PayController extends Controller {
 		// }
 
 		if (!username || !price || !packageId) {
-			await ctx.model.Logs.create({ text: "支付-参数错误" + JSON.stringify(query) });
+			await ctx.model.Log.create({ text: "支付-参数错误" + JSON.stringify(query) });
 			ctx.throw(400, "params invalid");
 		}
 
 		let user = await ctx.model.Users.findOne({ where: { username }});
 		if (!user) {
-			await ctx.model.Logs.create({ text: "支付-用户不存在" + username });
+			await ctx.model.Log.create({ text: "支付-用户不存在" + username });
 			ctx.throw(400, "user not exist");
 		}
 		user = user.get({ plain: true });
 
 		let package_ = await ctx.model.Packages.findOne({ where: { id: packageId }});
 		if (!package_) {
-			await ctx.model.Logs.create({ text: "支付-课程包不存在" });
+			await ctx.model.Log.create({ text: "支付-课程包不存在" });
 			ctx.throw(400, "package not exist" + packageId);
 		}
 		package_ = package_.get({ plain: true });
 		if (package_.rmb > price) {
-			await ctx.model.Logs.create({ text: "支付-支付金额错误" + price });
+			await ctx.model.Log.create({ text: "支付-支付金额错误" + price });
 			ctx.throw(400, "金额不对");
 		}
 
-		const subscribe = await ctx.model.Subscribes.findOne({ where: { userId: user.id, packageId: package_.id, state: 1 }});
+		const subscribe = await ctx.model.Subscribe.findOne({ where: { userId: user.id, packageId: package_.id, state: 1 }});
 		if (subscribe) {
-			await ctx.model.Logs.create({ text: "支付-课程包已购买" });
+			await ctx.model.Log.create({ text: "支付-课程包已购买" });
 			ctx.throw(400, "package already subscribe");
 		}
 
 		// 更新用户待解锁金币数
 		const lockCoin = user.lockCoin + package_.coin;
-		await ctx.model.Users.update({ lockCoin }, { where: { id: user.id }});
+		await ctx.model.User.update({ lockCoin }, { where: { id: user.id }});
 
-		await ctx.model.Subscribes.upsert({
+		await ctx.model.Subscribe.upsert({
 			userId: user.id,
 			packageId: package_.id,
 			state: PACKAGE_SUBSCRIBE_STATE_BUY,

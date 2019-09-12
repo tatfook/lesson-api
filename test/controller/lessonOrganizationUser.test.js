@@ -5,6 +5,11 @@ const { app, assert } = require("egg-mock/bootstrap");
 describe("机构用户", () => {
 	before(async () => {
 		await app.keepworkModel.Users.sync({ force: true });
+		await app.keepworkModel.Users.sync({ force: true });
+		await app.model.LessonOrganizationActivateCode.sync({ force: true });
+		await app.model.LessonOrganizationClassMember.sync({ force: true });
+		await app.model.LessonOrganization.sync({ force: true });
+		await app.model.LessonOrganizationClass.sync({ force: true });
 	});
 
 	it("001 用户绑定 解绑", async () => {
@@ -14,17 +19,17 @@ describe("机构用户", () => {
 		await app.keepworkModel.Users.create({ id: 1, realname: "110", username: "test", roleId: 64, password: md5("123456") });
 
 		// 创建机构
-		const organ = await app.model.lessonOrganizations.create({
+		const organ = await app.model.LessonOrganization.create({
 			name: "org0000", count: 1, endDate: new Date("2200-01-01")
 		}).then(o => o.toJSON());
 
 		// 创建班级
-		let cls = await app.model.lessonOrganizationClasses.create({
+		let cls = await app.model.LessonOrganizationClass.create({
 			name: "clss000", organizationId: organ.id, begin: new Date(), end: new Date().getTime() + 1000 * 60 * 60 * 24
 		}).then(o => o.toJSON());
 
 		// 创建班级成员
-		await app.model.lessonOrganizationClassMembers.create({
+		await app.model.LessonOrganizationClassMember.create({
 			organizationId: organ.id, memberId: 1, roleId: 64, classId: cls.id, bind: 1
 		});
 

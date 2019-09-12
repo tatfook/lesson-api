@@ -8,7 +8,7 @@ class SubjectsController extends Controller {
 		const { ctx } = this;
 		const query = ctx.query || {};
 
-		const list = await ctx.model.Subjects.findAll({ ...this.queryOptions, where: query });
+		const list = await ctx.model.Subject.findAll({ ...this.queryOptions, where: query });
 
 		return this.success(list);
 	}
@@ -18,7 +18,7 @@ class SubjectsController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
-		const subject = await ctx.model.Subjects.findOne({ where: { id } });
+		const subject = await ctx.model.Subject.findOne({ where: { id } });
 		if (!subject) ctx.throw(404, "not found");
 
 		return this.success(subject);
@@ -29,7 +29,7 @@ class SubjectsController extends Controller {
 		const { ctx } = this;
 		const params = ctx.request.body;
 
-		const result = await ctx.model.Subjects.create(params);
+		const result = await ctx.model.Subject.create(params);
 
 		return this.success(result);
 	}
@@ -42,7 +42,7 @@ class SubjectsController extends Controller {
 
 		const params = ctx.request.body;
 
-		const result = await ctx.model.Subjects.update(params, { where: { id } });
+		const result = await ctx.model.Subject.update(params, { where: { id } });
 
 		return this.success(result);
 	}
@@ -53,7 +53,7 @@ class SubjectsController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
-		const result = await ctx.model.Subjects.destroy({
+		const result = await ctx.model.Subject.destroy({
 			where: { id },
 		});
 

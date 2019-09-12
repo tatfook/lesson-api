@@ -81,10 +81,10 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	app.model.lessonOrganizationForms = model;
+	app.model.LessonOrganizationForm = model;
 
 	model.associate = () => {
-		app.model.lessonOrganizationForms.hasMany(app.model.lessonOrganizationFormSubmits, {
+		app.model.LessonOrganizationForm.hasMany(app.model.LessonOrganizationFormSubmit, {
 			as: "lessonOrganizationFormSubmits",
 			foreignKey: "formId",
 			sourceKey: "id",

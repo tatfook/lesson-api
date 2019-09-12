@@ -53,7 +53,7 @@ module.exports = app => {
 	// model.sync({force:true});
 
 	model.isAvailable = async function (key) {
-		let data = await app.model.TeacherCDKeys.findOne({ where: { key }});
+		let data = await app.model.TeacherCDKey.findOne({ where: { key }});
 
 		if (!data) return false;
 
@@ -70,7 +70,7 @@ module.exports = app => {
 		const isAvail = await this.isAvailable(key);
 		if (!isAvail) return isAvail;
 
-		await app.model.TeacherCDKeys.update({
+		await app.model.TeacherCDKey.update({
 			state: TEACHER_KEY_STATE_USING,
 			userId,
 		}, {
@@ -80,10 +80,10 @@ module.exports = app => {
 		return true;
 	};
 
-	app.model.teacherCDKeys = model;
+	app.model.TeacherCDKey = model;
 
 	model.associate = () => {
-		app.model.teacherCDKeys.belongsTo(app.model.teachers, {
+		app.model.TeacherCDKey.belongsTo(app.model.Teacher, {
 			as: "teachers",
 			foreignKey: "userId",
 			targetKey: "userId",

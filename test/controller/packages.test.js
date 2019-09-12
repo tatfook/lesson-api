@@ -4,20 +4,20 @@ const md5 = require("blueimp-md5");
 
 describe("test/controller/packages.test.js", () => {
 	before(async () => {
-		const packages = app.model.Packages;
-		const lessons = app.model.Lessons;
-		const packageLessons = app.model.PackageLessons;
-		const subjects = app.model.Subjects;
-		const skills = app.model.Skills;
+		const packages = app.model.Package;
+		const lessons = app.model.Lesson;
+		const packageLessons = app.model.PackageLesson;
+		const subjects = app.model.Subject;
+		const skills = app.model.Skill;
 		await packages.truncate();
 		await lessons.truncate();
 		await packageLessons.truncate();
 		await subjects.truncate();
 		await skills.truncate();
-		await app.model.LessonSkills.truncate();
-		await app.model.Subscribes.truncate();
-		await app.model.PackageSorts.truncate();
-		await app.model.Users.truncate();
+		await app.model.LessonSkill.truncate();
+		await app.model.Subscribe.truncate();
+		await app.model.PackageSort.truncate();
+		await app.model.User.truncate();
 
 		await subjects.create({
 			subjectName: "前端",
@@ -91,7 +91,7 @@ describe("test/controller/packages.test.js", () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
-		await app.model.Packages.create({ id: 1, userId: 1, packageName: "test" });
+		await app.model.Package.create({ userId: 1, packageName: "test" });
 
 		let data = await app.httpRequest().put("/packages/1").send({
 			subjectId: 2
@@ -109,7 +109,7 @@ describe("test/controller/packages.test.js", () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
-		await app.model.Packages.create({ id: 1, userId: 1, packageName: "test" });
+		await app.model.Package.create({ userId: 1, packageName: "test1" });
 
 		let data = await app.httpRequest().get("/packages/1/detail")
 			.set("Authorization", `Bearer ${token}`)
@@ -126,9 +126,9 @@ describe("test/controller/packages.test.js", () => {
 
 		const url = "/packages/1/lessons";
 
-		await app.model.lessons.create({ id: 1, userId: 1, lessonName: "test" });
-		await app.model.packageLessons.create({ id: 1, packageId: 1, lessonId: 1, userId: 1 });
-		await app.model.Packages.create({ id: 1, userId: 1, packageName: "test" });
+		let less = await app.model.Lesson.create({ userId: 1, lessonName: "test1" });
+		let pack = await app.model.Package.create({ userId: 1, packageName: "test2" });
+		await app.model.PackageLesson.create({ packageId: pack.id, lessonId: less.id, userId: 1 });
 
 		let lessons = await app.httpRequest()
 			.get(url).set("Authorization", `Bearer ${token}`)
@@ -167,17 +167,17 @@ describe("test/controller/packages.test.js", () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
-		await app.model.Packages.create({ id: 1, userId: 2, packageName: "test" });
-		await app.model.Users.create({ username: "test", password: md5("123456") });
+		let pack = await app.model.Package.create({ userId: 2, packageName: "test3" });
+		await app.model.User.create({ username: "test5656", password: md5("123456") });
 
-		const users = app.model.Users;
+		const users = app.model.User;
 		await users.update({ coin: 300, lockCoin: 0 }, { where: { id: 1 }});
 
-		await app.httpRequest().post("/packages/1/subscribe").send({ packageId: 1 })
+		await app.httpRequest().post(`/packages/${pack.id}/subscribe`).send({ packageId: pack.id })
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 
-		const isSubscribe = await app.httpRequest().get("/packages/1/isSubscribe")
+		const isSubscribe = await app.httpRequest().get(`/packages/${pack.id}/isSubscribe`)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.ok(isSubscribe);
@@ -193,7 +193,7 @@ describe("test/controller/packages.test.js", () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
-		await app.model.Packages.create({ id: 1, userId: 1, packageName: "test" });
+		await app.model.Package.create({ userId: 1, packageName: "test4" });
 		await app.httpRequest().post("/packages/1/audit").send({ state: 1 })
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200);
@@ -217,6 +217,7 @@ describe("test/controller/packages.test.js", () => {
 	it("GET /packages/search", async () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
+		await app.model.Package.truncate();
 
 		let package_ = await app.httpRequest().post("/packages").send({
 			packageName: "前端",
@@ -268,6 +269,7 @@ describe("test/controller/packages.test.js", () => {
 	it("GET /packages/hots", async () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
+		await app.model.Package.truncate();
 
 		await app.httpRequest().post("/packages").send({
 			packageName: "前端",
@@ -303,13 +305,13 @@ describe("test/controller/packages.test.js", () => {
 		const admintoken = await app.adminLogin().then(o => o.token);
 		assert.ok(token);
 
-		await app.httpRequest().post("/admins/PackageSorts").send({
+		await app.httpRequest().post("/admins/PackageSort").send({
 			packageId: 1,
 			hotNo: 1
 		}).set("Authorization", `Bearer ${admintoken}`)
 			.expect(200).then(res => res.body);
 
-		await app.httpRequest().post("/admins/PackageSorts").send({
+		await app.httpRequest().post("/admins/PackageSort").send({
 			packageId: 2,
 			hotNo: 2
 		}).set("Authorization", `Bearer ${admintoken}`)
@@ -327,6 +329,7 @@ describe("test/controller/packages.test.js", () => {
 	it("GET /packages", async () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
+		await app.model.Package.truncate();
 
 		await app.httpRequest().post("/packages").send({
 			packageName: "前端",
@@ -353,6 +356,7 @@ describe("test/controller/packages.test.js", () => {
 	it("DELETE /packages/:id", async () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
+		await app.model.Package.truncate();
 
 		await app.httpRequest().post("/packages").send({
 			packageName: "前端",

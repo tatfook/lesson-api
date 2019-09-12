@@ -92,7 +92,7 @@ class Api {
 
 	async projectsUpsert(inst) {
 		const tags = (inst.tags || "").split("|").filter(o => o);
-		const user = await this.app.model.users.findOne({ where: { id: inst.userId } });
+		const user = await this.app.model.User.findOne({ where: { id: inst.userId } });
 		if (!user) return;
 
 		return this.curl('post', `/projects/${inst.id}/upsert`, {
@@ -121,7 +121,7 @@ class Api {
 		});
 		//console.log(inst);
 		if (inst.state == 2) {
-			const totalLessons = await this.app.model.PackageLessons.count({ where: { packageId: inst.id } });
+			const totalLessons = await this.app.model.PackageLesson.count({ where: { packageId: inst.id } });
 			return this.curl('post', `/packages/${inst.id}/upsert`, {
 				//return await this.curl('post', `/projects/${inst.id}/upsert`, {
 				id: inst.id,

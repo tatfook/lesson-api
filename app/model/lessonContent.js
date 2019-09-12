@@ -50,7 +50,7 @@ module.exports = app => {
 	// model.sync({force:true});
 
 	model.release = async function (userId, lessonId, content) {
-		let count = await app.model.LessonContents.count({
+		let count = await app.model.LessonContent.count({
 			where: {
 				userId,
 				lessonId,
@@ -59,7 +59,7 @@ module.exports = app => {
 
 		count = count + 1;
 
-		const data = await app.model.LessonContents.create({
+		const data = await app.model.LessonContent.create({
 			userId,
 			version: count,
 			lessonId,
@@ -73,7 +73,7 @@ module.exports = app => {
 		const where = { lessonId };
 		if (version) where.version = _.toNumber(version);
 
-		const list = await app.model.LessonContents.findAll({
+		const list = await app.model.LessonContent.findAll({
 			where,
 			limit: 1,
 			order: [["version", "DESC"]],

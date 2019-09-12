@@ -59,7 +59,7 @@ module.exports = app => {
 	// model.sync({force:true});
 
 	model.isAllowTeach = async function (userId) {
-		let user = await app.model.Teachers.findOne({ where: { userId }});
+		let user = await app.model.Teacher.findOne({ where: { userId }});
 		if (!user) return false;
 		user = user.get({ plain: true });
 
@@ -74,20 +74,20 @@ module.exports = app => {
 	};
 
 	model.getByUserId = async function (userId) {
-		return await app.model.teachers.findOne({ where: { userId }}).then(o => o && o.toJSON());
+		return await app.model.Teacher.findOne({ where: { userId }}).then(o => o && o.toJSON());
 	};
 
-	app.model.teachers = model;
+	app.model.Teacher = model;
 
 	model.associate = () => {
-		app.model.teachers.belongsTo(app.model.users, {
+		app.model.Teacher.belongsTo(app.model.User, {
 			as: "users",
 			foreignKey: "userId",
 			targetKey: "id",
 			constraints: false,
 		});
 
-		app.model.teachers.hasMany(app.model.teacherCDKeys, {
+		app.model.Teacher.hasMany(app.model.TeacherCDKey, {
 			as: "teacherCDKeys",
 			foreignKey: "userId",
 			sourceKey: "userId",

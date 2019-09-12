@@ -59,13 +59,13 @@ module.exports = app => {
 
 		if (userId) where.userId = userId;
 
-		const data = await app.model.Lessons.findOne({ where });
+		const data = await app.model.Lesson.findOne({ where });
 
 		return data && data.get({ plain: true });
 	};
 
 	model.addSkill = async function (userId, lessonId, skillId, score) {
-		let data = await app.model.Lessons.findOne({
+		let data = await app.model.Lesson.findOne({
 			where: {
 				userId,
 				id: lessonId,
@@ -73,10 +73,10 @@ module.exports = app => {
 		});
 		if (!data) return false;
 
-		data = await app.model.Skills.findOne({ where: { id: skillId }});
+		data = await app.model.Skill.findOne({ where: { id: skillId }});
 		if (!data) return false;
 
-		data = await app.model.LessonSkills.create({
+		data = await app.model.LessonSkill.create({
 			userId,
 			lessonId,
 			skillId,
@@ -89,14 +89,14 @@ module.exports = app => {
 
 	model.getSkills = async function (lessonId) {
 		const skills = [];
-		const list = await app.model.LessonSkills.findAll({
+		const list = await app.model.LessonSkill.findAll({
 			where: {
 				lessonId,
 			}
 		});
 		for (let i = 0; i < list.length; i++) {
 			let lessonSkill = list[i].get({ plain: true });
-			let skill = await app.model.Skills.findOne({
+			let skill = await app.model.Skill.findOne({
 				where: { id: lessonSkill.skillId },
 			});
 			if (skill) {// 据说这个一定是真
@@ -110,7 +110,7 @@ module.exports = app => {
 	};
 
 	model.deleteSkill = async function (userId, lessonId, skillId) {
-		return await app.model.LessonSkills.destroy({
+		return await app.model.LessonSkill.destroy({
 			where: {
 				userId,
 				lessonId,
@@ -135,10 +135,10 @@ module.exports = app => {
 		return list;
 	};
 
-	app.model.lessons = model;
+	app.model.Lesson = model;
 
 	model.associate = () => {
-		app.model.lessons.hasMany(app.model.packageLessons, {
+		app.model.Lesson.hasMany(app.model.PackageLesson, {
 			as: "packageLessons",
 			foreignKey: "lessonId",
 			sourceKey: "id",

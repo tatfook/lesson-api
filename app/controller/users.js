@@ -40,7 +40,7 @@ class UsersController extends Controller {
 		this.enauthenticated();
 		const user = this.getUser();
 
-		const data = await ctx.model.Users.getById(user.userId, user.username);
+		const data = await ctx.model.User.getById(user.userId, user.username);
 		if (!data) return this.throw(404, "用户不存在");
 
 		const userId = user.userId;
@@ -48,8 +48,8 @@ class UsersController extends Controller {
 		data.rmb = account.rmb;
 		data.coin = account.coin;
 		data.bean = account.bean;
-		data.tutorService = await this.model.tutors.getByUserId(user.userId);
-		data.teacher = await this.model.teachers.getByUserId(userId);
+		data.tutorService = await this.model.Tutor.getByUserId(user.userId);
+		data.teacher = await this.model.Teacher.getByUserId(userId);
 		data.allianceMember = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId);
 		data.tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId);
 
@@ -62,7 +62,7 @@ class UsersController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
-		const data = await ctx.model.Users.getById(id);
+		const data = await ctx.model.User.getById(id);
 		if (!data) return this.throw(404, "用户不存在");
 
 		const userId = id;
@@ -71,8 +71,8 @@ class UsersController extends Controller {
 		data.coin = account.coin;
 		data.bean = account.bean;
 
-		data.tutorService = await this.model.tutors.getByUserId(userId);
-		data.teacher = await this.model.teachers.getByUserId(userId);
+		data.tutorService = await this.model.Tutor.getByUserId(userId);
+		data.teacher = await this.model.Teacher.getByUserId(userId);
 
 		data.allianceMember = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId);
 		data.tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId);
@@ -85,7 +85,7 @@ class UsersController extends Controller {
 		this.enauthenticated();
 		const user = this.getUser();
 
-		const data = await ctx.model.Users.getById(user.userId, user.username);
+		const data = await ctx.model.User.getById(user.userId, user.username);
 
 		return this.success(data);
 	}
@@ -108,7 +108,7 @@ class UsersController extends Controller {
 		delete params.identify;
 		delete params.username;
 
-		const result = await ctx.model.Users.update(params, { where: { id }});
+		const result = await ctx.model.User.update(params, { where: { id }});
 
 		return this.success(result);
 	}
@@ -130,17 +130,17 @@ class UsersController extends Controller {
 			school: "string_optional"
 		});
 
-		const user = await this.model.Users.getById(id);
+		const user = await this.model.User.getById(id);
 		if (!user) this.throw(400, "arg error");
 
-		const isOk = await this.model.TeacherCDKeys.useKey(key, id);
+		const isOk = await this.model.TeacherCDKey.useKey(key, id);
 		if (!isOk) this.throw(400, "key invalid");
 
-		const cdKey = await this.model.TeacherCDKeys.findOne({ where: { key }}).then(o => o && o.toJSON());
+		const cdKey = await this.model.TeacherCDKey.findOne({ where: { key }}).then(o => o && o.toJSON());
 		const startTime = new Date().getTime();
 
 		user.identify = (user.identify | USER_IDENTIFY_TEACHER) & (~USER_IDENTIFY_APPLY_TEACHER);
-		const teacher = await this.model.Teachers.findOne({
+		const teacher = await this.model.Teacher.findOne({
 			where: { userId: id }
 		})
 			.then(o => o && o.toJSON())
@@ -154,8 +154,8 @@ class UsersController extends Controller {
 		}
 		teacher.endTime += cdKey.expire;
 
-		await this.model.Teachers.upsert(teacher);
-		const result = await this.model.Users.update(user, { where: { id }});
+		await this.model.Teacher.upsert(teacher);
+		const result = await this.model.User.update(user, { where: { id }});
 
 		return this.success(result);
 	}
@@ -166,7 +166,7 @@ class UsersController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
-		const ok = await ctx.model.Teachers.isAllowTeach(id);
+		const ok = await ctx.model.Teacher.isAllowTeach(id);
 
 		return this.success(ok);
 	}
@@ -179,7 +179,7 @@ class UsersController extends Controller {
 			packageState: "int_optional",
 		});
 
-		const list = await this.model.Subscribes.getByUserId(id, packageState);
+		const list = await this.model.Subscribe.getByUserId(id, packageState);
 
 		return this.success(list);
 	}
@@ -196,7 +196,7 @@ class UsersController extends Controller {
 		const packageId = params.packageId && _.toNumber(params.packageId);
 		if (!packageId) ctx.throw(400, "args error");
 
-		const result = await ctx.model.Subscribes.isSubscribePackage(userId, packageId);
+		const result = await ctx.model.Subscribe.isSubscribePackage(userId, packageId);
 
 		return this.success(result);
 	}
@@ -234,7 +234,7 @@ class UsersController extends Controller {
 		const userId = this.getUser().userId;
 		if (~~id !== userId) ctx.throw(400, "args error");
 
-		const list = await ctx.model.Coins.findAll({ where: { userId }});
+		const list = await ctx.model.Coin.findAll({ where: { userId }});
 		return this.success(list);
 	}
 
@@ -244,7 +244,7 @@ class UsersController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, "id invalid");
 
-		const list = await ctx.model.UserLearnRecords.getSkills(id);
+		const list = await ctx.model.UserLearnRecord.getSkills(id);
 
 		this.success(list);
 	}
@@ -254,19 +254,19 @@ class UsersController extends Controller {
 		const { userId } = this.enauthenticated();
 		const { coin, bean, description } = this.validate({ coin: "int_optional", bean: "int_optional", description: "string_optional" });
 
-		const user = await this.model.Users.getById(userId);
+		const user = await this.model.User.getById(userId);
 		if (!user) this.throw(400);
 		if ((bean && bean > user.bean) || (coin && coin > user.coin)) this.throw(400, "余额不足");
 		if (user.bean && bean && user.bean >= bean && bean > 0) {
 			user.bean = user.bean - bean;
-			await this.model.Trades.create({ userId, type: TRADE_TYPE_BEAN, amount: bean * -1, description });
+			await this.model.Trade.create({ userId, type: TRADE_TYPE_BEAN, amount: bean * -1, description });
 		}
 		if (user.coin && coin && user.coin >= coin && coin > 0) {
 			user.coin = user.coin - coin;
-			await this.model.Trades.create({ userId, type: TRADE_TYPE_COIN, amount: coin * -1, description });
+			await this.model.Trade.create({ userId, type: TRADE_TYPE_COIN, amount: coin * -1, description });
 		}
 
-		await this.model.Users.update(user, { fields: ["coin", "bean"], where: { id: userId }});
+		await this.model.User.update(user, { fields: ["coin", "bean"], where: { id: userId }});
 
 		return this.success("OK");
 	}
@@ -284,7 +284,7 @@ class UsersController extends Controller {
 
 		if (~~amount.rmb !== 3000) return this.throw(400, "导师金额不对");
 
-		const tutor = await this.model.tutors.getByUserId(userId) || { userId, tutorId };
+		const tutor = await this.model.Tutor.getByUserId(userId) || { userId, tutorId };
 		const curtitme = new Date().getTime();
 
 
@@ -296,7 +296,7 @@ class UsersController extends Controller {
 			tutor.endTime = (tutor.endTime || curtitme) + ONEYEAR;
 		}
 
-		await this.model.tutors.upsert(tutor);
+		await this.model.Tutor.upsert(tutor);
 
 		return this.success("OK");
 	}

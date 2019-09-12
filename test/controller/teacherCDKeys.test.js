@@ -3,7 +3,7 @@ const { app, mock, assert } = require("egg-mock/bootstrap");
 
 describe("test/controller/admins/teacherCDKeys.test.js", () => {
 	before(async () => {
-		const teacherCDKeys = app.model.TeacherCDKeys;
+		const teacherCDKeys = app.model.TeacherCDKey;
 		await teacherCDKeys.truncate();
 	});
 
@@ -18,7 +18,7 @@ describe("test/controller/admins/teacherCDKeys.test.js", () => {
 		assert(data.length, 20);
 
 		data = await app.httpRequest()
-			.get("/admins/teacherCDKeys")
+			.get("/admins/teacherCDKey")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.equal(data.count, 20);
@@ -29,7 +29,7 @@ describe("test/controller/admins/teacherCDKeys.test.js", () => {
 			.expect(200).then(res => res.body);
 
 		data = await app.httpRequest()
-			.get("/admins/teacherCDKeys")
+			.get("/admins/teacherCDKey")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.equal(data.count, 21);
@@ -44,28 +44,28 @@ describe("test/controller/admins/teacherCDKeys.test.js", () => {
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 
-		await app.httpRequest().put("/admins/teacherCDKeys/1")
+		await app.httpRequest().put("/admins/teacherCDKey/1")
 			.send({
 				state: 1
 			}).set("Authorization", `Bearer ${token}`).expect(200);
 
 		let data = await app.httpRequest()
-			.get("/admins/teacherCDKeys")
+			.get("/admins/teacherCDKey")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 
 		assert(data.rows[0].state === 1);
 
 		await app.httpRequest()
-			.delete("/admins/teacherCDKeys/1")
+			.delete("/admins/teacherCDKey/1")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200);
 
 		data = await app.httpRequest()
-			.get("/admins/teacherCDKeys")
+			.get("/admins/teacherCDKey")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 
-		assert(data.count === 0);
+		assert(data.count === 21);
 	});
 });

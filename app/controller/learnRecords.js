@@ -13,7 +13,7 @@ class LearnRecordsController extends Controller {
 		const { userId } = this.authenticated();
 		query.userId = userId;
 
-		const result = await this.model.LearnRecords.findAndCount({ ...this.queryOptions, where: query });
+		const result = await this.model.LearnRecord.findAndCount({ ...this.queryOptions, where: query });
 
 		return this.success(result);
 	}
@@ -26,7 +26,7 @@ class LearnRecordsController extends Controller {
 		this.enauthenticated();
 		const userId = this.getUser().userId;
 
-		const lr = await ctx.model.LearnRecords.findOne({ where: { id, userId } });
+		const lr = await ctx.model.LearnRecord.findOne({ where: { id, userId } });
 
 		if (!lr) ctr.throw(404, "not found");
 
@@ -55,10 +55,10 @@ class LearnRecordsController extends Controller {
 
 		//if (!data) this.throw(500, "未购买课程包");
 
-		let learnRecord = await ctx.model.LearnRecords.createLearnRecord(params);
+		let learnRecord = await ctx.model.LearnRecord.createLearnRecord(params);
 
 		if (!params.classroomId) {
-			await this.app.model.lessonOrganizationLogs.classroomLog({
+			await this.app.model.LessonOrganizationLog.classroomLog({
 				lr: learnRecord, action: "learn", handleId: userId, username, organizationId
 			});
 		}
@@ -73,11 +73,11 @@ class LearnRecordsController extends Controller {
 		if (!id) ctx.throw(400, "id invalid");
 		const userId = this.getUser().userId || 0;
 
-		const lr = await ctx.model.LearnRecords.getById(id, userId);
+		const lr = await ctx.model.LearnRecord.getById(id, userId);
 		if (!lr) ctx.throw(400, "args error");
 
 		if (lr.classroomId) {
-			const isClassing = await ctx.model.Classrooms.isClassing(lr.classroomId);
+			const isClassing = await ctx.model.Classroom.isClassing(lr.classroomId);
 			if (!isClassing) ctx.throw(400, "已下课");
 		}
 		params.id = id;
@@ -87,7 +87,7 @@ class LearnRecordsController extends Controller {
 		delete params.lessonId;
 		delete params.classroomId;
 
-		await ctx.model.LearnRecords.updateLearnRecord(params);
+		await ctx.model.LearnRecord.updateLearnRecord(params);
 
 		return this.success("OK");
 	}
@@ -100,7 +100,7 @@ class LearnRecordsController extends Controller {
 		this.enauthenticated();
 		const userId = this.getUser().userId;
 
-		const result = await ctx.model.LearnRecords.destroy({
+		const result = await ctx.model.LearnRecord.destroy({
 			where: { id, userId },
 		});
 
@@ -114,12 +114,12 @@ class LearnRecordsController extends Controller {
 		this.enauthenticated();
 		const userId = this.getUser().userId;
 
-		const lr = await ctx.model.LearnRecords.getById(id, userId);
-		const pack = await ctx.model.Packages.getById(lr.packageId);
+		const lr = await ctx.model.LearnRecord.getById(id, userId);
+		const pack = await ctx.model.Package.getById(lr.packageId);
 
 		if (!pack || pack.state != PACKAGE_STATE_AUDIT_SUCCESS) return this.success({ coin: 0, bean: 0 });
 
-		const data = await ctx.model.LessonRewards.rewards(userId, lr.packageId, lr.lessonId);
+		const data = await ctx.model.LessonReward.rewards(userId, lr.packageId, lr.lessonId);
 
 		return this.success(data || { coin: 0, bean: 0 });
 	}
@@ -130,10 +130,10 @@ class LearnRecordsController extends Controller {
 		const userId = this.getUser().userId;
 		const params = this.validate({ "packageId": "int", "lessonId": "int" });
 
-		const pack = await ctx.model.Packages.getById(params.packageId);
+		const pack = await ctx.model.Package.getById(params.packageId);
 		if (!pack || pack.state != PACKAGE_STATE_AUDIT_SUCCESS) return this.success({ coin: 10, bean: 10 });
 
-		let data = await this.model.LessonRewards.findOne({
+		let data = await this.model.LessonReward.findOne({
 			where: {
 				userId,
 				packageId: params.packageId,

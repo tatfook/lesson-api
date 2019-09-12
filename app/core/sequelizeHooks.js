@@ -2,7 +2,7 @@ const _ = require("lodash");
 
 module.exports = app => {
 
-	const models = { "packages": "Packages" };
+	const models = { "packages": "Package" };
 
 	async function getList(options) {
 		const { model, where } = options;
@@ -45,8 +45,8 @@ module.exports = app => {
 		const tableName = model.getTableName();
 		const list = await getList(options);
 		for (let i = 0; i < list.length; i++) {
-			await app.model.PackageLessons.destroy({ where: { packageId: list[i].id }});
-			await app.model.lessonOrganizationPackages.destroy({ where: { packageId: list[i].id }});
+			await app.model.PackageLesson.destroy({ where: { packageId: list[i].id }});
+			await app.model.LessonOrganizationPackage.destroy({ where: { packageId: list[i].id }});
 			await app.api[tableName + "Destroy"](list[i]);
 		}
 	});

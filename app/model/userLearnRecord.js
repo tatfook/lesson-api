@@ -65,7 +65,7 @@ module.exports = app => {
 	};
 
 	model.getLearnedLessons = async function (userId, packageId) {
-		const list = await app.model.UserLearnRecords.findAll({
+		const list = await app.model.UserLearnRecord.findAll({
 			where: {
 				userId,
 				packageId,
@@ -79,7 +79,7 @@ module.exports = app => {
 
 		return lessons;
 	};
-	app.model.userLearnRecords = model;
+	app.model.UserLearnRecord = model;
 
 	return model;
 };

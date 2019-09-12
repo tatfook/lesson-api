@@ -94,7 +94,7 @@ module.exports = app => {
 
 		if (userId) where.userId = userId;
 
-		const data = await app.model.Packages.findOne({ where });
+		const data = await app.model.Package.findOne({ where });
 
 		return data && data.get({ plain: true });
 	};
@@ -105,23 +105,23 @@ module.exports = app => {
 			return;
 		};
 
-		await app.model.Packages.update({ auditAt: new Date() }, { where: { id: packageId }});
-		await app.model.Subscribes.upsert({ userId, packageId });
+		await app.model.Package.update({ auditAt: new Date() }, { where: { id: packageId }});
+		await app.model.Subscribe.upsert({ userId, packageId });
 	};
 
 	model.addLesson = async function (userId, packageId, lessonId, lessonNo) {
-		let data = await app.model.Packages.findOne({ where: { userId, id: packageId }});
+		let data = await app.model.Package.findOne({ where: { userId, id: packageId }});
 		if (!data) return false;
 
-		data = await app.model.Lessons.findOne({ where: { id: lessonId }});
+		data = await app.model.Lesson.findOne({ where: { id: lessonId }});
 
 		if (!data) return false;
 		if (!lessonNo) {
-			lessonNo = await app.model.PackageLessons.count({ where: { packageId, lessonId }});
+			lessonNo = await app.model.PackageLesson.count({ where: { packageId, lessonId }});
 			lessonNo += 1;
 		}
 
-		data = await app.model.PackageLessons.create({
+		data = await app.model.PackageLesson.create({
 			userId,
 			packageId,
 			lessonId,
@@ -136,7 +136,7 @@ module.exports = app => {
 	};
 
 	model.putLesson = async function (userId, packageId, lessonId, lessonNo) {
-		return await app.model.PackageLessons.update({ extra: { lessonNo }}, {
+		return await app.model.PackageLesson.update({ extra: { lessonNo }}, {
 			where: {
 				userId,
 				packageId,
@@ -149,7 +149,7 @@ module.exports = app => {
 		// let data = await app.model.Packages.findOne({where: {userId, id: packageId}});
 		// if (!data) return false;
 
-		return await app.model.PackageLessons.destroy({
+		return await app.model.PackageLesson.destroy({
 			where: {
 				userId,
 				packageId,
@@ -182,10 +182,10 @@ module.exports = app => {
 		await this.audit(obj.id, obj.userId, obj.state);
 	};
 
-	app.model.packages = model;
+	app.model.Package = model;
 
 	model.associate = () => {
-		app.model.packages.hasMany(app.model.packageLessons, {
+		app.model.Package.hasMany(app.model.PackageLesson, {
 			as: "packageLessons",
 			foreignKey: "packageId",
 			sourceKey: "id",

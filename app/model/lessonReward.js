@@ -70,11 +70,11 @@ module.exports = app => {
 		if (!account) return;
 
 		// 是否学习完成
-		let data = await app.model.UserLearnRecords.findOne({ where });
+		let data = await app.model.UserLearnRecord.findOne({ where });
 		if (!data) return;
 
 		// 是否已领取
-		let lessonReward = await app.model.LessonRewards.findOne({ where }).then(o => o && o.toJSON());
+		let lessonReward = await app.model.LessonReward.findOne({ where }).then(o => o && o.toJSON());
 		lessonReward = lessonReward || { userId, packageId, lessonId, coin: 0, bean: 0 };
 
 		let beanCount = lessonReward.bean ? 0 : 10; // 已奖励则不再奖励
@@ -85,12 +85,12 @@ module.exports = app => {
 		if (~~coinCount === 0 && ~~beanCount === 0) return { coin: coinCount, bean: beanCount };
 
 		// 创建返还记录
-		await app.model.LessonRewards.upsert(lessonReward);
+		await app.model.LessonReward.upsert(lessonReward);
 
 		// 扣除用户可返还余额
 		await app.keepworkModel.accounts.increment({ coin: coinCount, bean: beanCount, lockCoin: 0 - coinCount }, { where: { userId }});
 
-		const lesson = await app.model.Lessons.getById(lessonId);
+		const lesson = await app.model.Lesson.getById(lessonId);
 		await app.keepworkModel.trades.create({
 			userId,
 			type: TRADE_TYPE_LESSON_STUDY,

@@ -37,11 +37,11 @@ module.exports = app => {
 	// model.sync({force:true});
 
 	model.getSkills = async function (subjectId) {
-		return await app.model.Skills.findAll({ where: { subjectId }});
+		return await app.model.Skill.findAll({ where: { subjectId }});
 	};
 
 	model.getOne = async function (subjectId) {
-		let subject = await app.model.Subjects.findOne({ where: { id: subjectId }});
+		let subject = await app.model.Subject.findOne({ where: { id: subjectId }});
 		if (!subject) return;
 
 		subject = subject.get({ plain: true });
@@ -52,7 +52,7 @@ module.exports = app => {
 	};
 
 	model.gets = async function () {
-		const list = await app.model.Subjects.findAll();
+		const list = await app.model.Subject.findAll();
 
 		const subjects = [];
 		for (let i = 0; i < list.length; i++) {

@@ -59,7 +59,7 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	app.model.lessonOrganizationLogs = model;
+	app.model.LessonOrganizationLog = model;
 
 	model.classroomLog = async function ({ classroom = {}, lr, action = "create", username, handleId, organizationId }) {
 		const log = {
@@ -80,9 +80,9 @@ module.exports = app => {
 		} else if (action === "learn") {
 			const packageId = lr.packageId;
 			const lessonId = lr.lessonId;
-			const pkg = await app.model.packages.findOne({ where: { id: packageId }});
-			const lesson = await app.model.lessons.findOne({ where: { id: lessonId }});
-			const packageLesson = await app.model.PackageLessons.findOne({ where: { packageId: packageId, lessonId: lessonId }});
+			const pkg = await app.model.Package.findOne({ where: { id: packageId }});
+			const lesson = await app.model.Lesson.findOne({ where: { id: lessonId }});
+			const packageLesson = await app.model.PackageLesson.findOne({ where: { packageId: packageId, lessonId: lessonId }});
 			const packageName = pkg.packageName;
 			const lessonName = lesson.lessonName;
 			const lessonNo = packageLesson.extra.lessonNo;
@@ -91,7 +91,7 @@ module.exports = app => {
 		} else {
 			return;
 		}
-		await app.model.lessonOrganizationLogs.create(log);
+		await app.model.LessonOrganizationLog.create(log);
 	};
 
 	return model;

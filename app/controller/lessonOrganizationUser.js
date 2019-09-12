@@ -56,7 +56,7 @@ const LessonOrganizationUser = class extends Controller {
 			roleId: CLASS_MEMBER_ROLE_STUDENT,
 			bind: 1,
 		}));
-		await this.model.lessonOrganizationClassMembers.bulkCreate(members);
+		await this.model.LessonOrganizationClassMember.bulkCreate(members);
 
 		const userinfos = users.map(u => ({ userId: u.id, registerUsername: _.toString(u.id + 10000) }));
 		await this.keepworkModel.userinfos.bulkCreate(userinfos);
@@ -84,11 +84,11 @@ const LessonOrganizationUser = class extends Controller {
 		}
 		if (roleId < CLASS_MEMBER_ROLE_TEACHER) return this.throw(400, "无权限操作");
 		let { classId } = params;;
-		const members = await this.model.lessonOrganizationClassMembers.findAll({
+		const members = await this.model.LessonOrganizationClassMember.findAll({
 			where: { classId, organizationId, bind: 1 }
 		}).then(list => list.map(o => o.toJSON()));
 
-		await this.model.lessonOrganizationClassMembers.update({ state: 0 }, { where: { classId, organizationId, bind: 1 }});
+		await this.model.LessonOrganizationClassMember.update({ state: 0 }, { where: { classId, organizationId, bind: 1 }});
 		const ids = members.map(o => o.memberId);
 		await this.ctx.keepworkModel.Users.update({ realname: null }, { where: { id: { "$in": ids }}});
 
@@ -110,7 +110,7 @@ const LessonOrganizationUser = class extends Controller {
 		if (roleId < CLASS_MEMBER_ROLE_TEACHER) return this.throw(400, "无权限操作");
 		const { password, classId, memberId } = params;
 
-		const member = await this.model.lessonOrganizationClassMembers.findOne({
+		const member = await this.model.LessonOrganizationClassMember.findOne({
 			where: { organizationId, classId, memberId }
 		}).then(o => o && o.toJSON());
 

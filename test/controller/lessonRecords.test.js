@@ -3,37 +3,37 @@ const { app, mock, assert } = require("egg-mock/bootstrap");
 
 describe("LearnRecords", () => {
 	before(async () => {
-		await app.model.Lessons.sync({ force: true });
-		await app.model.Subjects.sync({ force: true });
-		await app.model.Skills.sync({ force: true });
-		await app.model.LessonSkills.sync({ force: true });
-		await app.model.LearnRecords.sync({ force: true });
-		await app.model.UserLearnRecords.sync({ force: true });
-		await app.model.Packages.sync({ force: true });
-		await app.model.Subscribes.sync({ force: true });
-		await app.model.LessonRewards.sync({ force: true });
-		await app.model.PackageLessons.sync({ force: true });
-		await app.model.LessonContents.sync({ force: true });
-		await app.model.Teachers.sync({ force: true });
-		await app.model.TeacherCDKeys.sync({ force: true });
-		await app.model.Classrooms.sync({ force: true });
-		await app.model.Users.sync({ force: true });
+		await app.model.Lesson.sync({ force: true });
+		await app.model.Subject.sync({ force: true });
+		await app.model.Skill.sync({ force: true });
+		await app.model.LessonSkill.sync({ force: true });
+		await app.model.LearnRecord.sync({ force: true });
+		await app.model.UserLearnRecord.sync({ force: true });
+		await app.model.Package.sync({ force: true });
+		await app.model.Subscribe.sync({ force: true });
+		await app.model.LessonReward.sync({ force: true });
+		await app.model.PackageLesson.sync({ force: true });
+		await app.model.LessonContent.sync({ force: true });
+		await app.model.Teacher.sync({ force: true });
+		await app.model.TeacherCDKey.sync({ force: true });
+		await app.model.Classroom.sync({ force: true });
+		await app.model.User.sync({ force: true });
 
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
 
 		await app.httpRequest().get("/users").set("Authorization", `Bearer ${token}`).expect(200);
 
-		await app.model.Subjects.create({
+		await app.model.Subject.create({
 			subjectName: "前端",
 		});
-		await app.model.Subjects.create({
+		await app.model.Subject.create({
 			subjectName: "后端",
 		});
-		await app.model.Skills.create({
+		await app.model.Skill.create({
 			skillName: "唱歌",
 		});
-		await app.model.Skills.create({
+		await app.model.Skill.create({
 			skillName: "跳舞",
 		});
 
@@ -64,7 +64,7 @@ describe("LearnRecords", () => {
 			},
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
-		await app.model.Packages.update({ state: 2 }, { where: { id: 1 }});
+		await app.model.Package.update({ state: 2 }, { where: { id: 1 }});
 	});
 
 

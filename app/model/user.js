@@ -64,21 +64,21 @@ module.exports = app => {
 	// model.sync({force:true});
 
 	model.updateExtra = async function (userId, extra) {
-		const user = await app.model.Users.getById(userId);
+		const user = await app.model.User.getById(userId);
 
 		if (!user) return;
 
 		const userExtra = user.extra || {};
 		_.merge(userExtra, extra);
 
-		await app.model.Users.update({ extra: userExtra }, { where: { id: user.id }});
+		await app.model.User.update({ extra: userExtra }, { where: { id: user.id }});
 	};
 
 	model.getById = async function (userId, username) {
-		let data = await app.model.Users.findOne({ where: { id: userId }});
+		let data = await app.model.User.findOne({ where: { id: userId }});
 		const amount = 0;
 		if (!data && userId) {
-			data = await app.model.Users.create({
+			data = await app.model.User.create({
 				id: userId,
 				username: username || "",
 				coin: amount,
@@ -98,7 +98,7 @@ module.exports = app => {
 	};
 
 	model.isTeacher = async function (userId) {
-		let user = await app.model.Users.findOne({ where: { id: userId }});
+		let user = await app.model.User.findOne({ where: { id: userId }});
 		if (!user) return false;
 
 		user = user.get({ plain: true });
@@ -119,35 +119,35 @@ module.exports = app => {
 		if (datestr !== learn.lastLearnDate) {
 			learn.learnDayCount = (learn.learnDayCount || 0) + 1;
 			learn.lastLearnDate = datestr;
-			await app.model.Users.update({ extra: user.extra }, { where: { id: user.id }});
+			await app.model.User.update({ extra: user.extra }, { where: { id: user.id }});
 		}
 	};
 
-	app.model.users = model;
+	app.model.User = model;
 
 	model.associate = () => {
-		app.model.users.hasOne(app.model.tutors, {
+		app.model.User.hasOne(app.model.Tutor, {
 			as: "student",
 			foreignKey: "userId",
 			constraints: false,
 		});
-		app.model.users.hasOne(app.model.tutors, {
+		app.model.User.hasOne(app.model.Tutor, {
 			as: "tutor",
 			foreignKey: "tutorId",
 			constraints: false,
 		});
-		app.model.users.hasOne(app.model.teachers, {
+		app.model.User.hasOne(app.model.Teacher, {
 			as: "teachers",
 			foreignKey: "userId",
 			constraints: false,
 		});
-		app.model.users.hasMany(app.model.lessonOrganizations, {
+		app.model.User.hasMany(app.model.LessonOrganization, {
 			as: "lessonOrganizations",
 			foreignKey: "userId",
 			sourceKey: "id",
 			constraints: false,
 		});
-		app.model.users.hasOne(app.model.lessonOrganizationClassMembers, {
+		app.model.User.hasOne(app.model.LessonOrganizationClassMember, {
 			as: "lessonOrganizationClassMembers",
 			foreignKey: "memberId",
 			sourceKey: "id",

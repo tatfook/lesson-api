@@ -46,19 +46,19 @@ module.exports = app => {
 	// model.sync({force:true});
 
 	model.getByUserId = async function (userId) {
-		return await app.model.tutors.findOne({ where: { userId }}).then(o => o && o.toJSON());
+		return await app.model.Tutor.findOne({ where: { userId }}).then(o => o && o.toJSON());
 	};
 
-	app.model.tutors = model;
+	app.model.Tutor = model;
 
 	model.associate = () => {
-		app.model.tutors.belongsTo(app.model.users, {
+		app.model.Tutor.belongsTo(app.model.User, {
 			as: "student",
 			foreignKey: "userId",
 			targetKey: "id",
 			constraints: false,
 		});
-		app.model.tutors.belongsTo(app.model.users, {
+		app.model.Tutor.belongsTo(app.model.User, {
 			as: "tutor",
 			foreignKey: "tutorId",
 			targetKey: "id",

@@ -3,7 +3,7 @@ const { app, mock, assert } = require("egg-mock/bootstrap");
 
 describe("/admins/subjects.test.js", () => {
 	before(async () => {
-		const subjects = app.model.Subjects;
+		const subjects = app.model.Subject;
 		await subjects.truncate();
 	});
 
@@ -11,11 +11,11 @@ describe("/admins/subjects.test.js", () => {
 		const token = await app.adminLogin().then(o => o.token);
 		assert.ok(token);
 
-		await app.httpRequest().post("/admins/subjects").send({
+		await app.httpRequest().post("/admins/subject").send({
 			subjectName: "数学",
 		}).set("Authorization", `Bearer ${token}`).expect(200);
 
-		await app.httpRequest().post("/admins/subjects").send({
+		await app.httpRequest().post("/admins/subject").send({
 			subjectName: "英语",
 		}).set("Authorization", `Bearer ${token}`).expect(200);
 	});
@@ -24,7 +24,7 @@ describe("/admins/subjects.test.js", () => {
 		const token = await app.adminLogin().then(o => o.token);
 		assert.ok(token);
 
-		let list = await app.httpRequest().get("/admins/subjects")
+		let list = await app.httpRequest().get("/admins/subject")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.equal(list.count, 2);
 
@@ -38,7 +38,7 @@ describe("/admins/subjects.test.js", () => {
 		const token = await app.adminLogin().then(o => o.token);
 		assert.ok(token);
 
-		const subject = await app.httpRequest().get("/admins/subjects/1")
+		const subject = await app.httpRequest().get("/admins/subject/1")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.ok(subject);
 		assert.equal(subject.subjectName, "数学");
@@ -48,9 +48,9 @@ describe("/admins/subjects.test.js", () => {
 		const token = await app.adminLogin().then(o => o.token);
 		assert.ok(token);
 
-		await app.httpRequest().delete("/admins/subjects/1")
+		await app.httpRequest().delete("/admins/subject/1")
 			.set("Authorization", `Bearer ${token}`).expect(200);
-		const list = await app.httpRequest().get("/admins/subjects")
+		const list = await app.httpRequest().get("/admins/subject")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.equal(list.count, 1);
 	});
