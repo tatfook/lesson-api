@@ -1,6 +1,11 @@
 
 const moment = require("moment");
 
+const {
+	CLASS_MEMBER_ROLE_STUDENT,
+	CLASS_MEMBER_ROLE_TEACHER
+} = consts;
+
 module.exports = app => {
 	const {
 		BIGINT,
