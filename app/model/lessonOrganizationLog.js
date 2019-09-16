@@ -129,7 +129,7 @@ module.exports = app => {
 	model.studentLog = async function ({ oldmembers, roleId, classIds, realname = "", memberId, username, handleId, organizationId }) {
 		if (classIds.length === 0) {
 			if (!oldmembers || oldmembers.length === 0) {
-				oldmembers = await app.model.lessonOrganizationClassMembers.findAll({
+				oldmembers = await app.model.LessonOrganizationClassMember.findAll({
 					where: { memberId, organizationId }
 				}).then(list => list.map(o => o.toJSON()));
 			}
@@ -167,7 +167,7 @@ module.exports = app => {
 		for (let i = 0; i < oldmembers.length; i++) {
 			const member = oldmembers[i];
 			const index = classIds.indexOf(member.classId);
-			const cls = await app.model.lessonOrganizationClasses.findOne({ where: { id: member.classId }});
+			const cls = await app.model.LessonOrganizationClass.findOne({ where: { id: member.classId }});
 			member.realname = member.realname || "";
 			if (index < 0 && cls) {
 				if (roleId === CLASS_MEMBER_ROLE_STUDENT) {
