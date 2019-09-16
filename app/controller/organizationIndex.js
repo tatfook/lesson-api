@@ -43,7 +43,7 @@ const Index = class extends Controller {
 	// 日志
 	async log() {
 		let { organizationId, roleId } = this.authenticated();
-		if (roleId < CLASS_MEMBER_ROLE_ADMIN) return this.throw(400);
+		if (roleId < CLASS_MEMBER_ROLE_TEACHER) return this.throw(400);
 
 		const query = this.validate();
 		this.formatQuery(query);
