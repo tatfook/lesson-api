@@ -5,7 +5,7 @@ const _ = require("lodash");
 const {
 	CLASS_MEMBER_ROLE_STUDENT,
 	CLASS_MEMBER_ROLE_TEACHER
-} = consts;
+} = require("../core/consts.js");
 
 module.exports = app => {
 	const {
