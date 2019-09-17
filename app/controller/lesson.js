@@ -201,13 +201,13 @@ class LessonsController extends Controller {
 
 	async release() {
 		const { ctx } = this;
-		const id = _.toNumber(ctx.params.id);
+		const params = this.validate({
+			id: "number",
+			// content: "string_optional",
+			// courseware: "string_optional",
+		});
+		const id = params.id;
 		if (!id) ctx.throw(400, "id invalid");
-
-		const params = ctx.request.body;
-		ctx.validate({
-			content: "string",
-		}, params);
 
 		this.enauthenticated();
 		const userId = this.getUser().userId;
@@ -215,7 +215,7 @@ class LessonsController extends Controller {
 		const lesson = await ctx.model.Lesson.getById(id, userId);
 		if (!lesson) ctx.throw(400, "args error");
 
-		const result = await ctx.model.LessonContent.release(userId, id, params.content);
+		const result = await ctx.model.LessonContent.release(userId, id, params.content || null, params.courseware || null);
 
 		return this.success(result);
 	}

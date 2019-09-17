@@ -283,6 +283,15 @@ const LessonOrganizationClassMember = class extends Controller {
 			await this.model.LessonOrganizationClassMember.update({ roleId: member.roleId & (~params.roleId) }, { where: { id } });
 		}
 
+		const memberRoleId = params.roleId ? params.roleId : member.roleId;
+		await this.model.LessonOrganizationLog.studentLog({
+			organizationId,
+			handleId: userId,
+			username,
+			oldmembers: [member],
+			classIds: [-1],
+			roleId: memberRoleId & CLASS_MEMBER_ROLE_TEACHER ? CLASS_MEMBER_ROLE_TEACHER : CLASS_MEMBER_ROLE_STUDENT,
+		});
 		return this.success("OK");
 	}
 

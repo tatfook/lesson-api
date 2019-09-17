@@ -36,6 +36,11 @@ module.exports = app => {
 			defaultValue: "",
 		},
 
+		courseware: { // 课件内容
+			type: TEXT,
+			defaultValue: "",
+		},
+
 		extra: {
 			type: JSON,
 			defaultValue: {},
@@ -49,7 +54,7 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	model.release = async function (userId, lessonId, content) {
+	model.release = async function (userId, lessonId, content, courseware) {
 		let count = await app.model.LessonContent.count({
 			where: {
 				userId,
@@ -59,11 +64,13 @@ module.exports = app => {
 
 		count = count + 1;
 
+		const olddata = await model.content(lessonId);
 		const data = await app.model.LessonContent.create({
 			userId,
 			version: count,
 			lessonId,
-			content,
+			content: content || olddata.content || "",
+			courseware: courseware || olddata.courseware || "",
 		});
 
 		return data;
