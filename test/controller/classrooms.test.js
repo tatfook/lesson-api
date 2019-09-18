@@ -76,8 +76,8 @@ describe("test/controller/classrooms.test.js", () => {
 		let classroom = await app.httpRequest().post("/classrooms").send({
 			packageId: 1, lessonId: 1
 		}).set("Authorization", `Bearer ${token}`).expect(res => assert(res.statusCode === 200)).then(res => res.body);
-		const classroomId = classroom.id;
-		assert.equal(classroom.id, 1);
+		const classroomId = classroom.data.id;
+		assert.equal(classroom.data.id, 1);
 
 		await app.httpRequest().post("/classrooms").send({ // packageId && lessonId错误
 			packageId: 999, lessonId: 999
@@ -90,8 +90,8 @@ describe("test/controller/classrooms.test.js", () => {
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 
-		assert(classroom2.count === 1);
-		assert(classroom2.rows.length === 1);
+		assert(classroom2.data.count === 1);
+		assert(classroom2.data.rows.length === 1);
 
 		// 进入课堂
 		const token2 = app.util.jwt_encode({ userId: 2, username: "wxatest" }, app.config.self.secret);
@@ -100,12 +100,12 @@ describe("test/controller/classrooms.test.js", () => {
 			.then(res => res.body);
 
 		const valid = await app.httpRequest()
-			.get(`/classrooms/valid?key=${classroom.key}`)
+			.get(`/classrooms/valid?key=${classroom.data.key}`)
 			.expect(200).then(res => res.body);
-		assert(valid === true);
+		assert(valid.data === true);
 
 		await app.httpRequest().post("/classrooms/join").send({
-			key: classroom.key
+			key: classroom.data.key
 		})
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(res => assert(res.statusCode === 200)).then(res => res.body);
@@ -125,7 +125,7 @@ describe("test/controller/classrooms.test.js", () => {
 			.set("Authorization", `Bearer ${token}`)
 			.expect(res => assert(res.statusCode === 200))
 			.then(res => res.body);
-		assert.equal(classroom.state, 2);
+		assert.equal(classroom.data.state, 2);
 
 		// 课堂不存在
 		let ret = await app.httpRequest().post("/classrooms/join").send({
@@ -133,7 +133,7 @@ describe("test/controller/classrooms.test.js", () => {
 		})
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(400).then(res => res.body);
-		assert(ret.code === 1);
+		assert(ret.message === "课堂不存在");
 
 		// 自学
 		await app.httpRequest().post("/learnRecords")
@@ -152,13 +152,12 @@ describe("test/controller/classrooms.test.js", () => {
 		await app.model.Package.create({ userId: 1, packageName: "unique" });
 
 		await app.model.Lesson.create({ userId: 1, lessonName: "unique", url: "hahh" });
-
 		// 创建课堂
 		let classroom = await app.httpRequest().post("/classrooms").send({
 			packageId: 1, lessonId: 1
 		}).set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.equal(classroom.id, 2);
+		assert.equal(classroom.data.id, 2);
 
 		await app.httpRequest().put("/classrooms/1").send({ // 修改课堂
 			packageId: 2
@@ -166,17 +165,18 @@ describe("test/controller/classrooms.test.js", () => {
 
 		classroom = await app.httpRequest().get("/classrooms/1").then(res => res.body);
 
-		assert(classroom.packageId === 2);
+		assert(classroom.data.packageId === 2);
 
 		classroom = await app.httpRequest()// 通过key获取课堂
-			.get(`/classrooms/getByKey?key=${classroom.key}`)
+			.get(`/classrooms/getByKey?key=${classroom.data.key}`)
 			.expect(200).then(res => res.body);
 
-		assert(classroom.packageId === 2);
+		assert(classroom.data.packageId === 2);
 
 		classroom = await app.httpRequest().get("/classrooms/current")// 当前课堂
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(classroom.id, 2);
+		assert.equal(classroom.data.id, 2);
+
 	});
 });
 

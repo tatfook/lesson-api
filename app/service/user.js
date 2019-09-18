@@ -1,3 +1,5 @@
+"use strict";
+
 const _ = require('lodash');
 const Service = require('egg').Service;
 
@@ -95,6 +97,26 @@ class User extends Service {
 
 	async register(user) {
 		await this.createRegisterMsg(user);
+	}
+
+	/**
+	 * 通过条件获取user
+	 * @param {*} condition 必选,对象
+	 */
+	async getByCondition(condition) {
+		let data = await this.ctx.model.Classroom.findOne({ where: condition });
+		if (data) data = data.get({ plain: true });
+
+		return data;
+	}
+
+	/**
+	 * 通过userId找一个用户，如果没有则创建
+	 * @param {*} userId 必选
+	 * @param {*} username 可选
+	 */
+	async getById(userId, username) {
+		return await this.ctx.model.User.getById(userId, username);
 	}
 }
 

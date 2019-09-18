@@ -68,6 +68,22 @@ module.exports = app => {
 		return count;
 	};
 
+	// 
+	model.getLessonCountByPackageIds2 = async function (packageIds = []) {
+		if (packageIds.length === 0) return [];
+
+		const sql = `select packageId, count(*) as count from packageLessons group by packageId having packageId in (:packageIds)`;
+
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				packageIds,
+			},
+		});
+
+		return list;
+	};
+
 	model.associate = () => {
 		app.model.PackageLesson.belongsTo(app.model.Package, {
 			as: "packages",
