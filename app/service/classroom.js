@@ -53,7 +53,7 @@ class ClassroomService extends Service {
 			this.ctx.service.lesson.getByCondition({ id: params.lessonId })
 		]);
 
-		if (!packageLesson || !_package || !lesson) return { errMsg: Err.LESSON_OR_PACKAGE_NOT_EXISTS };
+		if (!packageLesson || !_package || !lesson) return this.ctx.throw(400, Err.LESSON_OR_PACKAGE_NOT_EXISTS);
 
 		const _extra = {
 			...(params.extra || {}),
@@ -101,18 +101,18 @@ class ClassroomService extends Service {
 	 */
 	async joinClassroom(params) {
 		const classroom = await this.getByCondition({ key: params.key });
-		if (!classroom) return { errMsg: Err.CLASSROOM_NOT_EXISTS };
+		if (!classroom) return this.ctx.throw(400, Err.CLASSROOM_NOT_EXISTS);
 
 		// 判断这个人是不是这个班级的
 		if (classroom.classId && params.userId) {
 			const member = await this.ctx.service.lessonOrganizationClassMember.getByCondition({
 				classId: classroom.classId, memberId: params.userId
 			});
-			if (!member) return { errMsg: Err.NOT_YOUR_CLASS };
+			if (!member) return this.ctx.throw(400, Err.NOT_YOUR_CLASS);
 		}
 
 		const data = await this.ctx.model.Classroom.join(params.userId, params.key, params.username);
-		if (!data) return { errMsg: Err.UNKNOWN_ERR };
+		if (!data) return this.ctx.throw(400, Err.UNKNOWN_ERR);
 
 		await this.ctx.service.lessonOrganizationLog.classroomLog({
 			classroom, action: "join",
@@ -132,12 +132,12 @@ class ClassroomService extends Service {
 		const user = await this.ctx.service.user.getById(userId);
 
 		const classroomId = user.extra.classroomId;
-		if (!classroomId) return { errMsg: Err.DONT_IN_CLASSROOM_NOW };
+		if (!classroomId) return this.ctx.throw(400, Err.DONT_IN_CLASSROOM_NOW);
 
 		const classroom = await this.getByCondition({ id: classroomId });
-		if (!classroom) return { errMsg: Err.CLASSROOM_NOT_EXISTS };
+		if (!classroom) return this.ctx.throw(400, Err.CLASSROOM_NOT_EXISTS);
 
-		if (classroom.state !== CLASSROOM_STATE_USING) return { errMsg: Err.CLASSROOM_FINISHED };
+		if (classroom.state !== CLASSROOM_STATE_USING) return this.ctx.throw(400, Err.CLASSROOM_FINISHED);
 
 		// 如果是跟着班级学的，判断班级是否有效
 		if (classroom.classId) {
@@ -145,7 +145,7 @@ class ClassroomService extends Service {
 				id: classroom.classId,
 				end: { $gte: new Date() }
 			});
-			if (!cls) return { errMsg: Err.CLASS_NOT_EXIST }
+			if (!cls) return this.ctx.throw(400, Err.CLASS_NOT_EXIST);
 		}
 
 		// 获取学习记录

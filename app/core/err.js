@@ -31,5 +31,7 @@ module.exports = {
 	"DONT_IN_CLASSROOM_NOW": "当前没有在上课",
 	"CLASSROOM_FINISHED": "课堂已结束",
 	"CLASS_NOT_EXIST": "班级失效",
-	"ARGS_ERR": "参数错误"
+	"ARGS_ERR": "参数错误",
+	"SQL_ERR": "SQL不合法",
+	"AUTH_ERR": "没有权限",
 };

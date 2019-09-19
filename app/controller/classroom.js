@@ -19,7 +19,7 @@ class ClassroomsController extends Controller {
 		const userId = this.getUser().userId;
 		query.userId = userId;
 
-		const data = await this.ctx.service.classroom.findAndCount(query);
+		const data = await ctx.service.classroom.findAndCount(query);
 
 		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
@@ -27,9 +27,9 @@ class ClassroomsController extends Controller {
 	async show() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
 
-		const data = await this.ctx.service.classroom.getByCondition({ id });
+		const data = await ctx.service.classroom.getByCondition({ id });
 
 		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
@@ -44,23 +44,21 @@ class ClassroomsController extends Controller {
 			lessonId: "int",
 		});
 
-		const data = await this.ctx.service.classroom.checkAndCreateClassroom(params);
+		const data = await ctx.service.classroom.checkAndCreateClassroom(params);
 
-		if (data.errMsg)
-			return ctx.helper.fail({ ctx, status: 400, errMsg: data.errMsg });
 		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async update() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
 		const params = ctx.request.body;
 
 		const userId = this.getUser().userId;
 		params.userId = userId;
 
-		const data = await this.ctx.service.classroom.updateClassroom(params, id, userId);
+		const data = await ctx.service.classroom.updateClassroom(params, id, userId);
 
 		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
@@ -80,11 +78,11 @@ class ClassroomsController extends Controller {
 	async getByKey() {
 		const { ctx } = this;
 		const { key } = this.validate({ key: "string" });
-		const classroom = await this.ctx.service.classroom.getByCondition({ key });
+		const classroom = await ctx.service.classroom.getByCondition({ key });
 		if (!classroom)
-			return this.ctx.helper.fail({ ctx, status: 400, errMsg: Err.CLASSROOM_NOT_EXISTS });
+			return ctx.helper.fail({ ctx, status: 400, errMsg: Err.CLASSROOM_NOT_EXISTS });
 
-		return this.ctx.helper.success({ ctx, status: 200, res: classroom });
+		return ctx.helper.success({ ctx, status: 200, res: classroom });
 	}
 
 	async join() {
@@ -93,20 +91,18 @@ class ClassroomsController extends Controller {
 		const { userId = 0, organizationId, username } = this.getUser();
 		params = { ...params, userId, organizationId, username };
 
-		const data = await this.ctx.service.classroom.joinClassroom(params);
+		const data = await ctx.service.classroom.joinClassroom(params);
 
-		if (data.errMsg)
-			return ctx.helper.fail({ ctx, status: 400, errMsg: data.errMsg });
-		return this.ctx.helper.success({ ctx, status: 200, res: data });
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async quit() {
 		const { ctx } = this;
 		const { userId, username } = this.enauthenticated();
 
-		await this.ctx.service.classroom.quitClassroom(userId, username);
+		await ctx.service.classroom.quitClassroom(userId, username);
 
-		return this.ctx.helper.success({ ctx, status: 200, res: "ok" });
+		return ctx.helper.success({ ctx, status: 200, res: "ok" });
 	}
 
 	async current() {
@@ -116,8 +112,6 @@ class ClassroomsController extends Controller {
 
 		const data = await ctx.service.classroom.currentClassroom(userId);
 
-		if (data.errMsg)
-			return ctx.helper.fail({ ctx, status: 400, errMsg: data.errMsg });
 		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 

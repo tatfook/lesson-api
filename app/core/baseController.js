@@ -3,6 +3,7 @@ const _ = require("lodash");
 const Controller = require("egg").Controller;
 
 const Err = require("./err.js");
+const { KEEPWORKUSER_ADMIN_ROLEID } = require("./consts");
 
 const rules = {
 	"int": joi.number().required(),
@@ -93,7 +94,7 @@ class BaseController extends Controller {
 
 		const result = await model.findAndCount(query);
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async search() {
@@ -103,7 +104,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.findAndCount({ ...this.queryOptions, where: query });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async index() {
@@ -118,7 +119,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.findAndCount({ ...this.queryOptions, where: query });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async create() {
@@ -133,7 +134,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.create(params);
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async show() {
@@ -148,7 +149,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.findOne({ where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async update() {
@@ -165,7 +166,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.update(params, { where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async destroy() {
@@ -182,7 +183,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.destroy({ where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async postExtra() {
@@ -197,7 +198,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.update({ extra: params }, { where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async putExtra() {
@@ -220,7 +221,7 @@ class BaseController extends Controller {
 
 		const result = await model.update({ extra }, { where });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async getExtra() {
@@ -238,7 +239,7 @@ class BaseController extends Controller {
 		if (!data) this.throw(404);
 		data = data.get({ plain: true });
 
-		this.success(data.extra || {});
+		ctx.helper.success({ ctx, status: 200, res: data.extra || {} });
 	}
 
 	async deleteExtra() {
@@ -252,7 +253,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.update({ extra: {} }, { where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	getUser() {
@@ -261,7 +262,7 @@ class BaseController extends Controller {
 
 	// 确保认证  废弃
 	enauthenticated() {
-		if (!this.isAuthenticated()) this.ctx.throw(401, "unauthenticated");
+		if (!this.isAuthenticated()) return this.ctx.throw(401, "unauthenticated");
 
 		return this.getUser();
 	}
@@ -274,7 +275,7 @@ class BaseController extends Controller {
 		const config = this.config.self;
 		const token = this.ctx.state.token;
 		const user = this.app.util.jwt_decode(token || "", config.adminSecret, true);
-		if (!user) return this.throw(401);
+		if (!user) return this.ctx.throw(401, "unauthenticated");
 
 		return user;
 	}
@@ -295,7 +296,7 @@ class BaseController extends Controller {
 		this.enauthenticated();
 		const roleId = this.getUser().roleId;
 
-		if (roleId != 10) this.ctx.throw(403, "not admin");
+		if (roleId !== KEEPWORKUSER_ADMIN_ROLEID) this.ctx.throw(403, "not admin");
 	}
 
 	isAuthenticated() {

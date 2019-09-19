@@ -6,9 +6,16 @@ module.exports = (options, app) => {
 		try {
 			await next();
 		} catch (e) {
-			console.log("--------没关系啊，你不是抓到我了吗？O(∩_∩)O---------");
-			ctx.helper.fail({ ctx, status: 500, errMsg: "服务器异常" });
-			app.model.Log.create({ text: e.stack });
+			let status = 500;
+			let errMsg = "服务器异常";
+			if (e.status) { // 内部throw的错误
+				status = e.status;
+				errMsg = e.message;
+			} else {
+				app.model.Log.create({ text: e.stack });
+			}
+
+			ctx.helper.fail({ ctx, status, errMsg });
 		}
 	};
 };

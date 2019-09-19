@@ -15,25 +15,25 @@ describe("test/controller/admins.test.js", () => {
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(200).then(res => res.body);
 
-		assert(users.count === 1);
-		assert(users.rows[0].username === "test");
+		assert(users.data.count === 1);
+		assert(users.data.rows[0].username === "test");
 
-		users = await app.httpRequest().get(`/admins/user/${users.rows[0].id}`)// 获取指定资源
+		users = await app.httpRequest().get(`/admins/user/${users.data.rows[0].id}`)// 获取指定资源
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(200).then(res => res.body);
 
-		assert(users.username === "test");
+		assert(users.data.username === "test");
 
-		await app.httpRequest().put(`/admins/user/${users.id}`).send({ // 修改资源
+		await app.httpRequest().put(`/admins/user/${users.data.id}`).send({ // 修改资源
 			username: "test3"
 		}).set("Authorization", `Bearer ${token2}`)
 			.expect(200);
 
-		users = await app.httpRequest().get(`/admins/user/${users.id}`)// 获取指定资源
+		users = await app.httpRequest().get(`/admins/user/${users.data.id}`)// 获取指定资源
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(200).then(res => res.body);
 
-		assert(users.username === "test3");
+		assert(users.data.username === "test3");
 
 		await app.httpRequest()
 			.post("/admins/user")
@@ -45,11 +45,11 @@ describe("test/controller/admins.test.js", () => {
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(200).then(res => res.body);
 
-		assert(users.count === 2);
-		assert(users.rows[0].username === "test3");
-		assert(users.rows[1].username === "test2");
+		assert(users.data.count === 2);
+		assert(users.data.rows[0].username === "test3");
+		assert(users.data.rows[1].username === "test2");
 
-		await app.httpRequest().delete(`/admins/user/${users.rows[0].id}`)// 删除资源
+		await app.httpRequest().delete(`/admins/user/${users.data.rows[0].id}`)// 删除资源
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(200).then(res => res.body);
 
@@ -57,7 +57,7 @@ describe("test/controller/admins.test.js", () => {
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(200).then(res => res.body);
 
-		assert(users.count === 1);
-		assert(users.rows[0].username === "test2");
+		assert(users.data.count === 1);
+		assert(users.data.rows[0].username === "test2");
 	});
 });

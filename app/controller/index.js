@@ -14,16 +14,6 @@ class IndexController extends Controller {
 		this.ctx.throw(400);
 	}
 
-	// async create() {
-	// }
-
-	// async update() {
-	// }
-
-	// async destroy() {
-
-	// }
-
 	async config() {
 		const params = this.ctx.request.body;
 

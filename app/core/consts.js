@@ -52,4 +52,7 @@ module.exports = {
 	CLASS_MEMBER_ROLE_STUDENT: 1, // 学生
 	CLASS_MEMBER_ROLE_TEACHER: 2, // 教师
 	CLASS_MEMBER_ROLE_ADMIN: 64, // 管理员
+
+	KEEPWORKUSER_ADMIN_ROLEID: 10, // keepwork系统管理员roleId
+	KEEPWORKUSER_ROLEID: 0, // keepwork系统普通用户roleId
 };
