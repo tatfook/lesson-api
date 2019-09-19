@@ -1,7 +1,7 @@
 
 const axios = require("axios");
 // const jwt = require("jwt-simple");
-const jwt = require("../core/jwt.js");
+const jwt = require("../common/jwt.js");
 
 module.exports = (options, app) => {
 	const config = app.config.self;

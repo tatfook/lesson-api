@@ -2,12 +2,12 @@
 // const joi = require("joi");
 const _ = require("lodash");
 
-const Controller = require("../core/baseController.js");
+const Controller = require("./baseController.js");
 
 const {
 	CLASS_MEMBER_ROLE_STUDENT,
 	CLASS_MEMBER_ROLE_ADMIN,
-} = require("../core/consts.js");
+} = require("../common/consts.js");
 
 const LessonOrganizationActivateCode = class extends Controller {
 	get modelName() {

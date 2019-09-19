@@ -6,8 +6,6 @@ module.exports = app => {
 		BIGINT,
 		INTEGER,
 		STRING,
-		TEXT,
-		BOOLEAN,
 		JSON,
 	} = app.Sequelize;
 

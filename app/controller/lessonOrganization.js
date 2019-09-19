@@ -1,8 +1,8 @@
 
 // const joi = require("joi");
 const _ = require("lodash");
-const Controller = require("../core/baseController.js");
-const { CLASS_MEMBER_ROLE_ADMIN } = require("../core/consts.js");
+const Controller = require("./baseController.js");
+const { CLASS_MEMBER_ROLE_ADMIN } = require("../common/consts.js");
 
 /**
  * 把机构有关的表，都要移到lesson-dev里面来

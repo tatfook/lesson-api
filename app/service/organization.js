@@ -1,6 +1,6 @@
 
 const _ = require("lodash");
-const Service = require("../core/service.js");
+const Service = require("../common/service.js");
 
 class Organization extends Service {
 

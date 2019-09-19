@@ -1,9 +1,9 @@
 
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 const { PACKAGE_STATE_AUDIT_SUCCESS } = consts;
 
 const _ = require("lodash");
-const Controller = require("../core/baseController.js");
+const Controller = require("./baseController.js");
 
 class LearnRecordsController extends Controller {
 	// get

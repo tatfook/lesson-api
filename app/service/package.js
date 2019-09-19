@@ -1,6 +1,6 @@
 "use strict";
 
-const Service = require("../core/service.js");
+const Service = require("../common/service.js");
 
 class PackageService extends Service {
 	/**

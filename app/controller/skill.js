@@ -1,6 +1,6 @@
 
 const _ = require("lodash");
-const Controller = require("../core/baseController.js");
+const Controller = require("./baseController.js");
 
 class SkillsController extends Controller {
 	// get

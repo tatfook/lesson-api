@@ -1,6 +1,6 @@
 // const _ = require("lodash");
 // const consts = require("../core/consts.js");
-const Controller = require("../core/baseController.js");
+const Controller = require("./baseController.js");
 
 // const {
 // 	TRADE_TYPE_BEAN,

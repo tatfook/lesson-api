@@ -2,7 +2,7 @@
 const _ = require("lodash");
 const {
 	TRADE_TYPE_LESSON_STUDY,
-} = require("../core/consts.js");
+} = require("../common/consts.js");
 
 module.exports = app => {
 	const {

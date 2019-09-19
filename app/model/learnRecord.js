@@ -1,5 +1,5 @@
 
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 const {
 	LEARN_RECORD_STATE_FINISH,
 } = consts;

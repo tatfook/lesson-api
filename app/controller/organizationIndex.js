@@ -1,12 +1,12 @@
 
 // const _ = require("lodash");
 
-const Controller = require("../core/baseController.js");
+const Controller = require("./baseController.js");
 
 const {
 	CLASS_MEMBER_ROLE_TEACHER,
 	CLASS_MEMBER_ROLE_ADMIN
-} = require("../core/consts.js");
+} = require("../common/consts.js");
 
 const Index = class extends Controller {
 	// 更改密码 

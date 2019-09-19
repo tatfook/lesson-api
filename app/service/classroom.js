@@ -1,8 +1,8 @@
 "use strict";
 
-const Service = require("../core/service.js");
-const { CLASSROOM_STATE_USING } = require("../core/consts");
-const Err = require("../core/err");
+const Service = require("../common/service.js");
+const { CLASSROOM_STATE_USING } = require("../common/consts");
+const Err = require("../common/err");
 
 class ClassroomService extends Service {
 	/**

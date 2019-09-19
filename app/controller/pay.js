@@ -1,7 +1,7 @@
 
 const _ = require("lodash");
-const consts = require("../core/consts.js");
-const Controller = require("../core/baseController.js");
+const consts = require("../common/consts.js");
+const Controller = require("./baseController.js");
 
 const {
 	PACKAGE_SUBSCRIBE_STATE_BUY

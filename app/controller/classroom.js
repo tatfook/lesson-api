@@ -1,10 +1,10 @@
 
 const _ = require("lodash");
-const consts = require("../core/consts.js");
-const Controller = require("../core/baseController.js");
+const consts = require("../common/consts.js");
+const Controller = require("./baseController.js");
 
 const { CLASSROOM_STATE_USING } = consts;
-const Err = require("../core/err");
+const Err = require("../common/err");
 
 class ClassroomsController extends Controller {
 	async ensureTeacher() {
@@ -16,7 +16,7 @@ class ClassroomsController extends Controller {
 		const query = ctx.query || {};
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 		query.userId = userId;
 
 		const data = await ctx.service.classroom.findAndCount(query);
@@ -55,7 +55,7 @@ class ClassroomsController extends Controller {
 		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
 		const params = ctx.request.body;
 
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 		params.userId = userId;
 
 		const data = await ctx.service.classroom.updateClassroom(params, id, userId);
@@ -88,7 +88,7 @@ class ClassroomsController extends Controller {
 	async join() {
 		const { ctx } = this;
 		let params = this.validate({ key: "string" });
-		const { userId = 0, organizationId, username } = this.getUser();
+		const { userId = 0, organizationId, username } = this.currentUser();
 		params = { ...params, userId, organizationId, username };
 
 		const data = await ctx.service.classroom.joinClassroom(params);
@@ -108,7 +108,7 @@ class ClassroomsController extends Controller {
 	async current() {
 		const { ctx } = this;
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
 		const data = await ctx.service.classroom.currentClassroom(userId);
 
@@ -136,8 +136,8 @@ class ClassroomsController extends Controller {
 		const params = ctx.request.body;
 		if (!params.userId) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
 
-		await this.ensureTeacher();
-		const userId = this.getUser().userId;
+		this.ensureTeacher();
+		const userId = this.currentUser().userId;
 
 		const classroom = await ctx.service.classroom.getByCondition({ id, userId });
 		if (!classroom) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
@@ -157,8 +157,8 @@ class ClassroomsController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
 
-		await this.ensureTeacher();
-		const userId = this.getUser().userId;
+		this.ensureTeacher();
+		const userId = this.currentUser().userId;
 
 		const classroom = await ctx.service.classroom.getByCondition({ id, userId });
 		if (!classroom) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });

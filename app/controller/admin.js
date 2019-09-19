@@ -1,7 +1,7 @@
 
 const _ = require("lodash");
-const Controller = require("../core/baseController.js");
-const Err = require("../core/err");
+const Controller = require("./baseController.js");
+const Err = require("../common/err");
 
 class AdminsController extends Controller {
 	// 检查model存不存在，和管理员权限

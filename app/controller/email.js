@@ -1,7 +1,7 @@
 // const axios = require("axios");
 // const _ = require("lodash");
-const email = require("../core/email.js");
-const Controller = require("../core/baseController.js");
+const email = require("../common/email.js");
+const Controller = require("./baseController.js");
 
 class EmailController extends Controller {
 

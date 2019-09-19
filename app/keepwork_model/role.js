@@ -4,7 +4,7 @@ const _ = require("lodash");
 const {
 	USER_ROLE_ALLIANCE_MEMBER,
 	USER_ROLE_TUTOR,
-} = require("../core/consts.js");
+} = require("../common/consts.js");
 
 module.exports = app => {
 	const {

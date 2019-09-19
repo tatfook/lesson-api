@@ -1,6 +1,6 @@
 
 const _ = require("lodash");
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 const {
 	USER_IDENTIFY_TEACHER
 } = consts;

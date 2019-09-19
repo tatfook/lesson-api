@@ -1,8 +1,8 @@
 
 const _ = require("lodash");
 const jwt = require("jwt-simple");
-const consts = require("../core/consts.js");
-const Controller = require("../core/baseController.js");
+const consts = require("../common/consts.js");
+const Controller = require("./baseController.js");
 
 const {
 	USER_IDENTIFY_TEACHER,

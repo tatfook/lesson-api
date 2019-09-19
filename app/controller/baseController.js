@@ -2,8 +2,8 @@ const joi = require("joi");
 const _ = require("lodash");
 const Controller = require("egg").Controller;
 
-const Err = require("./err.js");
-const { KEEPWORKUSER_ADMIN_ROLEID } = require("./consts");
+const Err = require("../common/err");
+const { KEEPWORKUSER_ADMIN_ROLEID } = require("../common/consts");
 
 const rules = {
 	"int": joi.number().required(),
@@ -257,6 +257,10 @@ class BaseController extends Controller {
 	}
 
 	getUser() {
+		return this.ctx.state.user || {};
+	}
+
+	currentUser() {
 		return this.ctx.state.user || {};
 	}
 

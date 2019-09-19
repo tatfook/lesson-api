@@ -1,4 +1,4 @@
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 
 const {
 	TEACHER_KEY_STATE_USING,

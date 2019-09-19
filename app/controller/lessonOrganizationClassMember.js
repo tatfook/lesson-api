@@ -1,14 +1,13 @@
 
-const joi = require("joi");
 const _ = require("lodash");
 
-const Controller = require("../core/baseController.js");
+const Controller = require("./baseController.js");
 
 const {
 	CLASS_MEMBER_ROLE_ADMIN,
 	CLASS_MEMBER_ROLE_STUDENT,
 	CLASS_MEMBER_ROLE_TEACHER,
-} = require("../core/consts.js");
+} = require("../common/consts.js");
 
 const LessonOrganizationClassMember = class extends Controller {
 	get modelName() {
@@ -263,7 +262,7 @@ const LessonOrganizationClassMember = class extends Controller {
 	}
 
 	async destroy() {
-		const { organizationId, roleId } = this.authenticated();
+		const { organizationId, roleId, userId, username } = this.authenticated();
 		const { id } = this.validate({ id: "number" });
 
 		const member = await this.model.LessonOrganizationClassMember.findOne({ where: { organizationId, id } }).then(o => o && o.toJSON());

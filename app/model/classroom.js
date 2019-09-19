@@ -1,6 +1,6 @@
 
 const _ = require("lodash");
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 const {
 	CLASSROOM_STATE_USING,
 	CLASSROOM_STATE_USED,

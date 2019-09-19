@@ -1,6 +1,6 @@
 const _ = require("lodash");
-const consts = require("../core/consts.js");
-const Controller = require("../core/baseController.js");
+const consts = require("../common/consts.js");
+const Controller = require("./baseController.js");
 //const Controller = require("egg").Controller;
 
 const {

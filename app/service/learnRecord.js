@@ -1,6 +1,6 @@
 "use strict";
 
-const Service = require("../core/service.js");
+const Service = require("../common/service.js");
 
 class LearnRecordService extends Service {
 	/**
@@ -33,7 +33,7 @@ class LearnRecordService extends Service {
 
 	/**
 	 * 更新课堂学习记录
-	 * @param {*} params 数组
+	 * @param {*} params 学习记录数组
 	 * @param {*} classroomId 课堂id
 	 */
 	async batchUpdateLearnRecord(params, classroomId) {

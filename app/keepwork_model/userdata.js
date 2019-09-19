@@ -1,6 +1,4 @@
 
-const _ = require("lodash");
-
 module.exports = app => {
 	const {
 		BIGINT,
