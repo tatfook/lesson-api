@@ -263,8 +263,10 @@ const LessonOrganizationClassMember = class extends Controller {
 	}
 
 	async destroy() {
-		const { organizationId, roleId } = this.authenticated();
-		const { id } = this.validate({ id: "number" });
+		const { organizationId, roleId, userId, username } = this.authenticated();
+
+		const params = this.validate({ id: "number" });
+		const id = params.id;
 
 		const member = await this.model.LessonOrganizationClassMember.findOne({ where: { organizationId, id } }).then(o => o && o.toJSON());
 		if (!member) return this.success('ok');
