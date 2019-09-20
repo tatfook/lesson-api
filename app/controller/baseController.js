@@ -143,7 +143,7 @@ class BaseController extends Controller {
 
 		this.enauthenticated();
 
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const userId = this.getUser().userId;
 
 		const model = this.model[this.modelName];
@@ -159,7 +159,7 @@ class BaseController extends Controller {
 
 		this.enauthenticated();
 
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		const userId = this.getUser().userId;
 
@@ -176,7 +176,7 @@ class BaseController extends Controller {
 
 		this.enauthenticated();
 
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		const userId = this.getUser().userId;
 
@@ -192,7 +192,7 @@ class BaseController extends Controller {
 		const params = ctx.request.body || {};
 
 		this.enauthenticated();
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const { userId } = this.getUser();
 
 		const model = this.model[this.modelName];
@@ -207,7 +207,7 @@ class BaseController extends Controller {
 		const params = ctx.request.body || {};
 
 		this.enauthenticated();
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const { userId } = this.getUser();
 
 		const where = { id, userId };
@@ -230,7 +230,7 @@ class BaseController extends Controller {
 		const params = ctx.request.body || {};
 
 		this.enauthenticated();
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const { userId } = this.getUser();
 
 		const where = { id, userId };
@@ -247,7 +247,7 @@ class BaseController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 
 		this.enauthenticated();
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const { userId } = this.getUser();
 
 		const model = this.model[this.modelName];
@@ -266,7 +266,7 @@ class BaseController extends Controller {
 
 	// 确保认证  废弃
 	enauthenticated() {
-		if (!this.isAuthenticated()) return this.ctx.throw(401, "unauthenticated");
+		if (!this.isAuthenticated()) return this.ctx.throw(401, Err.AUTH_ERR);
 
 		return this.getUser();
 	}
@@ -279,7 +279,7 @@ class BaseController extends Controller {
 		const config = this.config.self;
 		const token = this.ctx.state.token;
 		const user = this.app.util.jwt_decode(token || "", config.adminSecret, true);
-		if (!user) return this.ctx.throw(401, "unauthenticated");
+		if (!user) return this.ctx.throw(401, Err.AUTH_ERR);
 
 		return user;
 	}
@@ -300,7 +300,7 @@ class BaseController extends Controller {
 		this.enauthenticated();
 		const roleId = this.getUser().roleId;
 
-		if (roleId !== KEEPWORKUSER_ADMIN_ROLEID) this.ctx.throw(403, "not admin");
+		if (roleId !== KEEPWORKUSER_ADMIN_ROLEID) this.ctx.throw(403, Err.AUTH_ERR);
 	}
 
 	isAuthenticated() {

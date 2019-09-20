@@ -115,7 +115,7 @@ class User extends Service {
 	 * @param {*} userId 必选
 	 * @param {*} username 可选
 	 */
-	async getById(userId, username) {
+	async getByIdOrCreate(userId, username) {
 		return await this.ctx.model.User.getById(userId, username);
 	}
 }

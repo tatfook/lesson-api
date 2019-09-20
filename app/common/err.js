@@ -34,4 +34,8 @@ module.exports = {
 	"ARGS_ERR": "参数错误",
 	"SQL_ERR": "SQL不合法",
 	"AUTH_ERR": "没有权限",
+	"ID_ERR": "ID错误",
+	"NOT_FOUND": "资源找不到",
+	"ALREADY_DISMISS": "已经下课",
+	"DB_ERR": "数据库发生错误"
 };

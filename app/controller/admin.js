@@ -36,7 +36,7 @@ class AdminsController extends Controller {
 			_sql.indexOf("create ") >= 0 ||
 			_sql.indexOf("show ") >= 0 ||
 			_sql.indexOf("alter ") >= 0) {
-			return ctx.helper.fail({ ctx, status: 404, errMsg: Err.SQL_ERR });
+			return ctx.helper.fail({ ctx, status: 400, errMsg: Err.SQL_ERR });
 		}
 
 		const list = await this.model.query(sql, {
@@ -89,7 +89,7 @@ class AdminsController extends Controller {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 
-		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
+		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ID_ERR });
 
 		const data = await this.resource.findOne({ where: { id } });
 
@@ -112,7 +112,7 @@ class AdminsController extends Controller {
 		const params = ctx.request.body;
 		const id = _.toNumber(ctx.params.id);
 
-		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
+		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ID_ERR });
 
 		const data = await this.resource.update(params, { where: { id } });
 
@@ -125,7 +125,7 @@ class AdminsController extends Controller {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 
-		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
+		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ID_ERR });
 
 		const data = await this.resource.destroy({ where: { id } });
 

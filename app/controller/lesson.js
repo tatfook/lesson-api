@@ -3,6 +3,7 @@ const _ = require("lodash");
 
 const consts = require("../common/consts.js");
 const Controller = require("./baseController.js");
+const Err = require("../common/err");
 
 const { PACKAGE_STATE_AUDIT_SUCCESS } = consts;
 
@@ -13,159 +14,115 @@ class LessonsController extends Controller {
 		const order = [["updatedAt", "DESC"]];
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 		query.userId = userId;
 
-		const data = await ctx.model.Lesson.findAndCount({ where: query, order });
-		const lessons = [];
-		for (let i = 0; i < data.rows.length; i++) {
-			let lesson = data.rows[i];
-			lesson = lesson.get({ plain: true });
-			lesson.packages = await ctx.model.Lesson.getPackagesByLessonId(lesson.id);
-			lessons.push(lesson);
-		}
-
-		return this.success({ count: data.count, rows: lessons });
+		const data = await ctx.service.lesson.getLessonByPageAndSort(query, order);
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async detail() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
-		const data = await ctx.model.Lesson.getById(id);
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
-		if (!data) ctx.throw(404, "not found");
+		let data = await ctx.service.lesson.getByCondition({ id });
+		if (!data) return ctx.throw(404, Err.NOT_FOUND);
 
-		data.skills = await ctx.model.LessonSkill.getSkillsByLessonId(id);
-		data.packages = await ctx.model.Lesson.getPackagesByLessonId(id);
+		const [skills, packages] = await Promise.all([
+			ctx.service.lessonSkill.getSkillsByLessonId(id),
+			ctx.service.lesson.getPackagesByLessonId(id)
+		]);
 
-		return this.success(data);
+		data = { ...data, skills, packages };
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async detailByUrl() {
 		const { ctx } = this;
 		let { url } = this.validate({ url: "string" });
-
 		url = decodeURIComponent(url);
-		let data = await ctx.model.Lesson.findOne({ where: { url }});
-		if (!data) ctx.throw(404, "not found" + url);
-		data = data.get({ plain: true });
+
+		let data = await ctx.service.lesson.getByCondition({ url });
+		if (!data) return ctx.throw(404, Err.NOT_FOUND);
 
 		const id = data.id;
 
-		data.skills = await ctx.model.LessonSkill.getSkillsByLessonId(id);
-		data.packages = await ctx.model.Lesson.getPackagesByLessonId(id);
+		const [skills, packages] = await Promise.all([
+			ctx.service.lessonSkill.getSkillsByLessonId(id),
+			ctx.service.lesson.getPackagesByLessonId(id)
+		]);
 
-		return this.success(data);
+		data = { ...data, skills, packages };
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async show() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
-		const data = await ctx.model.Lesson.getById(id);
+		const data = await ctx.service.lesson.getByCondition(id);
 
-		return this.success(data);
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async create() {
 		const { ctx } = this;
 		const params = ctx.request.body;
-		const skills = params.skills;
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 		params.userId = userId;
 		params.state = PACKAGE_STATE_AUDIT_SUCCESS;
 
-		let lesson = await ctx.model.Lesson.create(params);
-		if (!lesson) ctx.throw("500", "DB failed");
-		lesson = lesson.get({ plain: true });
+		const lesson = await ctx.service.lesson.createLesson(params);
 
-		if (!skills || !_.isArray(skills)) return this.success(lesson);
-		const lessonSkills = [];
-		for (let i = 0; i < skills.length; i++) {
-			let skillParams = skills[i];
-			if (!skillParams.id) continue;
-			const skillId = skillParams.id;
-			const skillScore = skillParams.score || 0;
-			lessonSkills.push({
-				userId: userId,
-				skillId: skillId,
-				lessonId: lesson.id,
-				score: skillScore,
-			});
-		}
-		if (lessonSkills.length > 0) {
-			await ctx.model.LessonSkill.bulkCreate(lessonSkills);
-		}
-
-		return this.success(lesson);
+		return ctx.helper.success({ ctx, status: 200, res: lesson });
 	}
 
 	async update() {
 		const { ctx } = this;
 		const params = ctx.request.body;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
-		delete params.state;
-		const result = await ctx.model.Lesson.update(params, { where: { id }});
-		const skills = params.skills || [];
-		const lessonSkills = [];
-		for (let i = 0; i < skills.length; i++) {
-			let skillParams = skills[i];
-			if (!skillParams.id) continue;
-			const skillId = skillParams.id;
-			const skillScore = skillParams.score || 0;
-			lessonSkills.push({
-				userId: userId,
-				skillId: skillId,
-				lessonId: id,
-				score: skillScore,
-			});
-		}
-		if (lessonSkills.length > 0) {
-			await ctx.model.LessonSkill.destroy({ where: { lessonId: id }});
-			await ctx.model.LessonSkill.bulkCreate(lessonSkills);
-		}
+		const userId = this.currentUser().userId;
+		delete params.state;// 不能改state
+		params.userId = userId;
 
-		return this.success(result);
+		const result = await ctx.service.lesson.updateLesson(params, id);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async destroy() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		await ctx.model.LessonSkill.destroy({ where: { lessonId: id, userId }});
-		const result = await ctx.model.Lesson.destroy({ where: { id, userId }});
-
-		return this.success(result);
+		await ctx.service.lesson.destroyLesson(id, userId);
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
 	}
 
 	async getSkills() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 		this.enauthenticated();
-		// const userId = this.getUser().userId;
 
-		const skills = await ctx.model.Lesson.getSkills(id);
+		const skills = await ctx.service.lesson.getSkillsAndSkillName(id);
 
-		return this.success(skills);
+		return ctx.helper.success({ ctx, status: 200, res: skills });
 	}
 
 	async addSkill() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 		const params = ctx.request.body;
 
 		ctx.validate({
@@ -176,117 +133,120 @@ class LessonsController extends Controller {
 		});
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		const result = await ctx.model.Lesson.addSkill(userId, id, params.skillId, params.score);
-		return this.success(result);
+		const result = await ctx.service.lesson.addSkillScore(
+			userId, id, params.skillId, params.score
+		);
+
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async deleteSkill() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
 		const params = ctx.query || {};
 		const skillId = params.skillId && _.toNumber(params.skillId);
-		if (!skillId) ctx.throw(401, "args error");
+		if (!skillId) return ctx.throw(400, Err.ARGS_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		const result = await ctx.model.Lesson.deleteSkill(userId, id, skillId);
+		const result = await ctx.service.lessonSkill.destroyByCondition({ userId, lessonId: id, skillId });
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async release() {
 		const { ctx } = this;
 		const params = this.validate({
-			id: "number",
-			// content: "string_optional",
-			// courseware: "string_optional",
+			id: "number"
 		});
 		const id = params.id;
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		const lesson = await ctx.model.Lesson.getById(id, userId);
-		if (!lesson) ctx.throw(400, "args error");
+		const lesson = await ctx.service.lesson.getByCondition({ id, userId });
+		if (!lesson) return ctx.throw(404, Err.NOT_FOUND);
 
-		const result = await ctx.model.LessonContent.release(userId, id, params.content || null, params.courseware || null);
+		const result = await ctx.service.lessonContent.releaseLesson(
+			userId, id, params.content || null, params.courseware || null
+		);
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async content() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 		const params = ctx.query || {};
 
-		const result = await ctx.model.LessonContent.content(id, params.version);
+		const result = await ctx.service.lessonContent.getLessonContent(id, params.version);
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
+	// 创建自己的学习记录
 	async createLearnRecords() {
 		const { ctx } = this;
 		const params = ctx.request.body;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
 		ctx.validate({
 			packageId: "int",
 		}, params);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
 		params.userId = userId;
 		params.lessonId = id;
 
-		const data = await ctx.model.LearnRecord.createLearnRecord(params);
+		const data = await ctx.service.learnRecord.createLearnRecord(params);
 
-		return this.success(data);
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
+	// 这个更新接口没有检查课堂是否结束，暴力更新【不知为何】
 	async updateLearnRecords() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
 		const params = ctx.request.body || {};
-		if (!params.id) ctx.throw(400, "args error");
+		if (!params.id) return ctx.throw(400, Err.ARGS_ERR);
 
 		params.lessonId = id;
 		params.userId = userId;
 
-		const result = await ctx.model.LearnRecord.updateLearnRecord(params);
+		const result = await ctx.service.learnRecord.adminUpdateLearnRecord(params);
 
-		return this.success("OK");
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async getLearnRecords() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		const list = await ctx.model.LearnRecord.findAll({
-			where: {
-				lessonId: id,
-				userId,
-			}
+		const list = await ctx.service.learnRecord.findAllByCondition({
+			lessonId: id,
+			userId
 		});
 
-		return this.success(list);
+		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
 }
 

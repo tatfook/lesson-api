@@ -18,7 +18,6 @@ module.exports = (options, app) => {
 			}
 		} catch (e) {
 		}
-
 		ctx.state.token = token;
 		ctx.state.user = user || {};
 

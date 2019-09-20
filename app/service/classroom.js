@@ -20,7 +20,7 @@ class ClassroomService extends Service {
 	 * 分页查找classroom,并且查询packageId分别有多少Lesson数量
 	 * @param {*} condition 筛选条件,对象
 	 */
-	async findAndCount(condition) {
+	async findClassroomsAndCountLessons(condition) {
 		const data = await this.ctx.model.Classroom.findAndCountAll({ where: condition });
 		const packageIds = [];
 
@@ -129,7 +129,7 @@ class ClassroomService extends Service {
 
 	// 获取当前课堂
 	async currentClassroom(userId) {
-		const user = await this.ctx.service.user.getById(userId);
+		const user = await this.ctx.service.user.getByIdOrCreate(userId);
 
 		const classroomId = user.extra.classroomId;
 		if (!classroomId) return this.ctx.throw(400, Err.DONT_IN_CLASSROOM_NOW);

@@ -111,17 +111,17 @@ module.exports = app => {
 		if (params.userId) where.userId = params.userId;
 		if (params.classroomId) where.classroomId = params.classroomId;
 
-		// let lr = await app.model.LearnRecord.findOne({ where });
-		// if (!lr) return;
-		// lr = lr.get({ plain: true });
+		let lr = await app.model.LearnRecord.findOne({ where });
+		if (!lr) return;
+		lr = lr.get({ plain: true });
 
-		// if (params.reward) lr.reward = params.reward;
-		// if (params.state) lr.state = params.state;
-		// if (params.extra) lr.extra = params.extra;
-		// if (params.classroomId) lr.classroomId = params.classroomId;
+		if (params.reward) lr.reward = params.reward;
+		if (params.state) lr.state = params.state;
+		if (params.extra) lr.extra = params.extra;
+		if (params.classroomId) lr.classroomId = params.classroomId;
 
-		// await app.model.LearnRecord.update(lr, { where });
-		await app.model.LearnRecord.update(params, { where });
+		await app.model.LearnRecord.update(lr, { where });
+		// await app.model.LearnRecord.update(params, { where });
 
 		if (lr.userId && ~~params.state === LEARN_RECORD_STATE_FINISH) {
 			await this.learnFinish(lr);
