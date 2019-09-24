@@ -234,11 +234,19 @@ class LessonOrganizationService extends Service {
 	}
 
 	/**
-	 * 获取机构的人数
+	 * 获取机构已用人数？？
 	 * @param {*} organizationId 
 	 */
 	async getOrganMemberCount(organizationId) {
 		return await this.ctx.model.LessonOrganization.getUsedCount(organizationId);
+	}
+
+	/**
+ 	* 获取机构学生的人数
+ 	* @param {*} organizationId 
+ 	*/
+	async getStudentCount(organizationId) {
+		return await this.ctx.model.LessonOrganization.getStudentCount(organizationId);
 	}
 }
 

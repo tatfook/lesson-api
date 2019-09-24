@@ -1,9 +1,8 @@
 "use strict";
 
 const Service = require("../common/service.js");
-const { TOKEN_DEFAULT_EXPIRE, CLASS_MEMBER_ROLE_ADMIN } = require("../common/consts.js");
+const { CLASS_MEMBER_ROLE_ADMIN } = require("../common/consts.js");
 const _ = require("lodash");
-const Err = require("../common/err");
 
 
 class LessonOrganizationPackageService extends Service {
@@ -12,7 +11,7 @@ class LessonOrganizationPackageService extends Service {
 	 * @param {*} condition 
 	 */
 	async destroyByCondition(condition) {
-		return await this.ctx.model.LessonOrganizationPackage.destroy(condition);
+		return await this.ctx.model.LessonOrganizationPackage.destroy({ where: condition });
 	}
 
 	async findAllByCondition(condition) {
@@ -130,6 +129,14 @@ class LessonOrganizationPackageService extends Service {
 		_.each(packageList, o => { o.package = _.find(pkgs, p => ~~p.id === ~~o.packageId); });
 
 		return packageList;
+	}
+
+	/**
+	 * 批量创建机构packages
+	 * @param {*} packageArr 
+	 */
+	async bulkCreate(packageArr) {
+		return await this.ctx.model.LessonOrganizationPackage.bulkCreate(packageArr);
 	}
 
 }

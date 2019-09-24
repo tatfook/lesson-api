@@ -46,7 +46,7 @@ class LessonOrganizationActivateCodeService extends Service {
 
 		const list = await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(datas);
 
-		this.ctx.model.LessonOrganizationLog.classLog({ organizationId, cls, action: "activateCode", count, handleId: userId, username });
+		this.ctx.service.lessonOrganizationLog.classLog({ organizationId, cls, action: "activateCode", count, handleId: userId, username });
 
 		return list;
 	}
