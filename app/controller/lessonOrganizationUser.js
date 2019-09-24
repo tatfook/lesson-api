@@ -27,7 +27,7 @@ const LessonOrganizationUser = class extends Controller {
 		let { classId, handlerId, count, password } = params;;
 		handlerId = handlerId || userId;
 
-		const handler = await this.ctx.service.user.getUserByUserId(handlerId);
+		const handler = await this.ctx.service.user.getKeepworkUserByCondition({ id: handlerId });
 		if (!handler) return this.throw(400, "负责人不存在");
 		const cellphone = handler.realname;
 		if (!cellphone) return this.throw(400, "负责人未实名");

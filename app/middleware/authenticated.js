@@ -20,7 +20,6 @@ module.exports = (options, app) => {
 		}
 		ctx.state.token = token;
 		ctx.state.user = user || {};
-
 		await next();
 	};
 };

@@ -1,3 +1,4 @@
+"use strict";
 
 const errs = {
 	"-1": {
@@ -37,5 +38,13 @@ module.exports = {
 	"ID_ERR": "ID错误",
 	"NOT_FOUND": "资源找不到",
 	"ALREADY_DISMISS": "已经下课",
-	"DB_ERR": "数据库发生错误"
+	"DB_ERR": "数据库发生错误",
+	"MEMBER_NOT_EXISTS": "班级成员不存在",
+	"ORGANIZATION_NOT_FOUND": "机构不存在",
+	"INVALID_ACTIVATE_CODE": "无效激活码",
+	"ACTIVATE_CODE_NOT_MATCH_ORGAN": "激活码不属于这个机构",
+	"CLASS_IS_FINISH": "班级已经结束",
+	"INVALID_ORGAN": "无效机构",
+	"ALREADY_IN_CLASS": "已经是该班级学生",
+	"MEMBERS_UPPER_LIMIT": "人数已达上限",
 };

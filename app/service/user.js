@@ -35,8 +35,12 @@ class User extends Service {
 		return user;
 	}
 
-	async getUserByUserId(userId) {
-		return await this.app.keepworkModel.Users.findOne({ where: { id: userId } }).then(o => o && o.toJSON());
+	/**
+	 * 根据条件获取keepwork那边的User信息
+	 * @param {*} condition 
+	 */
+	async getKeepworkUserByCondition(condition) {
+		return await this.app.keepworkModel.Users.findOne({ where: condition }).then(o => o && o.toJSON());
 	}
 
 	async getUserinfoByUserId(userId) {

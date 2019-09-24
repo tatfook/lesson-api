@@ -16,6 +16,14 @@ class LessonOrganizationClassService extends Service {
 		return data;
 	}
 
+	/**
+	 * 根据条件更新
+	 * @param {*} params 
+	 * @param {*} condition 
+	 */
+	async updateByCondition(params, condition) {
+		return await this.ctx.model.LessonOrganizationClass.update(params, { where: condition });
+	}
 }
 
 module.exports = LessonOrganizationClassService;

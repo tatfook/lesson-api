@@ -1,3 +1,5 @@
+"use strict";
+
 const _ = require("lodash");
 // const jwt = require("jwt-simple");
 const jwt = require("./jwt.js");

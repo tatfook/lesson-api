@@ -1,3 +1,4 @@
+"use strict";
 
 const consts = require("../common/consts.js");
 const { PACKAGE_STATE_AUDIT_SUCCESS } = consts;

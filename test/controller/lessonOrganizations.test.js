@@ -48,7 +48,7 @@ describe("机构", () => {
 		let org = await app.httpRequest().get("/lessonOrganizations")
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(200).then(res => res.body);
-		assert(org.length === 1);
+		assert(org.data.length === 1);
 
 		const adminToken = await app.adminLogin().then(o => o.token);
 
@@ -93,7 +93,7 @@ describe("机构", () => {
 			.expect(200).then(res => res.body);
 
 		// 更新机构
-		await app.httpRequest().put(`/lessonOrganizations/${organ.id}`).send({
+		await app.httpRequest().put(`/lessonOrganizations/${organ.data.id}`).send({
 			name: "newname",
 			logo: "https://www.baidu.com",
 			usernames: ["user002"]
@@ -101,28 +101,28 @@ describe("机构", () => {
 			.expect(200).then(res => res.body);
 
 		// 机构获取
-		organ = await app.httpRequest().get(`/lessonOrganizations/${organ.id}`)
+		organ = await app.httpRequest().get(`/lessonOrganizations/${organ.data.id}`)
 			.set("Authorization", `Bearer ${adminToken}`)
 			.expect(200).then(res => res.body);
 
-		assert(organ.name === "newname" && organ.logo === "https://www.baidu.com");
+		assert(organ.data.name === "newname" && organ.data.logo === "https://www.baidu.com");
 
 		// 登录机构
 		const token = await app.httpRequest()
 			.post("/lessonOrganizations/login")
-			.send({ organizationId: organ.id, username: "user002", password: "123456" })
-			.expect(200).then(res => res.body.token).catch(e => console.log(e));
+			.send({ organizationId: organ.data.id, username: "user002", password: "123456" })
+			.expect(200).then(res => res.body).catch(e => console.log(e));
 
 		// 课程包列表
 		organ = await app.httpRequest().get(`/lessonOrganizations/packages`)
-			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
+			.set("Authorization", `Bearer ${token.data.token}`).expect(200).then(res => res.body);
 
-		assert(organ.length === 1 && organ[0].packageId === 1);
+		assert(organ.data.length === 1 && organ.data[0].packageId === 1);
 
 		// 课程详情
 		let detail = await app.httpRequest()
 			.get("/lessonOrganizations/packageDetail?packageId=1&classId=0")
-			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(detail.id && detail.packageId);
+			.set("Authorization", `Bearer ${token.data.token}`).expect(200).then(res => res.body);
+		assert(detail.data.id && detail.data.packageId);
 	});
 });

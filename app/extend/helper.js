@@ -35,13 +35,13 @@ module.exports = {
 		const timestr = hour + minute + second;
 		return { year, month, day, hour, minute, second, datetime, datestr, timestr };
 	},
-	jwt_encode: (payload, key, expire = 3600 * 24 * 100) => {
+	jwtEncode: (payload, key, expire = 3600 * 24 * 100) => {
 		payload = payload || {};
 		payload.exp = Date.now() / 1000 + expire;
 
 		return jwt.encode(payload, key, "HS1");
 	},
-	jwt_decode: (token, key, noVerify) => {
+	jwtDecode: (token, key, noVerify) => {
 		return jwt.decode(token, key, noVerify, "HS1");
 	},
 	rsaEncrypt: (prvKey, message) => {

@@ -1,5 +1,5 @@
-// const axios = require("axios");
-// const _ = require("lodash");
+"use strict";
+
 const email = require("../common/email.js");
 const Controller = require("./baseController.js");
 
