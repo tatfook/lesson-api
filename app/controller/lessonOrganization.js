@@ -362,7 +362,7 @@ const LessonOrganization = class extends Controller {
 				where: { organizationId, packageId, classId }
 			}).then(list => _.map(list, o => o.toJSON()));
 		} else {
-			const classIds = await this.model.lessonOrganizationClassMember.getAllClassIds({ memberId: userId, roleId, organizationId });
+			const classIds = await this.model.LessonOrganizationClassMember.getAllClassIds({ memberId: userId, roleId, organizationId });
 			list = await this.model.LessonOrganizationPackage.findAll({
 				where: {
 					organizationId,
