@@ -248,6 +248,24 @@ class LessonOrganizationService extends Service {
 	async getStudentCount(organizationId) {
 		return await this.ctx.model.LessonOrganization.getStudentCount(organizationId);
 	}
+
+	/**
+	 * 获取教师列表
+	 * @param {*} organizationId 
+	 * @param {*} classId 
+	 */
+	async getTeachers(organizationId, classId) {
+		return await this.ctx.model.LessonOrganization.getTeachers(organizationId, classId);
+	}
+
+	/**
+	 * 
+	 * @param {*} organizationId 
+	 * @param {*} classId 
+	 */
+	async getMembers(organizationId, roleId, classId) {
+		return await this.ctx.model.LessonOrganization.getMembers(organizationId, roleId, classId);
+	}
 }
 
 module.exports = LessonOrganizationService;

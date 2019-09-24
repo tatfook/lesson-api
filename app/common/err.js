@@ -47,5 +47,6 @@ module.exports = {
 	"INVALID_ORGAN": "无效机构",
 	"ALREADY_IN_CLASS": "已经是该班级学生",
 	"MEMBERS_UPPER_LIMIT": "人数已达上限",
-	"CLASS_NOT_EXISTS": "班级不存在"
+	"CLASS_NOT_EXISTS": "班级不存在",
+	"USER_NOT_EXISTS": "用户不存在"
 };

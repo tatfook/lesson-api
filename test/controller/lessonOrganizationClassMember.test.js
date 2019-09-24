@@ -57,24 +57,20 @@ describe("机构学生", () => {
 		// 学生
 		let students = await app.httpRequest().get(`/lessonOrganizationClassMembers/student?classId=${cls.id}`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(students.count === 0);
+		assert(students.data.count === 1);
 
 		// 移除班级成员
 		// await app.httpRequest().delete(`/lessonOrganizationClassMembers/${students.rows[0].id}?roleId=1`)
 		// 	.set("Authorization", `Bearer ${token}`).expect(200);
 
-		students = await app.httpRequest().get(`/lessonOrganizationClassMembers/student?classId=${cls.id}`)
-			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(students.count === 0);
-
 		students = await app.httpRequest().get(`/lessonOrganizationClassMembers/student?classId=${cls2.id}`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(students.count === 0);
+		assert(students.data.count === 0);
 
 		// 教师
 		let teachers = await app.httpRequest().get(`/lessonOrganizationClassMembers/teacher?classId=${cls2.id}`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(teachers.length === 0);
+		assert(teachers.data.length === 0);
 
 		let user3 = app.keepworkModel.Users.create({ username: "jacky", password: md5("123456") });
 		user3 = user3.get();
@@ -84,6 +80,6 @@ describe("机构学生", () => {
 
 		teachers = await app.httpRequest().get(`/lessonOrganizationClassMembers/teacher?classId=${cls2.id}`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(teachers.length === 1);
+		assert(teachers.data.length === 1);
 	});
 });

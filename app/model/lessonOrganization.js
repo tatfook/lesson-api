@@ -147,9 +147,8 @@ module.exports = app => {
 	};
 
 	model.getTeachers = async function (organizationId, classId) {
-		const sql = `select * from lessonOrganizationClassMembers as locm 
-		where locm.organizationId = ${organizationId} and roleId & 2 
-		and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
+		const sql = `select * from lessonOrganizationClassMembers as locm where locm.organizationId = ${organizationId} and
+		roleId & 2 and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
 			classId = 0 or exists (select * from lessonOrganizationClasses where id = classId)
 			) group by memberId`;
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
