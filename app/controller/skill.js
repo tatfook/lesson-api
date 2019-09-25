@@ -1,6 +1,7 @@
 
 const _ = require("lodash");
 const Controller = require("./baseController.js");
+const Err = require("../common/err");
 
 class SkillsController extends Controller {
 	// get
@@ -8,9 +9,9 @@ class SkillsController extends Controller {
 		const { ctx } = this;
 		const query = ctx.query || {};
 
-		const list = await ctx.model.Skill.findAll({ ...this.queryOptions, where: query });
+		const list = await ctx.service.skill.findAllByCondition(this.queryOptions, query);
 
-		return this.success(list);
+		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
 	async create() {
@@ -22,35 +23,33 @@ class SkillsController extends Controller {
 			skillName: "string",
 		}, params);
 
-		const result = await ctx.model.Skill.create(params);
+		const result = await ctx.service.skill.createSkill(params);
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async update() {
 		this.ensureAdmin();
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		const params = ctx.request.body;
 
-		const result = await ctx.model.Skill.update(params, { where: { id } });
+		const result = await ctx.service.skill.updateByCondition(params, { id });
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async destroy() {
 		this.ensureAdmin();
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
-		const result = await ctx.model.Skill.destroy({
-			where: { id },
-		});
+		const result = await ctx.service.skill.destoryByCondition({ id });
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 }
 
