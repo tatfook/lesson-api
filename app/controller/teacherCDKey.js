@@ -1,7 +1,7 @@
+"use strict";
 
 const _ = require("lodash");
 const uuidv1 = require("uuid/v1");
-// const consts = require("../core/consts.js");
 const Controller = require("./baseController.js");
 
 /**

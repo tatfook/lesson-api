@@ -65,7 +65,7 @@ class LessonOrganizationClassMemberService extends Service {
 	 * 
 	 * @param {*} params 
 	 */
-	async createMember(params) {
+	async create(params) {
 		const ret = await this.ctx.model.LessonOrganizationClassMember.create(params);
 		return ret ? ret.get() : undefined;
 	}

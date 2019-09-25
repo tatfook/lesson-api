@@ -128,7 +128,7 @@ class LessonOrganizationActivateCodeService extends Service {
 		if (member) {
 			await this.ctx.service.lessonOrganizationClassMember.updateByCondition({ roleId, realname }, { id: member.id });
 		} else {
-			member = await this.ctx.service.lessonOrganizationClassMember.createMember({
+			member = await this.ctx.service.lessonOrganizationClassMember.create({
 				organizationId: data.organizationId,
 				classId: data.classId,
 				memberId: userId,

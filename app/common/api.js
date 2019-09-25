@@ -3,6 +3,7 @@
 const _ = require("lodash");
 const axios = require("axios");
 const pathToRegexp = require('path-to-regexp');
+const helper = require('../extend/helper');
 
 class Api {
 	constructor(config, app) {
@@ -162,7 +163,7 @@ class Api {
 module.exports = app => {
 	const config = app.config.self;
 
-	config.adminToken = app.util.jwt_encode({ userId: 1, username: "xiaoyao", roleId: 10 }, config.secret, 3600 * 24 * 365 * 10);
+	config.adminToken = helper.jwtEncode({ userId: 1, username: "xiaoyao", roleId: 10 }, config.secret, 3600 * 24 * 365 * 10);
 	app.api = new Api(config, app);
 }
 

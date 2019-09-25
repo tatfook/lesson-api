@@ -1,3 +1,4 @@
+"use strict";
 
 const _ = require("lodash");
 const jwt = require("jwt-simple");
@@ -218,7 +219,11 @@ class UsersController extends Controller {
 	async tutorCB() {
 		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
 		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent || !signature || sigcontent !== this.app.util.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) return this.throw(400, "未知请求");
+		if (!sigcontent
+			|| !signature
+			|| sigcontent !== this.ctx.helper.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) {
+			return this.throw(400, "未知请求");
+		}
 
 		const params = this.validate({ userId: "int" });
 		const userId = params.userId;
@@ -245,7 +250,11 @@ class UsersController extends Controller {
 	async allianceMemberCB() {
 		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
 		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent || !signature || sigcontent !== this.app.util.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) return this.throw(400, "未知请求");
+		if (!sigcontent
+			|| !signature
+			|| sigcontent !== this.ctx.helper.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) {
+			return this.throw(400, "未知请求");
+		}
 
 		const params = this.validate({ userId: "int" });
 		const userId = params.userId;

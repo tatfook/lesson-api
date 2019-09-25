@@ -1,3 +1,5 @@
+"use strict";
+
 const consts = require("../common/consts.js");
 
 const {

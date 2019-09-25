@@ -135,20 +135,20 @@ describe("lesson organization class", () => {
 		// 获取学生0
 		let students = await app.httpRequest().get("/lessonOrganizationClassMembers/student")
 			.set("Authorization", `Bearer ${token}`).expect(res => assert(res.statusCode == 200)).then(res => res.body);
-		assert(students.count === 2);
+		assert(students.data.count === 2);
 
 		students = await app.httpRequest()
 			.get("/lessonOrganizationClassMembers/student?classId=" + cls1.id)
 			.set("Authorization", `Bearer ${token}`)
 			.expect(res => assert(res.statusCode === 200)).then(res => res.body);
-		assert(students.count === 1);
+		assert(students.data.count === 1);
 
 		// 获取老师
 		let teachers = await app.httpRequest()
 			.get("/lessonOrganizationClassMembers/teacher")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(res => assert(res.statusCode === 200)).then(res => res.body);
-		assert(teachers.length === 2);
+		assert(teachers.data.length === 2);
 	});
 
 	it("003 机构过期测试", async () => {

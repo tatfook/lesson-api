@@ -1,28 +1,6 @@
 "use strict";
 
-const errs = {
-	"-1": {
-		code: -1,
-		message: "未知错误"
-	},
-	"0": {
-		code: 0,
-		message: "服务器繁忙,请稍后重试..."
-	},
-	"1": {
-		code: 1,
-		message: "课堂不存在"
-	},
-	"2": {
-		code: 2,
-		message: "课堂人数已满"
-	}
-};
-
 module.exports = {
-	getByCode: (code) => {
-		return errs[code];
-	},
 	"UNKNOWN_ERR": "未知错误",
 	"CLASSROOM_NOT_EXISTS": "课堂不存在",
 	"CLASSROOM_FULL": "课堂人数已满",
@@ -59,5 +37,6 @@ module.exports = {
 	"CANT_BUY": "不支持购买",
 	"UNKNOWN_REQ": "未知请求",
 	"KEY_INVALID": "key错误",
-	"OVERAGE_NOT_ENOUGH": "余额不足"
+	"OVERAGE_NOT_ENOUGH": "余额不足",
+	"PACKAGE_ALREADY_SUBSCRIBE": "课程包已经订阅"
 };

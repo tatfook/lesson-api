@@ -1,5 +1,6 @@
 
-// const _ = require("lodash");
+"use strict";
+
 const Err = require("../common/err");
 const Controller = require("./baseController.js");
 

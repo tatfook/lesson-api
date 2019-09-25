@@ -280,7 +280,7 @@ class BaseController extends Controller {
 	adminAuthenticated() {
 		const config = this.config.self;
 		const token = this.ctx.state.token;
-		const user = this.app.util.jwt_decode(token || "", config.adminSecret, true);
+		const user = this.ctx.helper.jwtDecode(token || "", config.adminSecret, true);
 		if (!user) return this.ctx.throw(401, Err.AUTH_ERR);
 
 		return user;

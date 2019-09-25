@@ -1,5 +1,6 @@
-// const _ = require("lodash");
-// const consts = require("../core/consts.js");
+
+"use strict";
+
 const Controller = require("./baseController.js");
 
 // const {

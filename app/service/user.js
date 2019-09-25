@@ -58,7 +58,7 @@ class User extends Service {
 	async token(payload, clear) {
 		const config = this.app.config.self;
 		const tokenExpire = config.tokenExpire || 3600 * 24 * 2;
-		const token = this.app.util.jwt_encode(payload, config.secret, tokenExpire);
+		const token = this.ctx.helper.jwtEncode(payload, config.secret, tokenExpire);
 
 		await this.setToken(payload.userId, token, clear);
 

@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = {
 	async log(text) {
@@ -10,15 +11,4 @@ module.exports = {
 	getParams() {
 		return _.merge({}, this.request.body, this.query, this.params);
 	}
-
-	// get model() {
-	// return this.app.model;
-	// }
-	// get config() {
-	// return this.app.config.self;
-	// }
-
-	// get util() {
-	// return this.app.util;
-	// }
 };

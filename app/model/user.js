@@ -1,9 +1,11 @@
+"use strict";
 
 const _ = require("lodash");
 const consts = require("../common/consts.js");
 const {
 	USER_IDENTIFY_TEACHER
 } = consts;
+const helper = require("../extend/helper");
 
 module.exports = app => {
 	const {
@@ -112,7 +114,7 @@ module.exports = app => {
 		const user = await this.getById(userId);
 		if (!user) return;
 
-		const datestr = app.util.getDate().datestr;
+		const datestr = helper.getDate().datestr;
 		const learn = user.extra.learn || { learnDayCount: 0, lastLearnDate: "" };
 		user.extra.learn = learn;
 

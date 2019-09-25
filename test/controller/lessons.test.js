@@ -195,7 +195,7 @@ describe("test/controller/lessons.test.js", () => {
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 
-		assert.ok(user.lockCoin < 20); // 成功领取奖励
+		assert.ok(user.data.lockCoin < 20); // 成功领取奖励
 	});
 
 	// it("POST|GET lessons/1/contents", async () => {

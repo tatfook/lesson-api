@@ -1,13 +1,12 @@
+"use strict";
+
 const _ = require("lodash");
 const consts = require("../common/consts.js");
 const Controller = require("./baseController.js");
 const Err = require("../common/err");
 
 const {
-	PACKAGE_STATE_UNAUDIT,
-	PACKAGE_STATE_AUDITING,
-	PACKAGE_STATE_AUDIT_SUCCESS,
-	PACKAGE_SUBSCRIBE_STATE_BUY
+	PACKAGE_STATE_AUDIT_SUCCESS
 } = consts;
 
 class PackagesController extends Controller {

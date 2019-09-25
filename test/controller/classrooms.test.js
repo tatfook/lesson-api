@@ -37,7 +37,8 @@ describe("test/controller/classrooms.test.js", () => {
 			skillName: "跳舞",
 		});
 
-		const token = app.util.jwt_encode({ userId: 1, username: "xiaoyao" }, app.config.self.secret);
+		const user = await app.login();
+		const token = user.token;
 
 		await app.httpRequest().get("/users").set("Authorization", `Bearer ${token}`).expect(res => assert(res.statusCode === 200)).then(res => res.body);
 
@@ -51,7 +52,7 @@ describe("test/controller/classrooms.test.js", () => {
 				vedioUrl: "http://www.baidu.com",
 			}
 		}).set("Authorization", `Bearer ${token}`).expect(res => assert(res.statusCode == 200)).then(res => res.body);
-		assert.equal(lesson.id, 1);
+		assert.equal(lesson.data.id, 1);
 
 		await app.httpRequest().post("/packages").send({
 			packageName: "前端",
@@ -70,7 +71,8 @@ describe("test/controller/classrooms.test.js", () => {
 	});
 
 	it("001 创建课堂 进入课堂 退出课堂 关闭课堂", async () => {
-		const token = app.util.jwt_encode({ userId: 1, username: "xiaoyao" }, app.config.self.secret);
+		const user = await app.login();
+		const token = user.token;
 
 		// 创建课堂
 		let classroom = await app.httpRequest().post("/classrooms").send({
@@ -94,7 +96,9 @@ describe("test/controller/classrooms.test.js", () => {
 		assert(classroom2.data.rows.length === 1);
 
 		// 进入课堂
-		const token2 = app.util.jwt_encode({ userId: 2, username: "wxatest" }, app.config.self.secret);
+		const user_ = await app.login({ id: 2, username: "wxatest" });
+		const token2 = user_.token;
+
 		await app.httpRequest().get("/users").set("Authorization", `Bearer ${token2}`)
 			.expect(res => assert(res.statusCode === 200))
 			.then(res => res.body);
@@ -133,6 +137,7 @@ describe("test/controller/classrooms.test.js", () => {
 		})
 			.set("Authorization", `Bearer ${token2}`)
 			.expect(400).then(res => res.body);
+
 		assert(ret.message === "课堂不存在");
 
 		// 自学
@@ -145,7 +150,8 @@ describe("test/controller/classrooms.test.js", () => {
 	});
 
 	it("002", async () => {
-		const token = app.util.jwt_encode({ userId: 1, username: "xiaoyao" }, app.config.self.secret);
+		const user = await app.login({ id: 1, username: "xiaoyao" });
+		const token = user.token;
 
 		// await app.model.PackageLesson.create({ packageId: 1, lessonId: 1, userId: 2 });
 

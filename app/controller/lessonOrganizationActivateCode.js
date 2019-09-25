@@ -1,3 +1,4 @@
+"use strict";
 
 const Controller = require("./baseController.js");
 const Err = require("../common/err");
