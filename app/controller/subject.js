@@ -1,6 +1,7 @@
 
 const _ = require("lodash");
 const Controller = require("./baseController.js");
+const Err = require("../common/err");
 
 class SubjectsController extends Controller {
 	// get
@@ -8,20 +9,19 @@ class SubjectsController extends Controller {
 		const { ctx } = this;
 		const query = ctx.query || {};
 
-		const list = await ctx.model.Subject.findAll({ ...this.queryOptions, where: query });
-
-		return this.success(list);
+		const list = await ctx.service.subject.findAllByCondition(this.queryOptions, query);
+		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
 	async show() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
-		const subject = await ctx.model.Subject.findOne({ where: { id } });
-		if (!subject) ctx.throw(404, "not found");
+		const subject = await ctx.service.subject.getByCondition({ id });
+		if (!subject) ctx.throw(404, Err.NOT_FOUND);
 
-		return this.success(subject);
+		return ctx.helper.success({ ctx, status: 200, res: subject });
 	}
 
 	async create() {
@@ -29,35 +29,33 @@ class SubjectsController extends Controller {
 		const { ctx } = this;
 		const params = ctx.request.body;
 
-		const result = await ctx.model.Subject.create(params);
+		const result = await ctx.service.subject.createSubject(params);
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async update() {
 		this.ensureAdmin();
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		const params = ctx.request.body;
 
-		const result = await ctx.model.Subject.update(params, { where: { id } });
+		const result = await ctx.service.subject.updateByCondition(params, { id });
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async destroy() {
 		this.ensureAdmin();
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
-		const result = await ctx.model.Subject.destroy({
-			where: { id },
-		});
+		const result = await ctx.service.subject.destoryByCondition({ id });
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 }

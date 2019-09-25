@@ -4,6 +4,10 @@ const uuidv1 = require("uuid/v1");
 // const consts = require("../core/consts.js");
 const Controller = require("./baseController.js");
 
+/**
+ * 全部废弃！！！！
+ */
+
 class TeacherCDKeysController extends Controller {
 	async index() {
 		this.adminAuthenticated();
