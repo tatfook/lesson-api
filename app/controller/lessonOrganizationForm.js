@@ -41,7 +41,8 @@ const LessonOrganizationForm = class extends Controller {
 		const params = this.validate({ id: "number" });
 
 		const data = await this.ctx.service.lessonOrganizationForm.updateForm(params, {
-			organizationId, userId, roleId });
+			organizationId, userId, roleId
+		});
 
 		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: data });
 	}
@@ -52,7 +53,7 @@ const LessonOrganizationForm = class extends Controller {
 		params.userId = this.currentUser().userId;
 		delete params.id;
 
-		const submit = await this.ctx.model.lessonOrganizationForm.postForm(params);
+		const submit = await this.ctx.service.lessonOrganizationForm.postForm(params);
 
 		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: submit });
 	}
@@ -60,7 +61,7 @@ const LessonOrganizationForm = class extends Controller {
 	async getSubmit() {
 		let { userId, organizationId, roleId } = this.authenticated();
 		const params = this.validate({ id: "number" });
-	
+
 		const result = await this.ctx.service.lessonOrganizationForm.getAllSubmit(params, { userId, organizationId, roleId }, this.queryOptions);
 
 		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: result });

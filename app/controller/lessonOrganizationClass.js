@@ -46,7 +46,9 @@ const LessonOrganizationClass = class extends Controller {
 	}
 
 	async create() {
+
 		const { roleId, organizationId, userId, username } = this.authenticated();
+
 		const params = this.validate({ name: "string" });
 
 		const cls = await this.ctx.service.lessonOrganizationClass.createClass(params, {

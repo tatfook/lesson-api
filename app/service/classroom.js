@@ -160,6 +160,16 @@ class ClassroomService extends Service {
 	async dismiss(userId, classroomId, username) {
 		return await this.ctx.model.Classroom.dismiss(userId, classroomId, username);
 	}
+
+	/**
+	 * 是否教了
+	 * @param {*} userId 
+	 * @param {*} packageId 
+	 * @param {*} lessonId 
+	 */
+	async isTeached(userId, packageId, lessonId) {
+		return await this.ctx.model.Classroom.isTeached(userId, packageId, lessonId);
+	}
 }
 
 module.exports = ClassroomService;

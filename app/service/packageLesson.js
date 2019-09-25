@@ -31,6 +31,19 @@ class PackageLessonService extends Service {
 
 		return data;
 	}
+
+	/**
+	 * 
+	 * @param {*} packageLessons 
+	 */
+	async bulkCreate(packageLessons) {
+		return await this.ctx.model.PackageLesson.bulkCreate(packageLessons);
+	}
+
+
+	async destroyByCondition(condition) {
+		return await this.ctx.model.PackageLesson.destroy({ where: condition });
+	}
 }
 
 module.exports = PackageLessonService;

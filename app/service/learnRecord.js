@@ -110,6 +110,18 @@ class LearnRecordService extends Service {
 		const ret = await this.ctx.model.LearnRecord.findAll({ where: condition });
 		return ret.map(r => r.get());
 	}
+
+	/**
+	 * 找一个课程是否学习完
+	 * @param {*} userId 
+	 * @param {*} packageId 
+	 * @param {*} lessonId 
+	 */
+	async packageIsLearned(userId, packageId, lessonId) {
+		return await this.ctx.model.LearnRecord.isLearned(userId, packageId, lessonId)
+	}
+
+
 }
 
 module.exports = LearnRecordService;

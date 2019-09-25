@@ -122,6 +122,35 @@ class User extends Service {
 	async getByIdOrCreate(userId, username) {
 		return await this.ctx.model.User.getById(userId, username);
 	}
+
+	/**
+	 * 
+	 * @param {*} userDatas 
+	 */
+	async bulkCreateKeepworkUser(userDatas) {
+		const ret = await this.ctx.keepworkModel.Users.bulkCreate(userDatas);
+		return ret ? ret.map(r => r.get()) : [];
+	}
+
+	/**
+	 * 
+	 * @param {*} userinfos 
+	 */
+	async bulkCreateUserinfos(userinfos) {
+		const ret = await this.ctx.keepworkModel.userinfos.bulkCreate(userinfos);
+		return ret ? ret.map(r => r.get()) : [];
+	}
+
+	/**
+ 	* 根据条件更新
+ 	* @param {*} params 更新的字段
+ 	* @param {*} condition 条件
+ 	*/
+	async updateKeepworkUserByCondition(params, condition) {
+		return await this.ctx.keepworkModel.Users.update(params, { where: condition });
+	}
+
+
 }
 
 module.exports = User;

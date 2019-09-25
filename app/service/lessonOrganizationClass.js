@@ -33,7 +33,7 @@ class LessonOrganizationClassService extends Service {
 	async historyClass(queryOptions, organizationId) {
 		const curtime = new Date();
 		const [count, rows] = await Promise.all([
-			this.ctx.model.LessonOrganizationClass.count({ where: { organizationId, end: { $lte: curtime }}}),
+			this.ctx.model.LessonOrganizationClass.count({ where: { organizationId, end: { $lte: curtime } } }),
 			this.findAllByCondition({
 				organizationId,
 				end: {
@@ -95,7 +95,7 @@ class LessonOrganizationClassService extends Service {
 		const { roleId, organizationId, userId, username } = authParams;
 
 		if (!organizationId) return this.ctx.throw(400, Err.ARGS_ERR);
-		if (roleId & CLASS_MEMBER_ROLE_ADMIN === 0) return this.throw(403, Err.AUTH_ERR);
+		if (roleId & CLASS_MEMBER_ROLE_ADMIN === 0) return this.ctx.throw(403, Err.AUTH_ERR);
 
 		params.organizationId = organizationId;
 		const packages = params.packages || [];
@@ -146,7 +146,7 @@ class LessonOrganizationClassService extends Service {
 			}
 		}
 
-		await this.model.LessonOrganizationClass.update(params, { where: { id: params.id }});
+		await this.model.LessonOrganizationClass.update(params, { where: { id: params.id } });
 
 		if (params.packages) {
 			const datas = [];
@@ -172,7 +172,7 @@ class LessonOrganizationClassService extends Service {
 	 */
 	async destroyClass(classId, organizationId) {
 		await Promise.all([
-			this.ctx.model.LessonOrganizationClass.destroy({ where: { id: classId, organizationId }}),
+			this.ctx.model.LessonOrganizationClass.destroy({ where: { id: classId, organizationId } }),
 			this.ctx.service.lessonOrganizationPackage.destroyByCondition({ classId, organizationId })
 		]);
 	}

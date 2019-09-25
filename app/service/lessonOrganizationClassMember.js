@@ -229,7 +229,6 @@ class LessonOrganizationClassMemberService extends Service {
 		}).then(list => list.map(o => o.toJSON()));
 
 		oldmembers = _.filter(oldmembers, o => {
-			console.log('---:', o);
 			if (o.roleId == CLASS_MEMBER_ROLE_STUDENT && o.lessonOrganizationClasses
 				&& new Date(o.lessonOrganizationClasses.end).getTime() < new Date().getTime()
 			) return false;
@@ -326,6 +325,14 @@ class LessonOrganizationClassMemberService extends Service {
 			classIds: [-1],
 			roleId: memberRoleId & CLASS_MEMBER_ROLE_TEACHER ? CLASS_MEMBER_ROLE_TEACHER : CLASS_MEMBER_ROLE_STUDENT,
 		});
+	}
+
+	/**
+	 * 
+	 * @param {*} members 
+	 */
+	async bulkCreateMembers(members) {
+		return await this.ctx.model.LessonOrganizationClassMember.bulkCreate(members);
 	}
 }
 

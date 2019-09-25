@@ -49,5 +49,13 @@ module.exports = {
 	"MEMBERS_UPPER_LIMIT": "人数已达上限",
 	"CLASS_NOT_EXISTS": "班级不存在",
 	"USER_NOT_EXISTS": "用户不存在",
-	"FORM_NOT_EXISTS": "FORM不存在"
+	"FORM_NOT_EXISTS": "FORM不存在",
+	"USER_NOT_REALNAME": "用户未实名",
+	"USER_NOT_EXISTS_OR_NOT_BIND_ORGAN": "成员不存在，或者未绑定本机构",
+	"ALREADY_SUBSCRIBE": "已经订阅",
+	"PACKAGE_NOT_EXISTS": "课程包不存在",
+	"CANT_BUY_SELF_PACKAGE": "用户不能购买自己的课程包",
+	"AMOUNT_ERR": "金额错误",
+	"CANT_BUY": "不支持购买",
+	"UNKNOWN_REQ": "未知请求"
 };
