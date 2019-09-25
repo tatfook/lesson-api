@@ -57,5 +57,7 @@ module.exports = {
 	"CANT_BUY_SELF_PACKAGE": "用户不能购买自己的课程包",
 	"AMOUNT_ERR": "金额错误",
 	"CANT_BUY": "不支持购买",
-	"UNKNOWN_REQ": "未知请求"
+	"UNKNOWN_REQ": "未知请求",
+	"KEY_INVALID": "key错误",
+	"OVERAGE_NOT_ENOUGH": "余额不足"
 };

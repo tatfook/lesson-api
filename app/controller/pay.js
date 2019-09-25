@@ -15,18 +15,6 @@ class PayController extends Controller {
 		const username = query.username;
 		const packageId = _.toNumber(query.packageId);
 		const price = _.toNumber(query.price);
-		// const config = app.config.self;
-		// const ip = ctx.ip;
-
-		// console.log(ctx.ip);
-		// console.log(config);
-		// console.log(ctx.path);
-		// console.log(ctx.query);
-
-		// if (_.indexOf(config.trustIps, ip) < 0) {
-		// await ctx.model.Logs.create({text:"支付-不可信任请求:" + ip});
-		// ctx.throw(400, "不可信任请求");
-		// }
 
 		if (!username || !price || !packageId) {
 			await ctx.model.Log.create({ text: "支付-参数错误" + JSON.stringify(query) });

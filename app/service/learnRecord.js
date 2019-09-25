@@ -121,7 +121,10 @@ class LearnRecordService extends Service {
 		return await this.ctx.model.LearnRecord.isLearned(userId, packageId, lessonId)
 	}
 
-
+	// 获取用户已学习的技能列表
+	async getSkills(userId) {
+		return await this.ctx.model.UserLearnRecord.getSkills(userId);
+	}
 }
 
 module.exports = LearnRecordService;

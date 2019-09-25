@@ -50,7 +50,7 @@ describe("test/controller/users.test.js", () => {
 				vedioUrl: "http://www.baidu.com",
 			}
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(lesson.id, 1);
+		assert.equal(lesson.data.id, 1);
 
 		await app.httpRequest().post("/packages").send({
 			packageName: "前端",
@@ -79,12 +79,12 @@ describe("test/controller/users.test.js", () => {
 		let user = await app.httpRequest().get("/users/1")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
-		assert.equal(user.nickname, "xiaoyao");
+		assert.equal(user.data.nickname, "xiaoyao");
 
 		user = await app.httpRequest().get("/users")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
-		assert(user.id);
+		assert(user.data.id);
 	});
 
 	it("POST /users/1/teacher", async () => {
@@ -108,7 +108,7 @@ describe("test/controller/users.test.js", () => {
 		let user = await app.httpRequest()
 			.get("/users/1").set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.ok(user.identify & 2);
+		assert.ok(user.data.identify & 2);
 
 		const isTeach = await app.httpRequest()
 			.get("/users/1/isTeach")
@@ -145,11 +145,11 @@ describe("test/controller/users.test.js", () => {
 			state: 1,
 		}).set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.equal(lr.id, 1);
+		assert.equal(lr.data.id, 1);
 
 		const skills = await app.httpRequest().get("/users/1/skills")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(skills.length, 2);
+		assert.equal(skills.data.length, 2);
 		// console.log(skills);
 	});
 

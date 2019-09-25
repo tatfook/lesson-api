@@ -22,6 +22,17 @@ class SubscribeService extends Service {
 	async upsertSubscribe(params) {
 		return await this.ctx.model.Subscribe.upsert(params);
 	}
+
+	/**
+	 * 用户课程包
+	 * @param {*} userId 
+	 * @param {*} state package的状态
+	 */
+	async getByUserId(userId, state) {
+		return await this.ctx.model.Subscribe.getByUserId(userId, state);
+	}
+
+
 }
 
 module.exports = SubscribeService;
