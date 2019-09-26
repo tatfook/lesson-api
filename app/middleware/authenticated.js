@@ -1,6 +1,5 @@
 "use strict";
 
-const axios = require("axios");
 const jwt = require("../common/jwt.js");
 
 module.exports = (options, app) => {
@@ -8,18 +7,23 @@ module.exports = (options, app) => {
 	return async function (ctx, next) {
 		const Authorization = ctx.request.header.authorization || ("Bearer " + (ctx.cookies.get("token") || ""));
 		const token = Authorization.split(" ")[1] || "";
-		const headers = { "Authorization": Authorization };
-		let user = undefined;
+
+		// 普通token
 		try {
-			user = jwt.decode(token, config.secret);
-			// 验证token是否有效
-			if (this.app.config.env !== "unittest") {
-				await axios.get(config.coreServiceBaseUrl + "users/profile", { headers }).catch(e => { user = undefined; });
-			}
+			ctx.state.user = jwt.decode(token, config.secret);
 		} catch (e) {
+			ctx.state.user = {};
 		}
+
+		// admin token【dashboard那边】
+		try {
+			ctx.state.admin = token ? jwt.decode(token, config.adminSecret, false) : {};
+			ctx.state.admin.admin = true;
+		} catch (e) {
+			ctx.state.admin = {};
+		}
+
 		ctx.state.token = token;
-		ctx.state.user = user || {};
 		await next();
 	};
 };

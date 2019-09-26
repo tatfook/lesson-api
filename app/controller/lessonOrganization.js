@@ -134,14 +134,17 @@ const LessonOrganization = class extends Controller {
 	async update() {
 		const { ctx } = this;
 		const params = this.validate({ id: "number" });
-		const authParams = this.authenticated();
 		delete params.userId;
 		const id = params.id;
 
 		const organ = await ctx.service.lessonOrganization.getByCondition({ id });
 		if (!organ) return ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
 
-		await ctx.service.lessonOrganization.updateOrganization(params, id, authParams);
+		if (ctx.state.admin && ctx.state.admin.userId) {
+			await ctx.service.lessonOrganization.updateOrganization(params, id);
+		} else {
+			await ctx.service.lessonOrganization.updateOrganization(params, id, this.authenticated());
+		}
 
 		if (params.packages) {
 			await ctx.service.lessonOrganizationPackage.destroyByCondition({ organizationId: id, classId: 0 });
