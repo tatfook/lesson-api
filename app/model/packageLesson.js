@@ -1,3 +1,4 @@
+"use strict";
 
 const _ = require("lodash");
 
@@ -66,6 +67,22 @@ module.exports = app => {
 		_.each(list, o => { count[o.packageId] = o.count; });
 
 		return count;
+	};
+
+	// 
+	model.getLessonCountByPackageIds2 = async function (packageIds = []) {
+		if (packageIds.length === 0) return [];
+
+		const sql = `select packageId, count(*) as count from packageLessons group by packageId having packageId in (:packageIds)`;
+
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				packageIds,
+			},
+		});
+
+		return list;
 	};
 
 	model.associate = () => {

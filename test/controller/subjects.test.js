@@ -26,11 +26,11 @@ describe("/admins/subjects.test.js", () => {
 
 		let list = await app.httpRequest().get("/admins/subject")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(list.count, 2);
+		assert.equal(list.data.count, 2);
 
 		list = await app.httpRequest().get("/subjects")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(list.length, 2);
+		assert.equal(list.data.length, 2);
 
 	});
 
@@ -41,7 +41,7 @@ describe("/admins/subjects.test.js", () => {
 		const subject = await app.httpRequest().get("/admins/subject/1")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.ok(subject);
-		assert.equal(subject.subjectName, "数学");
+		assert.equal(subject.data.subjectName, "数学");
 	});
 
 	it("DELETE /admins/subjects/1", async () => {
@@ -52,6 +52,6 @@ describe("/admins/subjects.test.js", () => {
 			.set("Authorization", `Bearer ${token}`).expect(200);
 		const list = await app.httpRequest().get("/admins/subject")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(list.count, 1);
+		assert.equal(list.data.count, 1);
 	});
 });

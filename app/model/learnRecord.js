@@ -1,5 +1,6 @@
+"use strict";
 
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 const {
 	LEARN_RECORD_STATE_FINISH,
 } = consts;
@@ -121,6 +122,7 @@ module.exports = app => {
 		if (params.classroomId) lr.classroomId = params.classroomId;
 
 		await app.model.LearnRecord.update(lr, { where });
+		// await app.model.LearnRecord.update(params, { where });
 
 		if (lr.userId && ~~params.state === LEARN_RECORD_STATE_FINISH) {
 			await this.learnFinish(lr);

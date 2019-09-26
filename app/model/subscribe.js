@@ -1,5 +1,7 @@
+"use strict";
+
 const _ = require("lodash");
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 const {
 	COIN_TYPE_PACKAGE_REWARD,
 	PACKAGE_SUBSCRIBE_STATE_BUY,

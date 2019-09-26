@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = app => {
 	const {
@@ -35,6 +36,15 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
+
+	model.associate = () => {
+		app.model.Skill.hasMany(app.model.LessonSkill, {
+			as: "lessonSkills",
+			foreignKey: "skillId",
+			sourceKey: "id",
+			constraints: false,
+		});
+	};
 
 	return model;
 };

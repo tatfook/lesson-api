@@ -34,8 +34,8 @@ describe("机构表单", () => {
 			}],
 		}).expect(res => assert(res.statusCode === 200)).then(res => res.body);
 
-		assert(form.id);
-		const formId = form.id;
+		assert(form.data.id);
+		const formId = form.data.id;
 
 		// 创建表单2
 		form = await app.httpRequest().post("/lessonOrganizationForms").set("Authorization", `Bearer ${token}`).send({
@@ -47,11 +47,11 @@ describe("机构表单", () => {
 				title: "这是一个问答题?",
 			}],
 		}).expect(res => assert(res.statusCode === 200)).then(res => res.body);
-		assert(form.id);
+		assert(form.data.id);
 
 
 		// 修改表单  改为进行中
-		await app.httpRequest().put("/lessonOrganizationForms/" + form.id).set("Authorization", `Bearer ${token}`).send({
+		await app.httpRequest().put("/lessonOrganizationForms/" + form.data.id).set("Authorization", `Bearer ${token}`).send({
 			organizationId: organ.id,
 			state: 1
 		}).expect(res => assert(res.statusCode === 200)).then(res => res.body);
@@ -62,7 +62,7 @@ describe("机构表单", () => {
 			organizationId: organ.id,
 			state: 1,
 		}).expect(res => assert(res.statusCode === 200)).then(res => res.body);
-		assert(forms.length === 1);
+		assert(forms.data.length === 1);
 
 
 		// 检索全部表单
@@ -70,7 +70,7 @@ describe("机构表单", () => {
 			.post(`/lessonOrganizationForms/search`)
 			.send({ organizationId: organ.id })
 			.expect(res => assert(res.statusCode === 200)).then(res => res.body);
-		assert(forms.length === 2);
+		assert(forms.data.length === 2);
 
 		// 删除表单
 		// await app.httpRequest()
@@ -86,20 +86,20 @@ describe("机构表单", () => {
 		// assert(forms.length === 1);
 
 		// 提交表单
-		const submit = await app.httpRequest().post(`/lessonOrganizationForms/${form.id}/submit`).send({
+		const submit = await app.httpRequest().post(`/lessonOrganizationForms/${form.data.id}/submit`).send({
 			quizzes: [{
 				title: "这是一个问答题?",
 			}],
 		}).expect(res => assert(res.statusCode === 200)).then(res => res.body);
 
-		await app.httpRequest().post(`/lessonOrganizationForms/${form.id}/submit`).send({
+		await app.httpRequest().post(`/lessonOrganizationForms/${form.data.id}/submit`).send({
 			quizzes: [{
 				title: "这是一个问答题?",
 			}],
 		}).expect(res => assert(res.statusCode === 200)).then(res => res.body);
 
 		// 更改提交
-		await app.httpRequest().put(`/lessonOrganizationForms/${form.id}/submit/${submit.id}`)
+		await app.httpRequest().put(`/lessonOrganizationForms/${form.data.id}/submit/${submit.data.id}`)
 			.set("Authorization", `Bearer ${token}`)
 			.send({
 				organizationId: organ.id,
@@ -108,8 +108,8 @@ describe("机构表单", () => {
 
 		// 获取提交列表
 		const submits = await app.httpRequest()
-			.get(`/lessonOrganizationForms/${form.id}/submit?organizationId=${organ.id}`)
+			.get(`/lessonOrganizationForms/${form.data.id}/submit?organizationId=${organ.id}`)
 			.set("Authorization", `Bearer ${token}`).expect(res => assert(res.statusCode === 200)).then(res => res.body);
-		assert(submits.count === 2);
+		assert(submits.data.count === 2);
 	});
 });

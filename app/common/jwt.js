@@ -1,3 +1,5 @@
+"use strict";
+
 /*
  * jwt-simple
  *

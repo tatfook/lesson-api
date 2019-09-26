@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = app => {
 	const {
@@ -69,48 +70,39 @@ module.exports = app => {
 	};
 
 	model.addSkill = async function (userId, lessonId, skillId, score) {
-		let data = await app.model.Lesson.findOne({
-			where: {
-				userId,
-				id: lessonId,
-			}
-		});
-		if (!data) return false;
+		const [lesson, skill] = await Promise.all([
+			app.model.Lesson.findOne({ where: { userId, id: lessonId }}),
+			app.model.Skill.findOne({ where: { id: skillId }})
+		]);
 
-		data = await app.model.Skill.findOne({ where: { id: skillId }});
-		if (!data) return false;
+		if (!lesson || !skill) return false;
 
-		data = await app.model.LessonSkill.create({
+		const data = await app.model.LessonSkill.create({
 			userId,
 			lessonId,
 			skillId,
 			score,
 		});
-		if (!data) return false;
 
-		return true;
+		return !data ? false : true;
 	};
 
 	model.getSkills = async function (lessonId) {
-		const skills = [];
-		const list = await app.model.LessonSkill.findAll({
-			where: {
-				lessonId,
-			}
+		let list = await app.model.LessonSkill.findAll({
+			include: [{
+				as: "skills",
+				model: app.model.Skill,
+				attributes: ["skillName"]
+			}],
+			where: { lessonId }
 		});
-		for (let i = 0; i < list.length; i++) {
-			let lessonSkill = list[i].get({ plain: true });
-			let skill = await app.model.Skill.findOne({
-				where: { id: lessonSkill.skillId },
-			});
-			if (skill) {// 据说这个一定是真
-				skill = skill.get({ plain: true });
-				lessonSkill.skillName = skill.skillName;
-			}
-			skills.push(lessonSkill);
-		}
 
-		return skills;
+		return list.map(r => {
+			r = r.get();
+			r.skillName = r.skills.skillName;
+			delete r.skills;
+			return r;
+		});
 	};
 
 	model.deleteSkill = async function (userId, lessonId, skillId) {

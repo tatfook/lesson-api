@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = app => {
 	const {
@@ -63,6 +64,26 @@ module.exports = app => {
 	});
 
 	// model.sync({force:true});
+
+	model.findByUserIdRoleIdAndOrganizationIdSql = async function name(params) {
+		const sql = `
+		SELECT DISTINCT c.* FROM lessonOrganizationClasses c
+		LEFT JOIN lessonOrganizationClassMembers m on m.classId = c.id
+		where m.organizationId = :organizationId and m.roleId & :roleId
+		and m.memberId= :memberId and c.end >=now() 
+		`;
+		console.log("-----------90---------", params);
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				organizationId: params.organizationId,
+				roleId: params.roleId,
+				memberId: params.userId
+			}
+		});
+
+		return list;
+	};
 
 	model.associate = () => {
 		app.model.LessonOrganizationClass.hasMany(app.model.LessonOrganizationActivateCode, {

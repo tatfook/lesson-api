@@ -1,20 +1,14 @@
+"use strict";
 
 const _ = require("lodash");
 const jwt = require("jwt-simple");
-const consts = require("../core/consts.js");
-const Controller = require("../core/baseController.js");
+const consts = require("../common/consts.js");
+const Controller = require("./baseController.js");
+const Err = require("../common/err");
 
 const {
-	USER_IDENTIFY_TEACHER,
-	USER_IDENTIFY_APPLY_TEACHER,
-
 	USER_ROLE_ALLIANCE_MEMBER,
 	USER_ROLE_TUTOR,
-
-	TEACHER_PRIVILEGE_TEACH,
-
-	TRADE_TYPE_BEAN,
-	TRADE_TYPE_COIN,
 } = consts;
 
 const ONEYEAR = 1000 * 3600 * 24 * 365;
@@ -23,82 +17,58 @@ class UsersController extends Controller {
 	token() {
 		const env = this.app.config.env;
 		this.enauthenticated();
-		const user = this.getUser();
+		const user = this.currentUser();
 		user.exp = Date.now() / 1000 + (env === "prod" ? 3600 * 24 * 1000 : 3600 * 24);
 		const token = jwt.encode(user, this.app.config.self.secret);
 
-		return this.success(token);
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: token });
 	}
 
 	tokeninfo() {
-		return this.success(this.enauthenticated());
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: this.enauthenticated() });
 	}
 
 	// 获取当前用户  不存在则创建
 	async index() {
 		const { ctx } = this;
 		this.enauthenticated();
-		const user = this.getUser();
+		const user = this.currentUser();
 
-		const data = await ctx.model.User.getById(user.userId, user.username);
-		if (!data) return this.throw(404, "用户不存在");
+		const data = await this.ctx.service.user.getCurrentUser(user);
 
-		const userId = user.userId;
-		const account = await this.app.keepworkModel.accounts.getByUserId(userId) || {};
-		data.rmb = account.rmb;
-		data.coin = account.coin;
-		data.bean = account.bean;
-		data.tutorService = await this.model.Tutor.getByUserId(user.userId);
-		data.teacher = await this.model.Teacher.getByUserId(userId);
-		data.allianceMember = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId);
-		data.tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId);
-
-		return this.success(data);
+		return this.ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	// 获取用户信息
 	async show() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
-		const data = await ctx.model.User.getById(id);
-		if (!data) return this.throw(404, "用户不存在");
+		const data = await ctx.service.user.getCurrentUser({ userId: id });
 
-		const userId = id;
-		const account = await this.app.keepworkModel.accounts.getByUserId(userId) || {};
-		data.rmb = account.rmb;
-		data.coin = account.coin;
-		data.bean = account.bean;
-
-		data.tutorService = await this.model.Tutor.getByUserId(userId);
-		data.teacher = await this.model.Teacher.getByUserId(userId);
-
-		data.allianceMember = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId);
-		data.tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId);
-
-		return this.success(data);
+		return this.ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async create() {
 		const { ctx } = this;
 		this.enauthenticated();
-		const user = this.getUser();
+		const user = this.currentUser();
 
-		const data = await ctx.model.User.getById(user.userId, user.username);
+		const data = await ctx.service.user.getByIdOrCreate(user.userId, user.username);
 
-		return this.success(data);
+		return this.ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async update() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		if (~~id !== userId) ctx.throw(400, "args error");
+		if (~~id !== userId) ctx.throw(400, Err.ARGS_ERR);
 
 		const params = ctx.request.body;
 
@@ -108,9 +78,9 @@ class UsersController extends Controller {
 		delete params.identify;
 		delete params.username;
 
-		const result = await ctx.model.User.update(params, { where: { id }});
+		const result = await ctx.service.user.updateUserByCondition(params, { id });
 
-		return this.success(result);
+		return this.ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	// 申请成老师
@@ -121,161 +91,105 @@ class UsersController extends Controller {
 		this.success("未实现, 空接口");
 	}
 
-	// 成为老师
+	// 成为老师 废弃
 	async teacher() {
-		// const { ctx } = this;
+		const { ctx } = this;
 		const { id, key, school } = this.validate({
 			id: "int",
 			key: "string",
 			school: "string_optional"
 		});
 
-		const user = await this.model.User.getById(id);
-		if (!user) this.throw(400, "arg error");
+		const result = await ctx.service.user.becomeTeacher(id, key, school);
 
-		const isOk = await this.model.TeacherCDKey.useKey(key, id);
-		if (!isOk) this.throw(400, "key invalid");
-
-		const cdKey = await this.model.TeacherCDKey.findOne({ where: { key }}).then(o => o && o.toJSON());
-		const startTime = new Date().getTime();
-
-		user.identify = (user.identify | USER_IDENTIFY_TEACHER) & (~USER_IDENTIFY_APPLY_TEACHER);
-		const teacher = await this.model.Teacher.findOne({
-			where: { userId: id }
-		})
-			.then(o => o && o.toJSON())
-			|| {
-				userId: id, startTime, endTime: startTime,
-				key, school, privilege: TEACHER_PRIVILEGE_TEACH
-			};
-
-		if (teacher.endTime < startTime) {
-			teacher.endTime = teacher.startTime = startTime;
-		}
-		teacher.endTime += cdKey.expire;
-
-		await this.model.Teacher.upsert(teacher);
-		const result = await this.model.User.update(user, { where: { id }});
-
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	// 是否允许教课
 	async isTeach() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
-		const ok = await ctx.model.Teacher.isAllowTeach(id);
+		const ok = await ctx.service.teacher.isAllowTeach(id);
 
-		return this.success(ok);
+		return ctx.helper.success({ ctx, status: 200, res: ok });
 	}
 
 	// 用户课程包
 	async getSubscribes() {
-		// const { userId } = this.enauthenticated();
 		const { id, packageState } = this.validate({
 			id: "int",
 			packageState: "int_optional",
 		});
 
-		const list = await this.model.Subscribe.getByUserId(id, packageState);
+		const list = await this.ctx.service.subscribe.getByUserId(id, packageState);
 
-		return this.success(list);
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: list });
 	}
 
 	async isSubscribe() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.query;
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
-		if (~~id !== userId) ctx.throw(400, "args error");
+		const userId = this.currentUser().userId;
+		if (~~id !== userId) ctx.throw(400, Err.ARGS_ERR);
+
 		const packageId = params.packageId && _.toNumber(params.packageId);
-		if (!packageId) ctx.throw(400, "args error");
+		if (!packageId) ctx.throw(400, Err.ARGS_ERR);
 
-		const result = await ctx.model.Subscribe.isSubscribePackage(userId, packageId);
+		const result = await ctx.service.subscribe.getByCondition({ userId, packageId });
 
-		return this.success(result);
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: result ? true : false });
 	}
-
-	// // 用户订阅
-	// async postSubscribes() {
-	// const {ctx} = this;
-	// const id = _.toNumber(ctx.params.id);
-	// const params = ctx.request.body;
-	// if (!id) ctx.throw(400, "id invalid");
-
-	// this.enauthenticated();
-	// const userId = this.getUser().userId;
-	// if (id != userId) ctx.throw(400, "args error");
-
-	// ctx.validate({
-	// packageId: 'int',
-	// }, params);
-
-	// const packageId = params.packageId;
-	// const result = await ctx.model.Subscribes.subscribePackage(userId, packageId);
-
-	// if (result.id != 0) ctx.throw(400, result.message);
-
-	// return this.success("OK");
-	// }
 
 	// 获取知识币变更列表
 	async coins() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
-		if (~~id !== userId) ctx.throw(400, "args error");
+		const userId = this.currentUser().userId;
+		if (~~id !== userId) ctx.throw(400, Err.ARGS_ERR);
 
-		const list = await ctx.model.Coin.findAll({ where: { userId }});
-		return this.success(list);
+		const list = await ctx.service.coin.getAllByCondition({ userId });
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: list });
 	}
 
 	// 获取用户已学习的技能列表
 	async skills() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
-		const list = await ctx.model.UserLearnRecord.getSkills(id);
+		const list = await ctx.service.learnRecord.getSkills(id);
 
-		this.success(list);
+		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
 	// 用户花费知识币和知识豆
 	async expense() {
 		const { userId } = this.enauthenticated();
-		const { coin, bean, description } = this.validate({ coin: "int_optional", bean: "int_optional", description: "string_optional" });
+		const { coin, bean, description } = this.validate({
+			coin: "int_optional", bean: "int_optional", description: "string_optional"
+		});
 
-		const user = await this.model.User.getById(userId);
-		if (!user) this.throw(400);
-		if ((bean && bean > user.bean) || (coin && coin > user.coin)) this.throw(400, "余额不足");
-		if (user.bean && bean && user.bean >= bean && bean > 0) {
-			user.bean = user.bean - bean;
-			await this.model.Trade.create({ userId, type: TRADE_TYPE_BEAN, amount: bean * -1, description });
-		}
-		if (user.coin && coin && user.coin >= coin && coin > 0) {
-			user.coin = user.coin - coin;
-			await this.model.Trade.create({ userId, type: TRADE_TYPE_COIN, amount: coin * -1, description });
-		}
+		await this.ctx.service.user.expense(userId, { coin, bean, description });
 
-		await this.model.User.update(user, { fields: ["coin", "bean"], where: { id: userId }});
-
-		return this.success("OK");
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
 	}
 
-	// 导师服务回调
+	// 导师服务回调 废弃
 	async tutorServiceCB() {
 		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
 		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent || !signature || sigcontent !== this.app.util.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) return this.throw(400, "未知请求");
+		if (!sigcontent || !signature || sigcontent !== this.ctx.helper.rsaDecrypt(
+			this.app.config.self.rsa.publicKey, signature)
+		) return this.ctx.throw(400, Err.UNKNOWN_REQ);
 
 		const params = this.validate({ userId: "int" });
 		const userId = params.userId;
@@ -301,11 +215,15 @@ class UsersController extends Controller {
 		return this.success("OK");
 	}
 
-	// 成为导师回调
+	// 成为导师回调 废弃
 	async tutorCB() {
 		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
 		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent || !signature || sigcontent !== this.app.util.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) return this.throw(400, "未知请求");
+		if (!sigcontent
+			|| !signature
+			|| sigcontent !== this.ctx.helper.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) {
+			return this.throw(400, "未知请求");
+		}
 
 		const params = this.validate({ userId: "int" });
 		const userId = params.userId;
@@ -328,11 +246,15 @@ class UsersController extends Controller {
 		return this.success("OK");
 	}
 
-	// 共享会员
+	// 共享会员 废弃
 	async allianceMemberCB() {
 		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
 		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent || !signature || sigcontent !== this.app.util.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) return this.throw(400, "未知请求");
+		if (!sigcontent
+			|| !signature
+			|| sigcontent !== this.ctx.helper.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) {
+			return this.throw(400, "未知请求");
+		}
 
 		const params = this.validate({ userId: "int" });
 		const userId = params.userId;

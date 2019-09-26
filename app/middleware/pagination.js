@@ -1,13 +1,10 @@
-
-// const _ = require("lodash");
+"use strict";
 
 module.exports = (options, app) => {
 	return async function (ctx, next) {
 		const headers = ctx.request.headers;
 		const query = ctx.query || {};
 		const body = ctx.request.body || {};
-
-		// _.merge(query, ctx.request.body);
 
 		const perPage = parseInt(headers["x-per-page"] || query["x-per-page"] || body["x-per-page"] || 200, 10);
 		const page = parseInt(headers["x-page"] || query["x-page"] || body["x-page"] || 1, 10);

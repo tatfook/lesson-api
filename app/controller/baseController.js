@@ -1,8 +1,11 @@
+"use strict";
+
 const joi = require("joi");
 const _ = require("lodash");
 const Controller = require("egg").Controller;
 
-const Err = require("./err.js");
+const Err = require("../common/err");
+const { KEEPWORKUSER_ADMIN_ROLEID } = require("../common/consts");
 
 const rules = {
 	"int": joi.number().required(),
@@ -93,7 +96,7 @@ class BaseController extends Controller {
 
 		const result = await model.findAndCount(query);
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async search() {
@@ -103,7 +106,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.findAndCount({ ...this.queryOptions, where: query });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async index() {
@@ -118,7 +121,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.findAndCount({ ...this.queryOptions, where: query });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async create() {
@@ -133,7 +136,7 @@ class BaseController extends Controller {
 		const model = this.model[this.modelName];
 		const result = await model.create(params);
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async show() {
@@ -142,13 +145,13 @@ class BaseController extends Controller {
 
 		this.enauthenticated();
 
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const userId = this.getUser().userId;
 
 		const model = this.model[this.modelName];
 		const result = await model.findOne({ where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async update() {
@@ -158,14 +161,14 @@ class BaseController extends Controller {
 
 		this.enauthenticated();
 
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		const userId = this.getUser().userId;
 
 		const model = this.model[this.modelName];
 		const result = await model.update(params, { where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async destroy() {
@@ -175,14 +178,14 @@ class BaseController extends Controller {
 
 		this.enauthenticated();
 
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		const userId = this.getUser().userId;
 
 		const model = this.model[this.modelName];
 		const result = await model.destroy({ where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async postExtra() {
@@ -191,13 +194,13 @@ class BaseController extends Controller {
 		const params = ctx.request.body || {};
 
 		this.enauthenticated();
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const { userId } = this.getUser();
 
 		const model = this.model[this.modelName];
 		const result = await model.update({ extra: params }, { where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async putExtra() {
@@ -206,7 +209,7 @@ class BaseController extends Controller {
 		const params = ctx.request.body || {};
 
 		this.enauthenticated();
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const { userId } = this.getUser();
 
 		const where = { id, userId };
@@ -220,7 +223,7 @@ class BaseController extends Controller {
 
 		const result = await model.update({ extra }, { where });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async getExtra() {
@@ -229,7 +232,7 @@ class BaseController extends Controller {
 		const params = ctx.request.body || {};
 
 		this.enauthenticated();
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const { userId } = this.getUser();
 
 		const where = { id, userId };
@@ -238,7 +241,7 @@ class BaseController extends Controller {
 		if (!data) this.throw(404);
 		data = data.get({ plain: true });
 
-		this.success(data.extra || {});
+		ctx.helper.success({ ctx, status: 200, res: data.extra || {} });
 	}
 
 	async deleteExtra() {
@@ -246,22 +249,26 @@ class BaseController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 
 		this.enauthenticated();
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		const { userId } = this.getUser();
 
 		const model = this.model[this.modelName];
 		const result = await model.update({ extra: {} }, { where: { id, userId } });
 
-		this.success(result);
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	getUser() {
 		return this.ctx.state.user || {};
 	}
 
+	currentUser() {
+		return this.ctx.state.user || {};
+	}
+
 	// 确保认证  废弃
 	enauthenticated() {
-		if (!this.isAuthenticated()) this.ctx.throw(401, "unauthenticated");
+		if (!this.isAuthenticated()) return this.ctx.throw(401, Err.AUTH_ERR);
 
 		return this.getUser();
 	}
@@ -273,8 +280,8 @@ class BaseController extends Controller {
 	adminAuthenticated() {
 		const config = this.config.self;
 		const token = this.ctx.state.token;
-		const user = this.app.util.jwt_decode(token || "", config.adminSecret, true);
-		if (!user) return this.throw(401);
+		const user = this.ctx.helper.jwtDecode(token || "", config.adminSecret, true);
+		if (!user) return this.ctx.throw(401, Err.AUTH_ERR);
 
 		return user;
 	}
@@ -295,7 +302,7 @@ class BaseController extends Controller {
 		this.enauthenticated();
 		const roleId = this.getUser().roleId;
 
-		if (roleId != 10) this.ctx.throw(403, "not admin");
+		if (roleId !== KEEPWORKUSER_ADMIN_ROLEID) this.ctx.throw(403, Err.AUTH_ERR);
 	}
 
 	isAuthenticated() {

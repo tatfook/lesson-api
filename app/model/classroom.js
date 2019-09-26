@@ -1,6 +1,7 @@
+"use strict";
 
 const _ = require("lodash");
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 const {
 	CLASSROOM_STATE_USING,
 	CLASSROOM_STATE_USED,
@@ -75,7 +76,7 @@ module.exports = app => {
 		if (!classroom) return;
 		classroom = classroom.get({ plain: true });
 		classroom.key = _.padEnd(_.toString(classroom.id), 6, "" + _.random(10000000, 99999999));
-		await app.model.Classroom.update(classroom, { where: { id: classroom.id }});
+		await app.model.Classroom.update(classroom, { where: { id: classroom.id } });
 
 		const userId = classroom.userId;
 		const user = await app.model.User.getById(userId);
@@ -85,11 +86,11 @@ module.exports = app => {
 		extra.classroomId = classroom.id;
 
 		// 设置用户当前课堂id
-		await app.model.User.update({ extra }, { where: { id: userId }});
+		await app.model.User.update({ extra }, { where: { id: userId } });
 
 		// 更新课程包周上课量
 		const lastClassroomCount = await this.getPackageWeekClassroomCount(classroom.packageId);
-		await app.model.Package.update({ lastClassroomCount }, { where: { id: classroom.packageId }});
+		await app.model.Package.update({ lastClassroomCount }, { where: { id: classroom.packageId } });
 
 		return classroom;
 	};
@@ -146,13 +147,13 @@ module.exports = app => {
 		// 教师退出自己的课堂 不置当前课堂id
 		if (~~classroom.userId !== ~~studentId) {
 			user.extra.classroomId = undefined;
-			await app.model.User.update({ extra: user.extra }, { where: { id: user.id }});
+			await app.model.User.update({ extra: user.extra }, { where: { id: user.id } });
 		}
 
 	};
 
 	model.join = async function (studentId, key, username) {
-		let data = await app.model.Classroom.findOne({ where: { key }});
+		let data = await app.model.Classroom.findOne({ where: { key } });
 		if (!data) return;
 		data = data.get({ plain: true });
 		const classroomId = data.id;
@@ -173,14 +174,14 @@ module.exports = app => {
 			// 设置用户当前课堂id
 			await app.model.User.updateExtra(studentId, { classroomId });
 
-			learnRecord = await app.model.LearnRecord.findOne({ where: { classroomId, userId: studentId }});
+			learnRecord = await app.model.LearnRecord.findOne({ where: { classroomId, userId: studentId } });
 			if (!learnRecord) learnRecord = await app.model.LearnRecord.create(learnRecordData);
 
 			await app.model.Subscribe.upsert({ userId: studentId, packageId: data.packageId });
 		} else {
 			if (username) {
 				learnRecordData.extra.username = username;
-				const lrs = await app.model.LearnRecord.findAll({ where: { classroomId }});
+				const lrs = await app.model.LearnRecord.findAll({ where: { classroomId } });
 				_.each(lrs, o => {
 					if ((o.extra || {}).username === username) learnRecord = o;
 				});

@@ -1,8 +1,10 @@
+"use strict";
+
 const _ = require("lodash");
-const hooks = require("../core/sequelizeHooks");
+const hooks = require("../common/sequelizeHooks");
 const {
 	PACKAGE_STATE_AUDIT_SUCCESS
-} = require("../core/consts.js");
+} = require("../common/consts.js");
 
 
 module.exports = app => {

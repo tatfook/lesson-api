@@ -47,7 +47,7 @@ describe("LearnRecords", () => {
 				vedioUrl: "http://www.baidu.com",
 			}
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(lesson.id, 1);
+		assert.equal(lesson.data.id, 1);
 
 		await app.httpRequest().post("/packages").send({
 			packageName: "前端",
@@ -78,15 +78,15 @@ describe("LearnRecords", () => {
 			lessonId: 1,
 			state: 1,
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(data.id, 1);
+		assert.equal(data.data.id, 1);
 
 		// 领取学习j奖励
 		let reward = await app.httpRequest()
 			.post("/learnRecords/1/reward")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.equal(reward.coin, 0);
-		assert.equal(reward.bean, 10);
+		assert.equal(reward.data.coin, 0);
+		assert.equal(reward.data.bean, 10);
 		// console.log(reward);
 
 		// accounts表的lockCoin
@@ -95,21 +95,21 @@ describe("LearnRecords", () => {
 			.post("/learnRecords/1/reward")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.ok(reward.coin > 0);
-		assert.equal(reward.bean, 0);
+		assert.ok(reward.data.coin > 0);
+		assert.equal(reward.data.bean, 0);
 
 		// 不可重复领取
 		reward = await app.httpRequest().post("/learnRecords/1/reward")
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.equal(reward.coin, 0);
-		assert.equal(reward.bean, 0);
+		assert.equal(reward.data.coin, 0);
+		assert.equal(reward.data.bean, 0);
 
 		// 获取领奖记录
 		reward = await app.httpRequest()
 			.get("/learnRecords/reward?packageId=1&lessonId=1")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.ok(reward.coin > 0);
-		assert.equal(reward.bean, 10);
+		assert.ok(reward.data.coin > 0);
+		assert.equal(reward.data.bean, 10);
 	});
 });

@@ -1,43 +1,45 @@
+"use strict";
 
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 const { PACKAGE_STATE_AUDIT_SUCCESS } = consts;
 
 const _ = require("lodash");
-const Controller = require("../core/baseController.js");
+const Controller = require("./baseController.js");
+const Err = require("../common/err");
 
 class LearnRecordsController extends Controller {
 	// get
 	async index() {
-		// const {ctx} = this;
+		const { ctx } = this;
 		const query = this.validate();
 		const { userId } = this.authenticated();
 		query.userId = userId;
 
-		const result = await this.model.LearnRecord.findAndCount({ ...this.queryOptions, where: query });
+		const result = await ctx.service.learnRecord.findLearnRecordAndCount(this.queryOptions, query);
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async show() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		const lr = await ctx.model.LearnRecord.findOne({ where: { id, userId } });
+		const lr = await ctx.service.learnRecord.getByCondition({ id, userId });
 
-		if (!lr) ctr.throw(404, "not found");
+		if (!lr) return ctx.throw(404, Err.NOT_FOUND);
 
-		this.success(lr);
+		return ctx.helper.success({ ctx, status: 200, res: lr });
 	}
 
 	async create() {
 		const { ctx } = this;
 		const params = ctx.request.body;
 
-		const { userId = 0, username, organizationId } = this.getUser();
+		const { userId = 0, username, organizationId } = this.currentUser();
 
 		params.userId = userId;
 
@@ -45,103 +47,81 @@ class LearnRecordsController extends Controller {
 			packageId: "int",
 			lessonId: "int",
 			classroomId: { type: "int", required: false },
-			state: 'int',
+			state: "int",
 		}, params);
 
-		//const data = await ctx.model.Subscribes.findOne({where:{
-		//userId,
-		//packageId: params.packageId,
-		//}});
-
-		//if (!data) this.throw(500, "未购买课程包");
-
-		let learnRecord = await ctx.model.LearnRecord.createLearnRecord(params);
+		let learnRecord = await ctx.service.learnRecord.createLearnRecord(params);
 
 		if (!params.classroomId) {
-			await this.app.model.LessonOrganizationLog.classroomLog({
+			await ctx.service.lessonOrganizationLog.classroomLog({
 				lr: learnRecord, action: "learn", handleId: userId, username, organizationId
 			});
 		}
-
-		return this.success(learnRecord);
+		return ctx.helper.success({ ctx, status: 200, res: learnRecord });
 	}
 
 	async update() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.request.body || {};
-		if (!id) ctx.throw(400, "id invalid");
-		const userId = this.getUser().userId || 0;
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
-		const lr = await ctx.model.LearnRecord.getById(id, userId);
-		if (!lr) ctx.throw(400, "args error");
+		const userId = this.currentUser().userId || 0;
 
-		if (lr.classroomId) {
-			const isClassing = await ctx.model.Classroom.isClassing(lr.classroomId);
-			if (!isClassing) ctx.throw(400, "已下课");
-		}
-		params.id = id;
-		params.userId = userId;
+		await ctx.service.learnRecord.updateLearnRecord(id, userId, params);
 
-		delete params.packageId;
-		delete params.lessonId;
-		delete params.classroomId;
-
-		await ctx.model.LearnRecord.updateLearnRecord(params);
-
-		return this.success("OK");
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
 	}
 
 	async destroy() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) return ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		const result = await ctx.model.LearnRecord.destroy({
-			where: { id, userId },
-		});
+		const result = await ctx.service.learnRecord.destroyByCondition({ id, userId });
 
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	async createReward() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		const lr = await ctx.model.LearnRecord.getById(id, userId);
-		const pack = await ctx.model.Package.getById(lr.packageId);
+		const lr = await ctx.service.learnRecord.getByCondition({ id, userId });
+		const pack = await ctx.service.package.getByCondition({ id: lr.packageId });
 
-		if (!pack || pack.state != PACKAGE_STATE_AUDIT_SUCCESS) return this.success({ coin: 0, bean: 0 });
+		if (!pack || pack.state !== PACKAGE_STATE_AUDIT_SUCCESS) {
+			return ctx.helper.success({ ctx, status: 200, res: { coin: 0, bean: 0 }});
+		}
 
-		const data = await ctx.model.LessonReward.rewards(userId, lr.packageId, lr.lessonId);
+		const data = await ctx.service.lessonReward.getRewards(userId, lr.packageId, lr.lessonId);
 
-		return this.success(data || { coin: 0, bean: 0 });
+		return ctx.helper.success({ ctx, status: 200, res: data || { coin: 0, bean: 0 }});
 	}
 
 	async getReward() {
 		const { ctx } = this;
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 		const params = this.validate({ "packageId": "int", "lessonId": "int" });
 
-		const pack = await ctx.model.Package.getById(params.packageId);
-		if (!pack || pack.state != PACKAGE_STATE_AUDIT_SUCCESS) return this.success({ coin: 10, bean: 10 });
+		const pack = await ctx.service.package.getByCondition({ id: params.packageId });
+		if (!pack || pack.state !== PACKAGE_STATE_AUDIT_SUCCESS) {
+			return ctx.helper.success({ ctx, status: 200, res: { coin: 10, bean: 10 }});
+		}
 
-		let data = await this.model.LessonReward.findOne({
-			where: {
-				userId,
-				packageId: params.packageId,
-				lessonId: params.lessonId,
-			}
+		const data = await ctx.service.lessonReward.getByCondition({
+			userId,
+			packageId: params.packageId,
+			lessonId: params.lessonId,
 		});
-		data = data ? data.get({ plain: true }) : { coin: 0, bean: 0 };
-		return this.success(data);
+		return ctx.helper.success({ ctx, status: 200, res: data || { coin: 0, bean: 0 }});
 	}
 }
 

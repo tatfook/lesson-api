@@ -1,3 +1,4 @@
+"use strict";
 
 const nodemailer = require("nodemailer");
 
@@ -13,16 +14,6 @@ module.exports = app => {
 			pass: config.email.pass,
 		},
 	});
-
-	// 连接验证
-	// transporter.verify(function(error, success) {
-	// if (error) {
-	// console.log(error);
-	// } else {
-	// console.log("server is ready to take our messages");
-	// }
-	// })
-
 
 	const sendEmail = async function (to, subject, html, from) {
 		from = from || config.email.from || config.email.user;
