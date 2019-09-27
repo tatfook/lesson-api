@@ -114,7 +114,7 @@ class User extends Service {
 	 * @param {*} condition 必选,对象
 	 */
 	async getByCondition(condition) {
-		let data = await this.ctx.model.Classroom.findOne({ where: condition });
+		let data = await this.ctx.model.User.findOne({ where: condition });
 		if (data) data = data.get({ plain: true });
 
 		return data;

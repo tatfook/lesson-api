@@ -6,7 +6,7 @@ const Controller = require("./baseController.js");
 
 const LessonOrganizationForm = class extends Controller {
 	get modelName() {
-		return "lessonOrganizationForms";
+		return "LessonOrganizationForm";
 	}
 
 	async search() {

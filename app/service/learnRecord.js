@@ -118,7 +118,8 @@ class LearnRecordService extends Service {
 	 * @param {*} lessonId 
 	 */
 	async packageIsLearned(userId, packageId, lessonId) {
-		return await this.ctx.model.LearnRecord.isLearned(userId, packageId, lessonId)
+		const ret = await this.ctx.model.UserLearnRecord.findOne({ where: { userId, packageId, lessonId } });
+		return ret ? true : false;
 	}
 
 	// 获取用户已学习的技能列表

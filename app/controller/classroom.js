@@ -59,7 +59,7 @@ class ClassroomsController extends Controller {
 		const userId = this.currentUser().userId;
 		params.userId = userId;
 
-		const data = await ctx.service.classroom.updateClassroom(params, id, userId);
+		const data = await ctx.service.classroom.updateByCondition(params, { id, userId });
 
 		return ctx.helper.success({ ctx, status: 200, res: data });
 	}

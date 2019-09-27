@@ -9,7 +9,7 @@ const {
 	CLASS_MEMBER_ROLE_ADMIN
 } = require("../common/consts.js");
 
-class LessonOraganizationIndexService extends Service {
+class LessonOrgIndexService extends Service {
 
 	async changePassword(params, authParams) {
 		let { userId, organizationId, username, roleId } = authParams;
@@ -53,4 +53,4 @@ class LessonOraganizationIndexService extends Service {
 	}
 }
 
-module.exports = LessonOraganizationIndexService;
+module.exports = LessonOrgIndexService;

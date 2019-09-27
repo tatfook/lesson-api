@@ -5,7 +5,7 @@ const { CLASS_MEMBER_ROLE_TEACHER, CLASS_MEMBER_ROLE_STUDENT } = require("../com
 const _ = require("lodash");
 const Err = require("../common/err");
 
-class LessonOrganizationUserService extends Service {
+class LessonOrgUserService extends Service {
 
 	/**
 	 * 机构批量创建用户
@@ -107,4 +107,4 @@ class LessonOrganizationUserService extends Service {
 	}
 }
 
-module.exports = LessonOrganizationUserService;
+module.exports = LessonOrgUserService;

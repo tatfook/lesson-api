@@ -72,7 +72,7 @@ module.exports = app => {
 		where m.organizationId = :organizationId and m.roleId & :roleId
 		and m.memberId= :memberId and c.end >=now() 
 		`;
-		console.log("-----------90---------", params);
+
 		const list = await app.model.query(sql, {
 			type: app.model.QueryTypes.SELECT,
 			replacements: {

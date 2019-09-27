@@ -123,15 +123,11 @@ module.exports = app => {
 		return list[0].count || 0;
 	};
 
-	model.getStudentCount = async function (organizationId) {
-		return await this.getMemberCount(organizationId, 1);
-	};
-
 	model.getMemberCount = async function (organizationId, roleId, classId) {
 		const sql = `select count(*) as count from (
 			select * from lessonOrganizationClassMembers as locm 
-			where locm.organizationId = ${organizationId} and roleId & ${roleId} 
-			and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
+			where locm.organizationId = ${organizationId} 
+			and roleId & ${roleId} and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
 				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and end > current_timestamp())
 				) group by memberId) as t`;
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
@@ -140,7 +136,7 @@ module.exports = app => {
 
 	model.getMembers = async function (organizationId, roleId, classId) {
 		const sql = `select * from lessonOrganizationClassMembers as locm where locm.organizationId = ${organizationId} and 
-		roleId & ${roleId} and classId ${classId == undefined ? ">= 0" : ("= " + classId)}  and (
+		roleId & ${roleId} and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
 			classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and end > current_timestamp())
 			) group by memberId`;
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });

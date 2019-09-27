@@ -7,7 +7,7 @@ const {
 const Err = require("../common/err");
 const _ = require("lodash");
 
-class LessonOrganizationClassService extends Service {
+class LessonOrgClassService extends Service {
 	/**
 	 * 通过条件获取class
 	 * @param {*} condition 必选,对象
@@ -33,7 +33,7 @@ class LessonOrganizationClassService extends Service {
 	async historyClass(queryOptions, organizationId) {
 		const curtime = new Date();
 		const [count, rows] = await Promise.all([
-			this.ctx.model.LessonOrganizationClass.count({ where: { organizationId, end: { $lte: curtime } } }),
+			this.ctx.model.LessonOrganizationClass.count({ where: { organizationId, end: { $lte: curtime }}}),
 			this.findAllByCondition({
 				organizationId,
 				end: {
@@ -138,7 +138,7 @@ class LessonOrganizationClassService extends Service {
 		if (new Date(cls.end).getTime() < new Date().getTime()) {
 			const [organ, studentCount] = await Promise.all([
 				this.ctx.service.lessonOrganization.getByCondition({ id: cls.organizationId }),
-				this.ctx.service.lessonOrganization.getStudentCount(cls.organizationId)
+				this.ctx.service.lessonOrganization.getMemberCount(cls.organizationId, 1)
 			]);
 
 			if (studentCount > organ.count) {
@@ -146,7 +146,7 @@ class LessonOrganizationClassService extends Service {
 			}
 		}
 
-		await this.model.LessonOrganizationClass.update(params, { where: { id: params.id } });
+		await this.model.LessonOrganizationClass.update(params, { where: { id: params.id }});
 
 		if (params.packages) {
 			const datas = [];
@@ -172,7 +172,7 @@ class LessonOrganizationClassService extends Service {
 	 */
 	async destroyClass(classId, organizationId) {
 		await Promise.all([
-			this.ctx.model.LessonOrganizationClass.destroy({ where: { id: classId, organizationId } }),
+			this.ctx.model.LessonOrganizationClass.destroy({ where: { id: classId, organizationId }}),
 			this.ctx.service.lessonOrganizationPackage.destroyByCondition({ classId, organizationId })
 		]);
 	}
@@ -213,4 +213,4 @@ class LessonOrganizationClassService extends Service {
 	}
 }
 
-module.exports = LessonOrganizationClassService;
+module.exports = LessonOrgClassService;

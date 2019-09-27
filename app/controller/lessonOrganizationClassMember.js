@@ -4,7 +4,7 @@ const Controller = require("./baseController.js");
 
 const LessonOrganizationClassMember = class extends Controller {
 	get modelName() {
-		return "lessonOrganizationClassMembers";
+		return "LessonOrganizationClassMember";
 	}
 
 	// 获取教师列表

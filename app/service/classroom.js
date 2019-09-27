@@ -1,7 +1,7 @@
 "use strict";
 
 const Service = require("../common/service.js");
-const { CLASSROOM_STATE_USING } = require("../common/consts");
+const { CLASSROOM_STATE_USING, CLASSROOM_STATE_USED } = require("../common/consts");
 const Err = require("../common/err");
 
 class ClassroomService extends Service {
@@ -86,12 +86,9 @@ class ClassroomService extends Service {
 	/**
 	 * 更新classroom
 	 * @param {*} params 要更新的字段内容
-	 * @param {*} classroomId 主键id
-	 * @param {*} userId 可选
+	 * @param {*} condition
 	 */
-	async updateClassroom(params, classroomId, userId) {
-		const condition = { id: classroomId, userId }
-
+	async updateByCondition(params, condition) {
 		return await this.ctx.model.Classroom.update(params, { where: condition });
 	}
 
@@ -124,7 +121,24 @@ class ClassroomService extends Service {
 
 	// 退出课堂
 	async quitClassroom(userId, username) {
-		return await this.ctx.model.Classroom.quit(userId, username);
+		const user = await this.ctx.service.user.getByCondition({ id: userId });
+
+		const classroomId = user.extra.classroomId;
+		if (!classroomId) return;
+
+		const classroom = await this.getByCondition({ id: classroomId });
+		if (classroom.state !== CLASSROOM_STATE_USING) return;
+
+		await Promise.all([
+			this.ctx.service.lessonOrganizationLog.classroomLog({ classroom, action: "quit", handleId: userId, username }),
+			this.ctx.service.learnRecord.destroyByCondition({ classroomId, userId })
+		]);
+
+		// 教师退出自己的课堂 不置当前课堂id
+		if (~~classroom.userId !== ~~userId) {
+			user.extra.classroomId = undefined;
+			await this.ctx.service.user.updateUserByCondition({ extra: user.extra }, { id: userId });
+		}
 	}
 
 	// 获取当前课堂
@@ -168,7 +182,8 @@ class ClassroomService extends Service {
 	 * @param {*} lessonId 
 	 */
 	async isTeached(userId, packageId, lessonId) {
-		return await this.ctx.model.Classroom.isTeached(userId, packageId, lessonId);
+		let ret = await this.getByCondition({ userId, packageId, lessonId });
+		return ret ? true : false;
 	}
 }
 
