@@ -174,12 +174,41 @@ const LessonOrganization = class extends Controller {
 		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
+	// 机构课程包【代替之前的graphQL接口】
+	async getPackages() {
+		const { ctx } = this;
+		const { organizationId } = this.validate({ organizationId: "number" });
+
+		const data = await this.ctx.service.lessonOrganization.getOrgPackages(organizationId);
+		return ctx.helper.success({ ctx, status: 200, res: data });
+	}
+
+	// checkUserInvalid 校验是否在教师列表中&&是否存在这个用户, 不存在这个用户或者已经是机构的老师会返回错误
+	async checkUserInvalid() {
+		const { username, organizationId } = this.validate({ username: "string", organizationId: "number" });
+
+		await this.ctx.service.lessonOrganization.checkUserInvalid(username, organizationId);
+
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: "OK" });
+	}
+
+	// 获取该用户在这个机构中的姓名, 一个人在一个机构中的姓名是相同的
+	async getRealNameInOrg() {
+		const { ctx } = this;
+		const { userId, organizationId } = this.authenticated();
+
+		const ret = await this.ctx.service.lessonOrganizationClassMember.getByCondition({ memberId: userId, organizationId });
+		if (!ret) this.ctx.throw(404, Err.USER_NOT_IN_ORG);
+
+		return ctx.helper.success({ ctx, status: 200, res: ret.realname });
+	}
+
 	// 获取机构各角色的人数
 	async getMemberCountByRole() {
 		const { ctx } = this;
 		const { organizationId } = this.validate({ organizationId: "number" });
 
-		const data = ctx.service.lessonOrganization.getMemberCountByRoleId(organizationId);
+		const data = await ctx.service.lessonOrganization.getMemberCountByRoleId(organizationId);
 
 		return ctx.helper.success({ ctx, status: 200, res: data });
 	}

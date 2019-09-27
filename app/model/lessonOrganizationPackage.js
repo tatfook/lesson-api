@@ -81,6 +81,13 @@ module.exports = app => {
 			targetKey: "id",
 			constraints: false,
 		});
+
+		app.model.LessonOrganizationPackage.belongsTo(app.model.Package, {
+			as: "packages",
+			foreignKey: "packageId",
+			targetKey: "id",
+			constraints: false,
+		});
 	};
 
 	return model;

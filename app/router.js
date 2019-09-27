@@ -112,6 +112,9 @@ module.exports = app => {
 	router.get(`${prefix}lessonOrganizations/getByName`, lessonOrganization.getByName);
 	router.get(`${prefix}lessonOrganizations/getByUrl`, lessonOrganization.getByUrl);
 	router.get(`${prefix}lessonOrganizations/getMemberCountByRole`, lessonOrganization.getMemberCountByRole);
+	router.get(`${prefix}lessonOrganizations/checkUserInvalid`, lessonOrganization.checkUserInvalid);
+	router.get(`${prefix}lessonOrganizations/getOrgPackages`, lessonOrganization.getPackages);
+	router.get(`${prefix}lessonOrganizations/getRealNameInOrg`, lessonOrganization.getRealNameInOrg);
 	router.post(`${prefix}lessonOrganizations/login`, lessonOrganization.login);
 	router.post(`${prefix}lessonOrganizations/search`, lessonOrganization.search);
 	router.resources(`${prefix}lessonOrganizations`, lessonOrganization);

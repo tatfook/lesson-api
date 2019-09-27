@@ -191,6 +191,13 @@ module.exports = app => {
 			sourceKey: "id",
 			constraints: false,
 		});
+
+		app.model.Package.hasMany(app.model.LessonOrganizationPackage, {
+			as: "lessonOrganizationPackages",
+			foreignKey: "packageId",
+			sourceKey: "id",
+			constraints: false,
+		});
 	};
 
 	hooks(app);
