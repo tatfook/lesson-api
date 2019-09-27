@@ -76,7 +76,7 @@ module.exports = app => {
 		if (!classroom) return;
 		classroom = classroom.get({ plain: true });
 		classroom.key = _.padEnd(_.toString(classroom.id), 6, "" + _.random(10000000, 99999999));
-		await app.model.Classroom.update(classroom, { where: { id: classroom.id } });
+		await app.model.Classroom.update(classroom, { where: { id: classroom.id }});
 
 		const userId = classroom.userId;
 		const user = await app.model.User.getById(userId);
@@ -86,28 +86,18 @@ module.exports = app => {
 		extra.classroomId = classroom.id;
 
 		// 设置用户当前课堂id
-		await app.model.User.update({ extra }, { where: { id: userId } });
+		await app.model.User.update({ extra }, { where: { id: userId }});
 
 		// 更新课程包周上课量
 		const lastClassroomCount = await this.getPackageWeekClassroomCount(classroom.packageId);
-		await app.model.Package.update({ lastClassroomCount }, { where: { id: classroom.packageId } });
+		await app.model.Package.update({ lastClassroomCount }, { where: { id: classroom.packageId }});
 
 		return classroom;
 	};
 
-	model.getById = async function (classroomId, userId) {
-		const where = { id: classroomId };
-
-		if (userId) where.userId = userId;
-		let data = await app.model.Classroom.findOne({ where });
-
-		if (data) data = data.get({ plain: true });
-
-		return data;
-	};
 
 	model.isClassing = async function (classroomId) {
-		const classroom = await this.getById(classroomId);
+		const classroom = await app.model.Classroom.findOne({ where: { id: classroomId }});
 		if (classroom && ~~classroom.state === CLASSROOM_STATE_USING) return true;
 
 		return false;
@@ -133,7 +123,7 @@ module.exports = app => {
 		const classroomId = user.extra.classroomId;
 		if (!classroomId) return;
 
-		const classroom = await app.model.Classroom.getById(classroomId);
+		const classroom = await app.model.Classroom.findOne({ where: { id: classroomId }});
 		if (~~classroom.state !== CLASSROOM_STATE_USING) return;
 
 		app.model.LessonOrganizationLog.classroomLog({ classroom, action: "quit", handleId: studentId, username });
@@ -147,15 +137,16 @@ module.exports = app => {
 		// 教师退出自己的课堂 不置当前课堂id
 		if (~~classroom.userId !== ~~studentId) {
 			user.extra.classroomId = undefined;
-			await app.model.User.update({ extra: user.extra }, { where: { id: user.id } });
+			await app.model.User.update({ extra: user.extra }, { where: { id: user.id }});
 		}
 
 	};
 
 	model.join = async function (studentId, key, username) {
-		let data = await app.model.Classroom.findOne({ where: { key } });
+		let data = await app.model.Classroom.findOne({ where: { key }});
 		if (!data) return;
 		data = data.get({ plain: true });
+
 		const classroomId = data.id;
 		const lessonId = data.lessonId;
 		// 课程未开始或结束
@@ -174,14 +165,14 @@ module.exports = app => {
 			// 设置用户当前课堂id
 			await app.model.User.updateExtra(studentId, { classroomId });
 
-			learnRecord = await app.model.LearnRecord.findOne({ where: { classroomId, userId: studentId } });
+			learnRecord = await app.model.LearnRecord.findOne({ where: { classroomId, userId: studentId }});
 			if (!learnRecord) learnRecord = await app.model.LearnRecord.create(learnRecordData);
 
 			await app.model.Subscribe.upsert({ userId: studentId, packageId: data.packageId });
 		} else {
 			if (username) {
 				learnRecordData.extra.username = username;
-				const lrs = await app.model.LearnRecord.findAll({ where: { classroomId } });
+				const lrs = await app.model.LearnRecord.findAll({ where: { classroomId }});
 				_.each(lrs, o => {
 					if ((o.extra || {}).username === username) learnRecord = o;
 				});

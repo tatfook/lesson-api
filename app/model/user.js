@@ -85,18 +85,9 @@ module.exports = app => {
 				username: username || "",
 				coin: amount,
 			});
-
-			// await app.model.Coins.create({
-			// userId,
-			// amount: amount,
-			// type: COIN_TYPE_SYSTEM_DONATE,
-			// desc: "系统赠送",
-			// });
 		};
 
-		data = data.get({ plain: true });
-
-		return data;
+		return data ? data.get() : undefined;
 	};
 
 	model.isTeacher = async function (userId) {

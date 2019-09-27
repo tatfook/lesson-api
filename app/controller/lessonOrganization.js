@@ -19,7 +19,7 @@ const LessonOrganization = class extends Controller {
 		if (!members.length) return ctx.throw(400, Err.MEMBER_NOT_EXISTS);
 
 		// 合并这个人在这个机构中的全部角色,并且生成一个token
-		const token = await ctx.service.lessonOrganization.mergeRoleIdAndGenToken(
+		const { token } = await ctx.service.lessonOrganization.mergeRoleIdAndGenToken(
 			{ members, userId, username, organizationId },
 			this.app.config.self);
 

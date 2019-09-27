@@ -67,18 +67,14 @@ module.exports = app => {
 
 	model.getLearnedLessons = async function (userId, packageId) {
 		const list = await app.model.UserLearnRecord.findAll({
+			attributes: ["lessonId"],
 			where: {
 				userId,
 				packageId,
 			}
 		});
 
-		const lessons = [];
-		for (let i = 0; i < list.length; i++) {
-			lessons.push(list[i].lessonId);
-		}
-
-		return lessons;
+		return list.map(r => r.get());
 	};
 
 	return model;
