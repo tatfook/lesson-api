@@ -9,7 +9,7 @@ const {
 
 const LessonOrganizationActivateCode = class extends Controller {
 	get modelName() {
-		return "lessonOrganizationActivateCodes";
+		return "LessonOrganizationActivateCode";
 	}
 
 	async create() {

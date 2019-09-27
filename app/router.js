@@ -86,9 +86,9 @@ module.exports = app => {
 	router.resources("skills", prefix + "skills", skills);
 	// router.resources("skills", prefix + "admins/skills", skills);
 
-	const teacherCDKeys = controller.teacherCDKey;
-	router.post(prefix + "admins/teacherCDKeys/generate", teacherCDKeys.generate);
-	router.resources("teacherCDKeys", prefix + "admins/teacherCDKeys", teacherCDKeys);
+	// const teacherCDKeys = controller.teacherCDKey;
+	// router.post(prefix + "admins/teacherCDKeys/generate", teacherCDKeys.generate);
+	// router.resources("teacherCDKeys", prefix + "admins/teacherCDKeys", teacherCDKeys);
 
 	const admins = controller.admin;
 	router.post(`${prefix}admins/query`, admins.query);
@@ -96,12 +96,12 @@ module.exports = app => {
 	router.resources("admins", prefix + "admins/:resources", admins);
 	router.post("admins", prefix + "admins/:resources/search", admins.search);
 
-	const pays = controller.pay;
-	router.post("pays", prefix + "pays/callback", pays.callback);
-	router.resources(prefix + "pays", pays);
+	// const pays = controller.pay;
+	// router.post("pays", prefix + "pays/callback", pays.callback);
+	// router.resources(prefix + "pays", pays);
 
-	const trades = controller.trade;
-	router.resources(prefix + "trades", trades);
+	// const trades = controller.trade;
+	// router.resources(prefix + "trades", trades);
 
 	// -----------------------------add from coreservice--------------------------------------------------------
 	// LESSON three 
@@ -111,6 +111,7 @@ module.exports = app => {
 	router.get(`${prefix}lessonOrganizations/packageDetail`, lessonOrganization.packageDetail);
 	router.get(`${prefix}lessonOrganizations/getByName`, lessonOrganization.getByName);
 	router.get(`${prefix}lessonOrganizations/getByUrl`, lessonOrganization.getByUrl);
+	router.get(`${prefix}lessonOrganizations/getMemberCountByRole`, lessonOrganization.getMemberCountByRole);
 	router.post(`${prefix}lessonOrganizations/login`, lessonOrganization.login);
 	router.post(`${prefix}lessonOrganizations/search`, lessonOrganization.search);
 	router.resources(`${prefix}lessonOrganizations`, lessonOrganization);

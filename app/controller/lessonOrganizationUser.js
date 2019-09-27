@@ -4,7 +4,7 @@ const Controller = require("./baseController.js");
 
 const LessonOrganizationUser = class extends Controller {
 	static get modelName() {
-		return "lessonOrganizationUsers";
+		return "LessonOrganizationUser";
 	}
 
 	async batchCreateUser() {

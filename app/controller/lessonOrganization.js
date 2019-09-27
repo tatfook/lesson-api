@@ -7,7 +7,7 @@ const Err = require("../common/err");
 
 const LessonOrganization = class extends Controller {
 	get modelName() {
-		return "lessonOrganizations";
+		return "LessonOrganization";
 	}
 
 	async token() {
@@ -141,7 +141,7 @@ const LessonOrganization = class extends Controller {
 		const organ = await ctx.service.lessonOrganization.getByCondition({ id });
 		if (!organ) return ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
 
-		await ctx.service.lessonOrganization.updateOrganization(params, id, authParams);
+		await ctx.service.lessonOrganization.updateOrganization(params, organ, authParams);
 
 		if (params.packages) {
 			await ctx.service.lessonOrganizationPackage.destroyByCondition({ organizationId: id, classId: 0 });
@@ -172,6 +172,16 @@ const LessonOrganization = class extends Controller {
 		list = await ctx.service.lessonOrganizationPackage.dealWithPackageList(list, roleId, userId, classId);
 
 		return ctx.helper.success({ ctx, status: 200, res: list });
+	}
+
+	// 获取机构各角色的人数
+	async getMemberCountByRole() {
+		const { ctx } = this;
+		const { organizationId } = this.validate({ organizationId: "number" });
+
+		const data = ctx.service.lessonOrganization.getMemberCountByRoleId(organizationId);
+
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	// 课程包详情页

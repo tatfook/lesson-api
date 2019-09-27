@@ -59,45 +59,20 @@ module.exports = app => {
 		collate: "utf8mb4_bin",
 	});
 
-	// model.sync({force:true});
-
-	model.getById = async function (id, userId) {
-		const where = { id };
-		if (userId) where.userId = userId;
-		const data = await app.model.LearnRecord.findOne({ where });
-
-		return data && data.get({ plain: true });
-	};
-
-	model.isLearned = async function (userId, packageId, lessonId) {
-		const data = await app.model.UserLearnRecord.findOne({
-			where: {
-				userId,
-				packageId,
-				lessonId,
-			}
-		});
-
-		if (data) return true;
-
-		return false;
-	};
-
 	model.learnFinish = async function (params) {
 		await app.model.UserLearnRecord.upsert(params);
 	};
 
 	model.createLearnRecord = async function (params) {
 		const userId = params.userId;
-
 		if (userId) {
 			await app.model.User.learn(userId);
 		}
+
 		let lr = await app.model.LearnRecord.create(params);
-
-		if (!lr) return console.log("create learn records failed", params);
-
+		if (!lr) return;
 		lr = lr.get({ plain: true });
+
 		if (lr.userId && ~~lr.state === LEARN_RECORD_STATE_FINISH) {
 			await this.learnFinish(params);
 		}

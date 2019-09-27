@@ -7,7 +7,7 @@ const {
 const Err = require("../common/err");
 const _ = require("lodash");
 
-class LessonOrganizationFormService extends Service {
+class LessonOrgFormService extends Service {
 	/**
 	 * 通过条件获取Lesson
 	 * @param {*} condition  必选,对象
@@ -128,4 +128,4 @@ class LessonOrganizationFormService extends Service {
 	}
 }
 
-module.exports = LessonOrganizationFormService;
+module.exports = LessonOrgFormService;

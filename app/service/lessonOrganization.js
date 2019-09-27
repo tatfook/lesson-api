@@ -1,11 +1,17 @@
 "use strict";
 
 const Service = require("../common/service.js");
-const { TOKEN_DEFAULT_EXPIRE, CLASS_MEMBER_ROLE_ADMIN } = require("../common/consts.js");
+const {
+	TOKEN_DEFAULT_EXPIRE,
+	CLASS_MEMBER_ROLE_ADMIN,
+	CLASS_MEMBER_ROLE_STUDENT,
+	CLASS_MEMBER_ROLE_TEACHER
+} = require("../common/consts.js");
+
 const _ = require("lodash");
 const Err = require("../common/err");
 
-class LessonOrganizationService extends Service {
+class LessonOrgService extends Service {
 
 	/**
 	 * 合并这个人在这个机构中的全部角色,并且生成一个token
@@ -137,20 +143,20 @@ class LessonOrganizationService extends Service {
 	/**
 	 * 根据organizationId更新
 	 * @param {*} params 
-	 * @param {*} organizationId 
+	 * @param {*} organ
 	 * @param {*} authParams 
 	 */
-	async updateOrganization(params, organizationId, authParams) {
+	async updateOrganization(params, organ, authParams) {
 		if (this.ctx.state.admin && this.ctx.state.admin.userId) {
-			await this.ctx.model.LessonOrganization.update(params, { where: { id: organizationId }});
+			await this.ctx.model.LessonOrganization.update(params, { where: { id: organ.id }});
 		} else {
 			const { userId, roleId = 0, username } = authParams;
 			if (roleId < CLASS_MEMBER_ROLE_ADMIN) return this.ctx.throw(403, Err.AUTH_ERR);
-			await this.ctx.model.LessonOrganization.update(params, { where: { id: organizationId }});
+			await this.ctx.model.LessonOrganization.update(params, { where: { id: organ.id }});
 
 			if (params.privilege && organ.privilege !== params.privilege) {
 				await this.ctx.model.LessonOrganizationLog.create({
-					organizationId,
+					organizationId: organ.id,
 					type: "系统",
 					description: params.privilege === 0 ? "不允许任课教师管理学生信息" : "允许任课教师管理学生信息",
 					handleId: userId,
@@ -246,7 +252,7 @@ class LessonOrganizationService extends Service {
  	* @param {*} organizationId 
  	*/
 	async getStudentCount(organizationId) {
-		return await this.ctx.model.LessonOrganization.getStudentCount(organizationId);
+		return await this.ctx.model.LessonOrganization.getMemberCount(organizationId, 1);
 	}
 
 	/**
@@ -266,6 +272,21 @@ class LessonOrganizationService extends Service {
 	async getMembers(organizationId, roleId, classId) {
 		return await this.ctx.model.LessonOrganization.getMembers(organizationId, roleId, classId);
 	}
+
+	// 获取机构各角色的人数,和人数上限
+	async getMemberCountByRoleId(organizationId) {
+		const [studentCount, teacherCount, organ] = await Promise.all([
+			this.ctx.model.LessonOrganization.getMemberCount(organizationId, CLASS_MEMBER_ROLE_STUDENT),
+			this.ctx.model.LessonOrganization.getMemberCount(organizationId, CLASS_MEMBER_ROLE_TEACHER),
+			this.getByCondition({ id: organizationId })
+		]);
+
+		return {
+			studentCount,
+			teacherCount,
+			upperLimit: organ.count
+		};
+	}
 }
 
-module.exports = LessonOrganizationService;
+module.exports = LessonOrgService;

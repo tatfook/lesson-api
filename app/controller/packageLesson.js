@@ -4,7 +4,7 @@ const Controller = require("./baseController.js");
 
 class PackageLessonsController extends Controller {
 	get modelName() {
-		return "packageLessons";
+		return "PackageLesson";
 	}
 }
 

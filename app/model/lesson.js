@@ -105,16 +105,6 @@ module.exports = app => {
 		});
 	};
 
-	model.deleteSkill = async function (userId, lessonId, skillId) {
-		return await app.model.LessonSkill.destroy({
-			where: {
-				userId,
-				lessonId,
-				skillId,
-			}
-		});
-	};
-
 	model.getPackagesByLessonId = async function (lessonId) {
 		let sql = `select packages.* 
 			from packageLessons, packages 

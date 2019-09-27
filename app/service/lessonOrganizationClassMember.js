@@ -9,7 +9,7 @@ const {
 const Err = require('../common/err');
 const _ = require('lodash')
 
-class LessonOrganizationClassMemberService extends Service {
+class LessonOrgClassMemberService extends Service {
 	/**
  	* 通过条件获取lessonOrganizationClassMember
  	* @param {*} condition  必选,对象
@@ -138,33 +138,37 @@ class LessonOrganizationClassMemberService extends Service {
 		if (memberIds.length === 0) return { count: 0, rows: [] };
 
 		const curtime = new Date();
-		const list = await this.model.LessonOrganizationClassMember.findAll({
-			include: [
-				{
-					as: "lessonOrganizationClasses",
-					model: this.model.LessonOrganizationClass,
-					where: {
-						end: { $gte: curtime },
-					},
-					required: false,
-				},
-			],
-			where: {
-				organizationId,
-				memberId: { $in: memberIds },
-				classId: classId ? classId : { "$gt": 0 },
-			},
-		}).then(list => list.map(o => o.toJSON()));
 
-		const users = await this.ctx.keepworkModel.Users.findAll({
-			attributes: ["id", "username", "nickname", "portrait"], where: { id: { $in: memberIds } }
-		});
+		const [list, users] = await Promise.all([
+			this.model.LessonOrganizationClassMember.findAll({
+				include: [
+					{
+						as: "lessonOrganizationClasses",
+						model: this.model.LessonOrganizationClass,
+						where: {
+							end: { $gte: curtime },
+						},
+						required: false,
+					},
+				],
+				where: {
+					organizationId,
+					memberId: { $in: memberIds },
+					classId: classId ? classId : { "$gt": 0 },
+				}
+			}),
+
+			this.ctx.keepworkModel.Users.findAll({
+				attributes: ["id", "username", "nickname", "portrait"], where: { id: { $in: memberIds } }
+			})
+		]);
 
 		const map = {};
 		const rows = [];
 		let count = 0;
 
 		_.each(list, o => {
+			o = o.get();
 			if (!(o.roleId & CLASS_MEMBER_ROLE_STUDENT)) return;
 			if (!map[o.memberId]) {
 				count++;
@@ -336,4 +340,4 @@ class LessonOrganizationClassMemberService extends Service {
 	}
 }
 
-module.exports = LessonOrganizationClassMemberService;
+module.exports = LessonOrgClassMemberService;

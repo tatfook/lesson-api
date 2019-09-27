@@ -5,7 +5,7 @@ const { CLASS_MEMBER_ROLE_ADMIN } = require("../common/consts.js");
 const _ = require("lodash");
 
 
-class LessonOrganizationPackageService extends Service {
+class LessonOrgPackageService extends Service {
 	/**
 	 * 根据条件删除机构课程包
 	 * @param {*} condition 
@@ -141,4 +141,4 @@ class LessonOrganizationPackageService extends Service {
 
 }
 
-module.exports = LessonOrganizationPackageService;
+module.exports = LessonOrgPackageService;

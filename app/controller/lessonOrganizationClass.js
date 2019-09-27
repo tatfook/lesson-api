@@ -11,7 +11,7 @@ const Err = require("../common/err");
 
 const LessonOrganizationClass = class extends Controller {
 	get modelName() {
-		return "lessonOrganizationClasses";
+		return "LessonOrganizationClass";
 	}
 
 	async show() {

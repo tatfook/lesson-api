@@ -2,7 +2,7 @@
 
 const Service = require("../common/service.js");
 
-class LessonOrganizationLogService extends Service {
+class LessonOrgLogService extends Service {
 	/**
 	 * 创建classroomLog
 	 * @param {*} params 必选，对象
@@ -29,4 +29,4 @@ class LessonOrganizationLogService extends Service {
 
 }
 
-module.exports = LessonOrganizationLogService;
+module.exports = LessonOrgLogService;

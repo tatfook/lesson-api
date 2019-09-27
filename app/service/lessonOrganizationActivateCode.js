@@ -6,7 +6,7 @@ const { CLASS_MEMBER_ROLE_ADMIN, CLASS_MEMBER_ROLE_STUDENT } = require("../commo
 const _ = require("lodash");
 const Err = require("../common/err");
 
-class LessonOrganizationActivateCodeService extends Service {
+class LessonOrgActivateCodeService extends Service {
 
 	/**
 	 * 创建激活码
@@ -148,4 +148,4 @@ class LessonOrganizationActivateCodeService extends Service {
 	}
 }
 
-module.exports = LessonOrganizationActivateCodeService;
+module.exports = LessonOrgActivateCodeService;
