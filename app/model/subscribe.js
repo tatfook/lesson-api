@@ -53,8 +53,6 @@ module.exports = app => {
 		],
 	});
 
-	// model.sync({force:true});
-
 	model.getPackagesByUserId = async function (userId) {
 		const sql = `select packages.*, subscribes.createdAt joinAt, subscribes.state subscribeState 
 			from subscribes, packages 
@@ -98,48 +96,6 @@ module.exports = app => {
 		return packages;
 	};
 
-	model.isSubscribePackage = async function (userId, packageId) {
-		let data = await app.model.Subscribe.findOne({
-			where: {
-				userId,
-				packageId,
-				// state: PACKAGE_SUBSCRIBE_STATE_BUY,
-			}
-		});
-		if (data) return true;
-
-		return false;
-	};
-
-	model.packageReward = async function (userId, packageId) {
-		const data = await app.model.Subscribe.findOne({
-			where: {
-				userId,
-				packageId,
-				state: PACKAGE_SUBSCRIBE_STATE_BUY,
-			}
-		});
-		if (!data) return;
-
-		const _package = await app.model.Package.getById(packageId);
-		if (!_package) return;
-
-		const user = await app.model.User.getById(userId);
-		if (!user) return;
-
-		await app.model.User.update({
-			coin: user.coin + _package.reward,
-		}, {
-			where: { id: userId }
-		});
-
-		await app.model.Coin.create({
-			userId,
-			amount: _package.reward,
-			type: COIN_TYPE_PACKAGE_REWARD,
-		});
-	};
-
 	model.addTeachedLesson = async function (userId, packageId, lessonId) {
 		let subscribe = await app.model.Subscribe.findOne({
 			where: {
@@ -149,6 +105,7 @@ module.exports = app => {
 		});
 		if (!subscribe) return;
 		subscribe = subscribe.get({ plain: true });
+
 		const extra = subscribe.extra || {};
 		extra.teachedLessons = extra.teachedLessons || [];
 		const index = _.findIndex(extra.teachedLessons, val => ~~val === ~~lessonId);
