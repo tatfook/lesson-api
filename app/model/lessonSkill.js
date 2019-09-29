@@ -52,9 +52,7 @@ module.exports = app => {
 		],
 	});
 
-	// model.sync({force:true});
-
-	model.getSkillsByLessonId = async function (lessonId) {
+	model.getSkillsByLessonId = async lessonId => {
 		const sql = `
 		select lessonSkills.*,skills.skillName skillName,skills.enSkillName enSkillName
 		from lessonSkills, skills 
@@ -66,9 +64,7 @@ module.exports = app => {
 			replacements: { lessonId },
 		});
 
-		const skills = [];
-		_.each(list, val => skills.push(val.get ? val.get({ plain: true }) : val));
-		return skills;
+		return list.map(r => r.get ? r.get() : r);
 	};
 
 	model.associate = () => {

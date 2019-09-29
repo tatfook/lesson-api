@@ -63,9 +63,7 @@ module.exports = app => {
 		],
 	});
 
-	// model.sync({force:true});
-
-	model.findByUserIdRoleIdAndOrganizationIdSql = async function name(params) {
+	model.findByUserIdRoleIdAndOrganizationIdSql = async params => {
 		const sql = `
 		SELECT DISTINCT c.* FROM lessonOrganizationClasses c
 		LEFT JOIN lessonOrganizationClassMembers m on m.classId = c.id

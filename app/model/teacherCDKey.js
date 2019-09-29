@@ -56,13 +56,10 @@ module.exports = app => {
 
 	model.isAvailable = async function (key) {
 		let data = await app.model.TeacherCDKey.findOne({ where: { key }});
-
 		if (!data) return false;
-
 		data = data.get({ plain: true });
 
 		const disable = TEACHER_KEY_STATE_USING | TEACHER_KEY_STATE_DISABLE;
-
 		if (data.state & disable) return false;
 
 		return true;

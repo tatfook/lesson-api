@@ -47,7 +47,7 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	model.getSkills = async function (userId) {
+	model.getSkills = async userId => {
 		const sql = `select skillName, enSkillName, sum(score) as score from (
 			select s.skillName, s.enSkillName, ls.score
 			 FROM userLearnRecords as ulr, lessonSkills as ls,skills as s 
@@ -63,18 +63,6 @@ module.exports = app => {
 		});
 
 		return list;
-	};
-
-	model.getLearnedLessons = async function (userId, packageId) {
-		const list = await app.model.UserLearnRecord.findAll({
-			attributes: ["lessonId"],
-			where: {
-				userId,
-				packageId,
-			}
-		});
-
-		return list.map(r => r.get());
 	};
 
 	return model;

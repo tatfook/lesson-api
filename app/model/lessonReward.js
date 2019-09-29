@@ -63,16 +63,15 @@ module.exports = app => {
 
 	});
 
-	// model.sync({force:true});
-
-	model.rewards = async function (userId, packageId, lessonId) {
+	model.rewards = async (userId, packageId, lessonId) => {
 		const where = { userId, packageId, lessonId };
-		const account = await app.keepworkModel.accounts.findOne({ where: { userId }}).then(o => o && o.toJSON());
-		if (!account) return;
 
-		// 是否学习完成
-		let data = await app.model.UserLearnRecord.findOne({ where });
-		if (!data) return;
+		const [account, userLearnRecord] = await Promise.all([
+			app.keepworkModel.accounts.findOne({ where: { userId }}),
+			app.model.UserLearnRecord.findOne({ where })// 是否学习完成
+		]);
+
+		if (!account || !userLearnRecord) return;
 
 		// 是否已领取
 		let lessonReward = await app.model.LessonReward.findOne({ where }).then(o => o && o.toJSON());
@@ -85,13 +84,12 @@ module.exports = app => {
 		lessonReward.bean = lessonReward.bean + beanCount;
 		if (~~coinCount === 0 && ~~beanCount === 0) return { coin: coinCount, bean: beanCount };
 
-		// 创建返还记录
-		await app.model.LessonReward.upsert(lessonReward);
+		const [lesson] = await Promise.all([
+			app.model.Lesson.getById(lessonId),
+			app.model.LessonReward.upsert(lessonReward), // 创建返还记录
+			app.keepworkModel.accounts.increment({ coin: coinCount, bean: beanCount, lockCoin: 0 - coinCount }, { where: { userId }}), // 扣除用户可返还余额
+		]);
 
-		// 扣除用户可返还余额
-		await app.keepworkModel.accounts.increment({ coin: coinCount, bean: beanCount, lockCoin: 0 - coinCount }, { where: { userId }});
-
-		const lesson = await app.model.Lesson.getById(lessonId);
 		await app.keepworkModel.trades.create({
 			userId,
 			type: TRADE_TYPE_LESSON_STUDY,

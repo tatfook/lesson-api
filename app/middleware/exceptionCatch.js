@@ -6,14 +6,13 @@ module.exports = (options, app) => {
 		try {
 			await next();
 		} catch (e) {
-			let status = 500;
-			let errMsg = "服务器异常";
-			if (e.status) { // 内部throw的错误
-				status = e.status;
-				errMsg = e.message;
-			} else {
-				app.model.Log.create({ text: e.stack });
+			let [status, errMsg] = [500, "服务器异常"];
+
+			if (e.status) { // 内部主动throw的错误
+				[status, errMsg] = [e.status, e.message];
 			}
+
+			app.model.Log.create({ text: e.stack || e.message });
 
 			ctx.helper.fail({ ctx, status, errMsg });
 		}

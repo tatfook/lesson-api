@@ -56,7 +56,7 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	model.release = async function (userId, lessonId, content, courseware) {
+	model.release = async (userId, lessonId, content, courseware) => {
 		let count = await app.model.LessonContent.count({
 			where: {
 				userId,
@@ -78,7 +78,7 @@ module.exports = app => {
 		return data;
 	};
 
-	model.content = async function (lessonId, version) {
+	model.content = async (lessonId, version) => {
 		const where = { lessonId };
 		if (version) where.version = _.toNumber(version);
 

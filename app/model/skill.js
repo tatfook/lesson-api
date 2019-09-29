@@ -35,8 +35,6 @@ module.exports = app => {
 		collate: "utf8mb4_bin",
 	});
 
-	// model.sync({force:true});
-
 	model.associate = () => {
 		app.model.Skill.hasMany(app.model.LessonSkill, {
 			as: "lessonSkills",

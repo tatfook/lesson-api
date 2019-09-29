@@ -10,7 +10,7 @@ class PackageLessonService extends Service {
 	async getLessonCountByPackageIds(packageIds = []) {
 		if (packageIds.length === 0) return {};
 
-		let list = await this.ctx.model.PackageLesson.getLessonCountByPackageIds2(packageIds);
+		let list = await this.ctx.model.PackageLesson.getLessonCountByPackageIds(packageIds);
 
 		const count = {};
 
@@ -30,6 +30,15 @@ class PackageLessonService extends Service {
 		if (data) data = data.get({ plain: true });
 
 		return data;
+	}
+
+	/**
+	 * 根据条件更新
+	 * @param {*} params 
+	 * @param {*} condition 
+	 */
+	async updateByCondition(params, condition) {
+		return await this.ctx.model.PackageLesson.update(params, { where: condition });
 	}
 
 	/**

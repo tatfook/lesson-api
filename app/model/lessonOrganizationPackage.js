@@ -58,8 +58,6 @@ module.exports = app => {
 		],
 	});
 
-	// model.sync({force:true});
-
 	model.associate = () => {
 		app.model.LessonOrganizationPackage.belongsTo(app.model.LessonOrganization, {
 			as: "lessonOrganizations",

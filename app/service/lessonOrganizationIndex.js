@@ -3,7 +3,6 @@
 
 const Service = require("../common/service.js");
 const Err = require("../common/err");
-const _ = require("lodash");
 const {
 	CLASS_MEMBER_ROLE_TEACHER,
 	CLASS_MEMBER_ROLE_ADMIN

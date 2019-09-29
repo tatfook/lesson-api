@@ -48,29 +48,8 @@ module.exports = app => {
 		],
 	});
 
-	// model.sync({force:true});
-
-	model.getLessonCountByPackageIds = async function (packageIds = []) {
-		if (packageIds.length === 0) return {};
-
-		const sql = `select packageId, count(*) as count from packageLessons group by packageId having packageId in (:packageIds)`;
-
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT,
-			replacements: {
-				packageIds,
-			},
-		});
-
-		const count = {};
-
-		_.each(list, o => { count[o.packageId] = o.count; });
-
-		return count;
-	};
-
 	// 
-	model.getLessonCountByPackageIds2 = async function (packageIds = []) {
+	model.getLessonCountByPackageIds = async (packageIds = []) => {
 		if (packageIds.length === 0) return [];
 
 		const sql = `select packageId, count(*) as count from packageLessons group by packageId having packageId in (:packageIds)`;

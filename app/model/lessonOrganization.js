@@ -96,20 +96,8 @@ module.exports = app => {
 		collate: "utf8mb4_bin",
 	});
 
-	// model.sync({force:true});
-
-	model.getValidOrganizationById = async function (organizationId) {
-		// const curdate = new Date();
-		return await app.model.LessonOrganization.findOne({
-			where: {
-				id: organizationId,
-				endDate: { $gte: new Date() },
-			}
-		}).then(o => o && o.toJSON());
-	};
-
 	// 获取机构已用人数
-	model.getUsedCount = async function (organizationId) {
+	model.getUsedCount = async organizationId => {
 		const sql = `select count(*) as count from (
 			select * from lessonOrganizationClassMembers as locm 
 			where locm.organizationId = ${organizationId} 
@@ -123,7 +111,7 @@ module.exports = app => {
 		return list[0].count || 0;
 	};
 
-	model.getMemberCount = async function (organizationId, roleId, classId) {
+	model.getMemberCount = async (organizationId, roleId, classId) => {
 		const sql = `select count(*) as count from (
 			select * from lessonOrganizationClassMembers as locm 
 			where locm.organizationId = ${organizationId} 
@@ -134,7 +122,7 @@ module.exports = app => {
 		return list[0].count || 0;
 	};
 
-	model.getMembers = async function (organizationId, roleId, classId) {
+	model.getMembers = async (organizationId, roleId, classId) => {
 		const sql = `select * from lessonOrganizationClassMembers as locm where locm.organizationId = ${organizationId} and 
 		roleId & ${roleId} and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
 			classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and end > current_timestamp())
@@ -143,7 +131,7 @@ module.exports = app => {
 		return list;
 	};
 
-	model.getTeachers = async function (organizationId, classId) {
+	model.getTeachers = async (organizationId, classId) => {
 		const sql = `select * from lessonOrganizationClassMembers as locm where locm.organizationId = ${organizationId} and
 		roleId & 2 and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
 			classId = 0 or exists (select * from lessonOrganizationClasses where id = classId)

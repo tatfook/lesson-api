@@ -83,10 +83,11 @@ class PackageService extends Service {
 		for (let i = 0; i < data.lessons.length; i++) {
 			let lesson = data.lessons[i];
 
-			let isLearned = await this.ctx.service.learnRecord.packageIsLearned(userId, packageId, lesson.id);
+			const [isLearned, isTeached] = await Promise.all([
+				this.ctx.service.learnRecord.packageIsLearned(userId, packageId, lesson.id),
+				this.ctx.service.classroom.isTeached(userId, packageId, lesson.id)
+			]);
 			if (isLearned) data.learnedLessons.push(lesson.id);
-
-			let isTeached = await this.ctx.service.classroom.isTeached(userId, packageId, lesson.id);
 			if (isTeached) data.teachedLessons.push(lesson.id);
 		}
 
@@ -267,7 +268,7 @@ class PackageService extends Service {
 			packages[i] = pack;
 		}
 
-		const lessonCount = await this.ctx.model.PackageLesson.getLessonCountByPackageIds(packageIds);
+		const lessonCount = await this.ctx.service.packageLesson.getLessonCountByPackageIds(packageIds);
 		_.each(packages, (o, i) => o.lessonCount = lessonCount[o.id]);
 
 		packages = _.orderBy(packages, ["lastTeachDate", "createdAt"], ["desc", "desc"]);
@@ -282,7 +283,29 @@ class PackageService extends Service {
 	 * @param {*} lessonNo 
 	 */
 	async addLesson(userId, packageId, lessonId, lessonNo) {
-		return await this.ctx.model.Package.addLesson(userId, packageId, lessonId, lessonNo);
+		const [pkg, lesson] = await Promise.all([
+			this.ctx.model.Package.findOne({ where: { userId, id: packageId } }),
+			this.ctx.model.Lesson.findOne({ where: { id: lessonId } })
+		]);
+		if (!pkg || !lesson) return false;
+
+		if (!lessonNo) {
+			lessonNo = await this.ctx.model.PackageLesson.count({ where: { packageId, lessonId } });
+			lessonNo += 1;
+		}
+
+		const data = await this.ctx.model.PackageLesson.create({
+			userId,
+			packageId,
+			lessonId,
+			extra: {
+				lessonNo,
+			}
+		});
+
+		if (data) return true;
+
+		return false;
 	}
 
 	/**
@@ -293,7 +316,7 @@ class PackageService extends Service {
 	 * @param {*} lessonNo 
 	 */
 	async updatePackageLesson(userId, packageId, lessonId, lessonNo) {
-		return await this.ctx.model.Package.putLesson(userId, packageId, lessonId, lessonNo);
+		return await this.ctx.service.packageLesson.updateByCondition({ extra: { lessonNo } }, { userId, packageId, lessonId });
 	}
 
 	/**
@@ -303,8 +326,10 @@ class PackageService extends Service {
 	 * @param {*} lessonId 
 	 */
 	async deleteLesson(userId, packageId, lessonId) {
-		return await this.ctx.model.Package.deleteLesson(userId, packageId, lessonId);
+		return await this.ctx.service.packageLesson.destroyByCondition({ userId, packageId, lessonId })
 	}
+
+
 }
 
 module.exports = PackageService;

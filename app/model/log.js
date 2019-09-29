@@ -23,7 +23,5 @@ module.exports = app => {
 		collate: "utf8mb4_bin",
 	});
 
-	// model.sync({force:true});
-
 	return model;
 };

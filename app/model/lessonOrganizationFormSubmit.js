@@ -65,8 +65,6 @@ module.exports = app => {
 		collate: "utf8mb4_bin",
 	});
 
-	// model.sync({force:true});
-
 	model.associate = () => {
 		app.model.LessonOrganizationFormSubmit.belongsTo(app.model.LessonOrganizationForm, {
 			as: "lessonOrganizationForms",
