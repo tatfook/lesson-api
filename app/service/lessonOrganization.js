@@ -98,11 +98,7 @@ class LessonOrgService extends Service {
 	 * @param {*} organizationId 
 	 */
 	async createAdminForOrganization(usernames, organizationId) {
-		const users = await this.ctx.keepworkModel.Users.findAll({
-			where: {
-				username: { [this.ctx.model.Op.in]: usernames }
-			}
-		}).then(list => _.map(list, o => o.toJSON()));
+		const users = await this.ctx.service.keepwork.getAllUserByCondition({ username: { "$in": usernames }});
 
 		const members = _.map(users, o => ({
 			classId: 0,

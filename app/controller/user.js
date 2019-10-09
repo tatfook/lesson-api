@@ -216,67 +216,67 @@ class UsersController extends Controller {
 	}
 
 	// 成为导师回调 废弃
-	async tutorCB() {
-		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
-		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent
-			|| !signature
-			|| sigcontent !== this.ctx.helper.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) {
-			return this.throw(400, "未知请求");
-		}
+	// async tutorCB() {
+	// 	const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
+	// 	const signature = this.ctx.headers["x-keepwork-signature"];
+	// 	if (!sigcontent
+	// 		|| !signature
+	// 		|| sigcontent !== this.ctx.helper.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) {
+	// 		return this.throw(400, "未知请求");
+	// 	}
 
-		const params = this.validate({ userId: "int" });
-		const userId = params.userId;
-		const amount = params.amount || { rmb: 0, coin: 0, bean: 0 };
-		if (amount.rmb != 100) return this.throw(400, "金额不对");
+	// 	const params = this.validate({ userId: "int" });
+	// 	const userId = params.userId;
+	// 	const amount = params.amount || { rmb: 0, coin: 0, bean: 0 };
+	// 	if (amount.rmb != 100) return this.throw(400, "金额不对");
 
-		const tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId) || { userId, roleId: USER_ROLE_TUTOR };
-		const curtitme = new Date().getTime();
+	// 	const tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId) || { userId, roleId: USER_ROLE_TUTOR };
+	// 	const curtitme = new Date().getTime();
 
-		if (tutor.endTime <= curtitme) {
-			tutor.startTime = curtitme;
-			tutor.endTime = curtitme + ONEYEAR;
-		} else {
-			tutor.startTime = tutor.startTime || curtitme;
-			tutor.endTime = (tutor.endTime || curtitme) + ONEYEAR;
-		}
+	// 	if (tutor.endTime <= curtitme) {
+	// 		tutor.startTime = curtitme;
+	// 		tutor.endTime = curtitme + ONEYEAR;
+	// 	} else {
+	// 		tutor.startTime = tutor.startTime || curtitme;
+	// 		tutor.endTime = (tutor.endTime || curtitme) + ONEYEAR;
+	// 	}
 
-		await this.app.keepworkModel.roles.upsert(tutor);
+	// 	await this.app.keepworkModel.roles.upsert(tutor);
 
-		return this.success("OK");
-	}
+	// 	return this.success("OK");
+	// }
 
 	// 共享会员 废弃
-	async allianceMemberCB() {
-		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
-		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent
-			|| !signature
-			|| sigcontent !== this.ctx.helper.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) {
-			return this.throw(400, "未知请求");
-		}
+	// async allianceMemberCB() {
+	// 	const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
+	// 	const signature = this.ctx.headers["x-keepwork-signature"];
+	// 	if (!sigcontent
+	// 		|| !signature
+	// 		|| sigcontent !== this.ctx.helper.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) {
+	// 		return this.throw(400, "未知请求");
+	// 	}
 
-		const params = this.validate({ userId: "int" });
-		const userId = params.userId;
-		const amount = params.amount || { rmb: 0, coin: 0, bean: 0 };
-		if (amount.rmb != 100) return this.throw(400, "金额不对");
+	// 	const params = this.validate({ userId: "int" });
+	// 	const userId = params.userId;
+	// 	const amount = params.amount || { rmb: 0, coin: 0, bean: 0 };
+	// 	if (amount.rmb != 100) return this.throw(400, "金额不对");
 
-		const alliance = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId) || { userId, roleId: USER_ROLE_ALLIANCE_MEMBER };
-		const curtitme = new Date().getTime();
+	// 	const alliance = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId) || { userId, roleId: USER_ROLE_ALLIANCE_MEMBER };
+	// 	const curtitme = new Date().getTime();
 
-		if (alliance.endTime <= curtitme) {
-			alliance.startTime = curtitme;
-			alliance.endTime = curtitme + ONEYEAR;
-		} else {
-			alliance.startTime = alliance.startTime || curtitme;
-			alliance.endTime = (alliance.endTime || curtitme) + ONEYEAR;
-		}
+	// 	if (alliance.endTime <= curtitme) {
+	// 		alliance.startTime = curtitme;
+	// 		alliance.endTime = curtitme + ONEYEAR;
+	// 	} else {
+	// 		alliance.startTime = alliance.startTime || curtitme;
+	// 		alliance.endTime = (alliance.endTime || curtitme) + ONEYEAR;
+	// 	}
 
-		await this.app.keepworkModel.roles.upsert(alliance);
+	// 	await this.app.keepworkModel.roles.upsert(alliance);
 
-		return this.success("OK");
+	// 	return this.success("OK");
 
-	}
+	// }
 }
 
 module.exports = UsersController;

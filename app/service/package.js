@@ -231,8 +231,9 @@ class PackageService extends Service {
 
 		// 购买成功  增加待解锁知识币 
 		await Promise.all([
-			this.app.keepworkModel.accounts.increment({ lockCoin }, { where: { userId } }),
-			await this.ctx.service.subscribe.upsertSubscribe({ userId, packageId, state: PACKAGE_SUBSCRIBE_STATE_BUY })
+			// this.app.keepworkModel.accounts.increment({ lockCoin }, { where: { userId } }),
+			this.ctx.service.keepwork.accountIncrement({ lockCoin }, userId),
+			this.ctx.service.subscribe.upsertSubscribe({ userId, packageId, state: PACKAGE_SUBSCRIBE_STATE_BUY })
 		])
 	}
 

@@ -4,6 +4,7 @@ const _ = require("lodash");
 const jwt = require("../common/jwt");
 const crypto = require("crypto");
 const md5 = require("blueimp-md5");
+const axios = require("axios");
 
 module.exports = {
 	success: ({ ctx, status = 200, res = null }) => {
@@ -52,5 +53,30 @@ module.exports = {
 	},
 	md5: (str) => {
 		return md5(str);
+	},
+	objToQueryStr: (obj) => {
+		return Object.keys(obj).map(function (key) {
+			return "".concat(encodeURIComponent(key), "=").concat(encodeURIComponent(obj[key]));
+		}).join("&");
+	},
+	async curl(method, url, data, config = {}, forceData = false) {
+		method = (method || "get").toLowerCase();
+		config = { ...config, method, url };
+		if (["get", "delete", "head", "options"].includes(method) && !forceData) {
+			config.params = data;
+		} else {
+			config.data = data;
+		}
+
+		return axios.request(config)
+			.then(res => {
+				console.log(`请求:${method} ${url}成功`, JSON.stringify(res.config));
+				this.app.logger.debug(`请求:${url}成功`, JSON.stringify(res.config));
+				return res.data;
+			})
+			.catch(res => {
+				console.log(`请求:${method} ${url}失败`, res.response.status, res.response.data);
+				this.app.logger.debug(`请求:${url}失败`, res.responsestatus, res.response.data);
+			});
 	}
 };

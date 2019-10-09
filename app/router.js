@@ -26,9 +26,9 @@ module.exports = app => {
 	router.get(prefix + "users/:id/coins", users.coins);
 	router.get(prefix + "users/:id/skills", users.skills);
 	router.get(prefix + "users/:id/isTeach", users.isTeach);
-	router.post(prefix + "users/tutorCB", users.tutorCB);
-	router.post(prefix + "users/tutorServiceCB", users.tutorServiceCB);
-	router.post(prefix + "users/allianceMemberCB", users.allianceMemberCB);
+	// router.post(prefix + "users/tutorCB", users.tutorCB);
+	// router.post(prefix + "users/tutorServiceCB", users.tutorServiceCB);
+	// router.post(prefix + "users/allianceMemberCB", users.allianceMemberCB);
 
 	const packages = controller.package;
 	router.get(prefix + "packages/teach", packages.teach);
@@ -145,10 +145,10 @@ module.exports = app => {
 	router.resources(`${prefix}lessonOrganizationActivateCodes`, lessonOrganizationActivateCode);
 
 	// organization user 
-	const lessonOrganizationUser = controller.lessonOrganizationUser;
-	router.post(`${prefix}lessonOrganizationUsers/batch`, lessonOrganizationUser.batchCreateUser);
-	router.post(`${prefix}lessonOrganizationUsers/unbind`, lessonOrganizationUser.unbind);
-	router.post(`${prefix}lessonOrganizationUsers/setpwd`, lessonOrganizationUser.setpwd);
+	// const lessonOrganizationUser = controller.lessonOrganizationUser;
+	// router.post(`${prefix}lessonOrganizationUsers/batch`, lessonOrganizationUser.batchCreateUser);
+	// router.post(`${prefix}lessonOrganizationUsers/unbind`, lessonOrganizationUser.unbind);
+	// router.post(`${prefix}lessonOrganizationUsers/setpwd`, lessonOrganizationUser.setpwd);
 
 	// organization form
 	const lessonOrganizationForm = controller.lessonOrganizationForm;

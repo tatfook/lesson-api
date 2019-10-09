@@ -1,59 +1,16 @@
 "use strict";
 
-const _ = require('lodash');
-const Service = require('egg').Service;
-const Err = require('../common/err');
+const Service = require("egg").Service;
+const Err = require("../common/err");
 const {
 	USER_IDENTIFY_TEACHER,
 	USER_IDENTIFY_APPLY_TEACHER,
 	TEACHER_PRIVILEGE_TEACH,
-} = require('../common/consts');
+} = require("../common/consts");
+
+const tokenUpperLimit = 20;// 只支持20个token
 
 class User extends Service {
-
-	// 简化用户信息 
-	getSimpleUser() {
-	}
-
-	async getUser({ userId, kid, username, cellphone, email }) {
-		const user = await this.app.keepworkModel.users.findOne({
-			where: {
-				"$or": [
-					{ id: _.toNumber(userId) || 0 },
-					//{userId: (_.toNumber(kid) || 0) - 10000},
-					{ username: username },
-					{ cellphone: cellphone },
-					{ email: email },
-				]
-			}
-		}).then(o => o && o.toJSON());
-
-		if (!user) return;
-
-		user.isRealname = user.realname ? true : false;
-		user.cellphone = undefined;
-		user.email = undefined;
-		user.password = undefined;
-		user.realname = undefined;
-		user.roleId = undefined;
-		user.sex = undefined;
-
-		return user;
-	}
-
-	/**
-	 * 根据条件获取keepwork那边的User信息
-	 * @param {*} condition 
-	 */
-	async getKeepworkUserByCondition(condition) {
-		return await this.app.keepworkModel.Users.findOne({ where: condition }).then(o => o && o.toJSON());
-	}
-
-	async getUserinfoByUserId(userId) {
-		const userinfo = await this.app.keepworkModel.userinfos.findOne({ where: { userId } }).then(o => o && o.toJSON());
-		if (!userinfo) await this.app.userinfos.upsert({ userId });
-		return userinfo;
-	}
 
 	async token(payload, clear) {
 		const config = this.app.config.self;
@@ -68,45 +25,16 @@ class User extends Service {
 	async setToken(userId, token, clear = false) {
 		this.ctx.state.user = { userId };
 
-		const data = await this.app.keepworkModel.userdatas.get(userId);
+		const data = await this.ctx.service.keepwork.getUserDatas(userId);
 
 		data.tokens = data.tokens || [];
 		if (clear) data.tokens = [];
 
 		data.tokens.splice(0, 0, token);
-		// 只支持10个token
-		if (data.tokens.length > 20) data.tokens.pop();
-		await this.app.keepworkModel.userdatas.set(userId, data);
-	}
+		// 只支持20个token
+		if (data.tokens.length > tokenUpperLimit) data.tokens.pop();
 
-	async validateToken(userId, token) {
-		const data = await this.app.keepworkModel.userdatas.get(userId);
-		const tokens = data.tokens || [];
-		//console.log(userId, data, token);
-		return _.find(tokens, o => o == token) ? true : false;
-	}
-
-	async createRegisterMsg(user) {
-		const msg = await this.app.keepworkModel.messages.create({
-			sender: 0,
-			type: 0,
-			all: 0,
-			msg: {
-				type: 1,
-				user: {
-					...user,
-					password: undefined,
-				},
-			},
-			extra: {},
-		}).then(o => o && o.toJSON());
-		return await this.app.keepworkModel.userMessages.create({
-			userId: user.id, messageId: msg.id, state: 0
-		}).then(o => o && o.toJSON());
-	}
-
-	async register(user) {
-		await this.createRegisterMsg(user);
+		await this.ctx.service.keepwork.setUserDatas(userId, data);
 	}
 
 	/**
@@ -130,30 +58,12 @@ class User extends Service {
 	}
 
 	/**
-	 * 
-	 * @param {*} userDatas 
-	 */
-	async bulkCreateKeepworkUser(userDatas) {
-		const ret = await this.ctx.keepworkModel.Users.bulkCreate(userDatas);
-		return ret ? ret.map(r => r.get()) : [];
-	}
-
-	/**
-	 * 
-	 * @param {*} userinfos 
-	 */
-	async bulkCreateUserinfos(userinfos) {
-		const ret = await this.ctx.keepworkModel.userinfos.bulkCreate(userinfos);
-		return ret ? ret.map(r => r.get()) : [];
-	}
-
-	/**
  	* 根据条件更新
  	* @param {*} params 更新的字段
  	* @param {*} condition 条件
  	*/
 	async updateKeepworkUserByCondition(params, condition) {
-		return await this.ctx.keepworkModel.Users.update(params, { where: condition });
+		return await this.ctx.service.keepwork.updateUser(params, condition);
 	}
 
 	/**
@@ -167,12 +77,10 @@ class User extends Service {
 
 		const userId = user.userId;
 
-		const [account = {}, tutorService, teacher, allianceMember, tutor] = await Promise.all([
-			ctx.keepworkModel.accounts.getByUserId(userId),
+		const [tutorService, teacher, [account, allianceMember, tutor]] = await Promise.all([
 			ctx.model.Tutor.getByUserId(userId),
 			ctx.model.Teacher.getByUserId(userId),
-			ctx.keepworkModel.roles.getAllianceMemberByUserId(userId),
-			ctx.keepworkModel.roles.getTutorByUserId(userId)
+			ctx.service.keepwork.getAccountsAndRoles(userId)
 		]);
 
 		data.rmb = account.rmb;
@@ -205,16 +113,16 @@ class User extends Service {
 		const isOk = await this.ctx.model.TeacherCDKey.useKey(key, userId);
 		if (!isOk) this.throw(400, Err.KEY_INVALID);
 
-		const cdKey = await this.ctx.model.TeacherCDKey.findOne({ where: { key } }).then(o => o && o.toJSON());
+		const cdKey = await this.ctx.model.TeacherCDKey.findOne({ where: { key }}).then(o => o && o.toJSON());
 		const startTime = new Date().getTime();
 
 		user.identify = (user.identify | USER_IDENTIFY_TEACHER) & (~USER_IDENTIFY_APPLY_TEACHER);
 		const teacher = await this.ctx.model.Teacher.findOne({
 			where: { userId }
 		}).then(o => o && o.toJSON()) || {
-				userId, startTime, endTime: startTime,
-				key, school, privilege: TEACHER_PRIVILEGE_TEACH
-			};
+			userId, startTime, endTime: startTime,
+			key, school, privilege: TEACHER_PRIVILEGE_TEACH
+		};
 
 		if (teacher.endTime < startTime) {
 			teacher.endTime = teacher.startTime = startTime;

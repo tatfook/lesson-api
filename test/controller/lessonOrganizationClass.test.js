@@ -3,7 +3,7 @@ const { app, assert } = require("egg-mock/bootstrap");
 
 describe("lesson organization class", () => {
 	before(async () => {
-		await app.keepworkModel.Users.sync({ force: true });
+		await app.keepworkModel.Users.truncate();
 		await app.model.LessonOrganization.sync({ force: true });
 		await app.model.LessonOrganizationClassMember.sync({ force: true });
 		await app.model.LessonOrganizationClass.sync({ force: true });
@@ -25,7 +25,7 @@ describe("lesson organization class", () => {
 		const token = await app.httpRequest().post("/lessonOrganizations/login").send({
 			organizationId: organ.id, username: "user009", password: "123456"
 		}).expect(200).then(res => res.body).catch(e => console.log(e));
-		console.log("-------------1-----", token.data.token);
+
 		// 创建班级
 		let cls = await app.httpRequest().post("/lessonOrganizationClasses")
 			.send({
@@ -36,19 +36,19 @@ describe("lesson organization class", () => {
 		await app.model.LessonOrganizationClassMember.create({
 			organizationId: organ.id, memberId: 1, roleId: 1, classId: cls.data.id
 		});
-		console.log("-------------1-2----");
+
 		// 再创建一个班级
 		let class2 = await app.httpRequest().post("/lessonOrganizationClasses")
 			.send({
 				name: "clss008", organizationId: organ.id, begin: new Date(), end: new Date().getTime() + 1000 * 60 * 60 * 24
 			})
 			.set("Authorization", `Bearer ${token.data.token}`).expect(200).then(res => res.body);
-		console.log("-------------1-3----", cls.data.id);
+
 		// 更新班级;
 		await app.httpRequest().put(`/lessonOrganizationClasses/${cls.data.id}`).send({
 			name: "newClassName"
 		}).set("Authorization", `Bearer ${token.data.token}`).expect(200).then(res => res.body);
-		console.log("-------------1-4----");
+
 		// 班级列表
 		let class_ = await app.httpRequest().get("/lessonOrganizationClasses")
 			.set("Authorization", `Bearer ${token.data.token}`)
@@ -56,7 +56,7 @@ describe("lesson organization class", () => {
 		assert(class_.data.length === 2);
 		assert(class_.data[0].name === "clss008" || class_.data[0].name === "newClassName");
 		assert(class_.data[1].name === "newClassName" || class_.data[1].name === "clss008");
-		console.log("-------------1--5---");
+
 		// 删除班级
 		await app.httpRequest().delete("/lessonOrganizationClasses/" + class2.data.id)
 			.set("Authorization", `Bearer ${token.data.token}`).expect(200);
@@ -71,6 +71,10 @@ describe("lesson organization class", () => {
 			.set("Authorization", `Bearer ${token.data.token}`)
 			.expect(200).then(res => res.body);
 		assert(class_.data.length === 1);
+
+		await app.httpRequest().get(`/lessonOrganizationClasses/${class_.data[0].id}/project`)
+			.set("Authorization", `Bearer ${token.data.token}`)
+			.expect(200).then(res => res.body);
 
 		class_ = await app.httpRequest().get("/lessonOrganizationClasses?roleId=64")
 			.set("Authorization", `Bearer ${token.data.token}`)
@@ -90,7 +94,7 @@ describe("lesson organization class", () => {
 		await app.model.LessonOrganizationClassMember.create({
 			organizationId: organ.id, memberId: 2, roleId: 1, classId: cls.id
 		});
-		console.log("---id-----", cls.id);
+
 		// 恢复结业班级
 		// await app.httpRequest().put("/lessonOrganizationClasses/" + cls.id).send({
 		// 	end: "2040-01-01"
@@ -103,6 +107,8 @@ describe("lesson organization class", () => {
 			.set("Authorization", `Bearer ${token.data.token}`).expect(200).then(res => res.body);
 
 		assert(hisClass.data.count === 1);
+
+
 	});
 
 	it("002 获取机构学生", async () => {

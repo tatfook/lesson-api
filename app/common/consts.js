@@ -53,4 +53,6 @@ module.exports = {
 	"KEEPWORKUSER_ROLEID": 0, // keepwork系统普通用户roleId
 
 	"TOKEN_DEFAULT_EXPIRE": 3600 * 24 * 2, // token默认过期时间，两天
+
+	"API_KEY": "cda5ab42f101e9f739156e532f54db0d"// lesson_api的md5值
 };
