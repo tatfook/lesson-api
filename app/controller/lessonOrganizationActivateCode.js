@@ -46,11 +46,19 @@ const LessonOrganizationActivateCode = class extends Controller {
 		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: data });
 	}
 
+	// 新加参数 parentPhoneNum, verifCode，绑定家长手机号
 	async activate() {
 		const { userId, username } = this.authenticated();
-		let { key, realname, organizationId } = this.validate({ key: "string", organizationId: "number" });
+		let { key, realname, organizationId,
+			parentPhoneNum, verifCode
+		} = this.validate({ key: "string", organizationId: "number" });
 
-		const data = await this.ctx.service.lessonOrganizationActivateCode.useActivateCode({ key, realname, organizationId }, { userId, username });
+		const data = await this.ctx.service.lessonOrganizationActivateCode.useActivateCode({
+			key, realname,
+			organizationId,
+			parentPhoneNum,
+			verifCode
+		}, { userId, username });
 
 		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: data });
 	}

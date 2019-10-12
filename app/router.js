@@ -96,6 +96,18 @@ module.exports = app => {
 	router.resources("admins", prefix + "admins/:resources", admins);
 	router.post("admins", prefix + "admins/:resources/search", admins.search);
 
+	const evaluationReport = controller.evaluationReport;
+	router.post(`${prefix}evaluationReports`, evaluationReport.create);
+	router.get(`${prefix}evaluationReports`, evaluationReport.index);
+	router.post(`${prefix}evaluationReports/userReport`, evaluationReport.createUserReport);
+	router.delete(`${prefix}evaluationReports/:id`, evaluationReport.destroy);
+	router.get(`${prefix}evaluationReports/:id`, evaluationReport.show);
+	router.delete(`${prefix}evaluationReports/userReport/:id`, evaluationReport.destroyUserReport);
+	router.get(`${prefix}evaluationReports/userReport/:id`, evaluationReport.getUserReportDetail);
+	router.put(`${prefix}evaluationReports/userReport/:id`, evaluationReport.updateUserReport);
+	router.post(`${prefix}evaluationReports/sendSms`, evaluationReport.sendSms);
+	router.post(`${prefix}evaluationReports/verifyCode`, evaluationReport.verifyCode);
+
 	// const pays = controller.pay;
 	// router.post("pays", prefix + "pays/callback", pays.callback);
 	// router.resources(prefix + "pays", pays);

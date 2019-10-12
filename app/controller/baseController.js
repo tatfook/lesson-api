@@ -7,6 +7,8 @@ const Controller = require("egg").Controller;
 const Err = require("../common/err");
 const { KEEPWORKUSER_ADMIN_ROLEID } = require("../common/consts");
 
+const validator = require('../common/validatorExtend');
+
 const rules = {
 	"int": joi.number().required(),
 	"int_optional": joi.number(),
@@ -41,6 +43,57 @@ class BaseController extends Controller {
 		_.assignIn(params, result.value);
 
 		return params;
+	}
+
+
+	validate2(str, rules) {
+		for (const k in rules) {
+			if (k === 'require' || k === 'transform') {
+				continue;
+			}
+			const method = validator[k];
+			if (typeof method !== 'function') {
+				throw new Error(`非法的校验方法${k}！`);
+			}
+			const rule = rules[k];
+			const [errmsg, param] = [rule.errmsg, rule.param];
+			if (Array.isArray(param)) {
+				if (!method.call(null, str, ...param)) {
+					return { error: errmsg };
+				}
+			} else if (typeof param === 'object') {
+				if (!method.call(null, str, param)) {
+					return { error: errmsg };
+				}
+			} else if (!method.call(null, str)) {
+				return { error: errmsg };
+			}
+		}
+		return {};
+	}
+
+	// 采用校验库 https://www.npmjs.com/package/validator
+	validateCgi(param, cgiConfig) {
+		if (!param || !cgiConfig) {
+			this.ctx.throw(400, Err.ARGS_ERR);
+		}
+		for (const k in cgiConfig) {
+			const rules = cgiConfig[k];
+			let userParam = param[k];
+			if (userParam === null || userParam === undefined) {
+				if (rules.require === 0) {
+					continue;
+				}
+				this.ctx.throw(400, `缺少参数${k}！`);
+			}
+			if (typeof userParam === 'number') {
+				userParam = userParam.toString();
+			}
+			const ret = this.validate2(userParam, rules);
+			if (ret.error) {
+				this.ctx.throw(400, ret.error);
+			}
+		}
 	}
 
 	formatQuery(query) {

@@ -88,12 +88,19 @@ class LessonOrgActivateCodeService extends Service {
 
 	/**
 	 * 使用激活码
-	 * @param {*} params {key, realname, organizationId } 
+	 * @param {*} params {key, realname, organizationId,parentPhoneNum?,verifCode? } 
 	 * @param {*} authParams {userId, username}
 	 */
 	async useActivateCode(params, authParams) {
 		const { userId, username } = authParams;
-		let { key, realname, organizationId } = params;
+		let { key, realname, organizationId, parentPhoneNum, verifCode } = params;
+
+		let checkFlag = false;
+		if (parentPhoneNum && verifCode) {
+			const check = await this.app.redis.get(`verifCode:${parentPhoneNum}`);
+			if (check !== verifCode) this.ctx.throw(400, Err.VERIFCODE_ERR);
+			checkFlag = true;
+		}
 
 		const curtime = new Date().getTime();
 		const data = await this.getByCondition({ key, state: 0 });
@@ -126,7 +133,9 @@ class LessonOrgActivateCodeService extends Service {
 		let member = _.find(ms, o => o.classId == data.classId);
 		const roleId = member ? (member.roleId | CLASS_MEMBER_ROLE_STUDENT) : CLASS_MEMBER_ROLE_STUDENT;
 		if (member) {
-			await this.ctx.service.lessonOrganizationClassMember.updateByCondition({ roleId, realname }, { id: member.id });
+			await this.ctx.service.lessonOrganizationClassMember.updateByCondition({
+				roleId, realname, parentPhoneNum: checkFlag ? parentPhoneNum : undefined
+			}, { id: member.id });
 		} else {
 			member = await this.ctx.service.lessonOrganizationClassMember.create({
 				organizationId: data.organizationId,
@@ -134,6 +143,7 @@ class LessonOrgActivateCodeService extends Service {
 				memberId: userId,
 				roleId,
 				realname,
+				parentPhoneNum: checkFlag ? parentPhoneNum : undefined
 			});
 		}
 
