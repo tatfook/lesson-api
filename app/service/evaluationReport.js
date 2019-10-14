@@ -27,7 +27,7 @@ class EvalReportService extends Service {
 			transaction = await this.ctx.model.transaction();
 			await Promise.all([
 				this.ctx.model.EvaluationReport.destroy({ where: { id: reportId }, transaction }),
-				this.ctx.model.EvaluationUserReport.destroy({ where: { reportId: id }, transaction })
+				this.ctx.model.EvaluationUserReport.destroy({ where: { reportId }, transaction })
 			]);
 
 			await transaction.commit();
@@ -157,8 +157,25 @@ class EvalReportService extends Service {
 			}
 		}
 
-		await this.ctx.keepworkModel.Users.update({ portrait }, { where: { id: userId } });
-		await this.ctx.service.lessonOrganizationClassMember.updateByCondition({ realname, parentPhoneNum }, { memberId: userId, organizationId });
+		await Promise.all([
+			this.ctx.keepworkModel.Users.update({ portrait }, { where: { id: userId } }),
+			this.ctx.service.lessonOrganizationClassMember.updateByCondition({ realname, parentPhoneNum }, { memberId: userId, organizationId })
+		]);
+	}
+
+	// 获取keepwork头像，在机构中的realname和家长手机号
+	async getPortraitRealNameParentNum(userId, organizationId) {
+
+		const [user, member] = await Promise.all([
+			this.ctx.keepworkModel.Users.findOne({ where: { id: userId } }),
+			this.ctx.service.lessonOrganizationClassMember.getByCondition({ organizationId, memberId: userId })
+		]);
+
+		return {
+			portrait: user ? user.portrait : '',
+			realname: member ? member.realname : '',
+			parentPhoneNum: member ? member.parentPhoneNum : ''
+		}
 	}
 
 	// 修改家长手机号【第二步】

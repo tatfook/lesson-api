@@ -56,8 +56,13 @@ module.exports = app => {
 
 		updatedAt: {
 			type: DATE,
+		},
+		bind: {
+			type: INTEGER
+		},
+		parentPhoneNum: {
+			type: STRING
 		}
-
 	}, {
 		underscored: false,
 		charset: "utf8mb4",

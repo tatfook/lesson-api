@@ -140,7 +140,14 @@ const LessonOrganization = class extends Controller {
 		const organ = await ctx.service.lessonOrganization.getByCondition({ id });
 		if (!organ) return ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
 
-		await ctx.service.lessonOrganization.updateOrganization(params, organ, authParams);
+		if (this.ctx.state.admin && this.ctx.state.admin.userId) {
+			await ctx.service.lessonOrganization.updateOrganization(params, organ);
+		} else {
+			delete params.QRCode;
+			delete params.propaganda;
+			const { userId, roleId = 0, username } = this.authenticated();
+			await ctx.service.lessonOrganization.updateOrganization(params, organ, { userId, roleId, username });
+		}
 
 		if (params.packages) {
 			await ctx.service.lessonOrganizationPackage.destroyByCondition({ organizationId: id, classId: 0 });

@@ -252,6 +252,16 @@ class EvalReportController extends Controller {
 		return ctx.helper.success({ ctx, status: 200, res: "OK" });
 	}
 
+	// 获取用户信息，keepwork头像，机构中的realname,和家长手机号
+	async getUserInfo() {
+		const { ctx } = this;
+		const { userId, organizationId } = this.enauthenticated();
+
+		const ret = await ctx.service.evaluationReport.getPortraitRealNameParentNum(userId, organizationId);
+
+		return ctx.helper.success({ ctx, status: 200, res: ret });
+	}
+
 	// 修改家长手机号【第二步】
 	async updateParentphonenum() {
 		const { ctx } = this;
