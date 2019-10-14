@@ -131,6 +131,8 @@ module.exports = app => {
 			distinct
   			ur.*,
 			o.name orgName,
+			o.QRCode,
+			o.propaganda,
 			m.realname
 		from
   			evaluationUserReports ur
@@ -250,6 +252,28 @@ module.exports = app => {
 				LEFT JOIN evaluationUserReports ur2 ON ur2.userId = m.memberId
 			WHERE ur.userId=${studentId} AND ur2.reportId IS NOT NULL
 		) a GROUP BY a.reportId ORDER BY a.reportId
+		`;
+
+		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		return list;
+	};
+
+	// 学生获得的历次点评列表
+	model.getEvaluationCommentListSql = async function (userId, classId) {
+		const sql = `
+		SELECT
+			distinct
+			ur.id,
+  			ur.createdAt,
+  			m.realname teacherName,
+  			r.name reportName,
+  			if(r.type=1,'小评','阶段总结') \`type\`,
+  			ur.star
+		from
+  			evaluationUserReports ur
+  			join evaluationReports r on r.id = ur.reportId 
+  			left join lessonOrganizationClassMembers m on m.memberId=r.userId
+  			where ur.userId=${userId} and r.classId = ${classId}
 		`;
 
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });

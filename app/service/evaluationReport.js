@@ -3,7 +3,7 @@
 
 const Service = require("../common/service.js");
 const Err = require("../common/err");
-
+const moment = require("moment");
 
 class EvalReportService extends Service {
 
@@ -167,8 +167,75 @@ class EvalReportService extends Service {
 	}
 
 	// 本班所有任课老师对该学生的点评数据分析
-	async getUserReportStatisticsInClass() {
+	async getUserReportStatisticsInClass(classId, studentId) {
+		const [
+			classmatesHistoryAvgStar,
+			userSumStar,
+			userHistoryStar,
+			classmatesHistoryAvgStar2
+		] = await Promise.all([
+			this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStar(studentId), // 本班同学历次能力值总和的平均值
+			this.ctx.model.EvaluationUserReport.getUserSumStar(studentId, classId), // 获取学生在这个班历次能力值总和
+			this.ctx.model.EvaluationUserReport.getUserHistoryStar(studentId, classId), // 获取学生在这个班历次成长
+			this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStarGroupByReportId(studentId)// 获取同学历次成长的平均值
+		]);
 
+		const userHistoryStarArr = [];
+		for (let i = 0; i < userHistoryStar.length; i++) {
+			const element = userHistoryStar[i];
+			let star = 0, spatial = 0, collaborative = 0, creative = 0, logical = 0, compute = 0, coordinate = 0;
+			for (let j = 0; j <= i; j++) {
+				star += userHistoryStar[j].star;
+				spatial += userHistoryStar[j].spatial;
+				collaborative += userHistoryStar[j].collaborative;
+				creative += userHistoryStar[j].creative;
+				logical += userHistoryStar[j].logical;
+				compute += userHistoryStar[j].compute;
+				coordinate += userHistoryStar[j].coordinate;
+			}
+
+			userHistoryStarArr.push({ ...element, star, spatial, collaborative, creative, logical, compute, coordinate });
+		}
+
+		const classmatesHistoryAvgStar2Arr = [];
+		for (let i = 0; i < classmatesHistoryAvgStar2.length; i++) {
+			const element = classmatesHistoryAvgStar2[i];
+			let starAvg = 0, spatialAvg = 0, collaborativeAvg = 0, creativeAvg = 0, logicalAvg = 0, computeAvg = 0, coordinateAvg = 0;
+			for (let j = 0; j <= i; j++) {
+				starAvg += parseFloat(classmatesHistoryAvgStar2[j].starAvg);
+				spatialAvg += parseFloat(classmatesHistoryAvgStar2[j].spatialAvg);
+				collaborativeAvg += parseFloat(classmatesHistoryAvgStar2[j].collaborativeAvg);
+				creativeAvg += parseFloat(classmatesHistoryAvgStar2[j].creativeAvg);
+				logicalAvg += parseFloat(classmatesHistoryAvgStar2[j].logicalAvg);
+				computeAvg += parseFloat(classmatesHistoryAvgStar2[j].computeAvg);
+				coordinateAvg += parseFloat(classmatesHistoryAvgStar2[j].coordinateAvg);
+			}
+
+			classmatesHistoryAvgStar2Arr.push({ ...element, starAvg, spatialAvg, collaborativeAvg, creativeAvg, logicalAvg, computeAvg, coordinateAvg })
+		}
+
+		const retObj = {
+			historyStarStatistics: { // 历次能力值统计
+				classmatesHistoryAvgStar,
+				userSumStar
+			},
+			growthTrack: {// 成长轨迹
+				userHistoryStar: userHistoryStarArr,
+				classmatesHistoryAvgStar2: classmatesHistoryAvgStar2Arr
+			}
+		};
+
+		return retObj;
+	}
+
+	// 学生获得的历次点评列表
+	async getEvaluationCommentList(classId, userId) {
+		const list = await this.ctx.model.EvaluationUserReport.getEvaluationCommentListSql(userId, classId);
+		list.forEach(r => {
+			r.createdAt = moment(r.createdAt).format("YYYY-MM-DD HH:mm:ss");
+			r.teacherName = `${r.teacherName}老师`;
+		});
+		return list;
 	}
 }
 

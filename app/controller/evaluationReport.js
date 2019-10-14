@@ -274,11 +274,24 @@ class EvalReportController extends Controller {
 	// 我的评估报告-数据统计,本班所有任课老师对该学生的点评数据分析
 	async evaluationStatistics() {
 		const { ctx } = this;
-		const { userId, organizationId } = this.enauthenticated();
+		const { userId } = this.enauthenticated();
 		const { classId } = ctx.request.query;
 		this.validateCgi({ classId }, evaluationStatistics);
 
+		const ret = await ctx.service.evaluationReport.getUserReportStatisticsInClass(classId, userId);
 
+		return ctx.helper.success({ ctx, status: 200, res: ret });
+	}
+
+	// 我的评估报告-历次点评列表
+	async getEvaluationCommentList() {
+		const { ctx } = this;
+		const { userId } = this.enauthenticated();
+		const { classId } = ctx.request.query;
+		this.validateCgi({ classId }, evaluationStatistics);
+
+		const list = await ctx.service.evaluationReport.getEvaluationCommentList(classId, userId);
+		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
 }

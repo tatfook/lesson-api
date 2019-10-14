@@ -102,6 +102,8 @@ module.exports = app => {
 	router.get(`${prefix}evaluationReports`, evaluationReport.index);
 	router.post(`${prefix}evaluationReports/userReport`, evaluationReport.createUserReport);
 	router.delete(`${prefix}evaluationReports/:id`, evaluationReport.destroy);
+	router.get(`${prefix}evaluationReports/statistics`, evaluationReport.evaluationStatistics);
+	router.get(`${prefix}evaluationReports/evaluationCommentList`, evaluationReport.getEvaluationCommentList);
 	router.get(`${prefix}evaluationReports/:id`, evaluationReport.show);
 	router.delete(`${prefix}evaluationReports/userReport/:id`, evaluationReport.destroyUserReport);
 	router.get(`${prefix}evaluationReports/userReport/:id`, evaluationReport.getUserReportDetail);
@@ -110,6 +112,7 @@ module.exports = app => {
 	router.post(`${prefix}evaluationReports/verifyCode`, evaluationReport.verifyCode);
 	router.put(`${prefix}evaluationReports/userInfo`, evaluationReport.updateUserInfo);
 	router.put(`${prefix}evaluationReports/parentPhoneNum`, evaluationReport.updateParentphonenum);
+
 	// const pays = controller.pay;
 	// router.post("pays", prefix + "pays/callback", pays.callback);
 	// router.resources(prefix + "pays", pays);
