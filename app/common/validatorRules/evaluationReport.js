@@ -15,6 +15,20 @@ const star = {
 	}
 };
 
+const cellphone = {
+	isReg: {
+		errmsg: Err.CELLPHONE_ERR,
+		param: /^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-7|9])|(?:5[0-3|5-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[1|8|9]))\d{8}$/
+	}
+};
+
+const verifCode = {
+	isLength: {
+		errmsg: Err.VERIFCODE_ERR,
+		param: { min: 6, max: 6 }
+	}
+};
+
 const createReport = {
 	name: {
 		isLength: {
@@ -83,6 +97,18 @@ const userReportDetail = {
 			errmsg: Err.USERID_ERR,
 			param: { min: 1 }
 		}
+	},
+	classId: {
+		isInt: {
+			errmsg: Err.CLASSID_ERR,
+			param: { min: 1 }
+		}
+	},
+	type: {
+		isInt: {
+			errmsg: Err.REPORT_TYPE_ERR,
+			param: { min: 1, max: 2 }
+		}
 	}
 };
 
@@ -114,30 +140,55 @@ const updateUserReport = {
 };
 
 const sendSms = {
-	cellphone: {
-		isReg: {
-			errmsg: Err.CELLPHONE_ERR,
-			param: /^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-7|9])|(?:5[0-3|5-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[1|8|9]))\d{8}$/
-		}
-	}
+	cellphone
 };
 
 const verifyCode = {
-	cellphone: {
-		isReg: {
-			errmsg: Err.CELLPHONE_ERR,
-			param: /^(?:(?:\+|00)86)?1(?:(?:3[\d])|(?:4[5-7|9])|(?:5[0-3|5-9])|(?:6[5-7])|(?:7[0-8])|(?:8[\d])|(?:9[1|8|9]))\d{8}$/
+	cellphone,
+	verifCode
+};
+
+
+const updateUserInfo = {
+	portrait: {
+		isURL: {
+			errmsg: Err.PORTRAIT_ERR,
+			param: { protocols: ["http", "https"] }
 		}
 	},
-	verifCode: {
+	realname: {
 		isLength: {
-			errmsg: Err.VERIFCODE_ERR,
-			param: { min: 6, max: 6 }
+			errmsg: Err.REALNAME_ERR,
+			param: { min: 1, max: 255 }
 		}
 	}
 };
 
+const updateParentNum = {
+	parentPhoneNum: cellphone,
+	verifCode
+};
+
+// 修改家长手机号第二步
+const updateParentNum2 = {
+	parentPhoneNum: cellphone,
+	verifCode,
+	newParentPhoneNum: cellphone,
+	newVerifCode: verifCode
+};
+
+const evaluationStatistics = {
+	classId: {
+		isInt: {
+			errmsg: Err.CLASSID_ERR,
+			param: { min: 1 }
+		}
+	}
+};
+
+
 module.exports = {
 	createReport, reportList, createUserReport, reportDetailList, userReportDetail,
-	updateUserReport, sendSms, verifyCode
+	updateUserReport, sendSms, verifyCode, updateUserInfo, updateParentNum, updateParentNum2,
+	evaluationStatistics
 };

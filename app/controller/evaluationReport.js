@@ -9,7 +9,8 @@ const { CLASS_MEMBER_ROLE_TEACHER } = consts;
 const {
 	createReport, reportList,
 	createUserReport, reportDetailList, userReportDetail,
-	updateUserReport, sendSms, verifyCode
+	updateUserReport, sendSms, verifyCode, updateUserInfo,
+	updateParentNum, updateParentNum2, evaluationStatistics
 } = require("../common/validatorRules/evaluationReport");
 
 const commentedStatus = 2;
@@ -150,16 +151,16 @@ class EvalReportController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, Err.ARGS_ERR);
 
-		const { studentId } = ctx.request.query;
+		const { studentId, classId, type } = ctx.request.query;
 		this.validateCgi({
-			studentId
+			studentId, classId, type
 		}, userReportDetail);
 
 		// 自己写的点评才能查看详情，学生那儿看到的是历次统计
 		// const teacherId = await this.ctx.service.evaluationReport.getTeacherByUserReportId(id);
 		// if (teacherId !== userId) ctx.throw(403, Err.AUTH_ERR);
 
-		const ret = await ctx.service.evaluationReport.getUserReportDetail(id, studentId);
+		const ret = await ctx.service.evaluationReport.getUserReportDetail(id, studentId, classId, type);
 		return ctx.helper.success({ ctx, status: 200, res: ret });
 	}
 
@@ -227,6 +228,59 @@ class EvalReportController extends Controller {
 
 		return ctx.helper.success({ ctx, status: 200, res: check === verifCode });
 	}
+
+	// 修改keepwork头像，在机构中的realname和家长手机号【也可不传parentPhoneNum, verifCode】
+	async updateUserInfo() {
+		const { ctx } = this;
+		const { userId, organizationId } = this.enauthenticated();
+
+		const { portrait, realname, parentPhoneNum = undefined, verifCode = undefined } = ctx.request.body;
+
+		if (portrait && realname) {
+			this.validateCgi({ portrait, realname }, updateUserInfo);
+		}
+		if (parentPhoneNum && verifCode) {
+			this.validateCgi({ parentPhoneNum, verifCode }, updateParentNum);
+			const check = await this.app.redis.get(`verifCode:${parentPhoneNum}`);
+			if (check !== verifCode) ctx.throw(400, Err.VERIFCODE_ERR);
+		}
+
+		await ctx.service.evaluationReport.updatePortraitRealNameParentNum({
+			portrait, realname, parentPhoneNum, userId, organizationId
+		});
+
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
+	}
+
+	// 修改家长手机号【第二步】
+	async updateParentphonenum() {
+		const { ctx } = this;
+		const { userId, organizationId } = this.enauthenticated();
+
+		const { parentPhoneNum, verifCode, newParentPhoneNum, newVerifCode } = ctx.request.body;
+		this.validateCgi({ parentPhoneNum, verifCode, newParentPhoneNum, newVerifCode }, updateParentNum2);
+
+		const [check1, check2] = await Promise.all([
+			this.app.redis.get(`verifCode:${parentPhoneNum}`),
+			this.app.redis.get(`verifCode:${newParentPhoneNum}`)
+		]);
+		if (check1 !== verifCode || check2 !== newVerifCode) ctx.throw(400, Err.VERIFCODE_ERR);
+
+		await ctx.service.evaluationReport.updateParentphonenum(userId, organizationId, newParentPhoneNum);
+
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
+	}
+
+	// 我的评估报告-数据统计,本班所有任课老师对该学生的点评数据分析
+	async evaluationStatistics() {
+		const { ctx } = this;
+		const { userId, organizationId } = this.enauthenticated();
+		const { classId } = ctx.request.query;
+		this.validateCgi({ classId }, evaluationStatistics);
+
+
+	}
+
 }
 
 module.exports = EvalReportController;

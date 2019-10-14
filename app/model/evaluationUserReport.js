@@ -187,39 +187,42 @@ module.exports = app => {
 		return list[0] ? list[0] : undefined;
 	};
 
-	// 获取学生历次能力值总和
-	model.getUserSumStar = async function (studentId) {
+	// 获取学生在这个班历次能力值总和
+	model.getUserSumStar = async function (studentId, classId) {
 		const sql = `
 		SELECT 
-			SUM(star) starCount,
-			SUM(\`spatial\`) spatialCount,
-			SUM(collaborative) collaborativeCount,
-			SUM(creative) creativeCount,
-			SUM(logical) logicalCount,
-			SUM(compute) computeCount,
-			SUM(coordinate) coordinateCount
-		FROM evaluationUserReports
-		WHERE userId = ${studentId};
+			SUM(ur.star) starCount,
+			SUM(ur.\`spatial\`) spatialCount,
+			SUM(ur.collaborative) collaborativeCount,
+			SUM(ur.creative) creativeCount,
+			SUM(ur.logical) logicalCount,
+			SUM(ur.compute) computeCount,
+			SUM(ur.coordinate) coordinateCount
+		FROM evaluationUserReports ur
+			JOIN evaluationReports r ON r.id = ur.reportId
+		WHERE ur.userId = ${studentId} AND r.classId = ${classId}
 		`;
 
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
 		return list[0] ? list[0] : undefined;
 	};
 
-	// 获取学生历次成长
-	model.getUserHistoryStar = async function (studentId) {
+	// 获取学生在这个班的历次成长
+	model.getUserHistoryStar = async function (studentId, classId) {
 		const sql = `
 		SELECT
-  			reportId,
-  			star,
-  			\`spatial\`,
-  			collaborative,
-  			creative,
-  			logical,
-  			compute,
-  			coordinate
-		FROM evaluationUserReports
-		WHERE userId = ${studentId}  ORDER BY reportId
+			ur.reportId,
+			ur.star,
+			ur.\`spatial\`,
+			ur.collaborative,
+			ur.creative,
+			ur.logical,
+			ur.compute,
+			ur.coordinate
+		FROM evaluationUserReports ur
+			JOIN evaluationReports r ON r.id = ur.reportId
+		WHERE ur.userId = ${studentId} AND r.classId = ${classId}
+		ORDER BY ur.reportId
 		`;
 
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });

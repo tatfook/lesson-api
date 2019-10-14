@@ -69,23 +69,29 @@ class EvalReportService extends Service {
 	}
 
 	// 学生获得的点评详情
-	async getUserReportDetail(userReportId, studentId) {
+	async getUserReportDetail(userReportId, studentId, classId, type) {
+
+		const taskArr = ~~type === 1 ?
+			[// 小评
+				this.getUserReportAndOrgInfo(userReportId),
+				this.ctx.model.EvaluationUserReport.getClassmatesAvgStarById(userReportId)
+			] : [// 阶段点评
+				this.getUserReportAndOrgInfo(userReportId),
+				this.ctx.model.EvaluationUserReport.getClassmatesAvgStarById(userReportId), // 本班同学本次点评的平均能力值
+				this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStar(studentId), // 本班同学历次能力值总和的平均值
+				this.ctx.model.EvaluationUserReport.getUserSumStar(studentId, classId), // 获取学生在这个班历次能力值总和
+				this.ctx.model.EvaluationUserReport.getUserHistoryStar(studentId, classId), // 获取学生在这个班历次成长
+				this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStarGroupByReportId(studentId)// 获取同学历次成长的平均值
+			];
 
 		const [
 			userRepo,
 			classmatesAvgStar,
-			classmatesHistoryAvgStar,
-			userSumStar,
-			userHistoryStar,
-			classmatesHistoryAvgStar2
-		] = await Promise.all([
-			this.getUserReportAndOrgInfo(userReportId),
-			this.ctx.model.EvaluationUserReport.getClassmatesAvgStarById(userReportId), // 本班同学本次点评的平均能力值
-			this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStar(studentId), // 本班同学历次能力值总和的平均值
-			this.ctx.model.EvaluationUserReport.getUserSumStar(studentId), // 获取学生历次能力值总和
-			this.ctx.model.EvaluationUserReport.getUserHistoryStar(studentId), // 获取学生历次成长
-			this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStarGroupByReportId(studentId)// 获取同学历次成长的平均值
-		]);
+			classmatesHistoryAvgStar = [],
+			userSumStar = [],
+			userHistoryStar = [],
+			classmatesHistoryAvgStar2 = []
+		] = await Promise.all(taskArr);
 
 		const userHistoryStarArr = [];
 		for (let i = 0; i < userHistoryStar.length; i++) {
@@ -140,6 +146,29 @@ class EvalReportService extends Service {
 	async updateUserReportByCondition(params, condition) {
 		const ret = await this.ctx.model.EvaluationUserReport.update(params, { where: condition });
 		return ret;
+	}
+
+	// 修改keepwork头像，在机构中的realname和家长手机号
+	async updatePortraitRealNameParentNum({ portrait, realname, parentPhoneNum, userId, organizationId }) {
+		if (parentPhoneNum) {
+			const member = await this.ctx.service.lessonOrganizationClassMember.getByCondition({ memberId: userId });
+			if (member.parentPhoneNum) {// 家长手机号已经绑定，再修改的话不应该用这个接口
+				this.ctx.throw(400, Err.UNKNOWN_ERR);
+			}
+		}
+
+		await this.ctx.keepworkModel.Users.update({ portrait }, { where: { id: userId } });
+		await this.ctx.service.lessonOrganizationClassMember.updateByCondition({ realname, parentPhoneNum }, { memberId: userId, organizationId });
+	}
+
+	// 修改家长手机号【第二步】
+	async updateParentphonenum(userId, organizationId, parentPhoneNum) {
+		return await this.ctx.service.lessonOrganizationClassMember.updateByCondition({ parentPhoneNum }, { memberId: userId, organizationId });
+	}
+
+	// 本班所有任课老师对该学生的点评数据分析
+	async getUserReportStatisticsInClass() {
+
 	}
 }
 

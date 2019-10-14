@@ -55,4 +55,6 @@ module.exports = {
 	"DONT_SEND_REPEAT": "请勿重复发送",
 	"SENDSMS_ERR": "短信发送失败",
 	"VERIFCODE_ERR": "验证码错误",
+	"PORTRAIT_ERR": "头像地址错误",
+	"REALNAME_ERR": "名字长度错误",
 };

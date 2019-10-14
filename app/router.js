@@ -96,6 +96,7 @@ module.exports = app => {
 	router.resources("admins", prefix + "admins/:resources", admins);
 	router.post("admins", prefix + "admins/:resources/search", admins.search);
 
+	// 评估报告api
 	const evaluationReport = controller.evaluationReport;
 	router.post(`${prefix}evaluationReports`, evaluationReport.create);
 	router.get(`${prefix}evaluationReports`, evaluationReport.index);
@@ -107,7 +108,8 @@ module.exports = app => {
 	router.put(`${prefix}evaluationReports/userReport/:id`, evaluationReport.updateUserReport);
 	router.post(`${prefix}evaluationReports/sendSms`, evaluationReport.sendSms);
 	router.post(`${prefix}evaluationReports/verifyCode`, evaluationReport.verifyCode);
-
+	router.put(`${prefix}evaluationReports/userInfo`, evaluationReport.updateUserInfo);
+	router.put(`${prefix}evaluationReports/parentPhoneNum`, evaluationReport.updateParentphonenum);
 	// const pays = controller.pay;
 	// router.post("pays", prefix + "pays/callback", pays.callback);
 	// router.resources(prefix + "pays", pays);
