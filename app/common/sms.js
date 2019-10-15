@@ -35,7 +35,7 @@ module.exports = app => {
 		return year + month + day + hour + minute + second;
 	}
 
-	const sendSms = async function (to, datas, templateId = "194013") {
+	const sendSms = async function (to, datas, templateId = "194012") {
 		const batch = getBatch();
 		const sig = md5(accountSid + accountToken + batch).toUpperCase();
 		const url = "https://" + serverIP + ":" + serverPort + "/" + softVersion + "/Accounts/" + accountSid + "/SMS/TemplateSMS?sig=" + sig;
