@@ -7,10 +7,11 @@ const Controller = require("./baseController.js");
 const Err = require("../common/err");
 const { CLASS_MEMBER_ROLE_TEACHER } = consts;
 const {
-	createReport, reportList,
+	createReport, updateReport, reportList, reportToParent,
 	createUserReport, reportDetailList, userReportDetail,
 	updateUserReport, sendSms, verifyCode, updateUserInfo,
-	updateParentNum, updateParentNum2, evaluationStatistics
+	updateParentNum, updateParentNum2, evaluationStatistics,
+	adminGetReport
 } = require("../common/validatorRules/evaluationReport");
 
 const commentedStatus = 2;
@@ -70,7 +71,8 @@ class EvalReportController extends Controller {
 		const id = _.toNumber(ctx.params.id);
 		if (!id) ctx.throw(400, Err.ARGS_ERR);
 
-		const { status } = ctx.request.query;// 1.待点评，2.已点评
+		/** status 1.待点评，2.已点评, isSend 0.未发送，1.已发送，realname名字过滤 */
+		const { status, isSend = undefined, realname = undefined } = ctx.request.query;
 		this.validateCgi({ status }, reportDetailList);
 
 		// 自己发起的点评才能查看详情列表
@@ -78,7 +80,7 @@ class EvalReportController extends Controller {
 		if (!repo) ctx.throw(400, Err.REPORT_ID_ERR);
 		if (repo.userId !== userId) ctx.throw(403, Err.AUTH_ERR);
 
-		const list = await ctx.service.evaluationReport.getUserReportList({ reportId: id, status });
+		const list = await ctx.service.evaluationReport.getUserReportList({ reportId: id, status, isSend, realname });
 		if (~~status === commentedStatus) {
 			list.forEach(r => {
 				r.createdAt = moment(r.createdAt).format("YYYY-MM-DD HH:mm:ss");
@@ -86,6 +88,26 @@ class EvalReportController extends Controller {
 		}
 
 		return ctx.helper.success({ ctx, status: 200, res: list });
+	}
+
+	// 修改发起的点评
+	async update() {
+		const { ctx } = this;
+		const { userId } = this.enauthenticated();
+		const id = _.toNumber(ctx.params.id);
+		if (!id) ctx.throw(400, Err.ARGS_ERR);
+
+		const { name, type } = ctx.request.body;
+		this.validateCgi({ name, type }, updateReport);
+
+		// 自己发起的点评才能修改
+		const repo = await ctx.service.evaluationReport.getReportByCondition({ id });
+		if (!repo) ctx.throw(400, Err.REPORT_ID_ERR);
+		if (repo.userId !== userId) ctx.throw(403, Err.AUTH_ERR);
+
+		await ctx.service.evaluationReport.updateEvalReport({ name, type }, { id });
+
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
 	}
 
 	// 点评学生 teacher only
@@ -186,7 +208,7 @@ class EvalReportController extends Controller {
 		if (teacherId !== userId) ctx.throw(403, Err.AUTH_ERR);
 
 		await ctx.service.evaluationReport.updateUserReportByCondition({
-			star, spatial, collaborative,
+			star, spatial, collaborative, updatedAt: moment().format("YYYY-MM-DD HH:mm:ss"),
 			creative, logical, compute, coordinate, comment, mediaUrl
 		}, { id });
 
@@ -302,6 +324,47 @@ class EvalReportController extends Controller {
 
 		const list = await ctx.service.evaluationReport.getEvaluationCommentList(classId, userId);
 		return ctx.helper.success({ ctx, status: 200, res: list });
+	}
+
+	// 发送给家长
+	async reportToParent() {
+		const { ctx } = this;
+		this.enauthenticated();
+		// dataArr 结构：[{baseUrl,reportName,studentId,realname, orgName,star,classId, type, userReportId,parentPhoneNum}]
+		let { dataArr } = ctx.request.body;
+		dataArr = typeof dataArr === "string" ? JSON.parse(dataArr) : dataArr;
+
+		for (let i = 0; i < dataArr.length; i++) {
+			const element = dataArr[i];
+			this.validateCgi(element, reportToParent);
+			element.star = element.star > 3 ? "棒极了" : "还不错";
+		}
+
+		await ctx.service.evaluationReport.reportToParent(dataArr);
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
+	}
+
+	// 管理员查看报告
+	async adminGetReport() {
+		const { ctx } = this;
+		const { organizationId } = this.enauthenticated();
+		const { days } = ctx.request.query;
+
+		if (days) this.validateCgi({ days }, adminGetReport);
+
+		const ret = await ctx.service.evaluationReport.adminGetReport(organizationId, days);
+		return ctx.helper.success({ ctx, status: 200, res: ret });
+	}
+
+	// 管理员查看班级报告
+	async getClassReport() {
+		const { ctx } = this;
+		this.enauthenticated();
+		const { classId, days } = ctx.request.query;
+		this.validateCgi({ classId }, evaluationStatistics);
+
+		const ret = await ctx.service.evaluationReport.adminGetClassReport(classId, days);
+		return ctx.helper.success({ ctx, status: 200, res: ret });
 	}
 
 }
