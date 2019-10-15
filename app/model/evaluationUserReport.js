@@ -83,34 +83,44 @@ module.exports = app => {
 		collate: "utf8mb4_bin"
 	});
 
-	model.getUserReportList = async function (reportId, status) {
+	model.getUserReportList = async function ({ reportId, status, isSend, realname }) {
+		let cond = ``;
+		if (isSend) cond += ` and ur.isSend =:isSend`;
+		if (realname) cond += ` and m.realname like concat('%',:realname,'%')`;
+
 		// 已点评名单sql
 		const sql1 = `SELECT
 		ur.id userReportId,
 		ur.userId studentId,
 		ur.createdAt,
 		ur.isSend,
-		u.username
+		ur.star,
+		m.realname,
+		m.parentPhoneNum
 	  FROM
 		evaluationUserReports ur
-		LEFT JOIN users u
-		  ON ur.userId = u.id
-	  WHERE ur.reportId = ${reportId}`;
+		LEFT JOIN lessonOrganizationClassMembers m
+		  ON ur.userId = m.memberId and m.roleId & 1
+	  WHERE ur.reportId = :reportId ${cond}`;
 
 		// 未点评名单sql
 		const sql2 = `SELECT
-		u.id userId,
-		u.username
+		m.memberId studentId,
+		m.realname
 	  FROM
 		lessonOrganizationClassMembers m
-		JOIN users u ON m.memberId = u.id
 		LEFT JOIN evaluationReports r ON m.classId = r.classId
 		LEFT JOIN evaluationUserReports ur ON m.memberId= ur.userId
-		WHERE r.id =${reportId} AND ur.id IS NULL `;
+		WHERE r.id =:reportId AND ur.id IS NULL `;
 
 		const sql = ~~status === 1 ? sql2 : sql1;
 
-		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				isSend, realname, reportId
+			}
+		});
 		return list;
 	};
 
@@ -118,9 +128,14 @@ module.exports = app => {
 		const sql = `
 		select r.userId from evaluationReports r
 		left join evaluationUserReports ur on r.id = ur.reportId
-		where ur.id = ${userReportId}
+		where ur.id = :userReportId
 		`;
-		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				userReportId
+			}
+		});
 		return list[0] ? list[0].userId : undefined;
 	};
 
@@ -138,10 +153,14 @@ module.exports = app => {
   			evaluationUserReports ur
   			left join lessonOrganizationClassMembers m on m.memberId = ur.userId
   			left join lessonOrganizations o on o.id = m.organizationId
-		where ur.id = ${userReportId}
+		where ur.id = :userReportId
 		`;
 
-		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT, replacements: {
+				userReportId
+			}
+		});
 		return list[0] ? list[0] : undefined;
 	};
 
@@ -161,9 +180,13 @@ module.exports = app => {
   			LEFT JOIN evaluationReports r ON r.id = ur.reportId
   			LEFT JOIN lessonOrganizationClassMembers m ON m.classId = r.classId
   			LEFT JOIN evaluationUserReports ur2 ON ur2.userId=m.memberId AND ur2.reportId = r.id
-		WHERE ur.id = ${userReportId} 
+		WHERE ur.id = :userReportId
 		 `;
-		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT, replacements: {
+				userReportId
+			}
+		});
 		return list[0] ? list[0] : undefined;
 	};
 
@@ -183,9 +206,13 @@ module.exports = app => {
   			LEFT JOIN evaluationReports r ON r.id = ur.reportId
   			LEFT JOIN lessonOrganizationClassMembers m ON m.classId = r.classId
   			LEFT JOIN evaluationUserReports ur2 ON ur2.userId=m.memberId 
-		WHERE ur.userId = ${studentId} 
+		WHERE ur.userId = :studentId
 		 `;
-		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT, replacements: {
+				studentId
+			}
+		});
 		return list[0] ? list[0] : undefined;
 	};
 
@@ -202,10 +229,14 @@ module.exports = app => {
 			SUM(ur.coordinate) coordinateCount
 		FROM evaluationUserReports ur
 			JOIN evaluationReports r ON r.id = ur.reportId
-		WHERE ur.userId = ${studentId} AND r.classId = ${classId}
+		WHERE ur.userId = :studentId AND r.classId = :classId
 		`;
 
-		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT, replacements: {
+				studentId, classId
+			}
+		});
 		return list[0] ? list[0] : undefined;
 	};
 
@@ -223,11 +254,15 @@ module.exports = app => {
 			ur.coordinate
 		FROM evaluationUserReports ur
 			JOIN evaluationReports r ON r.id = ur.reportId
-		WHERE ur.userId = ${studentId} AND r.classId = ${classId}
+		WHERE ur.userId = :studentId AND r.classId = :classId
 		ORDER BY ur.reportId
 		`;
 
-		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT, replacements: {
+				studentId, classId
+			}
+		});
 		return list;
 	};
 
@@ -250,11 +285,15 @@ module.exports = app => {
 				LEFT JOIN evaluationReports r ON r.id = ur.reportId
 				LEFT JOIN lessonOrganizationClassMembers m ON m.classId = r.classId
 				LEFT JOIN evaluationUserReports ur2 ON ur2.userId = m.memberId
-			WHERE ur.userId=${studentId} AND ur2.reportId IS NOT NULL
+			WHERE ur.userId=:studentId AND ur2.reportId IS NOT NULL
 		) a GROUP BY a.reportId ORDER BY a.reportId
 		`;
 
-		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT, replacements: {
+				studentId
+			}
+		});
 		return list;
 	};
 
@@ -273,10 +312,82 @@ module.exports = app => {
   			evaluationUserReports ur
   			join evaluationReports r on r.id = ur.reportId 
   			left join lessonOrganizationClassMembers m on m.memberId=r.userId
-  			where ur.userId=${userId} and r.classId = ${classId}
+  			where ur.userId=:userId and r.classId = :classId
 		`;
 
-		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT, replacements: {
+				userId, classId
+			}
+		});
+		return list;
+	};
+
+	// 机构的班级列表，以及它们的评估状态
+	model.getClassAndEvalStatus = async function (organizationId, days) {
+		let cond = ``;
+		if (days) cond += ` where r.createdAt>=${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}`;
+
+		const sql = `
+		select
+			a.*,
+			b.sendCount,
+			b.commentCount,
+			if (b.sendCount > 0, '发送给家长',if (b.commentCount = 0, '未点评', '待发送')) status
+		from(
+			select
+		  		c.id classId,
+				c.name,
+				group_concat(m.realname) teacherNames
+			from
+		  		lessonOrganizationClasses c
+		  		left join lessonOrganizationClassMembers m on m.classId = c.id and m.roleId & 2
+			where c.organizationId = :organizationId
+			group by c.id
+		) a
+		left join(
+			select
+				r.classId,
+				count(ur.isSend = 1 or null) sendCount,
+				count(ur.id) commentCount
+		  	from evaluationReports r
+			left join evaluationUserReports ur on ur.reportId = r.id ${cond}
+			group by r.classId
+		) b on a.classId = b.classId`;
+
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT, replacements: {
+				organizationId
+			}
+		});
+		return list;
+	};
+
+	// 班级各个老师的点评情况
+	model.getTeacherCommentStatistics = async function (classId, days) {
+		let cond = ``;
+		if (days) cond += ` and r.createdAt>=${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}`;
+
+		const sql = `
+		select
+  			r.userId,
+  			if(r.type=1,'小评','阶段总结') \`type\`,
+   			m.realname,
+			count(ur.id) commentCount,
+			count(ur.isSend=1 or null) sendCount
+		from
+  			evaluationReports r
+  			left join lessonOrganizationClassMembers m on m.memberId = r.userId
+    			and m.roleId & 2
+   			left join evaluationUserReports ur on ur.reportId = r.id
+			where r.classId = :classId ${cond} group by r.userId,r.type;
+		`;
+
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT, replacements: {
+				classId
+			}
+		});
 		return list;
 	};
 

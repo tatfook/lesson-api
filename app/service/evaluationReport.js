@@ -11,6 +11,10 @@ class EvalReportService extends Service {
 		return await this.ctx.model.EvaluationReport.create({ userId, name, type, classId });
 	}
 
+	async updateEvalReport(params, condition) {
+		return await this.ctx.model.EvaluationReport.update(params, { where: condition });
+	}
+
 	async createUserReport(params) {
 		return await this.ctx.model.EvaluationUserReport.create(params);
 	}
@@ -54,8 +58,8 @@ class EvalReportService extends Service {
 		return ret ? ret.get() : undefined;
 	}
 
-	async getUserReportList({ reportId, status }) {
-		const list = await this.ctx.model.EvaluationUserReport.getUserReportList(reportId, status);
+	async getUserReportList({ reportId, status, isSend, realname }) {
+		const list = await this.ctx.model.EvaluationUserReport.getUserReportList({ reportId, status, isSend, realname });
 		return list;
 	}
 
@@ -253,6 +257,42 @@ class EvalReportService extends Service {
 			r.teacherName = `${r.teacherName}老师`;
 		});
 		return list;
+	}
+
+	// 发送给家长  dataArr 结构：[{baseUrl,reportName,studentId,realname, orgName,star,classId, type, userReportId,parentPhoneNum}]
+	async reportToParent(dataArr) {
+		const tasksArr = [];
+		const userReportIds = [];
+
+		// 发短信任务
+		for (let i = 0; i < dataArr.length; i++) {
+			const { baseUrl, reportName, studentId, realname, orgName, star, classId, type, userReportId, parentPhoneNum } = dataArr[i];
+			tasksArr.push(this.app.sendSms(parentPhoneNum, [
+				reportName,
+				realname,
+				realname,
+				orgName,
+				star,
+				`${baseUrl}evaluationReports/userReport/${userReportId}?studentId=${studentId}&classId=${classId}&type=${type}`
+			], "479638"));
+
+			userReportIds.push(userReportId);
+		}
+
+		// 修改isSend标识
+		tasksArr.push(this.updateUserReportByCondition({ isSend: 1 }, { id: { "$in": userReportIds } }));
+
+		await Promise.all(tasksArr);
+	}
+
+	// 查看机构的全部班级的报告
+	async adminGetReport(organizationId, days) {
+		return await this.ctx.model.EvaluationUserReport.getClassAndEvalStatus(organizationId, days)
+	}
+
+	// 管理员查看班级报告
+	async adminGetClassReport(classId, days) {
+		return await this.ctx.model.EvaluationUserReport.getTeacherCommentStatistics(classId, days);
 	}
 }
 

@@ -23,6 +23,7 @@ module.exports = {
 	"ACTIVATE_CODE_NOT_MATCH_ORGAN": "激活码不属于这个机构",
 	"CLASS_IS_FINISH": "班级已经结束",
 	"INVALID_ORGAN": "无效机构",
+	"ORGNAME_LEN_ERR": "机构名称长度错误",
 	"ALREADY_IN_CLASS": "已经是该班级学生",
 	"MEMBERS_UPPER_LIMIT": "人数已达上限",
 	"CLASS_NOT_EXISTS": "班级不存在",
@@ -57,4 +58,5 @@ module.exports = {
 	"VERIFCODE_ERR": "验证码错误",
 	"PORTRAIT_ERR": "头像地址错误",
 	"REALNAME_ERR": "名字长度错误",
+	"BASEURL_ERR": "baseUrl错误"
 };

@@ -45,6 +45,21 @@ const createReport = {
 	classId
 };
 
+const updateReport = {
+	name: {
+		isLength: {
+			errmsg: Err.REPORT_NAME_ERR,
+			param: { min: 1, max: 64 }
+		}
+	},
+	type: {
+		isInt: {
+			errmsg: Err.REPORT_TYPE_ERR,
+			param: { min: 1, max: 2 }
+		}
+	},
+};
+
 const reportList = {
 	classId
 };
@@ -186,9 +201,60 @@ const evaluationStatistics = {
 	}
 };
 
+const reportToParent = {
+	baseUrl: {
+		isURL: {
+			errmsg: Err.BASEURL_ERR,
+			param: { protocols: ["http", "https"] }
+		}
+	},
+	studentId: {
+		isInt: {
+			errmsg: Err.USERID_ERR,
+			param: { min: 1 }
+		}
+	},
+	realname: {
+		isLength: {
+			errmsg: Err.REALNAME_ERR,
+			param: { min: 1, max: 255 }
+		}
+	},
+	orgName: {
+		isLength: {
+			errmsg: Err.ORGNAME_LEN_ERR,
+			param: { min: 1, max: 255 }
+		}
+	},
+	star,
+	classId,
+	type: {
+		isInt: {
+			errmsg: Err.REPORT_TYPE_ERR,
+			param: { min: 1, max: 2 }
+		}
+	},
+	userReportId: {
+		isInt: {
+			errmsg: Err.REPORT_ID_ERR,
+			param: { min: 1 }
+		}
+	},
+	parentPhoneNum: cellphone
+};
+
+const adminGetReport = {
+	days: {
+		isInt: {
+			errmsg: Err.ARGS_ERR,
+			param: { min: 1 }
+		}
+	}
+};
+
 
 module.exports = {
-	createReport, reportList, createUserReport, reportDetailList, userReportDetail,
+	createReport, updateReport, reportList, createUserReport, reportDetailList, userReportDetail,
 	updateUserReport, sendSms, verifyCode, updateUserInfo, updateParentNum, updateParentNum2,
-	evaluationStatistics
+	evaluationStatistics, reportToParent, adminGetReport
 };
