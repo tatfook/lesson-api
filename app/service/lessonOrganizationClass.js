@@ -183,13 +183,13 @@ class LessonOrgClassService extends Service {
 	 * @param {*} organizationId 
 	 */
 	async classLastestProject(classId, organizationId) {
-		const members = await this.ctx.service.lessonOrganizationClassMembers.findAllByCondition({ organizationId, classId: id });
+		const members = await this.ctx.service.lessonOrganizationClassMember.getAllByCondition({ organizationId, classId });
 		if (members.length === 0) return [];
 
 		const userIds = members.map(o => o.memberId);
 
 		let [projects, users] = await Promise.all([
-			this.ctx.service.project.findAllByCondition({
+			this.ctx.service.project.getAllByCondition({
 				userId: { "$in": userIds },
 				type: 0
 			}, [["updatedAt", "desc"]]),

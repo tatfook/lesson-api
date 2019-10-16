@@ -8,7 +8,7 @@ class ProjectService extends Service {
 	 * @param {*} condition  必选,对象
 	 */
 	async getByCondition(condition) {
-		let data = await this.ctx.model.Project.findOne({ where: condition });
+		let data = await this.ctx.keepworkModel.Project.findOne({ where: condition });
 		if (data) data = data.get({ plain: true });
 
 		return data;
@@ -20,7 +20,7 @@ class ProjectService extends Service {
 	 * @param {*} order 排序
 	 */
 	async getAllByCondition(condition, order) {
-		let list = await this.ctx.model.Project.findAll({ where: condition, order });
+		let list = await this.ctx.keepworkModel.Project.findAll({ where: condition, order });
 		return list ? list.map(r => r.get()) : [];
 	}
 }
