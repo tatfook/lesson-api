@@ -90,4 +90,33 @@ describe("test/controller/classrooms.test.js", () => {
 		assert(report.length === 1 && report[0].id === 1);
 	});
 
+	it("007 获取发起的点评列表 班级id传错 应该返回空数组", async () => {
+		const user = await app.login({ id: 1 });
+		const token = user.token;
+
+		const report = await app.httpRequest().get(`/evaluationReports?classId=2&roleId=2`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+
+		assert(report.length === 0);
+	});
+
+	it("008 获取发起的点评列表 参数classId传错 应该返回400", async () => {
+		const user = await app.login({ id: 1 });
+		const token = user.token;
+
+		await app.httpRequest().get(`/evaluationReports?classId=0&roleId=2`)
+			.set("Authorization", `Bearer ${token}`).expect(400).then(res => res.body.data);
+	});
+
+	it("009 获取发起的点评列表 加name筛选", async () => {
+		const user = await app.login({ id: 1 });
+		const token = user.token;
+		const ctx = app.mockContext();
+
+		const report = await app.httpRequest().get(`/evaluationReports?classId=1&roleId=2&name=${ctx.helper.escape("这")}`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+
+		assert(report.length === 1 && report[0].id === 1);
+	});
+
 });

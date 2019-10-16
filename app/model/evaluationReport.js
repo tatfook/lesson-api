@@ -53,7 +53,7 @@ module.exports = app => {
 
 	model.getReportList = async function ({ classId, name, type }) {
 		let condition = ` where r.classId = :classId`;
-		if (name) condition += ` and r.name = :name`;
+		if (name) condition += ` and r.name like concat('%',:name,'%')`;
 		if (type) condition += ` and r.type = :type`;
 
 		const sql = `SELECT
