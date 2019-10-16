@@ -111,7 +111,7 @@ module.exports = app => {
 		lessonOrganizationClassMembers m
 		LEFT JOIN evaluationReports r ON m.classId = r.classId
 		LEFT JOIN evaluationUserReports ur ON m.memberId= ur.userId
-		WHERE r.id =:reportId AND ur.id IS NULL `;
+		WHERE r.id =:reportId AND ur.id IS NULL AND m.roleId &1`;
 
 		const sql = ~~status === 1 ? sql2 : sql1;
 

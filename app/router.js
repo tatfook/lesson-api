@@ -102,6 +102,9 @@ module.exports = app => {
 	router.get(`${prefix}evaluationReports`, evaluationReport.index);
 	router.post(`${prefix}evaluationReports/userReport`, evaluationReport.createUserReport);
 	router.delete(`${prefix}evaluationReports/:id`, evaluationReport.destroy);
+	router.put(`${prefix}evaluationReports/userInfo`, evaluationReport.updateUserInfo);
+	router.put(`${prefix}evaluationReports/parentPhoneNum`, evaluationReport.updateParentphonenum);
+	router.put(`${prefix}evaluationReports/userReport/:id`, evaluationReport.updateUserReport);
 	router.put(`${prefix}evaluationReports/:id`, evaluationReport.update);
 	router.get(`${prefix}evaluationReports/statistics`, evaluationReport.evaluationStatistics);
 	router.get(`${prefix}evaluationReports/evaluationCommentList`, evaluationReport.getEvaluationCommentList);
@@ -111,11 +114,8 @@ module.exports = app => {
 	router.get(`${prefix}evaluationReports/:id`, evaluationReport.show);
 	router.delete(`${prefix}evaluationReports/userReport/:id`, evaluationReport.destroyUserReport);
 	router.get(`${prefix}evaluationReports/userReport/:id`, evaluationReport.getUserReportDetail);
-	router.put(`${prefix}evaluationReports/userReport/:id`, evaluationReport.updateUserReport);
 	router.post(`${prefix}evaluationReports/sendSms`, evaluationReport.sendSms);
 	router.post(`${prefix}evaluationReports/verifyCode`, evaluationReport.verifyCode);
-	router.put(`${prefix}evaluationReports/userInfo`, evaluationReport.updateUserInfo);
-	router.put(`${prefix}evaluationReports/parentPhoneNum`, evaluationReport.updateParentphonenum);
 	router.post(`${prefix}evaluationReports/reportToParent`, evaluationReport.reportToParent);
 
 	// const pays = controller.pay;

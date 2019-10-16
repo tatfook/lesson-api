@@ -169,7 +169,7 @@ class LessonOrgClassMemberService extends Service {
 
 		_.each(list, o => {
 			o = o.get();
-			if (!(o.roleId & CLASS_MEMBER_ROLE_STUDENT)) return;
+			if (!(o.roleId & CLASS_MEMBER_ROLE_STUDENT) || !o.lessonOrganizationClasses) return;
 			if (!map[o.memberId]) {
 				count++;
 				map[o.memberId] = o;
