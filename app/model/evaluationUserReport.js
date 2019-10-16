@@ -99,8 +99,9 @@ module.exports = app => {
 		m.parentPhoneNum
 	  FROM
 		evaluationUserReports ur
+		LEFT JOIN evaluationReports r ON r.id = ur.reportId
 		LEFT JOIN lessonOrganizationClassMembers m
-		  ON ur.userId = m.memberId and m.roleId & 1
+		  ON ur.userId = m.memberId and m.roleId & 1 and m.classId = r.classId
 	  WHERE ur.reportId = :reportId ${cond}`;
 
 		// 未点评名单sql
