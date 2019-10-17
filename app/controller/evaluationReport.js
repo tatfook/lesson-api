@@ -279,6 +279,12 @@ class EvalReportController extends Controller {
 		const { ctx } = this;
 		const { userId, organizationId } = this.enauthenticated();
 		const { studentId } = ctx.request.query;// 老师获取学生的信息，传该参数
+		// 检查师生身份
+		if (studentId) {
+			const check = await ctx.service.evaluationReport.checkTeacherRole(userId, organizationId, studentId);
+			if (!check) ctx.throw(403, Err.AUTH_ERR);
+		}
+
 		const ret = await ctx.service.evaluationReport.getPortraitRealNameParentNum(studentId ? studentId : userId, organizationId);
 
 		return ctx.helper.success({ ctx, status: 200, res: ret });
