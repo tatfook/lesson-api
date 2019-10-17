@@ -346,8 +346,8 @@ class EvalReportController extends Controller {
 			element.star = element.star > 3 ? "棒极了" : "还不错";
 		}
 
-		await ctx.service.evaluationReport.reportToParent(dataArr);
-		return ctx.helper.success({ ctx, status: 200, res: "OK" });
+		const ret = await ctx.service.evaluationReport.reportToParent(dataArr);
+		return ctx.helper.success({ ctx, status: 200, res: ret });
 	}
 
 	// 管理员查看报告
