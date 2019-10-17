@@ -278,8 +278,8 @@ class EvalReportController extends Controller {
 	async getUserInfo() {
 		const { ctx } = this;
 		const { userId, organizationId } = this.enauthenticated();
-
-		const ret = await ctx.service.evaluationReport.getPortraitRealNameParentNum(userId, organizationId);
+		const { studentId } = ctx.request.query;// 老师获取学生的信息，传该参数
+		const ret = await ctx.service.evaluationReport.getPortraitRealNameParentNum(studentId ? studentId : userId, organizationId);
 
 		return ctx.helper.success({ ctx, status: 200, res: ret });
 	}
