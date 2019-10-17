@@ -1,5 +1,6 @@
 "use strict";
 
+const moment = require("moment");
 module.exports = app => {
 	const {
 		BIGINT,
@@ -327,7 +328,7 @@ module.exports = app => {
 	// 机构的班级列表，以及它们的评估状态
 	model.getClassAndEvalStatus = async function (organizationId, days) {
 		let cond = ``;
-		if (days) cond += ` where r.createdAt>=${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}`;
+		if (days) cond += ` where r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
 
 		const sql = `
 		select
@@ -367,7 +368,7 @@ module.exports = app => {
 	// 班级各个老师的点评情况
 	model.getTeacherCommentStatistics = async function (classId, days) {
 		let cond = ``;
-		if (days) cond += ` and r.createdAt>=${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}`;
+		if (days) cond += ` and r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
 
 		const sql = `
 		select
