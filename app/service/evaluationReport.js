@@ -294,6 +294,11 @@ class EvalReportService extends Service {
 	async adminGetClassReport(classId, days) {
 		return await this.ctx.model.EvaluationUserReport.getTeacherCommentStatistics(classId, days);
 	}
+
+	// 检查师生身份
+	async checkTeacherRole(teacherId, organizationId, studentId) {
+		return await this.ctx.model.LessonOrganizationClassMember.checkTeacherRoleSql(teacherId, organizationId, studentId);
+	}
 }
 
 module.exports = EvalReportService;

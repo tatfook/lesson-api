@@ -93,6 +93,29 @@ module.exports = app => {
 		return classIds;
 	};
 
+	// 检查师生身份
+	model.checkTeacherRoleSql = async function (teacherId, organizationId, studentId) {
+		const sql = `
+		select
+  			s.id
+		from
+  			lessonOrganizationClassMembers t
+  			left join lessonOrganizationClassMembers s on s.classId = t.classId and s.roleId &1
+		where t.memberId = :teacherId
+  			  and t.roleId & 2
+  			  and t.organizationId = :organizationId
+  			  and s.memberId = :studentId
+		`;
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				teacherId, organizationId, studentId
+			}
+		});
+
+		return list.length ? true : false;
+	};
+
 	model.associate = () => {
 		app.model.LessonOrganizationClassMember.belongsTo(app.model.LessonOrganization, {
 			as: "lessonOrganizations",
