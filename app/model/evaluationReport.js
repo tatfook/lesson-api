@@ -60,7 +60,7 @@ module.exports = app => {
 		a.id,
 		a.name reportName,
 		a.username,
-		IF(a.type=1,'小评','阶段总结') type,
+		a.type,
 		a.createdAt,
 		a.commentCount,
 		a.sendCount,
