@@ -4,6 +4,7 @@
 const Service = require("../common/service.js");
 const Err = require("../common/err");
 const moment = require("moment");
+const _ = require("lodash");
 
 class EvalReportService extends Service {
 
@@ -262,11 +263,15 @@ class EvalReportService extends Service {
 	// 发送给家长  dataArr 结构：[{baseUrl,reportName,studentId,realname, orgName,star,classId, type, userReportId,parentPhoneNum}]
 	async reportToParent(dataArr) {
 		const tasksArr = [];
-		const userReportIds = [];
+		const successIds = [];// 发送成功报告id
+		const failArr = [];// 发送失败用户名字
 
 		// 发短信任务
 		for (let i = 0; i < dataArr.length; i++) {
-			const { baseUrl, reportName, studentId, realname, orgName, star, classId, type, userReportId, parentPhoneNum } = dataArr[i];
+			const { baseUrl, reportName, studentId, realname, orgName,
+				star, classId, type, userReportId, parentPhoneNum
+			} = dataArr[i];
+
 			tasksArr.push(this.app.sendSms(parentPhoneNum, [
 				reportName,
 				realname,
@@ -275,14 +280,21 @@ class EvalReportService extends Service {
 				star,
 				`${baseUrl}evaluationReports/userReport/${userReportId}?studentId=${studentId}&classId=${classId}&type=${type}`
 			], "479638"));
+		}
 
-			userReportIds.push(userReportId);
+		const sendRetArr = await Promise.all(tasksArr);
+
+		for (let i = 0; i < dataArr.length; i++) {
+			if (sendRetArr[i]) {
+				successIds.push(dataArr[i].userReportId);
+			} else {
+				failArr.push(dataArr[i].realname);
+			}
 		}
 
 		// 修改isSend标识
-		tasksArr.push(this.updateUserReportByCondition({ isSend: 1 }, { id: { "$in": userReportIds } }));
-
-		await Promise.all(tasksArr);
+		await this.updateUserReportByCondition({ isSend: 1 }, { id: { "$in": successIds } });
+		return failArr;
 	}
 
 	// 查看机构的全部班级的报告

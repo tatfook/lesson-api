@@ -308,7 +308,7 @@ module.exports = app => {
   			ur.createdAt,
   			m.realname teacherName,
   			r.name reportName,
-  			if(r.type=1,'小评','阶段总结') \`type\`,
+  			r.type,
   			ur.star
 		from
   			evaluationUserReports ur
@@ -373,7 +373,7 @@ module.exports = app => {
 		const sql = `
 		select
   			r.userId,
-  			if(r.type=1,'小评','阶段总结') \`type\`,
+  			r.type,
    			m.realname,
 			count(ur.id) commentCount,
 			count(ur.isSend=1 or null) sendCount
