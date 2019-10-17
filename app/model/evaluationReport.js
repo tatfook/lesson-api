@@ -83,7 +83,7 @@ module.exports = app => {
 		) a LEFT JOIN (SELECT
 			classId,
 			COUNT(id) COUNT
-		  FROM lessonOrganizationClassMembers GROUP BY classId
+		  FROM lessonOrganizationClassMembers  WHERE roleId &1 GROUP BY classId
 		) b ON a.classId = b.classId`;
 
 		const list = await app.model.query(sql, {
