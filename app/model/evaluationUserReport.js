@@ -331,13 +331,13 @@ module.exports = app => {
 	model.getClassAndEvalStatus = async function (organizationId, days) {
 		let cond = ``;
 		if (days) cond += ` where r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
-
+		// status 1.发送给家长,2.未点评,3.待发送
 		const sql = `
 		select
 			a.*,
 			b.sendCount,
 			b.commentCount,
-			if (b.sendCount > 0, '发送给家长',if (b.commentCount = 0, '未点评', '待发送')) status
+			if (b.sendCount > 0, 1,if (b.commentCount = 0, 2, 3)) status
 		from(
 			select
 		  		c.id classId,
@@ -346,7 +346,7 @@ module.exports = app => {
 			from
 		  		lessonOrganizationClasses c
 		  		left join lessonOrganizationClassMembers m on m.classId = c.id and m.roleId & 2
-			where c.organizationId = :organizationId
+			where c.organizationId = :organizationId and c.end > '${moment().format("YYYY-MM-DD HH:mm:ss")}'
 			group by c.id
 		) a
 		left join(
