@@ -285,11 +285,7 @@ class EvalReportService extends Service {
 		const sendRetArr = await Promise.all(tasksArr);
 
 		for (let i = 0; i < dataArr.length; i++) {
-			if (sendRetArr[i]) {
-				successIds.push(dataArr[i].userReportId);
-			} else {
-				failArr.push(dataArr[i].realname);
-			}
+			sendRetArr[i] ? successIds.push(dataArr[i].userReportId) : failArr.push(dataArr[i].realname);
 		}
 
 		// 修改isSend标识
