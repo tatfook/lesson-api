@@ -105,7 +105,9 @@ class EvalReportController extends Controller {
 		if (!repo) ctx.throw(400, Err.REPORT_ID_ERR);
 		if (repo.userId !== userId) ctx.throw(403, Err.AUTH_ERR);
 
-		await ctx.service.evaluationReport.updateEvalReport({ name, type }, { id });
+		await ctx.service.evaluationReport.updateEvalReport({
+			name, type, updatedAt: moment().format("YYYY-MM-DD HH:mm:ss")
+		}, { id });
 
 		return ctx.helper.success({ ctx, status: 200, res: "OK" });
 	}
@@ -223,16 +225,19 @@ class EvalReportController extends Controller {
 		const { cellphone } = ctx.request.body;
 		this.validateCgi({ cellphone }, sendSms);
 
-		const code = _.times(6, () => _.random(0, 9, false)).join("");
+		const env = this.app.config.self.env;
+		const code = env === "unittest" ? "123456" : _.times(6, () => _.random(0, 9, false)).join("");
 
 		const check = await this.app.redis.get(`verifCode:${cellphone}`);
 		if (check) ctx.throw(400, Err.DONT_SEND_REPEAT);
 
 		await this.app.redis.set(`verifCode:${cellphone}`, code, "EX", 60 * 3);
-		const res = await this.app.sendSms(cellphone, [code, "3分钟"]);
-		if (!res) {
-			await this.app.redis.del(`verifCode:${cellphone}`);
-			ctx.throw(400, Err.SENDSMS_ERR);
+		if (env !== "unittest") {
+			const res = await this.app.sendSms(cellphone, [code, "3分钟"]);
+			if (!res) {
+				await this.app.redis.del(`verifCode:${cellphone}`);
+				ctx.throw(400, Err.SENDSMS_ERR);
+			}
 		}
 
 		return ctx.helper.success({ ctx, status: 200, res: "OK" });
@@ -258,10 +263,9 @@ class EvalReportController extends Controller {
 
 		const { portrait, realname, parentPhoneNum = undefined, verifCode = undefined } = ctx.request.body;
 
-		if (portrait && realname) {
-			this.validateCgi({ portrait, realname }, updateUserInfo);
-		}
-		if (parentPhoneNum && verifCode) {
+		this.validateCgi({ portrait, realname }, updateUserInfo);
+
+		if (parentPhoneNum) {
 			this.validateCgi({ parentPhoneNum, verifCode }, updateParentNum);
 			const check = await this.app.redis.get(`verifCode:${parentPhoneNum}`);
 			if (check !== verifCode) ctx.throw(400, Err.VERIFCODE_ERR);
