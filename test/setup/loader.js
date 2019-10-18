@@ -13,11 +13,13 @@ module.exports = app => {
 		user.password = md5("123456");
 		user.id = user.id || 1;
 		// user.roleId = user.roleId || 1;
+		user.organizationId = user.organizationId || 1;
 
 		const token = helper.jwtEncode({
 			userId: user.id,
 			roleId: user.roleId,
-			username: user.username
+			username: user.username,
+			organizationId: user.organizationId
 		}, app.config.self.secret, 3600 * 24 * 2);
 		return { token };
 	};
