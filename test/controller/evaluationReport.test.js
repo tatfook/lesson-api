@@ -18,8 +18,8 @@ describe("test/controller/evaluationReport.test.js", () => {
 		await app.keepworkModel.Users.create({ id: 4, username: "user4", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
 		await app.keepworkModel.Users.create({ id: 5, username: "user5", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
 		await app.model.LessonOrganization.create({ name: "什么机构" });
-		await app.model.LessonOrganizationClass.create({ organizationId: 1, name: "什么班级" });
-		await app.model.LessonOrganizationClass.create({ organizationId: 1, name: "什么班级2" });
+		await app.model.LessonOrganizationClass.create({ organizationId: 1, name: "什么班级", end: "2029-10-21 00:00:00" });
+		await app.model.LessonOrganizationClass.create({ organizationId: 1, name: "什么班级2", end: "2029-10-21 00:00:00" });
 		await app.model.LessonOrganizationClassMember.create({ organizationId: 1, classId: 1, memberId: 1, roleId: 2, realname: "什么老师" });
 		await app.model.LessonOrganizationClassMember.create({ organizationId: 1, classId: 1, memberId: 2, roleId: 1, realname: "什么学生" });
 		await app.model.LessonOrganizationClassMember.create({ organizationId: 1, classId: 1, memberId: 3, roleId: 64, realname: "什么管理员" });
@@ -1030,14 +1030,222 @@ describe("test/controller/evaluationReport.test.js", () => {
 			app.redis.del(`verifCode:13590450686`)]);
 	});
 
-	// it("063 我的评估报告-数据统计", async () => {
-	// 	const user = await app.login({ id: 2 });
-	// 	const token = user.token;
+	it("063 我的评估报告-数据统计 userId:2", async () => {
+		const user = await app.login({ id: 2 });
+		const token = user.token;
 
-	// 	const ret = await app.httpRequest().get(`/evaluationReports/statistics?classId=1`)
-	// 		.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+		const ret = await app.httpRequest().get(`/evaluationReports/statistics?classId=1`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
 
-	// 	console.log("----------ret------", JSON.stringify(ret));
-	// 	assert(ret === 1);
-	// });
+		const classmatesHistoryAvgStar = ret.historyStarStatistics.classmatesHistoryAvgStar;
+		const userSumStar = ret.historyStarStatistics.userSumStar;
+		const userHistoryStar = ret.growthTrack.userHistoryStar;
+		const classmatesHistoryAvgStar2 = ret.growthTrack.classmatesHistoryAvgStar2;
+
+		// 历次能力值统计
+		assert(classmatesHistoryAvgStar.starAvg === "3.50"
+			&& classmatesHistoryAvgStar.spatialAvg === "3.50"
+			&& classmatesHistoryAvgStar.collaborativeAvg === "3.25"
+			&& classmatesHistoryAvgStar.creativeAvg === "3.50"
+			&& classmatesHistoryAvgStar.logicalAvg === "5.00"
+			&& classmatesHistoryAvgStar.computeAvg === "2.50"
+			&& classmatesHistoryAvgStar.coordinateAvg === "3.00");
+		assert(userSumStar.starCount === "6"
+			&& userSumStar.spatialCount === "6"
+			&& userSumStar.collaborativeCount === "6"
+			&& userSumStar.creativeCount === "7"
+			&& userSumStar.logicalCount === "10"
+			&& userSumStar.computeCount === "4"
+			&& userSumStar.coordinateCount === "6");
+
+		// 历次成长轨迹
+		assert(userHistoryStar[0].star === 1
+			&& userHistoryStar[0].spatial === 2
+			&& userHistoryStar[0].collaborative === 3
+			&& userHistoryStar[0].creative === 4
+			&& userHistoryStar[0].logical === 5
+			&& userHistoryStar[0].compute === 2
+			&& userHistoryStar[0].coordinate === 3);
+		assert(userHistoryStar[1].star === 6
+			&& userHistoryStar[1].spatial === 6
+			&& userHistoryStar[1].collaborative === 6
+			&& userHistoryStar[1].creative === 7
+			&& userHistoryStar[1].logical === 10
+			&& userHistoryStar[1].compute === 4
+			&& userHistoryStar[1].coordinate === 6);
+		assert(classmatesHistoryAvgStar2[0].starAvg === 3
+			&& classmatesHistoryAvgStar2[0].spatialAvg === 3
+			&& classmatesHistoryAvgStar2[0].collaborativeAvg === 3
+			&& classmatesHistoryAvgStar2[0].creativeAvg === 4.5
+			&& classmatesHistoryAvgStar2[0].logicalAvg === 5
+			&& classmatesHistoryAvgStar2[0].computeAvg === 3
+			&& classmatesHistoryAvgStar2[0].coordinateAvg === 3);
+		assert(classmatesHistoryAvgStar2[1].starAvg === 7
+			&& classmatesHistoryAvgStar2[1].spatialAvg === 7
+			&& classmatesHistoryAvgStar2[1].collaborativeAvg === 6.5
+			&& classmatesHistoryAvgStar2[1].creativeAvg === 7
+			&& classmatesHistoryAvgStar2[1].logicalAvg === 10
+			&& classmatesHistoryAvgStar2[1].computeAvg === 5
+			&& classmatesHistoryAvgStar2[1].coordinateAvg === 6);
+	});
+
+	it("064 我的评估报告-数据统计 userId:4", async () => {
+		const user = await app.login({ id: 4 });
+		const token = user.token;
+
+		const ret = await app.httpRequest().get(`/evaluationReports/statistics?classId=1`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+
+		const classmatesHistoryAvgStar = ret.historyStarStatistics.classmatesHistoryAvgStar;
+		const userSumStar = ret.historyStarStatistics.userSumStar;
+		const userHistoryStar = ret.growthTrack.userHistoryStar;
+		const classmatesHistoryAvgStar2 = ret.growthTrack.classmatesHistoryAvgStar2;
+
+		// 历次能力值统计
+		assert(classmatesHistoryAvgStar.starAvg === "3.50"
+			&& classmatesHistoryAvgStar.spatialAvg === "3.50"
+			&& classmatesHistoryAvgStar.collaborativeAvg === "3.25"
+			&& classmatesHistoryAvgStar.creativeAvg === "3.50"
+			&& classmatesHistoryAvgStar.logicalAvg === "5.00"
+			&& classmatesHistoryAvgStar.computeAvg === "2.50"
+			&& classmatesHistoryAvgStar.coordinateAvg === "3.00");
+		assert(userSumStar.starCount === "8"
+			&& userSumStar.spatialCount === "8"
+			&& userSumStar.collaborativeCount === "7"
+			&& userSumStar.creativeCount === "7"
+			&& userSumStar.logicalCount === "10"
+			&& userSumStar.computeCount === "6"
+			&& userSumStar.coordinateCount === "6");
+
+		// 历次成长轨迹
+		assert(userHistoryStar[0].star === 5
+			&& userHistoryStar[0].spatial === 4
+			&& userHistoryStar[0].collaborative === 3
+			&& userHistoryStar[0].creative === 5
+			&& userHistoryStar[0].logical === 5
+			&& userHistoryStar[0].compute === 4
+			&& userHistoryStar[0].coordinate === 3);
+		assert(userHistoryStar[1].star === 8
+			&& userHistoryStar[1].spatial === 8
+			&& userHistoryStar[1].collaborative === 7
+			&& userHistoryStar[1].creative === 7
+			&& userHistoryStar[1].logical === 10
+			&& userHistoryStar[1].compute === 6
+			&& userHistoryStar[1].coordinate === 6);
+		assert(classmatesHistoryAvgStar2[0].starAvg === 3
+			&& classmatesHistoryAvgStar2[0].spatialAvg === 3
+			&& classmatesHistoryAvgStar2[0].collaborativeAvg === 3
+			&& classmatesHistoryAvgStar2[0].creativeAvg === 4.5
+			&& classmatesHistoryAvgStar2[0].logicalAvg === 5
+			&& classmatesHistoryAvgStar2[0].computeAvg === 3
+			&& classmatesHistoryAvgStar2[0].coordinateAvg === 3);
+		assert(classmatesHistoryAvgStar2[1].starAvg === 7
+			&& classmatesHistoryAvgStar2[1].spatialAvg === 7
+			&& classmatesHistoryAvgStar2[1].collaborativeAvg === 6.5
+			&& classmatesHistoryAvgStar2[1].creativeAvg === 7
+			&& classmatesHistoryAvgStar2[1].logicalAvg === 10
+			&& classmatesHistoryAvgStar2[1].computeAvg === 5
+			&& classmatesHistoryAvgStar2[1].coordinateAvg === 6);
+	});
+
+	it("065 我的评估报告-历次点评列表 userId:2", async () => {
+		const user = await app.login({ id: 2 });
+		const token = user.token;
+
+		const ret = await app.httpRequest().get(`/evaluationReports/evaluationCommentList?classId=1`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+
+		assert(ret.length === 2);
+		assert(ret[0].reportName === "这个名字修改了"
+			&& ret[0].type === 1
+			&& ret[0].star === 1);
+		assert(ret[1].reportName === "这是阶段点评的名字"
+			&& ret[1].type === 2
+			&& ret[1].star === 5);
+	});
+
+	it("066 我的评估报告-历次点评列表 userId:4", async () => {
+		const user = await app.login({ id: 4 });
+		const token = user.token;
+
+		const ret = await app.httpRequest().get(`/evaluationReports/evaluationCommentList?classId=1`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+
+		assert(ret.length === 2);
+		assert(ret[0].reportName === "这个名字修改了"
+			&& ret[0].type === 1
+			&& ret[0].star === 5);
+		assert(ret[1].reportName === "这是阶段点评的名字"
+			&& ret[1].type === 2
+			&& ret[1].star === 3);
+	});
+
+	it("067 发送报告给家长", async () => {
+		const user = await app.login({ id: 2 });
+		const token = user.token;
+
+		const ret = await app.httpRequest().post(`/evaluationReports/reportToParent`).send({
+			dataArr: [{
+				baseUrl: "www.baidu.com/",
+				reportName: "这个名字修改了",
+				studentId: 2,
+				realname: "什么学生",
+				orgName: "什么机构",
+				star: 1,
+				classId: 1,
+				type: 1,
+				userReportId: 1,
+				parentPhoneNum: "18603042568"
+			}]
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+		assert(ret.length === 0);
+
+		const userRepo = await app.model.EvaluationUserReport.findOne({ where: { id: 1 }});
+		assert(userRepo.isSend === 1);
+	});
+
+	it("068 管理员查看报告", async () => {
+		const user = await app.login({ id: 3 });
+		const token = user.token;
+
+		const ret = await app.httpRequest().get(`/evaluationReports/orgClassReport`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+
+		assert(ret.length === 2);
+		assert(ret[0].name === "什么班级"
+			&& ret[0].teacherNames === "什么老师"
+			&& ret[0].sendCount === 1
+			&& ret[0].commentCount === 4);
+
+		assert(ret[1].name === "什么班级2"
+			&& ret[1].teacherNames === null
+			&& ret[1].sendCount === null
+			&& ret[1].commentCount === null);
+	});
+
+	it("069 管理员查看班级报告 classId:1", async () => {
+		const user = await app.login({ id: 3 });
+		const token = user.token;
+
+		const ret = await app.httpRequest().get(`/evaluationReports/classReport?classId=1`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+
+		assert(ret.length === 2);
+		assert(ret[0].realname === "什么老师"
+			&& ret[0].commentCount === 2
+			&& ret[0].sendCount === 1);
+		assert(ret[1].realname === "什么老师"
+			&& ret[1].commentCount === 2
+			&& ret[1].sendCount === 0);
+	});
+
+	it("070 管理员查看班级报告 classId:2", async () => {
+		const user = await app.login({ id: 3 });
+		const token = user.token;
+
+		const ret = await app.httpRequest().get(`/evaluationReports/classReport?classId=2`)
+			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+
+		assert(ret.length === 0);
+	});
 });

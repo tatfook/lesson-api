@@ -373,18 +373,42 @@ module.exports = app => {
 		if (days) cond += ` and r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
 
 		const sql = `
-		select
-  			r.userId,
-  			r.type,
-   			m.realname,
-			count(ur.id) commentCount,
-			count(ur.isSend=1 or null) sendCount
-		from
-  			evaluationReports r
-  			left join lessonOrganizationClassMembers m on m.memberId = r.userId
-    			and m.roleId & 2
-   			left join evaluationUserReports ur on ur.reportId = r.id
-			where r.classId = :classId ${cond} group by r.userId,r.type;
+		SELECT
+			a.*,
+			b.commentCount,
+			b.sendCount
+	  	FROM (
+			SELECT
+		  		r.userId,
+		  		r.type,
+		  		r.name reportName,
+		  		m.realname,
+		  		c.name className
+		 	FROM
+		  		evaluationReports r
+		  		LEFT JOIN lessonOrganizationClassMembers m
+					ON m.memberId = r.userId AND m.roleId & 2 
+		   		LEFT JOIN lessonOrganizationClasses c ON c.id = r.classId
+			WHERE r.classId = :classId ${cond} GROUP BY r.userId, r.type
+		) a
+		LEFT JOIN(  
+			SELECT
+				userId,
+				type,
+				SUM(IF(commented = 1, 1, 0)) commentCount,
+				SUM(IF(send = 1, 1, 0)) sendCount
+		  	FROM (
+				  SELECT
+			  		r.userId,
+			  		r.type,
+			  		IF(COUNT(ur.id) > 0, 1, 0) commented,
+			  		IF(COUNT(ur.isSend = 1 OR NULL) > 0, 1, 0) send
+				  FROM
+			  		evaluationReports r
+			  		LEFT JOIN evaluationUserReports ur ON ur.reportId = r.id
+					WHERE r.classId = :classId ${cond} GROUP BY r.id
+				) c GROUP BY userId,type
+		) b ON a.userId = b.userId AND a.type = b.type
 		`;
 
 		const list = await app.model.query(sql, {

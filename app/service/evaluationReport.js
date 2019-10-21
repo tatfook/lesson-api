@@ -8,18 +8,22 @@ const _ = require("lodash");
 
 class EvalReportService extends Service {
 
+	// 发起点评
 	async createEvalReport({ userId, name, type, classId }) {
 		return await this.ctx.model.EvaluationReport.create({ userId, name, type, classId });
 	}
 
+	// 更新发起的点评记录，（名称和类型）
 	async updateEvalReport(params, condition) {
 		return await this.ctx.model.EvaluationReport.update(params, { where: condition });
 	}
 
+	// 创建对学生点评的记录
 	async createUserReport(params) {
 		return await this.ctx.model.EvaluationUserReport.create(params);
 	}
 
+	// 获取对班级classId发起的点评
 	async getReportList({ classId, name = undefined, type = undefined }) {
 		const list = await this.ctx.model.EvaluationReport.getReportList({ classId, name, type });
 		return list;
@@ -42,33 +46,38 @@ class EvalReportService extends Service {
 		}
 	}
 
+	// 获取一条对学生的点评
 	async getUserReportByCondition(condition) {
 		const ret = await this.ctx.model.EvaluationUserReport.findOne({ where: condition });
 		return ret ? ret.get() : undefined;
 	}
 
-
+	// 获取对学生的点评和学生的头像
 	async getUserReportAndOrgInfo(userReportId) {
 		const repo = await this.ctx.model.EvaluationUserReport.getReportAndOrgNameById(userReportId);
 		const user = await this.ctx.keepworkModel.Users.findOne({ attributes: ["portrait"], where: { id: repo.userId } });
 		return { ...repo, portrait: user.portrait };
 	}
 
+	// 获取一条发起的点评
 	async getReportByCondition(condition) {
 		const ret = await this.ctx.model.EvaluationReport.findOne({ where: condition });
 		return ret ? ret.get() : undefined;
 	}
 
+	// 获取对学生的点评列表
 	async getUserReportList({ reportId, status, isSend, realname }) {
 		const list = await this.ctx.model.EvaluationUserReport.getUserReportList({ reportId, status, isSend, realname });
 		return list;
 	}
 
+	// 根据userReportId获取老师的id
 	async getTeacherByUserReportId(userReportId) {
 		const teacherId = await this.ctx.model.EvaluationUserReport.getTeacherByUserReportId(userReportId);
 		return teacherId;
 	}
 
+	// 根据条件删除对学生的点评
 	async destroyUserReportByCondition(condition) {
 		return await this.ctx.model.EvaluationUserReport.destroy({ where: condition });
 	}
@@ -282,14 +291,14 @@ class EvalReportService extends Service {
 			], "479638"));
 		}
 
-		const sendRetArr = await Promise.all(tasksArr);
+		const sendRetArr = this.app.config.self.env === 'unittest' ? Array(dataArr.length).fill(true) : await Promise.all(tasksArr);
 
 		for (let i = 0; i < dataArr.length; i++) {
 			sendRetArr[i] ? successIds.push(dataArr[i].userReportId) : failArr.push(dataArr[i].realname);
 		}
 
 		// 修改isSend标识
-		await this.updateUserReportByCondition({ isSend: 1 }, { id: { "$in": successIds } });
+		if (successIds.length) await this.updateUserReportByCondition({ isSend: 1 }, { id: { "$in": successIds } });
 		return failArr;
 	}
 
