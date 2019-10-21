@@ -381,7 +381,6 @@ module.exports = app => {
 			SELECT
 		  		r.userId,
 		  		r.type,
-		  		r.name reportName,
 		  		m.realname,
 		  		c.name className
 		 	FROM
@@ -416,7 +415,11 @@ module.exports = app => {
 				classId
 			}
 		});
-		return list;
+		return list.map(r => {
+			r.commentCount = parseInt(r.commentCount, 10);
+			r.sendCount = parseInt(r.sendCount, 10);
+			return r;
+		});
 	};
 
 	return model;
