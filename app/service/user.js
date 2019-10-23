@@ -86,6 +86,46 @@ class User extends Service {
 		return _.find(tokens, o => o == token) ? true : false;
 	}
 
+	// 检查师生身份
+	async checkTeacherRole(teacherId, organizationId, studentId) {
+		return await this.ctx.model.LessonOrganizationClassMember.checkTeacherRoleSql(teacherId, organizationId, studentId);
+	}
+
+	// 获取keepwork头像，在机构中的realname和家长手机号
+	async getPortraitRealNameParentNum(userId, organizationId) {
+
+		const [user, member] = await Promise.all([
+			this.ctx.keepworkModel.Users.findOne({ where: { id: userId } }),
+			this.ctx.service.lessonOrganizationClassMember.getByCondition({ organizationId, memberId: userId })
+		]);
+
+		return {
+			portrait: user ? user.portrait : '',
+			realname: member ? member.realname : '',
+			parentPhoneNum: member ? member.parentPhoneNum : ''
+		}
+	}
+
+	// 修改keepwork头像，在机构中的realname和家长手机号
+	async updatePortraitRealNameParentNum({ portrait, realname, parentPhoneNum, userId, organizationId }) {
+		if (parentPhoneNum) {
+			const member = await this.ctx.service.lessonOrganizationClassMember.getByCondition({ memberId: userId });
+			if (member.parentPhoneNum) {// 家长手机号已经绑定，再修改的话不应该用这个接口
+				this.ctx.throw(400, Err.UNKNOWN_ERR);
+			}
+		}
+
+		await Promise.all([
+			this.ctx.keepworkModel.Users.update({ portrait }, { where: { id: userId } }),
+			this.ctx.service.lessonOrganizationClassMember.updateByCondition({ realname, parentPhoneNum }, { memberId: userId, organizationId })
+		]);
+	}
+
+	// 修改家长手机号【第二步】
+	async updateParentphonenum(userId, organizationId, parentPhoneNum) {
+		return await this.ctx.service.lessonOrganizationClassMember.updateByCondition({ parentPhoneNum }, { memberId: userId, organizationId });
+	}
+
 	async createRegisterMsg(user) {
 		const msg = await this.app.keepworkModel.messages.create({
 			sender: 0,

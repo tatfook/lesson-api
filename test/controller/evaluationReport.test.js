@@ -817,7 +817,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().post(`/evaluationReports/sendSms`)
+		const ret = await app.httpRequest().post(`/users/sendSms`)
 			.send({
 				cellphone: "18603042568"
 			}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
@@ -829,7 +829,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().post(`/evaluationReports/sendSms`)
+		const ret = await app.httpRequest().post(`/users/sendSms`)
 			.send({
 				cellphone: "18603042568"
 			}).set("Authorization", `Bearer ${token}`).expect(400).then(res => res.body);
@@ -842,7 +842,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const token = user.token;
 
 		const code = await app.redis.get(`verifCode:18603042568`);
-		const ret = await app.httpRequest().post(`/evaluationReports/verifyCode`)
+		const ret = await app.httpRequest().post(`/users/verifyCode`)
 			.send({
 				cellphone: "18603042568", verifCode: code
 			}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
@@ -854,7 +854,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().post(`/evaluationReports/verifyCode`)
+		const ret = await app.httpRequest().post(`/users/verifyCode`)
 			.send({
 				cellphone: "18603042568", verifCode: "123457"
 			}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
@@ -866,7 +866,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 2 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().put(`/evaluationReports/userInfo`).send({
+		const ret = await app.httpRequest().put(`/users/userInfo`).send({
 			portrait: "http://pics1.baidu.com",
 			realname: "修改了的名字"
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
@@ -883,7 +883,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 2 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().put(`/evaluationReports/userInfo`).send({
+		const ret = await app.httpRequest().put(`/users/userInfo`).send({
 			portrait: "fasdfsadferfreercom",
 			realname: "修改了的名字?"
 		}).set("Authorization", `Bearer ${token}`).expect(400).then(res => res.body);
@@ -895,7 +895,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 2 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().put(`/evaluationReports/userInfo`).send({
+		const ret = await app.httpRequest().put(`/users/userInfo`).send({
 			portrait: "http://pics1.baidu.com",
 			realname: ""
 		}).set("Authorization", `Bearer ${token}`).expect(400).then(res => res.body);
@@ -907,7 +907,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 2 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().put(`/evaluationReports/userInfo`).send({
+		const ret = await app.httpRequest().put(`/users/userInfo`).send({
 			portrait: "http://pics1.alibaba.com",
 			realname: "又修改了的名字",
 			parentPhoneNum: "18603042568",
@@ -927,7 +927,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 2 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().put(`/evaluationReports/userInfo`).send({
+		const ret = await app.httpRequest().put(`/users/userInfo`).send({
 			portrait: "http://pics1.alibaba.com",
 			realname: "又修改了的名字",
 			parentPhoneNum: "18603042568",
@@ -944,7 +944,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 2 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().get(`/evaluationReports/userInfo`)
+		const ret = await app.httpRequest().get(`/users/userInfo`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
 
 		assert(ret.portrait === "http://pics1.alibaba.com");
@@ -956,7 +956,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().get(`/evaluationReports/userInfo?studentId=2`)
+		const ret = await app.httpRequest().get(`/users/userInfo?studentId=2`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
 
 		assert(ret.portrait === "http://pics1.alibaba.com");
@@ -968,7 +968,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().get(`/evaluationReports/userInfo?studentId=5`)
+		const ret = await app.httpRequest().get(`/users/userInfo?studentId=5`)
 			.set("Authorization", `Bearer ${token}`).expect(403).then(res => res.body);
 
 		assert(ret.message === "没有权限");
@@ -983,7 +983,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 			app.redis.set(`verifCode:18603042568`, "123456"),
 			app.redis.set(`verifCode:13590450686`, "123123")]);
 
-		const ret = await app.httpRequest().put(`/evaluationReports/parentPhoneNum`).send({
+		const ret = await app.httpRequest().put(`/users/parentPhoneNum`).send({
 			parentPhoneNum: "18603042568",
 			verifCode: "123456",
 			newParentPhoneNum: "13590450686",
@@ -1001,7 +1001,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 2 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().put(`/evaluationReports/parentPhoneNum`).send({
+		const ret = await app.httpRequest().put(`/users/parentPhoneNum`).send({
 			parentPhoneNum: "13590450686",
 			verifCode: "12598",
 			newParentPhoneNum: "18603042568",
@@ -1015,7 +1015,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 2 });
 		const token = user.token;
 
-		const ret = await app.httpRequest().put(`/evaluationReports/parentPhoneNum`).send({
+		const ret = await app.httpRequest().put(`/users/parentPhoneNum`).send({
 			parentPhoneNum: "13590450686",
 			verifCode: "123123",
 			newParentPhoneNum: "18603042568",

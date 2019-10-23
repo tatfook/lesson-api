@@ -9,9 +9,7 @@ const { CLASS_MEMBER_ROLE_TEACHER } = consts;
 const {
 	createReport, updateReport, reportList, reportToParent,
 	createUserReport, reportDetailList, userReportDetail,
-	updateUserReport, sendSms, verifyCode, updateUserInfo,
-	updateParentNum, updateParentNum2, evaluationStatistics,
-	adminGetReport
+	updateUserReport, evaluationStatistics, adminGetReport
 } = require("../common/validatorRules/evaluationReport");
 
 const commentedStatus = 2;
@@ -228,102 +226,6 @@ class EvalReportController extends Controller {
 		ctx.helper.success({ ctx, status: 200, res: "OK" });
 		// 先返回，然后刷新redis统计数据
 		await ctx.service.evaluationReport.refreshRedisStatistics({ studentId, reportId, classId });
-	}
-
-	// 发送短信验证码
-	async sendSms() {
-		const { ctx } = this;
-		this.enauthenticated();
-
-		const { cellphone } = ctx.request.body;
-		this.validateCgi({ cellphone }, sendSms);
-
-		const env = this.app.config.self.env;
-		const code = env === "unittest" ? "123456" : _.times(6, () => _.random(0, 9, false)).join("");
-
-		const check = await this.app.redis.get(`verifCode:${cellphone}`);
-		if (check) ctx.throw(400, Err.DONT_SEND_REPEAT);
-
-		await this.app.redis.set(`verifCode:${cellphone}`, code, "EX", 60 * 3);
-		if (env !== "unittest") {
-			const res = await this.app.sendSms(cellphone, [code, "3分钟"]);
-			if (!res) {
-				await this.app.redis.del(`verifCode:${cellphone}`);
-				ctx.throw(400, Err.SENDSMS_ERR);
-			}
-		}
-
-		return ctx.helper.success({ ctx, status: 200, res: "OK" });
-	}
-
-	// 校验验证码
-	async verifyCode() {
-		const { ctx } = this;
-		this.enauthenticated();
-
-		const { cellphone, verifCode } = ctx.request.body;
-		this.validateCgi({ cellphone, verifCode }, verifyCode);
-
-		const check = await this.app.redis.get(`verifCode:${cellphone}`);
-
-		return ctx.helper.success({ ctx, status: 200, res: check === verifCode });
-	}
-
-	// 修改keepwork头像，在机构中的realname和家长手机号【也可不传parentPhoneNum, verifCode】
-	async updateUserInfo() {
-		const { ctx } = this;
-		const { userId, organizationId } = this.enauthenticated();
-
-		const { portrait, realname, parentPhoneNum = undefined, verifCode = undefined } = ctx.request.body;
-
-		this.validateCgi({ portrait, realname }, updateUserInfo);
-
-		if (parentPhoneNum) {
-			this.validateCgi({ parentPhoneNum, verifCode }, updateParentNum);
-			const check = await this.app.redis.get(`verifCode:${parentPhoneNum}`);
-			if (check !== verifCode) ctx.throw(400, Err.VERIFCODE_ERR);
-		}
-
-		await ctx.service.evaluationReport.updatePortraitRealNameParentNum({
-			portrait, realname, parentPhoneNum, userId, organizationId
-		});
-
-		return ctx.helper.success({ ctx, status: 200, res: "OK" });
-	}
-
-	// 获取用户信息，keepwork头像，机构中的realname,和家长手机号
-	async getUserInfo() {
-		const { ctx } = this;
-		const { userId, organizationId } = this.enauthenticated();
-		const { studentId } = ctx.request.query;// 老师获取学生的信息，传该参数
-		// 检查师生身份
-		if (studentId) {
-			const check = await ctx.service.evaluationReport.checkTeacherRole(userId, organizationId, studentId);
-			if (!check) ctx.throw(403, Err.AUTH_ERR);
-		}
-
-		const ret = await ctx.service.evaluationReport.getPortraitRealNameParentNum(studentId ? studentId : userId, organizationId);
-
-		return ctx.helper.success({ ctx, status: 200, res: ret });
-	}
-
-	// 修改家长手机号【第二步】
-	async updateParentphonenum() {
-		const { ctx } = this;
-		const { userId, organizationId } = this.enauthenticated();
-
-		const { parentPhoneNum, verifCode, newParentPhoneNum, newVerifCode } = ctx.request.body;
-		this.validateCgi({ parentPhoneNum, verifCode, newParentPhoneNum, newVerifCode }, updateParentNum2);
-
-		const [check1, check2] = await Promise.all([
-			this.app.redis.get(`verifCode:${parentPhoneNum}`),
-			this.app.redis.get(`verifCode:${newParentPhoneNum}`)
-		]);
-		if (check1 !== verifCode || check2 !== newVerifCode) ctx.throw(400, Err.VERIFCODE_ERR);
-
-		await ctx.service.evaluationReport.updateParentphonenum(userId, organizationId, newParentPhoneNum);
-
-		return ctx.helper.success({ ctx, status: 200, res: "OK" });
 	}
 
 	// 我的评估报告-数据统计,本班所有任课老师对该学生的点评数据分析
