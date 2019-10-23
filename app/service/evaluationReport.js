@@ -302,10 +302,10 @@ class EvalReportService extends Service {
 			userHistoryStar,
 			classmatesHistoryAvgStar2
 		] = await Promise.all([
-			this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStar(studentId), // 本班同学历次能力值总和的平均值
-			this.ctx.model.EvaluationUserReport.getUserSumStar(studentId, classId), // 获取学生在这个班历次能力值总和
-			this.ctx.model.EvaluationUserReport.getUserHistoryStar(studentId, classId), // 获取学生在这个班历次成长
-			this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStarGroupByReportId(studentId)// 获取同学历次成长的平均值
+			this.getClassmatesHistoryAvgStar({ classId }), // 本班同学历次能力值总和的平均值
+			this.getUserSumStar({ studentId, classId }), // 获取学生在这个班历次能力值总和
+			this.getUserHistoryStar({ studentId, classId }), // 获取学生在这个班历次成长
+			this.getClassmatesHistoryAvgStarGroupByReportId({ classId })// 获取同学历次成长的平均值
 		]);
 
 		const userHistoryStarArr = [];
