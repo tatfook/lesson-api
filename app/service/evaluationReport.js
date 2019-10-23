@@ -23,6 +23,15 @@ class EvalReportService extends Service {
 		return await this.ctx.model.EvaluationUserReport.create(params);
 	}
 
+	// studentId在这些班级被删除学生身份，这里更新redis统计数据
+	async checkEvaluationStatus(studentId, classIds) {
+		const userReports = await this.ctx.model.EvaluationUserReport.getByUserIdAndClassIds(studentId, classIds);
+		for (let i = 0; i < userReports.length; i++) {
+			const element = userReports[i];
+			await this.refreshRedisStatistics({ classId: element.classId, reportId: element.reportId, studentId });
+		}
+	}
+
 	// 获取这个报告中已经点评了的学生id
 	async getStudentIdsByReportId(reportId) {
 		const ret = await this.ctx.model.EvaluationUserReport.getStudentIdsByReportId(reportId);

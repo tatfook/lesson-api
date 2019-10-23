@@ -241,6 +241,13 @@ class LessonOrgClassMemberService extends Service {
 
 		const ids = _.map(oldmembers, o => o.id);
 
+		if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
+			const oldClassIds = _.filter(oldmembers, o => o.roleId & CLASS_MEMBER_ROLE_STUDENT).map(r => r.classId);
+			const delClassIds = _.difference(oldClassIds, classIds);
+			// 这个人在这些班级的学生身份被删除，这里检查是否要更新评估报告的统计数据
+			if (delClassIds.length) await this.ctx.service.evaluationReport.checkEvaluationStatus(params.memberId, delClassIds);
+		}
+
 		//???
 		const organ = await this.ctx.service.lessonOrganization.getByCondition({ id: organizationId });
 		if (!organ) return this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
@@ -316,6 +323,11 @@ class LessonOrgClassMemberService extends Service {
 			if (!organ) return this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
 
 			if (organ.privilege && 2 === 0) return this.throw(403, Err.AUTH_ERR);
+		}
+
+		// 这个人在班级的学生身份被删除，这里检查是否要更新评估报告的统计数据
+		if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
+			await this.ctx.service.evaluationReport.checkEvaluationStatus(member.memberId, [member.classId]);
 		}
 
 		if (!params.roleId || params.roleId == member.roleId) {
