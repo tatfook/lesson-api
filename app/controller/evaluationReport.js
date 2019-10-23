@@ -56,12 +56,19 @@ class EvalReportController extends Controller {
 		if (!id) ctx.throw(400, Err.ARGS_ERR);
 
 		// 自己发起的点评才能删除
-		const repo = await ctx.service.evaluationReport.getReportByCondition({ id });
+		// const repo = await ctx.service.evaluationReport.getReportByCondition({ id });
+
+		const [repo, studentIds] = await Promise.all([
+			ctx.service.evaluationReport.getReportByCondition({ id }),
+			ctx.service.evaluationReport.getStudentIdsByReportId(id)
+		]);
 		if (!repo) ctx.throw(400, Err.REPORT_ID_ERR);
 		if (repo.userId !== userId) ctx.throw(403, Err.AUTH_ERR);
 
 		await ctx.service.evaluationReport.destroyReportById(id);
-		return ctx.helper.success({ ctx, status: 200, res: "OK" });
+		ctx.helper.success({ ctx, status: 200, res: "OK" });
+		// 先返回，然后删除redis统计数据
+		await ctx.service.evaluationReport.delRedisStaticstics({ classId: repo.classId, reportId: id, studentIds });
 	}
 
 	// 点评详情列表 teacher only
@@ -150,7 +157,9 @@ class EvalReportController extends Controller {
 			creative, logical, compute, coordinate, comment, mediaUrl
 		});
 
-		return ctx.helper.success({ ctx, status: 200, res: ret });
+		ctx.helper.success({ ctx, status: 200, res: ret });
+		// 先返回，然后刷新redis统计数据
+		await ctx.service.evaluationReport.refreshRedisStatistics({ reportId, studentId });
 	}
 
 	// 删除对学生的点评 teacher only
@@ -161,11 +170,13 @@ class EvalReportController extends Controller {
 		if (!id) ctx.throw(400, Err.ARGS_ERR);
 
 		// 自己写的点评才能删除
-		const teacherId = await this.ctx.service.evaluationReport.getTeacherByUserReportId(id);
+		const { teacherId, studentId, reportId, classId } = await this.ctx.service.evaluationReport.getTeacherByUserReportId(id);
 		if (teacherId !== userId) ctx.throw(403, Err.AUTH_ERR);
 
 		await ctx.service.evaluationReport.destroyUserReportByCondition({ id });
-		return ctx.helper.success({ ctx, status: 200, res: "OK" });
+		ctx.helper.success({ ctx, status: 200, res: "OK" });
+		// 先返回，然后刷新redis统计数据
+		await ctx.service.evaluationReport.refreshRedisStatistics({ studentId, reportId, classId });
 	}
 
 	// 学生获得的点评详情 teacher parent
@@ -206,7 +217,7 @@ class EvalReportController extends Controller {
 		}, updateUserReport);
 
 		// 自己写的点评才能修改
-		const teacherId = await this.ctx.service.evaluationReport.getTeacherByUserReportId(id);
+		const { teacherId, studentId, reportId, classId } = await this.ctx.service.evaluationReport.getTeacherByUserReportId(id);
 		if (teacherId !== userId) ctx.throw(403, Err.AUTH_ERR);
 
 		await ctx.service.evaluationReport.updateUserReportByCondition({
@@ -214,7 +225,9 @@ class EvalReportController extends Controller {
 			creative, logical, compute, coordinate, comment, mediaUrl
 		}, { id });
 
-		return ctx.helper.success({ ctx, status: 200, res: "OK" });
+		ctx.helper.success({ ctx, status: 200, res: "OK" });
+		// 先返回，然后刷新redis统计数据
+		await ctx.service.evaluationReport.refreshRedisStatistics({ studentId, reportId, classId });
 	}
 
 	// 发送短信验证码

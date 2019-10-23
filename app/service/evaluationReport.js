@@ -23,6 +23,42 @@ class EvalReportService extends Service {
 		return await this.ctx.model.EvaluationUserReport.create(params);
 	}
 
+	// 获取这个报告中已经点评了的学生id
+	async getStudentIdsByReportId(reportId) {
+		const ret = await this.ctx.model.EvaluationUserReport.getStudentIdsByReportId(reportId);
+		return ret ? ret.map(r => r.studentId) : [];
+	}
+
+	// 刷新redis的统计数据
+	async refreshRedisStatistics({ classId, reportId, studentId }) {
+		if (!classId) {
+			const report = await this.getReportByCondition({ id: reportId });
+			if (!report) return;
+			classId = report.classId
+		}
+		await Promise.all([
+			this.getClassmatesAvgStarById({ reportId, refresh: true }),
+			this.getClassmatesHistoryAvgStar({ classId, refresh: true }),
+			this.getUserSumStar({ studentId, classId, refresh: true }),
+			this.getUserHistoryStar({ studentId, classId, refresh: true }),
+			this.getClassmatesHistoryAvgStarGroupByReportId({ classId, refresh: true })
+		]);
+	}
+
+	// 在删除发起的点评之后，删除redis统计数据。由于可能有大量学生，这里不维护他们的统计数据，主动请求接口的时候再生成redis统计数据
+	async delRedisStaticstics({ classId, reportId, studentIds }) {
+		const taskArr = [];
+		taskArr.push(this.app.redis.del(`getClassmatesAvgStarById:${reportId}`));
+		taskArr.push(this.app.redis.del(`getClassmatesHistoryAvgStar:${classId}`));
+		taskArr.push(this.app.redis.del(`getClassmatesHistoryAvgStarGroupByReportId:${classId}`));
+
+		studentIds.forEach(r => {
+			taskArr.push(this.app.redis.del(`getUserSumStar:${r},${classId}`));
+			taskArr.push(this.app.redis.del(`getUserHistoryStar:${r},${classId}`));
+		});
+		await Promise.all(taskArr);
+	}
+
 	// 获取对班级classId发起的点评
 	async getReportList({ classId, name = undefined, type = undefined }) {
 		const list = await this.ctx.model.EvaluationReport.getReportList({ classId, name, type });
@@ -71,10 +107,9 @@ class EvalReportService extends Service {
 		return list;
 	}
 
-	// 根据userReportId获取老师的id
+	// 根据userReportId获取老师的id,studentId,reportId,classId
 	async getTeacherByUserReportId(userReportId) {
-		const teacherId = await this.ctx.model.EvaluationUserReport.getTeacherByUserReportId(userReportId);
-		return teacherId;
+		return await this.ctx.model.EvaluationUserReport.getTeacherByUserReportId(userReportId);
 	}
 
 	// 根据条件删除对学生的点评
@@ -82,20 +117,82 @@ class EvalReportService extends Service {
 		return await this.ctx.model.EvaluationUserReport.destroy({ where: condition });
 	}
 
+	// 本班同学本次点评的平均能力值
+	async getClassmatesAvgStarById({ reportId, refresh }) {
+		let ret;
+		if (!refresh) {
+			ret = await this.app.redis.get(`getClassmatesAvgStarById:${reportId}`);
+			if (ret) return JSON.parse(ret);
+		}
+		ret = await this.ctx.model.EvaluationUserReport.getClassmatesAvgStarById(reportId);
+		await this.app.redis.set(`getClassmatesAvgStarById:${reportId}`, JSON.stringify(ret));
+		return ret;
+	}
+
+	//   本班同学历次能力值总和的平均值
+	async getClassmatesHistoryAvgStar({ classId, refresh }) {
+		let ret;
+		if (!refresh) {
+			ret = await this.app.redis.get(`getClassmatesHistoryAvgStar:${classId}`);
+			if (ret) return JSON.parse(ret);
+		}
+		ret = await this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStar(classId);
+		await this.app.redis.set(`getClassmatesHistoryAvgStar:${classId}`, JSON.stringify(ret));
+		return ret;
+	}
+
+	// 获取学生在这个班历次能力值总和
+	async getUserSumStar({ studentId, classId, refresh }) {
+		let ret;
+		if (!refresh) {
+			ret = await this.app.redis.get(`getUserSumStar:${studentId},${classId}`);
+			if (ret) return JSON.parse(ret);
+		}
+		ret = await this.ctx.model.EvaluationUserReport.getUserSumStar(studentId, classId);
+		await this.app.redis.set(`getUserSumStar:${studentId},${classId}`, JSON.stringify(ret));
+		return ret;
+	}
+
+	// 获取学生在这个班历次成长
+	async getUserHistoryStar({ studentId, classId, refresh }) {
+		let ret;
+		if (!refresh) {
+			ret = await this.app.redis.get(`getUserHistoryStar:${studentId},${classId}`);
+			if (ret) return JSON.parse(ret);
+		}
+		ret = await this.ctx.model.EvaluationUserReport.getUserHistoryStar(studentId, classId);
+		await this.app.redis.set(`getUserHistoryStar:${studentId},${classId}`, JSON.stringify(ret));
+		return ret;
+	}
+
+	// 获取同学历次成长的平均值
+	async getClassmatesHistoryAvgStarGroupByReportId({ classId, refresh }) {
+		let ret;
+		if (!refresh) {
+			ret = await this.app.redis.get(`getClassmatesHistoryAvgStarGroupByReportId:${classId}`);
+			if (ret) return JSON.parse(ret);
+		}
+		ret = await this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStarGroupByReportId(classId);
+		await this.app.redis.set(`getClassmatesHistoryAvgStarGroupByReportId:${classId}`, JSON.stringify(ret));
+		return ret;
+	}
+
 	// 学生获得的点评详情
 	async getUserReportDetail(userReportId, studentId, classId, type) {
+		const repo = await this.getUserReportByCondition({ id: userReportId });
+		if (!repo) this.ctx.throw(400, Err.ARGS_ERR);
 
 		const taskArr = ~~type === 1 ?
 			[// 小评
 				this.getUserReportAndOrgInfo(userReportId),
-				this.ctx.model.EvaluationUserReport.getClassmatesAvgStarById(userReportId)
+				this.getClassmatesAvgStarById({ reportId: repo.reportId })
 			] : [// 阶段点评
 				this.getUserReportAndOrgInfo(userReportId),
-				this.ctx.model.EvaluationUserReport.getClassmatesAvgStarById(userReportId), // 本班同学本次点评的平均能力值
-				this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStar(studentId), // 本班同学历次能力值总和的平均值
-				this.ctx.model.EvaluationUserReport.getUserSumStar(studentId, classId), // 获取学生在这个班历次能力值总和
-				this.ctx.model.EvaluationUserReport.getUserHistoryStar(studentId, classId), // 获取学生在这个班历次成长
-				this.ctx.model.EvaluationUserReport.getClassmatesHistoryAvgStarGroupByReportId(studentId)// 获取同学历次成长的平均值
+				this.getClassmatesAvgStarById({ reportId: repo.reportId }), // 本班同学本次点评的平均能力值
+				this.getClassmatesHistoryAvgStar({ classId }), // 本班同学历次能力值总和的平均值
+				this.getUserSumStar({ studentId, classId }), // 获取学生在这个班历次能力值总和
+				this.getUserHistoryStar({ studentId, classId }), // 获取学生在这个班历次成长
+				this.getClassmatesHistoryAvgStarGroupByReportId({ classId })// 获取同学历次成长的平均值
 			];
 
 		const [
