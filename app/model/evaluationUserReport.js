@@ -165,6 +165,27 @@ module.exports = app => {
 	};
 
 	// 
+	model.getByUserIdAndClassIds = async function (studentId, classIds) {
+		const sql = `
+		select
+			  ur.*,
+			  r.classId
+		from
+  			evaluationUserReports ur
+  			left join evaluationReports r on r.id = ur.reportId
+    	where r.classId in (:classIds) and ur.userId =:studentId 
+		`;
+
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				studentId, classIds: classIds.toString()
+			}
+		});
+		return list ? list : [];
+	};
+
+	// 
 	model.getReportAndOrgNameById = async function (userReportId) {
 		const sql = `
 		select 
@@ -173,13 +194,15 @@ module.exports = app => {
 			o.name orgName,
 			o.QRCode,
 			o.propaganda,
-			m.realname
+			m.realname,
+			tm.realname teacherName
 		from
 			evaluationUserReports ur
 			left join evaluationReports r on r.id = ur.reportId
 			left join lessonOrganizationClassMembers m on m.memberId = ur.userId
 			  and m.roleId&1 AND m.classId = r.classId
-  			left join lessonOrganizations o on o.id = m.organizationId
+			left join lessonOrganizations o on o.id = m.organizationId
+			left join lessonOrganizationClassMembers tm on tm.memberId = r.userId and tm.roleId&2
 		where ur.id = :userReportId
 		`;
 

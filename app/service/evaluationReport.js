@@ -23,6 +23,15 @@ class EvalReportService extends Service {
 		return await this.ctx.model.EvaluationUserReport.create(params);
 	}
 
+	// studentId在这些班级被删除学生身份，这里更新redis统计数据
+	async checkEvaluationStatus(studentId, classIds) {
+		const userReports = await this.ctx.model.EvaluationUserReport.getByUserIdAndClassIds(studentId, classIds);
+		for (let i = 0; i < userReports.length; i++) {
+			const element = userReports[i];
+			await this.refreshRedisStatistics({ classId: element.classId, reportId: element.reportId, studentId });
+		}
+	}
+
 	// 获取这个报告中已经点评了的学生id
 	async getStudentIdsByReportId(reportId) {
 		const ret = await this.ctx.model.EvaluationUserReport.getStudentIdsByReportId(reportId);
@@ -259,41 +268,6 @@ class EvalReportService extends Service {
 		return ret;
 	}
 
-	// 修改keepwork头像，在机构中的realname和家长手机号
-	async updatePortraitRealNameParentNum({ portrait, realname, parentPhoneNum, userId, organizationId }) {
-		if (parentPhoneNum) {
-			const member = await this.ctx.service.lessonOrganizationClassMember.getByCondition({ memberId: userId });
-			if (member.parentPhoneNum) {// 家长手机号已经绑定，再修改的话不应该用这个接口
-				this.ctx.throw(400, Err.UNKNOWN_ERR);
-			}
-		}
-
-		await Promise.all([
-			this.ctx.keepworkModel.Users.update({ portrait }, { where: { id: userId } }),
-			this.ctx.service.lessonOrganizationClassMember.updateByCondition({ realname, parentPhoneNum }, { memberId: userId, organizationId })
-		]);
-	}
-
-	// 获取keepwork头像，在机构中的realname和家长手机号
-	async getPortraitRealNameParentNum(userId, organizationId) {
-
-		const [user, member] = await Promise.all([
-			this.ctx.keepworkModel.Users.findOne({ where: { id: userId } }),
-			this.ctx.service.lessonOrganizationClassMember.getByCondition({ organizationId, memberId: userId })
-		]);
-
-		return {
-			portrait: user ? user.portrait : '',
-			realname: member ? member.realname : '',
-			parentPhoneNum: member ? member.parentPhoneNum : ''
-		}
-	}
-
-	// 修改家长手机号【第二步】
-	async updateParentphonenum(userId, organizationId, parentPhoneNum) {
-		return await this.ctx.service.lessonOrganizationClassMember.updateByCondition({ parentPhoneNum }, { memberId: userId, organizationId });
-	}
-
 	// 本班所有任课老师对该学生的点评数据分析
 	async getUserReportStatisticsInClass(classId, studentId) {
 		const [
@@ -409,10 +383,6 @@ class EvalReportService extends Service {
 		return await this.ctx.model.EvaluationUserReport.getTeacherCommentStatistics(classId, days);
 	}
 
-	// 检查师生身份
-	async checkTeacherRole(teacherId, organizationId, studentId) {
-		return await this.ctx.model.LessonOrganizationClassMember.checkTeacherRoleSql(teacherId, organizationId, studentId);
-	}
 }
 
 module.exports = EvalReportService;

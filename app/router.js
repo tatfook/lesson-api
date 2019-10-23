@@ -16,6 +16,11 @@ module.exports = app => {
 	const users = controller.user;
 	router.get(prefix + "users/token", users.token);
 	router.get(prefix + "users/tokeninfo", users.tokeninfo);
+	router.get(`${prefix}users/userInfo`, users.getUserInfo);
+	router.put(`${prefix}users/userInfo`, users.updateUserInfo);
+	router.put(`${prefix}users/parentPhoneNum`, users.updateParentphonenum);
+	router.post(`${prefix}users/sendSms`, users.sendSms);
+	router.post(`${prefix}users/verifyCode`, users.verifyCode);
 	router.post(prefix + "users/expense", users.expense);
 	router.resources("users", prefix + "users", users);
 	router.post(prefix + "users/:id/applyTeacher", users.applyTeacher);
@@ -102,20 +107,15 @@ module.exports = app => {
 	router.get(`${prefix}evaluationReports`, evaluationReport.index);
 	router.post(`${prefix}evaluationReports/userReport`, evaluationReport.createUserReport);
 	router.delete(`${prefix}evaluationReports/:id`, evaluationReport.destroy);
-	router.put(`${prefix}evaluationReports/userInfo`, evaluationReport.updateUserInfo);
-	router.put(`${prefix}evaluationReports/parentPhoneNum`, evaluationReport.updateParentphonenum);
 	router.put(`${prefix}evaluationReports/userReport/:id`, evaluationReport.updateUserReport);
 	router.put(`${prefix}evaluationReports/:id`, evaluationReport.update);
 	router.get(`${prefix}evaluationReports/statistics`, evaluationReport.evaluationStatistics);
 	router.get(`${prefix}evaluationReports/evaluationCommentList`, evaluationReport.getEvaluationCommentList);
-	router.get(`${prefix}evaluationReports/userInfo`, evaluationReport.getUserInfo);
 	router.get(`${prefix}evaluationReports/orgClassReport`, evaluationReport.adminGetReport);
 	router.get(`${prefix}evaluationReports/classReport`, evaluationReport.getClassReport);
 	router.get(`${prefix}evaluationReports/:id`, evaluationReport.show);
 	router.delete(`${prefix}evaluationReports/userReport/:id`, evaluationReport.destroyUserReport);
 	router.get(`${prefix}evaluationReports/userReport/:id`, evaluationReport.getUserReportDetail);
-	router.post(`${prefix}evaluationReports/sendSms`, evaluationReport.sendSms);
-	router.post(`${prefix}evaluationReports/verifyCode`, evaluationReport.verifyCode);
 	router.post(`${prefix}evaluationReports/reportToParent`, evaluationReport.reportToParent);
 
 	// const pays = controller.pay;
