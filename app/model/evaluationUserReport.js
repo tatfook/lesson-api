@@ -128,7 +128,12 @@ module.exports = app => {
 
 	model.getTeacherByUserReportId = async function (userReportId) {
 		const sql = `
-		select r.userId from evaluationReports r
+		select 
+			r.userId teacherId,
+			ur.userId studentId,
+			r.id reportId,
+			r.classId
+		from evaluationReports r
 		left join evaluationUserReports ur on r.id = ur.reportId
 		where ur.id = :userReportId
 		`;
@@ -138,7 +143,25 @@ module.exports = app => {
 				userReportId
 			}
 		});
-		return list[0] ? list[0].userId : undefined;
+		return list[0] ? list[0] : undefined;
+	};
+
+	// 获取这个报告中已经点评了的学生id
+	model.getStudentIdsByReportId = async function (reportId) {
+		const sql = `
+		select 
+			ur.userId studentId
+		from evaluationUserReports ur 
+			left join evaluationReports r on r.id = ur.reportId
+		where r.id = :reportId
+		`;
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				reportId
+			}
+		});
+		return list;
 	};
 
 	// 
@@ -169,7 +192,7 @@ module.exports = app => {
 	};
 
 	// 获取本班同学本次点评的平均能力值
-	model.getClassmatesAvgStarById = async function (userReportId) {
+	model.getClassmatesAvgStarById = async function (reportId) {
 		const sql = `
 		SELECT
 			ROUND(AVG(ur2.star),2) starAvg,
@@ -180,41 +203,43 @@ module.exports = app => {
 			ROUND(AVG(ur2.compute),2) computeAvg,
 			ROUND(AVG(ur2.coordinate),2) coordinateAvg
 		FROM
-  			evaluationUserReports ur
-  			LEFT JOIN evaluationReports r ON r.id = ur.reportId
+  			evaluationReports r 
   			LEFT JOIN lessonOrganizationClassMembers m ON m.classId = r.classId
   			LEFT JOIN evaluationUserReports ur2 ON ur2.userId=m.memberId AND ur2.reportId = r.id
-		WHERE ur.id = :userReportId
-		 `;
+		WHERE r.id = :reportId
+		`;
 		const list = await app.model.query(sql, {
 			type: app.model.QueryTypes.SELECT, replacements: {
-				userReportId
+				reportId
 			}
 		});
 		return list[0] ? list[0] : undefined;
 	};
 
 	// 本班历次能力值总和的平均值
-	model.getClassmatesHistoryAvgStar = async function (studentId) {
+	model.getClassmatesHistoryAvgStar = async function (classId) {
 		const sql = `
 		SELECT
-			ROUND(AVG(ur2.star),2) starAvg,
-			ROUND(AVG(ur2.\`spatial\`),2) spatialAvg,
-			ROUND(AVG(ur2.collaborative),2) collaborativeAvg,
-			ROUND(AVG(ur2.creative),2) creativeAvg,
-			ROUND(AVG(ur2.logical),2) logicalAvg,
-			ROUND(AVG(ur2.compute),2) computeAvg,
-			ROUND(AVG(ur2.coordinate),2) coordinateAvg
-		FROM
-  			evaluationUserReports ur
-  			LEFT JOIN evaluationReports r ON r.id = ur.reportId
-  			LEFT JOIN lessonOrganizationClassMembers m ON m.classId = r.classId
-  			LEFT JOIN evaluationUserReports ur2 ON ur2.userId=m.memberId 
-		WHERE ur.userId = :studentId
-		 `;
+			ROUND(SUM(star) /COUNT(DISTINCT userId),2) starAvg,
+			ROUND(SUM(\`spatial\`)/COUNT(DISTINCT userId),2) spatialAvg,
+			ROUND(SUM(collaborative)/COUNT(DISTINCT userId),2) collaborativeAvg,
+			ROUND(SUM(creative) /COUNT(DISTINCT userId),2) creativeAvg,
+			ROUND(SUM(logical) /COUNT(DISTINCT userId),2) logicalAvg,
+			ROUND(SUM(compute) /COUNT(DISTINCT userId),2) computeAvg,
+			ROUND(SUM(coordinate) /COUNT(DISTINCT userId),2) coordinateAvg
+ 		FROM (
+			SELECT
+				DISTINCT ur2.*
+			FROM
+				evaluationUserReports ur
+  				LEFT JOIN evaluationReports r ON r.id = ur.reportId
+  				LEFT JOIN lessonOrganizationClassMembers m ON m.classId = r.classId
+  				LEFT JOIN evaluationUserReports ur2 ON ur2.userId=m.memberId AND ur2.reportId= ur.reportId
+			WHERE r.classId = :classId AND ur2.id IS NOT NULL) a
+		`;
 		const list = await app.model.query(sql, {
 			type: app.model.QueryTypes.SELECT, replacements: {
-				studentId
+				classId
 			}
 		});
 		return list[0] ? list[0] : undefined;
@@ -271,7 +296,7 @@ module.exports = app => {
 	};
 
 	// 获取同学历次成长的平均值
-	model.getClassmatesHistoryAvgStarGroupByReportId = async function (studentId) {
+	model.getClassmatesHistoryAvgStarGroupByReportId = async function (classId) {
 		const sql = `
 		SELECT 
 			reportId,
@@ -288,14 +313,14 @@ module.exports = app => {
 	  		FROM evaluationUserReports ur
 				LEFT JOIN evaluationReports r ON r.id = ur.reportId
 				LEFT JOIN lessonOrganizationClassMembers m ON m.classId = r.classId
-				LEFT JOIN evaluationUserReports ur2 ON ur2.userId = m.memberId
-			WHERE ur.userId=:studentId AND ur2.reportId IS NOT NULL
+				LEFT JOIN evaluationUserReports ur2 ON ur2.userId = m.memberId and ur.reportId = ur2.reportId
+			WHERE ur2.reportId IS NOT NULL AND r.classId = :classId
 		) a GROUP BY a.reportId ORDER BY a.reportId
 		`;
 
 		const list = await app.model.query(sql, {
 			type: app.model.QueryTypes.SELECT, replacements: {
-				studentId
+				classId
 			}
 		});
 		return list;
