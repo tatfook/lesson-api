@@ -27,6 +27,13 @@ describe("test/controller/evaluationReport.test.js", () => {
 		await app.model.LessonOrganizationClassMember.create({ organizationId: 1, classId: 2, memberId: 5, roleId: 1, realname: "什么学生3" });
 	});
 
+	// 睡几秒钟
+	async function sleep(seconds) {
+		return new Promise(resolve => {
+			setTimeout(() => resolve(), seconds * 1000);
+		});
+	}
+
 	it("001 发起点评 应该成功", async () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
@@ -551,9 +558,11 @@ describe("test/controller/evaluationReport.test.js", () => {
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
 		assert(report === "OK");
 
-		// 恢复数据
-		await app.model.EvaluationUserReport.create({
-			id: 1, userId: 2,
+		// 后置操作
+		await sleep(1);
+		// 恢复数据,不过id变了，之前应该是1，现在新创建的id应该是2
+		await app.httpRequest().post(`/evaluationReports/userReport`).send({
+			studentId: 2,
 			reportId: 1,
 			star: 3,
 			spatial: 4,
@@ -564,10 +573,11 @@ describe("test/controller/evaluationReport.test.js", () => {
 			coordinate: 3,
 			comment: "你还不错",
 			mediaUrl: []
-		});
-		// 给同学也创建一个点评数据，后面用来统计
-		await app.model.EvaluationUserReport.create({
-			id: 2, userId: 4,
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+		await sleep(1);
+		// 给同学也创建一个点评数据，后面用来统计，这个id应该是3
+		await app.httpRequest().post(`/evaluationReports/userReport`).send({
+			studentId: 4,
 			reportId: 1,
 			star: 5,
 			spatial: 4,
@@ -578,14 +588,15 @@ describe("test/controller/evaluationReport.test.js", () => {
 			coordinate: 3,
 			comment: "你也还不错",
 			mediaUrl: []
-		});
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+		await sleep(1);
 	});
 
 	it("038 学生获得的点评详情 studentId传错 应该失败", async () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const report = await app.httpRequest().get(`/evaluationReports/userReport/1?studentId=0&classId=1&type=1`)
+		const report = await app.httpRequest().get(`/evaluationReports/userReport/2?studentId=0&classId=1&type=1`)
 			.set("Authorization", `Bearer ${token}`).expect(400).then(res => res.body);
 
 		assert(report.message === "用户id错误");
@@ -595,7 +606,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const report = await app.httpRequest().get(`/evaluationReports/userReport/1?studentId=2&classId=0&type=1`)
+		const report = await app.httpRequest().get(`/evaluationReports/userReport/2?studentId=2&classId=0&type=1`)
 			.set("Authorization", `Bearer ${token}`).expect(400).then(res => res.body);
 
 		assert(report.message === "班级id错误");
@@ -605,7 +616,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const report = await app.httpRequest().get(`/evaluationReports/userReport/1?studentId=2&classId=1&type=3`)
+		const report = await app.httpRequest().get(`/evaluationReports/userReport/2?studentId=2&classId=1&type=3`)
 			.set("Authorization", `Bearer ${token}`).expect(400).then(res => res.body);
 
 		assert(report.message === "报告类型错误");
@@ -615,7 +626,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const report = await app.httpRequest().get(`/evaluationReports/userReport/1?studentId=2&classId=1&type=1`)
+		const report = await app.httpRequest().get(`/evaluationReports/userReport/2?studentId=2&classId=1&type=1`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
 
 		assert(report.userRepo.star === 3
@@ -637,10 +648,14 @@ describe("test/controller/evaluationReport.test.js", () => {
 	});
 
 	it("042 学生获得的点评详情 阶段点评", async () => {
+		const user = await app.login({ id: 1 });
+		const token = user.token;
+
 		// 前置操作，多加一个点评
 		const repo = await app.model.EvaluationReport.create({ id: 2, userId: 1, name: "这是阶段点评的名字", type: 2, classId: 1 });
-		const re = await app.model.EvaluationUserReport.create({
-			userId: 2,
+
+		const re = await app.httpRequest().post(`/evaluationReports/userReport`).send({
+			studentId: 2,
 			reportId: repo.id,
 			star: 5,
 			spatial: 4,
@@ -651,9 +666,11 @@ describe("test/controller/evaluationReport.test.js", () => {
 			coordinate: 3,
 			comment: "你还不错",
 			mediaUrl: []
-		});
-		await app.model.EvaluationUserReport.create({
-			userId: 4,
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+		await sleep(1);
+		// 给同学也创建一个点评数据，后面用来统计，这个id应该是3
+		await app.httpRequest().post(`/evaluationReports/userReport`).send({
+			studentId: 4,
 			reportId: repo.id,
 			star: 3,
 			spatial: 4,
@@ -662,12 +679,10 @@ describe("test/controller/evaluationReport.test.js", () => {
 			logical: 5,
 			compute: 2,
 			coordinate: 3,
-			comment: "你还不错",
+			comment: "你也还不错",
 			mediaUrl: []
-		});
-
-		const user = await app.login({ id: 1 });
-		const token = user.token;
+		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
+		await sleep(1);
 
 		const report = await app.httpRequest().get(`/evaluationReports/userReport/${re.id}?studentId=2&classId=1&type=2`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
@@ -716,7 +731,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 2 });
 		const token = user.token;
 
-		const report = await app.httpRequest().put(`/evaluationReports/userReport/1`).send({
+		const report = await app.httpRequest().put(`/evaluationReports/userReport/2`).send({
 			star: 1,
 			spatial: 2,
 			collaborative: 3,
@@ -734,7 +749,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const report = await app.httpRequest().put(`/evaluationReports/userReport/1`).send({
+		const report = await app.httpRequest().put(`/evaluationReports/userReport/2`).send({
 			star: 0,
 			spatial: 2,
 			collaborative: 3,
@@ -752,7 +767,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const report = await app.httpRequest().put(`/evaluationReports/userReport/1`).send({
+		const report = await app.httpRequest().put(`/evaluationReports/userReport/2`).send({
 			star: 1,
 			spatial: 2,
 			collaborative: 3,
@@ -770,7 +785,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const report = await app.httpRequest().put(`/evaluationReports/userReport/1`).send({
+		const report = await app.httpRequest().put(`/evaluationReports/userReport/2`).send({
 			star: 1,
 			spatial: 2,
 			collaborative: 3,
@@ -788,7 +803,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const report = await app.httpRequest().put(`/evaluationReports/userReport/1`).send({
+		const report = await app.httpRequest().put(`/evaluationReports/userReport/2`).send({
 			star: 1,
 			spatial: 2,
 			collaborative: 3,
@@ -802,15 +817,13 @@ describe("test/controller/evaluationReport.test.js", () => {
 		assert(report === "OK");
 
 		// 后置操作，检查记录是否真的修改
-		const re = await app.model.EvaluationUserReport.findOne({ where: { id: 1 }});
-		const format = "YYYY-MM-DD HH:mm:ss";
+		const re = await app.model.EvaluationUserReport.findOne({ where: { id: 2 } });
 		assert(re.comment === "这个记录已经修改了"
 			&& re.star === 1
 			&& re.spatial === 2
 			&& re.collaborative === 3
 			&& re.creative === 4
-			&& re.logical === 5
-			&& moment(re.updatedAt).format(format) === moment().format(format));
+			&& re.logical === 5);
 	});
 
 	it("048 发送短信验证码 应该成功", async () => {
@@ -873,9 +886,9 @@ describe("test/controller/evaluationReport.test.js", () => {
 
 		assert(ret === "OK");
 
-		const user_ = await app.keepworkModel.Users.findOne({ where: { id: 2 }});
+		const user_ = await app.keepworkModel.Users.findOne({ where: { id: 2 } });
 		assert(user_.portrait === "http://pics1.baidu.com");
-		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 }});
+		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 } });
 		assert(member.realname === "修改了的名字");
 	});
 
@@ -916,9 +929,9 @@ describe("test/controller/evaluationReport.test.js", () => {
 
 		assert(ret === "OK");
 
-		const user_ = await app.keepworkModel.Users.findOne({ where: { id: 2 }});
+		const user_ = await app.keepworkModel.Users.findOne({ where: { id: 2 } });
 		assert(user_.portrait === "http://pics1.alibaba.com");
-		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 }});
+		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 } });
 		assert(member.realname === "又修改了的名字");
 		assert(member.parentPhoneNum === "18603042568");
 	});
@@ -993,7 +1006,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		assert(ret === "OK");
 
 		// 检查是否真的修改成功
-		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 }});
+		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 } });
 		assert(member.parentPhoneNum === "13590450686");
 	});
 
@@ -1043,13 +1056,13 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const classmatesHistoryAvgStar2 = ret.growthTrack.classmatesHistoryAvgStar2;
 
 		// 历次能力值统计
-		assert(classmatesHistoryAvgStar.starAvg === "3.50"
-			&& classmatesHistoryAvgStar.spatialAvg === "3.50"
-			&& classmatesHistoryAvgStar.collaborativeAvg === "3.25"
-			&& classmatesHistoryAvgStar.creativeAvg === "3.50"
-			&& classmatesHistoryAvgStar.logicalAvg === "5.00"
-			&& classmatesHistoryAvgStar.computeAvg === "2.50"
-			&& classmatesHistoryAvgStar.coordinateAvg === "3.00");
+		assert(classmatesHistoryAvgStar.starAvg === "7.00"
+			&& classmatesHistoryAvgStar.spatialAvg === "7.00"
+			&& classmatesHistoryAvgStar.collaborativeAvg === "6.50"
+			&& classmatesHistoryAvgStar.creativeAvg === "7.00"
+			&& classmatesHistoryAvgStar.logicalAvg === "10.00"
+			&& classmatesHistoryAvgStar.computeAvg === "5.00"
+			&& classmatesHistoryAvgStar.coordinateAvg === "6.00");
 		assert(userSumStar.starCount === "6"
 			&& userSumStar.spatialCount === "6"
 			&& userSumStar.collaborativeCount === "6"
@@ -1102,13 +1115,13 @@ describe("test/controller/evaluationReport.test.js", () => {
 		const classmatesHistoryAvgStar2 = ret.growthTrack.classmatesHistoryAvgStar2;
 
 		// 历次能力值统计
-		assert(classmatesHistoryAvgStar.starAvg === "3.50"
-			&& classmatesHistoryAvgStar.spatialAvg === "3.50"
-			&& classmatesHistoryAvgStar.collaborativeAvg === "3.25"
-			&& classmatesHistoryAvgStar.creativeAvg === "3.50"
-			&& classmatesHistoryAvgStar.logicalAvg === "5.00"
-			&& classmatesHistoryAvgStar.computeAvg === "2.50"
-			&& classmatesHistoryAvgStar.coordinateAvg === "3.00");
+		assert(classmatesHistoryAvgStar.starAvg === "7.00"
+			&& classmatesHistoryAvgStar.spatialAvg === "7.00"
+			&& classmatesHistoryAvgStar.collaborativeAvg === "6.50"
+			&& classmatesHistoryAvgStar.creativeAvg === "7.00"
+			&& classmatesHistoryAvgStar.logicalAvg === "10.00"
+			&& classmatesHistoryAvgStar.computeAvg === "5.00"
+			&& classmatesHistoryAvgStar.coordinateAvg === "6.00");
 		assert(userSumStar.starCount === "8"
 			&& userSumStar.spatialCount === "8"
 			&& userSumStar.collaborativeCount === "7"
@@ -1194,13 +1207,13 @@ describe("test/controller/evaluationReport.test.js", () => {
 				star: 1,
 				classId: 1,
 				type: 1,
-				userReportId: 1,
+				userReportId: 2,
 				parentPhoneNum: "18603042568"
 			}]
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
 		assert(ret.length === 0);
 
-		const userRepo = await app.model.EvaluationUserReport.findOne({ where: { id: 1 }});
+		const userRepo = await app.model.EvaluationUserReport.findOne({ where: { id: 2 } });
 		assert(userRepo.isSend === 1);
 	});
 
@@ -1232,10 +1245,12 @@ describe("test/controller/evaluationReport.test.js", () => {
 
 		assert(ret.length === 2);
 		assert(ret[0].realname === "什么老师"
-			&& ret[0].commentCount === 2
+			&& ret[0].type === 1
+			&& ret[0].commentCount === 1
 			&& ret[0].sendCount === 1);
 		assert(ret[1].realname === "什么老师"
-			&& ret[1].commentCount === 2
+			&& ret[1].type === 2
+			&& ret[1].commentCount === 1
 			&& ret[1].sendCount === 0);
 	});
 
