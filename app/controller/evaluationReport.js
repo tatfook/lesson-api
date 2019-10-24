@@ -168,8 +168,9 @@ class EvalReportController extends Controller {
 		if (!id) ctx.throw(400, Err.ARGS_ERR);
 
 		// 自己写的点评才能删除
-		const { teacherId, studentId, reportId, classId } = await this.ctx.service.evaluationReport.getTeacherByUserReportId(id);
-		if (teacherId !== userId) ctx.throw(403, Err.AUTH_ERR);
+		const ret = await this.ctx.service.evaluationReport.getTeacherByUserReportId(id);
+		if (!ret || ret.teacherId !== userId) ctx.throw(403, Err.AUTH_ERR);
+		const { studentId, reportId, classId } = ret;
 
 		await ctx.service.evaluationReport.destroyUserReportByCondition({ id });
 		ctx.helper.success({ ctx, status: 200, res: "OK" });
@@ -215,8 +216,9 @@ class EvalReportController extends Controller {
 		}, updateUserReport);
 
 		// 自己写的点评才能修改
-		const { teacherId, studentId, reportId, classId } = await this.ctx.service.evaluationReport.getTeacherByUserReportId(id);
-		if (teacherId !== userId) ctx.throw(403, Err.AUTH_ERR);
+		const ret = await this.ctx.service.evaluationReport.getTeacherByUserReportId(id);
+		if (!ret || ret.teacherId !== userId) ctx.throw(403, Err.AUTH_ERR);
+		const { studentId, reportId, classId } = ret;
 
 		await ctx.service.evaluationReport.updateUserReportByCondition({
 			star, spatial, collaborative, updatedAt: moment().format("YYYY-MM-DD HH:mm:ss"),
