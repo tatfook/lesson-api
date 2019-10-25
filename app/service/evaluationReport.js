@@ -338,7 +338,7 @@ class EvalReportService extends Service {
 		return list;
 	}
 
-	// 发送给家长  dataArr 结构：[{baseUrl,reportName,studentId,realname, orgName,star,classId, type, userReportId,parentPhoneNum}]
+	// 发送给家长  dataArr 结构：[{baseUrl,reportName,realname, orgName,star,parentPhoneNum}]
 	async reportToParent(dataArr) {
 		const tasksArr = [];
 		const successIds = [];// 发送成功报告id
@@ -346,8 +346,8 @@ class EvalReportService extends Service {
 
 		// 发短信任务
 		for (let i = 0; i < dataArr.length; i++) {
-			const { baseUrl, reportName, studentId, realname, orgName,
-				star, classId, type, userReportId, parentPhoneNum
+			const { baseUrl, reportName, realname, orgName,
+				star, parentPhoneNum
 			} = dataArr[i];
 
 			if (this.app.config.self.env !== 'unittest') {
@@ -357,7 +357,7 @@ class EvalReportService extends Service {
 					realname,
 					orgName,
 					star,
-					`${baseUrl}evaluationReports/userReport/${userReportId}?studentId=${studentId}&classId=${classId}&type=${type}`
+					`${baseUrl}`
 				], "479638"));
 			}
 		}

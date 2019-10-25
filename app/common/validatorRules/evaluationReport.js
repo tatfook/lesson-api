@@ -208,12 +208,6 @@ const reportToParent = {
 			param: { protocols: ["http", "https"] }
 		}
 	},
-	studentId: {
-		isInt: {
-			errmsg: Err.USERID_ERR,
-			param: { min: 1 }
-		}
-	},
 	realname: {
 		isLength: {
 			errmsg: Err.REALNAME_ERR,
@@ -227,19 +221,6 @@ const reportToParent = {
 		}
 	},
 	star,
-	classId,
-	type: {
-		isInt: {
-			errmsg: Err.REPORT_TYPE_ERR,
-			param: { min: 1, max: 2 }
-		}
-	},
-	userReportId: {
-		isInt: {
-			errmsg: Err.REPORT_ID_ERR,
-			param: { min: 1 }
-		}
-	},
 	parentPhoneNum: cellphone
 };
 
