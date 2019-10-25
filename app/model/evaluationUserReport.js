@@ -363,7 +363,8 @@ module.exports = app => {
 		from
   			evaluationUserReports ur
   			join evaluationReports r on r.id = ur.reportId 
-  			left join lessonOrganizationClassMembers m on m.memberId=r.userId
+			left join lessonOrganizationClassMembers m on m.memberId=r.userId
+			  and m.roleId&2 and m.classId = r.classId
   			where ur.userId=:userId and r.classId = :classId
 		`;
 
@@ -385,7 +386,7 @@ module.exports = app => {
 			a.*,
 			b.sendCount,
 			b.commentCount,
-			if (b.sendCount > 0, 1,if (b.commentCount = 0, 2, 3)) status
+			if (b.sendCount > 0, 1,if (b.commentCount > 0, 3, 2)) status
 		from(
 			select
 		  		c.id classId,

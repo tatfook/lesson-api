@@ -34,14 +34,14 @@ class EvalReportController extends Controller {
 	async index() {
 		const { ctx } = this;
 		this.enauthenticated();
-		const { name, type, classId, roleId } = ctx.request.query;
+		const { name, type, classId, roleId, days } = ctx.request.query;
 
 		this.validateCgi({ classId }, reportList);
 		if (!["2", "64"].includes(roleId)) {
 			ctx.throw(403, Err.AUTH_ERR);
 		}
 
-		const list = await ctx.service.evaluationReport.getReportList({ roleId, classId, name, type });
+		const list = await ctx.service.evaluationReport.getReportList({ roleId, classId, name, type, days });
 
 		return ctx.helper.success({ ctx, status: 200, res: list });
 	}

@@ -56,21 +56,19 @@ class EvalReportService extends Service {
 
 	// 在删除发起的点评之后，删除redis统计数据。由于可能有大量学生，这里不维护他们的统计数据，主动请求接口的时候再生成redis统计数据
 	async delRedisStaticstics({ classId, reportId, studentIds }) {
-		const taskArr = [];
-		taskArr.push(this.app.redis.del(`getClassmatesAvgStarById:${reportId}`));
-		taskArr.push(this.app.redis.del(`getClassmatesHistoryAvgStar:${classId}`));
-		taskArr.push(this.app.redis.del(`getClassmatesHistoryAvgStarGroupByReportId:${classId}`));
+		await this.app.redis.del(`getClassmatesAvgStarById:${reportId}`);
+		await this.app.redis.del(`getClassmatesHistoryAvgStar:${classId}`);
+		await this.app.redis.del(`getClassmatesHistoryAvgStarGroupByReportId:${classId}`);
 
-		studentIds.forEach(r => {
-			taskArr.push(this.app.redis.del(`getUserSumStar:${r},${classId}`));
-			taskArr.push(this.app.redis.del(`getUserHistoryStar:${r},${classId}`));
-		});
-		await Promise.all(taskArr);
+		for (let i = 0; i < studentIds.length; i++) {
+			await this.app.redis.del(`getUserSumStar:${studentIds[i]},${classId}`);
+			await this.app.redis.del(`getUserHistoryStar:${studentIds[i]},${classId}`)
+		}
 	}
 
 	// 获取对班级classId发起的点评
-	async getReportList({ classId, name = undefined, type = undefined }) {
-		const list = await this.ctx.model.EvaluationReport.getReportList({ classId, name, type });
+	async getReportList({ classId, name = undefined, type = undefined, days }) {
+		const list = await this.ctx.model.EvaluationReport.getReportList({ classId, name, type, days });
 		return list;
 	}
 
@@ -352,14 +350,16 @@ class EvalReportService extends Service {
 				star, classId, type, userReportId, parentPhoneNum
 			} = dataArr[i];
 
-			tasksArr.push(this.app.sendSms(parentPhoneNum, [
-				reportName,
-				realname,
-				realname,
-				orgName,
-				star,
-				`${baseUrl}evaluationReports/userReport/${userReportId}?studentId=${studentId}&classId=${classId}&type=${type}`
-			], "479638"));
+			if (this.app.config.self.env !== 'unittest') {
+				tasksArr.push(this.app.sendSms(parentPhoneNum, [
+					reportName,
+					realname,
+					realname,
+					orgName,
+					star,
+					`${baseUrl}evaluationReports/userReport/${userReportId}?studentId=${studentId}&classId=${classId}&type=${type}`
+				], "479638"));
+			}
 		}
 
 		const sendRetArr = this.app.config.self.env === 'unittest' ? Array(dataArr.length).fill(true) : await Promise.all(tasksArr);
