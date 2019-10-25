@@ -51,10 +51,11 @@ module.exports = app => {
 		collate: "utf8mb4_bin"
 	});
 
-	model.getReportList = async function ({ classId, name, type }) {
+	model.getReportList = async function ({ classId, name, type, days }) {
 		let condition = ` where r.classId = :classId`;
 		if (name) condition += ` and r.name like concat('%',:name,'%')`;
 		if (type) condition += ` and r.type = :type`;
+		if (days) condition += ` where r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
 
 		const sql = `SELECT
 		a.id,

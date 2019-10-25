@@ -363,7 +363,8 @@ module.exports = app => {
 		from
   			evaluationUserReports ur
   			join evaluationReports r on r.id = ur.reportId 
-  			left join lessonOrganizationClassMembers m on m.memberId=r.userId
+			left join lessonOrganizationClassMembers m on m.memberId=r.userId
+			  and m.roleId&2 and m.classId = r.classId
   			where ur.userId=:userId and r.classId = :classId
 		`;
 
