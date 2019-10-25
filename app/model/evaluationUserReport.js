@@ -385,7 +385,7 @@ module.exports = app => {
 			a.*,
 			b.sendCount,
 			b.commentCount,
-			if (b.sendCount > 0, 1,if (b.commentCount = 0, 2, 3)) status
+			if (b.sendCount > 0, 1,if (b.commentCount > 0, 3, 2)) status
 		from(
 			select
 		  		c.id classId,
