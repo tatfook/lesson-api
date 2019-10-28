@@ -2,7 +2,7 @@
 
 const _ = require("lodash");
 const Controller = require("./baseController.js");
-const { CLASS_MEMBER_FULL_ROLE } = require("../common/consts.js");
+const { CLASS_MEMBER_FULL_ROLE, CLASS_MEMBER_ROLE_ADMIN } = require("../common/consts.js");
 const Err = require("../common/err");
 
 const LessonOrganization = class extends Controller {
@@ -143,9 +143,9 @@ const LessonOrganization = class extends Controller {
 		if (this.ctx.state.admin && this.ctx.state.admin.userId) {
 			await ctx.service.lessonOrganization.updateOrganization(params, organ);
 		} else {
-			delete params.QRCode;
-			delete params.propaganda;
 			const { userId, roleId = 0, username } = this.authenticated();
+			if (roleId < CLASS_MEMBER_ROLE_ADMIN) return ctx.throw(403, Err.AUTH_ERR);
+
 			await ctx.service.lessonOrganization.updateOrganization(params, organ, { userId, roleId, username });
 		}
 
