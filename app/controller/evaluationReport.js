@@ -257,7 +257,7 @@ class EvalReportController extends Controller {
 	async reportToParent() {
 		const { ctx } = this;
 		this.enauthenticated();
-		// dataArr 结构：[{baseUrl,reportName,studentId,realname, orgName,star,classId, type, userReportId,parentPhoneNum}]
+		// dataArr 结构：[{baseUrl,reportName,realname, orgName,star,parentPhoneNum}]
 		let { dataArr } = ctx.request.body;
 		dataArr = typeof dataArr === "string" ? JSON.parse(dataArr) : dataArr;
 
