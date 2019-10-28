@@ -48,9 +48,9 @@ class KeepworkService extends Service {
 		return ret;
 	}
 
-	// 更新user,调用update
-	async updateUser(params, condition) {
-		const ret = await this.ctx.helper.curl("put", `${this.baseUrl}lessons/users`, { condition, params, apiKey });
+	// 更新记录,调用update
+	async update(params, condition) {
+		const ret = await this.ctx.helper.curl("put", `${this.baseUrl}lessons/update`, { condition, params, apiKey });
 		return ret;
 	}
 
@@ -71,9 +71,15 @@ class KeepworkService extends Service {
 		return ret;
 	}
 
-	// 创建trade记录，params是要创建的记录对象，调用create
-	async createTrade(params) {
-		const ret = await this.ctx.helper.curl("post", `${this.baseUrl}lessons/trades`, { params, apiKey });
+	// 创建记录，params是要创建的记录对象，调用create
+	async createRecord(params) {
+		const ret = await this.ctx.helper.curl("post", `${this.baseUrl}lessons/createRecord`, { params, apiKey });
+		return ret;
+	}
+
+	// 截断表记录
+	async truncate(params) {
+		const ret = await this.ctx.helper.curl("post", `${this.baseUrl}lessons/truncate`, { params, apiKey });
 		return ret;
 	}
 }

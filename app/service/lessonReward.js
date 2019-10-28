@@ -42,12 +42,13 @@ class LearnRewardService extends Service {
 			this.ctx.service.keepwork.accountIncrement({ coin: coinCount, bean: beanCount, lockCoin: 0 - coinCount }, userId)
 		]);
 
-		await this.ctx.service.keepwork.createTrade({
+		await this.ctx.service.keepwork.createRecord({
 			userId,
 			type: TRADE_TYPE_LESSON_STUDY,
 			subject: lesson.lessonName,
 			coin: coinCount,
 			bean: beanCount,
+			resources: "trades"
 		});
 
 		return { coin: coinCount, bean: beanCount };

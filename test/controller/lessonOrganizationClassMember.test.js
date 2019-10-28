@@ -4,7 +4,10 @@ const { app, mock, assert } = require("egg-mock/bootstrap");
 
 describe("机构学生", () => {
 	before(async () => {
-		await app.keepworkModel.Users.truncate();
+		// 	await app.keepworkModel.Users.truncate();
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
+
 		await app.model.LessonOrganization.sync({ force: true });
 		await app.model.LessonOrganizationClass.sync({ force: true });
 		await app.model.LessonOrganizationClassMember.sync({ force: true });
@@ -14,8 +17,12 @@ describe("机构学生", () => {
 		const user = await app.adminLogin();
 		const token = user.token;
 
-		let user2 = await app.keepworkModel.Users.create({ username: "user005", password: md5("123456") });
-		user2 = user2.get();
+		// let user2 = await app.keepworkModel.Users.create({ username: "user005", password: md5("123456") });
+		// user2 = user2.get();
+
+		const ctx = app.mockContext();
+		const user2 = await ctx.service.keepwork.createRecord({ resources: "users", username: "user005", password: md5("123456") });
+
 		// 创建机构
 		const organ = await app.model.LessonOrganization.create({ name: "org0000", count: 1 }).then(o => o.toJSON());
 
@@ -72,8 +79,11 @@ describe("机构学生", () => {
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert(teachers.data.length === 0);
 
-		let user3 = app.keepworkModel.Users.create({ username: "jacky", password: md5("123456") });
-		user3 = user3.get();
+		// let user3 = app.keepworkModel.Users.create({ username: "jacky", password: md5("123456") });
+		// user3 = user3.get();
+
+		const user3 = await ctx.service.keepwork.createRecord({ resources: "users", username: "jacky", password: md5("123456") });
+
 		await app.model.LessonOrganizationClassMember.create({
 			organizationId: organ.id, classId: cls2.id, roleId: 2, memberId: user3.id
 		});

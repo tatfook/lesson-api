@@ -3,7 +3,9 @@ const { app, assert } = require("egg-mock/bootstrap");
 
 describe("lesson organization class", () => {
 	before(async () => {
-		await app.keepworkModel.Users.truncate();
+		// await app.keepworkModel.Users.truncate();
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
 		await app.model.LessonOrganization.sync({ force: true });
 		await app.model.LessonOrganizationClassMember.sync({ force: true });
 		await app.model.LessonOrganizationClass.sync({ force: true });
@@ -11,9 +13,12 @@ describe("lesson organization class", () => {
 
 	it("001 班级结业与恢复 删除班级 班级列表", async () => {
 		// const user = await app.factory.create("users", { username: "user009", password: md5("123456") });
-		const user = await app.keepworkModel.Users.create({ username: "user009", password: md5("123456") });
-		await app.keepworkModel.Users.create({ username: "user007", password: md5("123456") });
+		// const user = await app.keepworkModel.Users.create({ username: "user009", password: md5("123456") });
+		// await app.keepworkModel.Users.create({ username: "user007", password: md5("123456") });
 
+		const ctx = app.mockContext();
+		const user = await ctx.service.keepwork.createRecord({ resources: "users", username: "user009", password: md5("123456") });
+		await ctx.service.keepwork.createRecord({ resources: "users", username: "user007", password: md5("123456") });
 		// 创建机构
 		const organ = await app.model.LessonOrganization.create({ name: "org0000", count: 1 }).then(o => o.toJSON());
 		// 创建班级成员
@@ -113,7 +118,10 @@ describe("lesson organization class", () => {
 
 	it("002 获取机构学生", async () => {
 		// await app.factory.createMany("users", 10);
-		const user = await app.keepworkModel.Users.create({ username: "user001", password: md5("123456") }).then(o => o.toJSON());
+		// const user = await app.keepworkModel.Users.create({ username: "user001", password: md5("123456") }).then(o => o.toJSON());
+		const ctx = app.mockContext();
+		const user = await ctx.service.keepwork.createRecord({ resources: "users", username: "user001", password: md5("123456") });
+
 		const organ = await app.model.LessonOrganization.create({ name: "org1111", count: 100 }).then(o => o.toJSON());
 		// 创建班级 student=3 teacher=2
 		const cls1 = await app.model.LessonOrganizationClass.create({
@@ -158,7 +166,10 @@ describe("lesson organization class", () => {
 	});
 
 	it("003 机构过期测试", async () => {
-		const user = await app.keepworkModel.Users.create({ username: "jacky", password: md5("123456") }).then(o => o.toJSON());
+		// const user = await app.keepworkModel.Users.create({ username: "jacky", password: md5("123456") }).then(o => o.toJSON());
+		const ctx = app.mockContext();
+		const user = await ctx.service.keepwork.createRecord({ resources: "users", username: "jacky", password: md5("123456") });
+
 		const organ = await app.model.LessonOrganization.create({ name: "org666", count: 100 }).then(o => o.toJSON());
 		const cls1 = await app.model.LessonOrganizationClass.create({
 			name: "clss0009", organizationId: organ.id, begin: new Date(), end: new Date().getTime() + 1000 * 60 * 60 * 24

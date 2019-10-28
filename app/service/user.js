@@ -62,8 +62,8 @@ class User extends Service {
  	* @param {*} params 更新的字段
  	* @param {*} condition 条件
  	*/
-	async updateKeepworkUserByCondition(params, condition) {
-		return await this.ctx.service.keepwork.updateUser(params, condition);
+	async updateKeepworkResourceByCondition(params, condition) {
+		return await this.ctx.service.keepwork.update(params, condition);
 	}
 
 	/**

@@ -4,7 +4,9 @@ const { app, assert } = require("egg-mock/bootstrap");
 
 describe("机构用户", () => {
 	before(async () => {
-		await app.keepworkModel.Users.truncate();
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
+
 		await app.model.LessonOrganizationActivateCode.sync({ force: true });
 		await app.model.LessonOrganizationClassMember.sync({ force: true });
 		await app.model.LessonOrganization.sync({ force: true });
@@ -15,7 +17,7 @@ describe("机构用户", () => {
 		// const user = await app.adminLogin();
 		// const token = user.token;
 
-		await app.keepworkModel.Users.create({ id: 1, realname: "110", username: "test", roleId: 64, password: md5("123456") });
+		// 	await app.keepworkModel.Users.create({ id: 1, realname: "110", username: "test", roleId: 64, password: md5("123456") });
 
 		// 创建机构
 		const organ = await app.model.LessonOrganization.create({

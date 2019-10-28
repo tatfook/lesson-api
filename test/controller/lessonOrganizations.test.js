@@ -3,7 +3,9 @@ const { app, assert } = require("egg-mock/bootstrap");
 
 describe("机构", () => {
 	before(async () => {
-		await app.keepworkModel.Users.truncate();
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
+
 		await app.model.LessonOrganizationActivateCode.truncate();
 		await app.model.LessonOrganizationClassMember.truncate();
 		await app.model.LessonOrganization.truncate();
@@ -12,7 +14,11 @@ describe("机构", () => {
 	});
 
 	it("001 机构", async () => {
-		const user = await app.keepworkModel.Users.create({ username: "qizhibiao1", password: md5("123456"), roleId: 64 });
+		// 	const user = await app.keepworkModel.Users.create({ username: "qizhibiao1", password: md5("123456"), roleId: 64 });
+
+		const ctx = app.mockContext();
+		const user = await ctx.service.keepwork.createRecord({ resources: "users", username: "qizhibiao1", password: md5("123456") });
+
 		// 创建机构
 		const organ = await app.model.LessonOrganization.create({ name: "org0000", count: 1 }).then(o => o.toJSON());
 
@@ -76,7 +82,9 @@ describe("机构", () => {
 		const adminToken = await app.adminLogin().then(o => o.token);
 		assert.ok(adminToken);
 
-		await app.keepworkModel.Users.create({ id: 490, username: "dev123", password: md5("123456"), roleId: 64 });
+		// await app.keepworkModel.Users.create({ id: 490, username: "dev123", password: md5("123456"), roleId: 64 });
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.createRecord({ resources: "users", id: 490, username: "dev123", password: md5("123456"), roleId: 64 });
 
 		// 创建机构
 		let organ = await app.httpRequest().post("/lessonOrganizations").send({

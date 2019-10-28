@@ -21,7 +21,9 @@ describe("test/controller/classrooms.test.js", () => {
 		await app.model.TeacherCDKey.sync({ force: true });
 		await app.model.Classroom.sync({ force: true });
 		await app.model.User.sync({ force: true });
-		await app.keepworkModel.Users.truncate();
+		// await app.keepworkModel.Users.truncate();
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
 		await app.model.LessonOrganizationLog.sync({ force: true });
 
 		await subjects.create({
