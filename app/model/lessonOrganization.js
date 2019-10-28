@@ -81,7 +81,14 @@ module.exports = app => {
 			type: JSON,
 			defaultValue: {},
 		},
-
+		QRCode: {
+			type: STRING,
+			defaultValue: "",
+		},
+		propaganda: {
+			type: STRING,
+			defaultValue: "",
+		},
 		createdAt: {
 			type: DATE,
 		},
