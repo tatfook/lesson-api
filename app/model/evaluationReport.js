@@ -56,7 +56,7 @@ module.exports = app => {
 		let condition = ` where r.classId = :classId and r.userId = :userId`;
 		if (name) condition += ` and r.name like concat('%',:name,'%')`;
 		if (type) condition += ` and r.type = :type`;
-		if (days) condition += ` where r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
+		if (days) condition += ` and r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
 
 		const sql = `SELECT
 		a.id,

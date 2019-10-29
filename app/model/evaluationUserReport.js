@@ -399,13 +399,19 @@ module.exports = app => {
 			group by c.id
 		) a
 		left join(
-			select
-				r.classId,
-				count(ur.isSend = 1 or null) sendCount,
-				count(ur.id) commentCount
-		  	from evaluationReports r
-			left join evaluationUserReports ur on ur.reportId = r.id ${cond}
-			group by r.classId
+			select 
+				classId,
+				count(sendCount>0 or null) sendCount,
+				count(commentCount>0 or null) commentCount
+			from  (
+				select 
+					r.classId,
+					count(ur.isSend = 1 or null)  sendCount, 
+					count(ur.id) commentCount
+				from evaluationReports r 
+					left join evaluationUserReports ur on ur.reportId = r.id ${cond}
+					group by r.id,r.classId
+			) c group by c.classId
 		) b on a.classId = b.classId`;
 
 		const list = await app.model.query(sql, {
