@@ -96,7 +96,7 @@ class User extends Service {
 
 		const [user, member] = await Promise.all([
 			this.ctx.keepworkModel.Users.findOne({ where: { id: userId } }),
-			this.ctx.service.lessonOrganizationClassMember.getByCondition({ organizationId, memberId: userId })
+			this.ctx.service.lessonOrganizationClassMember.getByCondition({ organizationId, memberId: userId, classId: { '$gt': 0 } })
 		]);
 
 		return {
