@@ -287,6 +287,70 @@ class LessonOrgService extends Service {
 			upperLimit: organ.count
 		};
 	}
+
+	// 机构课程包【代替之前的graphQL接口】
+	async getOrgPackages(organizationId) {
+		let data = await this.ctx.model.LessonOrganization.findOne({
+			attributes: ["id"],
+			include: [{
+				attributes: ["id", "lessons"],
+				as: "lessonOrganizationPackages",
+				model: this.ctx.model.LessonOrganizationPackage,
+				include: [{
+					as: "packages",
+					model: this.ctx.model.Package,
+					attributes: ["id", "packageName"],
+				}]
+			}],
+			where: {
+				id: organizationId
+			}
+		}).then(r => r.get());
+
+		const orgPackages = data.organizaitonPackages = data.lessonOrganizationPackages;
+		data.lessonOrganizationPackages = undefined;
+
+		let lessonIds = [];// 提取lessonId,并找到它们
+		orgPackages.forEach(r => {
+			const lessons = r.lessons;
+
+			lessons.forEach(rr => {
+				lessonIds.push(rr.lessonId);
+			});
+		});
+		const lessons = await this.ctx.model.Lesson.findAll({ attributes: ["id", "lessonName"], where: { id: { $in: lessonIds }}});
+
+
+		for (let i = 0; i < orgPackages.length; i++) {
+			orgPackages[i] = orgPackages[i].get();
+			const _lessons = orgPackages[i].lessonNos = orgPackages[i].lessons;
+			orgPackages[i].lessons = undefined;
+
+			for (let j = 0; j < _lessons.length; j++) {
+				const index = _.findIndex(lessons, o => o.id === _lessons[j].lessonId);
+				if (index > -1) {
+					if (orgPackages[i].lessons) {
+						orgPackages[i].lessons.push(lessons[index]);
+					} else {
+						orgPackages[i].lessons = [lessons[index]];
+					}
+				}
+			}
+		}
+
+		return data;
+	}
+
+	// 校验是否在教师列表中&&是否存在这个用户
+	async checkUserInvalid(username, organizationId) {
+		const user = await this.ctx.model.User.findOne({ where: { username }});
+		if (!user) this.ctx.throw(400, Err.USER_NOT_EXISTS);
+
+		const isTeacher = await this.ctx.model.LessonOrganizationClassMember.findOne({
+			where: { organizationId, memberId: user.id, roleId: CLASS_MEMBER_ROLE_TEACHER }
+		});
+		if (isTeacher) this.ctx.throw(409, Err.ALREADY_ISTEACHER_IN_ORG);
+	}
 }
 
 module.exports = LessonOrgService;
