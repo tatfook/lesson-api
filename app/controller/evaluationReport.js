@@ -41,7 +41,7 @@ class EvalReportController extends Controller {
 			ctx.throw(403, Err.AUTH_ERR);
 		}
 
-		const list = await ctx.service.evaluationReport.getReportList({ userId, classId, name, type, days });
+		const list = await ctx.service.evaluationReport.getReportList({ userId, roleId, classId, name, type, days });
 
 		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
