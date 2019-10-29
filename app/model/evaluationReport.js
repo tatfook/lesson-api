@@ -52,8 +52,8 @@ module.exports = app => {
 		collate: "utf8mb4_bin"
 	});
 
-	model.getReportList = async function ({ classId, name, type, days }) {
-		let condition = ` where r.classId = :classId`;
+	model.getReportList = async function ({ classId, userId, name, type, days }) {
+		let condition = ` where r.classId = :classId and r.userId = :userId`;
 		if (name) condition += ` and r.name like concat('%',:name,'%')`;
 		if (type) condition += ` and r.type = :type`;
 		if (days) condition += ` where r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
@@ -91,9 +91,10 @@ module.exports = app => {
 		const list = await app.model.query(sql, {
 			type: app.model.QueryTypes.SELECT,
 			replacements: {
-				classId: classId,
-				name: name,
-				type: type,
+				classId,
+				userId,
+				name,
+				type,
 			}
 		});
 		return list;

@@ -67,8 +67,8 @@ class EvalReportService extends Service {
 	}
 
 	// 获取对班级classId发起的点评
-	async getReportList({ classId, name = undefined, type = undefined, days }) {
-		const list = await this.ctx.model.EvaluationReport.getReportList({ classId, name, type, days });
+	async getReportList({ classId, userId, name = undefined, type = undefined, days }) {
+		const list = await this.ctx.model.EvaluationReport.getReportList({ classId, userId, name, type, days });
 		return list;
 	}
 

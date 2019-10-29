@@ -33,7 +33,7 @@ class EvalReportController extends Controller {
 	// 报告列表【就是创建的点评列表】,admin && teacher
 	async index() {
 		const { ctx } = this;
-		this.enauthenticated();
+		const { userId } = this.enauthenticated();
 		const { name, type, classId, roleId, days } = ctx.request.query;
 
 		this.validateCgi({ classId }, reportList);
@@ -41,7 +41,7 @@ class EvalReportController extends Controller {
 			ctx.throw(403, Err.AUTH_ERR);
 		}
 
-		const list = await ctx.service.evaluationReport.getReportList({ roleId, classId, name, type, days });
+		const list = await ctx.service.evaluationReport.getReportList({ userId, classId, name, type, days });
 
 		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
