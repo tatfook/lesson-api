@@ -8,7 +8,7 @@ const apiKey = require("../common/consts").API_KEY;
  */
 class KeepworkService extends Service {
 	get baseUrl() {
-		return this.config.self.keepworkBaseURL;
+		return this.config.self.coreServiceBaseUrl;
 	}
 
 	/**
