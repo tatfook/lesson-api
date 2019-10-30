@@ -286,25 +286,7 @@ class LessonOrgService extends Service {
 
 	// 机构课程包【代替之前的graphQL接口】
 	async getOrgPackages(organizationId) {
-		let data = await this.ctx.model.LessonOrganization.findOne({
-			attributes: ["id"],
-			include: [{
-				attributes: ["id", "lessons"],
-				as: "lessonOrganizationPackages",
-				model: this.ctx.model.LessonOrganizationPackage,
-				include: [{
-					as: "packages",
-					model: this.ctx.model.Package,
-					attributes: ["id", "packageName"],
-				}]
-			}],
-			where: {
-				id: organizationId
-			}
-		}).then(r => r.get());
-
-		const orgPackages = data.organizaitonPackages = data.lessonOrganizationPackages;
-		data.lessonOrganizationPackages = undefined;
+		let orgPackages = await this.ctx.model.LessonOrganization.getOrgPackages(organizationId);
 
 		let lessonIds = [];// 提取lessonId,并找到它们
 		orgPackages.forEach(r => {
@@ -316,22 +298,18 @@ class LessonOrgService extends Service {
 		});
 		const lessons = await this.ctx.model.Lesson.findAll({ attributes: ["id", "lessonName"], where: { id: { $in: lessonIds }}});
 
-		const retObj = { lessons: [], packages: [] };
 		for (let i = 0; i < orgPackages.length; i++) {
-			orgPackages[i] = orgPackages[i].get();
-			const _lessons = orgPackages[i].lessonNos = orgPackages[i].lessons;
-			orgPackages[i].lessons = undefined;
+			const _lessons = orgPackages[i].lessons;
 
-			retObj.packages = [...retObj.packages, orgPackages[i].packages];
 			for (let j = 0; j < _lessons.length; j++) {
 				const index = _.findIndex(lessons, o => o.id === _lessons[j].lessonId);
 				if (index > -1) {
-					retObj.lessons.push(lessons[index]);
+					_lessons[j] = lessons[index];
 				}
 			}
 		}
-		retObj.packages = _.uniqBy(retObj.packages, "id");
-		return retObj;
+
+		return orgPackages;
 	}
 
 	// 校验是否在教师列表中&&是否存在这个用户

@@ -147,6 +147,26 @@ module.exports = app => {
 		return list;
 	};
 
+	// 获取机构课程包
+	model.getOrgPackages = async (organizationId) => {
+		const sql = `
+		SELECT 
+   			distinct p.id,p.packageName,op.lessons
+		FROM
+    		packages p
+        	LEFT JOIN lessonOrganizationPackages op ON op.packageId = p.id
+    		LEFT JOIN lessonOrganizations o on o.id = op.organizationId
+    	where o.id = :organizationId 
+		`;
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				organizationId
+			}
+		});
+		return list;
+	};
+
 	model.associate = () => {
 		app.model.LessonOrganization.belongsTo(app.model.User, {
 			as: "users",
