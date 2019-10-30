@@ -316,25 +316,22 @@ class LessonOrgService extends Service {
 		});
 		const lessons = await this.ctx.model.Lesson.findAll({ attributes: ["id", "lessonName"], where: { id: { $in: lessonIds }}});
 
-
+		const retObj = { lessons: [], packages: [] };
 		for (let i = 0; i < orgPackages.length; i++) {
 			orgPackages[i] = orgPackages[i].get();
 			const _lessons = orgPackages[i].lessonNos = orgPackages[i].lessons;
 			orgPackages[i].lessons = undefined;
 
+			retObj.packages = [...retObj.packages, orgPackages[i].packages];
 			for (let j = 0; j < _lessons.length; j++) {
 				const index = _.findIndex(lessons, o => o.id === _lessons[j].lessonId);
 				if (index > -1) {
-					if (orgPackages[i].lessons) {
-						orgPackages[i].lessons.push(lessons[index]);
-					} else {
-						orgPackages[i].lessons = [lessons[index]];
-					}
+					retObj.lessons.push(lessons[index]);
 				}
 			}
 		}
-
-		return data;
+		retObj.packages = _.uniqBy(retObj.packages, "id");
+		return retObj;
 	}
 
 	// 校验是否在教师列表中&&是否存在这个用户
