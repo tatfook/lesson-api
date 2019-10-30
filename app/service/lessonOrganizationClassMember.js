@@ -101,9 +101,7 @@ class LessonOrgClassMemberService extends Service {
 			}
 		}).then(list => list.map(o => o.toJSON()));
 
-		const users = await this.ctx.keepworkModel.Users.findAll({
-			attributes: ["id", "username"], where: { id: { $in: memberIds } }
-		});
+		const users = await this.ctx.service.keepwork.getAllUserByCondition({ id: { $in: memberIds } });
 
 		const map = {};
 		_.each(list, o => {
@@ -158,9 +156,7 @@ class LessonOrgClassMemberService extends Service {
 				}
 			}),
 
-			this.ctx.keepworkModel.Users.findAll({
-				attributes: ["id", "username", "nickname", "portrait"], where: { id: { $in: memberIds } }
-			})
+			this.ctx.service.keepwork.getAllUserByCondition({ id: { $in: memberIds } })
 		]);
 
 		const map = {};
@@ -177,7 +173,7 @@ class LessonOrgClassMemberService extends Service {
 
 				const index = _.findIndex(users, obj => { return obj.id === o.memberId; });
 				if (index > -1) {
-					o.users = users[index].get();
+					o.users = users[index];
 				}
 				rows.push(o);
 			}
@@ -210,10 +206,10 @@ class LessonOrgClassMemberService extends Service {
 		if (!params.memberId) {
 			if (!params.memberName) return this.ctx.throw(400, Err.ARGS_ERR);
 
-			const user = await this.ctx.service.user.getKeepworkUserByCondition({ username: params.memberName });
-			if (!user) return this.ctx.throw(400, Err.USER_NOT_EXISTS);
+			const users = await this.ctx.service.keepwork.getAllUserByCondition({ username: params.memberName })
+			if (!users || !users.length) return this.ctx.throw(400, Err.USER_NOT_EXISTS);
 
-			params.memberId = user.id;
+			params.memberId = users[0].id;
 		}
 
 

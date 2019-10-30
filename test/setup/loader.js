@@ -1,6 +1,5 @@
 
 const md5 = require("blueimp-md5");
-const { app, mock, assert } = require("egg-mock/bootstrap");
 const loadFactory = require("./factory.js");
 const helper = require("../../app/extend/helper");
 

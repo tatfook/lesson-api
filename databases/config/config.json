@@ -1,34 +1,23 @@
 {
-  "development": {
+  "dev": {
     "username": "root",
     "password": "tf.123456",
     "database": "lesson-dev",
     "host": "10.28.18.62",
-    "dialect": "mysql",
-    "operatorsAliases": false
+    "dialect": "mysql"
   },
   "release": {
     "username": "root",
     "password": "tf.123456",
     "database": "lesson-rls",
     "host": "10.28.18.62",
-    "dialect": "mysql",
-    "operatorsAliases": false
-  },
-  "test": {
-    "username": "root",
-    "password": "tf.123456",
-    "database": "lesson-wxa-test",
-    "host": "10.28.18.62",
-    "dialect": "mysql",
-    "operatorsAliases": false
+    "dialect": "mysql"
   },
   "production": {
-    "username": "root",
-    "password": "tf.123456",
-    "database": "lesson",
-    "host": "10.28.18.88",
-    "dialect": "mysql",
-    "operatorsAliases": false
+    "username": "XXX",
+    "password": "XXX",
+    "database": "XXX",
+    "host": "XXX",
+    "dialect": "XXX"
   }
 }

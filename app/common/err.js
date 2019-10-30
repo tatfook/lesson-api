@@ -40,6 +40,8 @@ module.exports = {
 	"KEY_INVALID": "key错误",
 	"OVERAGE_NOT_ENOUGH": "余额不足",
 	"PACKAGE_ALREADY_SUBSCRIBE": "课程包已经订阅",
+	"ALREADY_ISTEACHER_IN_ORG": "已经是该机构的老师",
+	"USER_NOT_IN_ORG": "用户不在该机构",
 	"REPORT_NAME_ERR": "报告名称长度错误",
 	"REPORT_TYPE_ERR": "报告类型错误",
 	"CLASSID_ERR": "班级id错误",

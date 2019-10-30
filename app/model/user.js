@@ -65,9 +65,8 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	model.updateExtra = async function (userId, extra) {
+	model.updateExtra = async (userId, extra) => {
 		const user = await app.model.User.getById(userId);
-
 		if (!user) return;
 
 		const userExtra = user.extra || {};
@@ -76,6 +75,7 @@ module.exports = app => {
 		await app.model.User.update({ extra: userExtra }, { where: { id: user.id }});
 	};
 
+	// 不存在则创建
 	model.getById = async function (userId, username) {
 		let data = await app.model.User.findOne({ where: { id: userId }});
 		const amount = 0;
@@ -90,7 +90,7 @@ module.exports = app => {
 		return data ? data.get() : undefined;
 	};
 
-	model.isTeacher = async function (userId) {
+	model.isTeacher = async userId => {
 		let user = await app.model.User.findOne({ where: { id: userId }});
 		if (!user) return false;
 
@@ -101,6 +101,7 @@ module.exports = app => {
 		return false;
 	};
 
+	// 增加user表中的学习天数和更新最近学习日期
 	model.learn = async function (userId) {
 		const user = await this.getById(userId);
 		if (!user) return;

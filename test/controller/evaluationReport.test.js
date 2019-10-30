@@ -1,6 +1,5 @@
 
 const { app, assert } = require("egg-mock/bootstrap");
-const moment = require("moment");
 
 describe("test/controller/evaluationReport.test.js", () => {
 	before(async () => {
@@ -9,14 +8,21 @@ describe("test/controller/evaluationReport.test.js", () => {
 		await app.model.LessonOrganizationClassMember.truncate();
 		await app.model.EvaluationReport.truncate();
 		await app.model.EvaluationUserReport.truncate();
-		await app.keepworkModel.Users.truncate();
+		await app.model.Log.truncate();
+
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
+
+		await app.redis.flushdb();
 
 		// 创建机构，班级，老师，学生，管理员
-		await app.keepworkModel.Users.create({ id: 1, username: "user1", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
-		await app.keepworkModel.Users.create({ id: 2, username: "user2", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
-		await app.keepworkModel.Users.create({ id: 3, username: "user3", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
-		await app.keepworkModel.Users.create({ id: 4, username: "user4", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
-		await app.keepworkModel.Users.create({ id: 5, username: "user5", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
+
+		await ctx.service.keepwork.createRecord({ id: 1, username: "user1", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+		await ctx.service.keepwork.createRecord({ id: 2, username: "user2", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+		await ctx.service.keepwork.createRecord({ id: 3, username: "user3", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+		await ctx.service.keepwork.createRecord({ id: 4, username: "user4", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+		await ctx.service.keepwork.createRecord({ id: 5, username: "user5", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+
 		await app.model.LessonOrganization.create({ name: "什么机构" });
 		await app.model.LessonOrganizationClass.create({ organizationId: 1, name: "什么班级", end: "2029-10-21 00:00:00" });
 		await app.model.LessonOrganizationClass.create({ organizationId: 1, name: "什么班级2", end: "2029-10-21 00:00:00" });
@@ -817,7 +823,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		assert(report === "OK");
 
 		// 后置操作，检查记录是否真的修改
-		const re = await app.model.EvaluationUserReport.findOne({ where: { id: 2 } });
+		const re = await app.model.EvaluationUserReport.findOne({ where: { id: 2 }});
 		assert(re.comment === "这个记录已经修改了"
 			&& re.star === 1
 			&& re.spatial === 2
@@ -886,9 +892,10 @@ describe("test/controller/evaluationReport.test.js", () => {
 
 		assert(ret === "OK");
 
-		const user_ = await app.keepworkModel.Users.findOne({ where: { id: 2 } });
-		assert(user_.portrait === "http://pics1.baidu.com");
-		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 } });
+		const ctx = app.mockContext();
+		const user_ = await ctx.service.keepwork.getAllUserByCondition({ id: 2 });
+		assert(user_[0].portrait === "http://pics1.baidu.com");
+		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 }});
 		assert(member.realname === "修改了的名字");
 	});
 
@@ -929,9 +936,10 @@ describe("test/controller/evaluationReport.test.js", () => {
 
 		assert(ret === "OK");
 
-		const user_ = await app.keepworkModel.Users.findOne({ where: { id: 2 } });
-		assert(user_.portrait === "http://pics1.alibaba.com");
-		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 } });
+		const ctx = app.mockContext();
+		const user_ = await ctx.service.keepwork.getAllUserByCondition({ id: 2 });
+		assert(user_[0].portrait === "http://pics1.alibaba.com");
+		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 }});
 		assert(member.realname === "又修改了的名字");
 		assert(member.parentPhoneNum === "18603042568");
 	});
@@ -1006,7 +1014,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		assert(ret === "OK");
 
 		// 检查是否真的修改成功
-		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 } });
+		const member = await app.model.LessonOrganizationClassMember.findOne({ where: { memberId: 2, organizationId: 1 }});
 		assert(member.parentPhoneNum === "13590450686");
 	});
 
@@ -1213,7 +1221,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body.data);
 		assert(ret.length === 0);
 
-		const userRepo = await app.model.EvaluationUserReport.findOne({ where: { id: 2 } });
+		const userRepo = await app.model.EvaluationUserReport.findOne({ where: { id: 2 }});
 		assert(userRepo.isSend === 1);
 	});
 
@@ -1228,7 +1236,7 @@ describe("test/controller/evaluationReport.test.js", () => {
 		assert(ret[0].name === "什么班级"
 			&& ret[0].teacherNames === "什么老师"
 			&& ret[0].sendCount === 1
-			&& ret[0].commentCount === 4);
+			&& ret[0].commentCount === 2);
 
 		assert(ret[1].name === "什么班级2"
 			&& ret[1].teacherNames === null

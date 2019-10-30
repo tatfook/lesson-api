@@ -7,16 +7,20 @@ describe("test/service/evaluationReport.test.js", () => {
 		await app.model.LessonOrganizationClassMember.truncate();
 		await app.model.EvaluationReport.truncate();
 		await app.model.EvaluationUserReport.truncate();
-		await app.keepworkModel.Users.truncate();
+
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
 
 		await app.redis.flushdb();
 
 		// 创建机构，班级，老师，学生，管理员
-		await app.keepworkModel.Users.create({ id: 1, username: "user1", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
-		await app.keepworkModel.Users.create({ id: 2, username: "user2", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
-		await app.keepworkModel.Users.create({ id: 3, username: "user3", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
-		await app.keepworkModel.Users.create({ id: 4, username: "user4", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
-		await app.keepworkModel.Users.create({ id: 5, username: "user5", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1 });
+
+		await ctx.service.keepwork.createRecord({ id: 1, username: "user1", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+		await ctx.service.keepwork.createRecord({ id: 2, username: "user2", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+		await ctx.service.keepwork.createRecord({ id: 3, username: "user3", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+		await ctx.service.keepwork.createRecord({ id: 4, username: "user4", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+		await ctx.service.keepwork.createRecord({ id: 5, username: "user5", password: "e35cf7b66449df565f93c607d5a81d09", roleId: 1, resources: "users" });
+
 		await app.model.LessonOrganization.create({ name: "什么机构" });
 		await app.model.LessonOrganizationClass.create({ organizationId: 1, name: "什么班级", end: "2029-10-21 00:00:00" });
 		await app.model.LessonOrganizationClass.create({ organizationId: 1, name: "什么班级2", end: "2029-10-21 00:00:00" });
@@ -114,7 +118,7 @@ describe("test/service/evaluationReport.test.js", () => {
 	it("007 getReportList 获取对班级classId发起的点评", async () => {
 		const ctx = app.mockContext();
 
-		const ret = await ctx.service.evaluationReport.getReportList({ classId: 1 });
+		const ret = await ctx.service.evaluationReport.getReportList({ classId: 1, userId: 1 });
 		assert(ret.length === 1 && ret[0].reportName === "这个名字修改了");
 	});
 
@@ -416,7 +420,7 @@ describe("test/service/evaluationReport.test.js", () => {
 			&& ret[0].name === "什么班级"
 			&& ret[0].teacherNames === "什么老师"
 			&& ret[0].sendCount === 0
-			&& ret[0].commentCount === 4
+			&& ret[0].commentCount === 2
 			&& ret[1].classId === 2
 			&& ret[1].name === "什么班级2"
 			&& ret[1].teacherNames === null

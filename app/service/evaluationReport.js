@@ -98,8 +98,8 @@ class EvalReportService extends Service {
 	// 获取对学生的点评和学生的头像
 	async getUserReportAndOrgInfo(userReportId) {
 		const repo = await this.ctx.model.EvaluationUserReport.getReportAndOrgNameById(userReportId);
-		const user = await this.ctx.keepworkModel.Users.findOne({ attributes: ["portrait"], where: { id: repo.userId } });
-		return { ...repo, portrait: user.portrait };
+		const users = await this.ctx.service.keepwork.getAllUserByCondition({ id: repo.userId });
+		return { ...repo, portrait: users[0].portrait };
 	}
 
 	// 获取一条发起的点评

@@ -3,18 +3,20 @@ const { app, assert } = require("egg-mock/bootstrap");
 
 describe("机构", () => {
 	before(async () => {
-		await app.keepworkModel.Users.sync({ force: true });
-		await app.model.LessonOrganizationActivateCode.sync({ force: true });
-		await app.model.LessonOrganizationClassMember.sync({ force: true });
-		await app.model.LessonOrganization.sync({ force: true });
-		await app.model.LessonOrganizationClass.sync({ force: true });
-		await app.model.LessonOrganizationPackage.sync({ force: true });
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
+
+		await app.model.LessonOrganizationActivateCode.truncate();
+		await app.model.LessonOrganizationClassMember.truncate();
+		await app.model.LessonOrganization.truncate();
+		await app.model.LessonOrganizationClass.truncate();
+		await app.model.LessonOrganizationPackage.truncate();
 	});
 
 	it("001 机构", async () => {
-		// const user = await app.factory.create("users", { username: "user001", password: md5("123456"), roleId: 64 });
-		// await app.factory.createMany("users", 10, { password: md5("123456") });
-		const user = await app.keepworkModel.Users.create({ username: "user001", password: md5("123456"), roleId: 64 });
+		const ctx = app.mockContext();
+		const user = await ctx.service.keepwork.createRecord({ resources: "users", username: "qizhibiao1", password: md5("123456") });
+
 		// 创建机构
 		const organ = await app.model.LessonOrganization.create({ name: "org0000", count: 1 }).then(o => o.toJSON());
 
@@ -32,7 +34,7 @@ describe("机构", () => {
 		// 登录机构
 		const token = await app.httpRequest()
 			.post("/lessonOrganizations/login")
-			.send({ organizationId: organ.id, username: "user001", password: "123456" })
+			.send({ organizationId: organ.id, username: "qizhibiao1", password: "123456" })
 			.expect(200).then(res => res.body.token).catch(e => console.log(e));
 
 		// 修改机构过期时间
@@ -65,12 +67,12 @@ describe("机构", () => {
 
 		await app.httpRequest()
 			.post("/lessonOrganizations/login")
-			.send({ organizationId: organ.id, username: "user001", password: "123456" })
+			.send({ organizationId: organ.id, username: "qizhibiao1", password: "123456" })
 			.expect(400).then(res => res.body.token).catch(e => console.log(e));
 
 		await app.httpRequest()
 			.post("/lessonOrganizations/login")
-			.send({ organizationId: organ.id, username: "user001", password: "456789" })
+			.send({ organizationId: organ.id, username: "qizhibiao1", password: "456789" })
 			.expect(200).then(res => res.body.token).catch(e => console.log(e));
 	});
 
@@ -78,13 +80,14 @@ describe("机构", () => {
 		const adminToken = await app.adminLogin().then(o => o.token);
 		assert.ok(adminToken);
 
-		await app.keepworkModel.Users.create({ username: "user002", password: md5("123456"), roleId: 64 });
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.createRecord({ resources: "users", id: 490, username: "dev123", password: md5("123456"), roleId: 64 });
 
 		// 创建机构
 		let organ = await app.httpRequest().post("/lessonOrganizations").send({
 			name: "organ002",
 			count: 1,
-			usernames: ["user001"],
+			usernames: ["qizhibiao1"],
 			packages: [{
 				packageId: 1,
 				lessons: [{ lessonId: 1, lessonNo: 1 }]
@@ -96,7 +99,7 @@ describe("机构", () => {
 		await app.httpRequest().put(`/lessonOrganizations/${organ.data.id}`).send({
 			name: "newname",
 			logo: "https://www.baidu.com",
-			usernames: ["user002"]
+			usernames: ["dev123"]
 		}).set("Authorization", `Bearer ${adminToken}`)
 			.expect(200).then(res => res.body);
 
@@ -110,7 +113,7 @@ describe("机构", () => {
 		// 登录机构
 		const token = await app.httpRequest()
 			.post("/lessonOrganizations/login")
-			.send({ organizationId: organ.data.id, username: "user002", password: "123456" })
+			.send({ organizationId: organ.data.id, username: "dev123", password: "123456" })
 			.expect(200).then(res => res.body).catch(e => console.log(e));
 
 		// 课程包列表

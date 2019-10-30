@@ -90,7 +90,9 @@ describe("LearnRecords", () => {
 		// console.log(reward);
 
 		// accounts表的lockCoin
-		await app.keepworkModel.accounts.update({ lockCoin: 100 }, { where: { id: 1 }});
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.update({ resources: "accounts", lockCoin: 100 }, { id: 1 });
+
 		reward = await app.httpRequest()
 			.post("/learnRecords/1/reward")
 			.set("Authorization", `Bearer ${token}`)

@@ -34,8 +34,8 @@ const LessonOrganization = class extends Controller {
 			organizationId, organizationName
 		} = this.validate({ username: "string", password: "string" });
 
-		const user = await ctx.service.user.getKeepworkUserByCondition({
-			[ctx.keepworkModel.Op.or]: [{
+		const users = await ctx.service.keepwork.getAllUserByCondition({
+			"$or": [{
 				username: username
 			}, {
 				cellphone: username
@@ -44,7 +44,9 @@ const LessonOrganization = class extends Controller {
 			}],
 			password: ctx.helper.md5(password)
 		});
-		if (!user) return ctx.throw(400, Err.USERNAME_OR_PWD_ERR);
+
+		if (!users || !users.length) return ctx.throw(400, Err.USERNAME_OR_PWD_ERR);
+		const user = users[0];
 
 		// 找到organizationId
 		if (!organizationId) {

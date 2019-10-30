@@ -3,7 +3,9 @@ const { app, assert } = require("egg-mock/bootstrap");
 
 describe("机构表单", () => {
 	before(async () => {
-		await app.keepworkModel.Users.sync({ force: true });
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
+
 		await app.model.LessonOrganization.sync({ force: true });
 		await app.model.LessonOrganizationClass.sync({ force: true });
 		await app.model.LessonOrganizationClassMember.sync({ force: true });

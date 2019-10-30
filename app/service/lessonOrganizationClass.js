@@ -48,14 +48,11 @@ class LessonOrgClassService extends Service {
 		const userIds = rows.map(r => r.lessonOrganizationClassMembers)
 			.map(r => r.map(rr => rr.get().memberId)).join().split(",");
 
-		const users = await this.ctx.keepworkModel.Users.findAll({
-			attributes: ["id", "username", "nickname", "portrait"],
-			where: {
-				id: {
-					$in: userIds
-				}
+		const users = await this.ctx.service.keepwork.getAllUserByCondition({
+			id: {
+				"$in": userIds
 			}
-		}).map(r => r.get());
+		});
 
 		for (let i = 0; i < rows.length; i++) {
 			const members = rows[i].lessonOrganizationClassMembers;
@@ -189,21 +186,13 @@ class LessonOrgClassService extends Service {
 		const userIds = members.map(o => o.memberId);
 
 		let [projects, users] = await Promise.all([
-			this.ctx.service.project.getAllByCondition({
+			this.ctx.service.keepwork.getAllProjectByCondition({
 				userId: { "$in": userIds },
 				type: 0
-			}, [["updatedAt", "desc"]]),
+			}, "updatedAt-desc"),
 
-			this.ctx.keepworkModel.Users.findAll({
-				attributes: ["id", "username", "nickname", "portrait"],
-				where: {
-					id: {
-						$in: userIds
-					}
-				}
-			})
+			this.ctx.service.keepwork.getAllUserByCondition({ id: { "$in": userIds }})
 		]);
-		users = users.map(r => r.get());
 
 		_.each(members, m => {
 			m.projects = projects.filter(o => o.userId === m.memberId).slice(0, 2);

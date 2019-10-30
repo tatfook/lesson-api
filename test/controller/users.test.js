@@ -116,24 +116,6 @@ describe("test/controller/users.test.js", () => {
 		assert.ok(isTeach);
 	});
 
-	// it("POST|GET /users/1/subscribes", async () => {
-	// 	const token = await app.login().then(o => o.token);
-	// 	assert.ok(token);
-
-	// 	const url = "/users/1/subscribes";
-	// 	await app.httpRequest().post("/users/1/subscribes")
-	// 		.send({ packageId: 1 }).set("Authorization", `Bearer ${token}`).expect(200);
-
-	// 	let list = await app.httpRequest().get(url)
-	// 		.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-	// 	assert.equal(list.length, 1);
-
-	// 	let isSubscribe = await app.httpRequest()
-	// 		.get("/users/1/isSubscribe?packageId=1")
-	// 		.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-	// 	assert.ok(isSubscribe === true);
-	// });
-
 	it("GET /users/1/skills", async () => {
 		const token = await app.login().then(o => o.token);
 		assert.ok(token);
@@ -153,28 +135,4 @@ describe("test/controller/users.test.js", () => {
 		// console.log(skills);
 	});
 
-	// it("POST /users/expense", async () => {
-	// 	let user = await app.model.users.create({ username: "jack", nickname: "jack" });
-	// 	await app.keepworkModel.accounts.create({ userId: user.id, coin: 50, bean: 30 });
-
-	// 	const token = await app.adminLogin().then(o => o.token);
-	// 	assert.ok(token);
-
-	// 	await app.httpRequest().put("/admins/users/1").send({
-	// 		coin: 50,
-	// 		bean: 30
-	// 	}).set("Authorization", `Bearer ${token}`).expect(200);
-
-	// 	user = await app.httpRequest().get("/users/1")
-	// 		.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-
-	// 	assert(user.coin === 50);
-	// 	assert(user.bean === 30);
-
-	// 	await app.httpRequest().post("users/expense").send({
-	// 		coin: 20,
-	// 		bean: 10
-	// 	}).set("Authorization", `Bearer ${token}`).expect(200);
-
-	// });
 });

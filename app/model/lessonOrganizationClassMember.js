@@ -1,6 +1,5 @@
 "use strict";
 
-const _ = require("lodash");
 module.exports = app => {
 	const {
 		BIGINT,
@@ -57,9 +56,6 @@ module.exports = app => {
 		updatedAt: {
 			type: DATE,
 		},
-		bind: {
-			type: INTEGER
-		},
 		parentPhoneNum: {
 			type: STRING
 		}
@@ -77,7 +73,6 @@ module.exports = app => {
 		],
 	});
 
-	// model.sync({force:true});
 	model.getAllClassIds = async function ({ memberId, roleId, organizationId }) {
 		const sql = `select classId from lessonOrganizationClassMembers where organizationId = :organizationId and memberId = :memberId and roleId & :roleId`;
 		const list = await app.model.query(sql, {

@@ -3,7 +3,6 @@
 
 const Service = require("../common/service.js");
 const Err = require("../common/err");
-const _ = require("lodash");
 const {
 	CLASS_MEMBER_ROLE_TEACHER,
 	CLASS_MEMBER_ROLE_ADMIN
@@ -28,8 +27,9 @@ class LessonOrgIndexService extends Service {
 		});
 		if (!member) return false;
 
-		const ok = await this.ctx.service.user.updateKeepworkUserByCondition({
+		const ok = await this.ctx.service.user.updateKeepworkResourceByCondition({
 			password: this.ctx.helper.md5(params.password),
+			resources: 'users'
 		}, { id: params.memberId });
 
 		this.model.LessonOrganizationLog.create({

@@ -89,9 +89,7 @@ module.exports = app => {
 		collate: "utf8mb4_bin",
 	});
 
-	// model.sync({force:true});
-
-	model.getById = async function (id, userId) {
+	model.getById = async (id, userId) => {
 		const where = { id };
 
 		if (userId) where.userId = userId;
@@ -101,83 +99,34 @@ module.exports = app => {
 		return data && data.get({ plain: true });
 	};
 
-	model.audit = async function (packageId, userId, state) {
+	model.audit = async (packageId, userId, state) => {
 		if (~~state !== PACKAGE_STATE_AUDIT_SUCCESS || !userId) {
-			app.keepworkModel.lessonOrganizationPackages.destroy({ where: { packageId }});
+			await app.model.LessonOrganizationPackage.destroy({ where: { packageId }});
 			return;
 		};
 
-		await app.model.Package.update({ auditAt: new Date() }, { where: { id: packageId }});
-		await app.model.Subscribe.upsert({ userId, packageId });
+		await Promise.all([
+			app.model.Package.update({ auditAt: new Date() }, { where: { id: packageId }}),
+			app.model.Subscribe.upsert({ userId, packageId })
+		]);
 	};
 
-	model.addLesson = async function (userId, packageId, lessonId, lessonNo) {
-		let data = await app.model.Package.findOne({ where: { userId, id: packageId }});
-		if (!data) return false;
-
-		data = await app.model.Lesson.findOne({ where: { id: lessonId }});
-
-		if (!data) return false;
-		if (!lessonNo) {
-			lessonNo = await app.model.PackageLesson.count({ where: { packageId, lessonId }});
-			lessonNo += 1;
-		}
-
-		data = await app.model.PackageLesson.create({
-			userId,
-			packageId,
-			lessonId,
-			extra: {
-				lessonNo,
-			},
-		});
-
-		if (data) return true;
-
-		return false;
-	};
-
-	model.putLesson = async function (userId, packageId, lessonId, lessonNo) {
-		return await app.model.PackageLesson.update({ extra: { lessonNo }}, {
-			where: {
-				userId,
-				packageId,
-				lessonId,
-			}
-		});
-	};
-
-	model.deleteLesson = async function (userId, packageId, lessonId) {
-		// let data = await app.model.Packages.findOne({where: {userId, id: packageId}});
-		// if (!data) return false;
-
-		return await app.model.PackageLesson.destroy({
-			where: {
-				userId,
-				packageId,
-				lessonId,
-			}
-		});
-	};
-
-	model.lessons = async function (packageId) {
+	model.lessons = async (packageId) => {
 		const sql = `select l.*, pl.extra plExtra from packageLessons as pl, lessons as l 
 		   where pl.lessonId = l.id and pl.packageId = :packageId`;
 
-		const lessons = [];
-		const list = await app.model.query(sql, {
+		let list = await app.model.query(sql, {
 			type: app.model.QueryTypes.SELECT,
 			replacements: { packageId },
 		});
 
-		_.each(list, o => {
-			o = o.get ? o.get({ plain: true }) : o;
-			o.lessonNo = o.plExtra.lessonNo || 10000;
-			delete o.plExtra;
-			lessons.push(o);
+		list = list.map(r => {
+			r.lessonNo = r.plExtra.lessonNo || 10000;
+			delete r.plExtra;
+			return r;
 		});
 
-		return _.sortBy(lessons, ["lessonNo"]);
+		return _.sortBy(list, ["lessonNo"]);
 	};
 
 	model.adminUpdateHook = async function (obj) {
@@ -187,6 +136,13 @@ module.exports = app => {
 	model.associate = () => {
 		app.model.Package.hasMany(app.model.PackageLesson, {
 			as: "packageLessons",
+			foreignKey: "packageId",
+			sourceKey: "id",
+			constraints: false,
+		});
+
+		app.model.Package.hasMany(app.model.LessonOrganizationPackage, {
+			as: "lessonOrganizationPackages",
 			foreignKey: "packageId",
 			sourceKey: "id",
 			constraints: false,

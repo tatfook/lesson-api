@@ -2,8 +2,6 @@
 "use strict";
 
 const Service = require("../common/service.js");
-const { CLASSROOM_STATE_USING } = require("../common/consts");
-const Err = require("../common/err");
 
 
 class CoinService extends Service {

@@ -122,24 +122,6 @@ class PackagesController extends Controller {
 		return this.ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
-	// async subscribePackage(userId, packageId, amount = { rmb: 0, coin: 0, bean: 0 }) {
-	// 	const data = await this.model.Subscribes.findOne({ where: { userId, packageId, state: PACKAGE_SUBSCRIBE_STATE_BUY }});
-	// 	if (data) this.throw(400, "已订阅");
-
-	// 	const _package = await this.model.Package.getById(packageId);
-	// 	if (!_package) return this.throw(400, "课程包不存在");
-	// 	if (_package.userId == userId) return this.throw(400, "用户不能购买自己的课程包");
-
-	// 	const rmb = amount.rmb || 0;
-	// 	const coin = amount.coin || 0;
-	// 	if (rmb !== _package.rmb && coin !== _package.coin) return this.throw(400, "金额错误");
-	// 	const lockCoin = _package.rmb;
-
-	// 	// 购买成功  增加待解锁知识币 
-	// 	await this.app.keepworkModel.accounts.increment({ lockCoin }, { where: { userId }});
-	// 	await this.model.Subscribe.upsert({ userId, packageId, state: PACKAGE_SUBSCRIBE_STATE_BUY });
-	// }
-
 	// 课程包订阅
 	async subscribe() {
 		const { id } = this.validate({ id: "int" });

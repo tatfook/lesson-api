@@ -97,12 +97,14 @@ module.exports = app => {
 		let classroom = await app.model.Classroom.create(params);
 		if (!classroom) return;
 		classroom = classroom.get({ plain: true });
+
 		classroom.key = _.padEnd(_.toString(classroom.id), 6, "" + _.random(10000000, 99999999));
-		await app.model.Classroom.update(classroom, { where: { id: classroom.id }});
+		await app.model.Classroom.update({ key: classroom.key }, { where: { id: classroom.id }});
 
 		const userId = classroom.userId;
 		const user = await app.model.User.getById(userId);
 		const extra = user.extra || {};
+
 		// 下课旧学堂
 		if (extra.classroomId) await this.dismiss(userId, extra.classroomId);
 		extra.classroomId = classroom.id;
@@ -117,7 +119,7 @@ module.exports = app => {
 		return classroom;
 	};
 
-	model.join = async function (studentId, key, username) {
+	model.join = async (studentId, key, username) => {
 		let data = await app.model.Classroom.findOne({ where: { key }});
 		if (!data) return;
 		data = data.get({ plain: true });
@@ -164,7 +166,7 @@ module.exports = app => {
 	};
 
 	// 获取最后一次教课记录 
-	model.getLastTeach = async function (userId, packageId) {
+	model.getLastTeach = async (userId, packageId) => {
 		const list = await app.model.Classroom.findAll({
 			order: [["createdAt", "DESC"]],
 			limit: 1,
@@ -183,7 +185,8 @@ module.exports = app => {
 			where: {
 				createdAt: {
 					[app.model.Op.gt]: new Date(startTime),
-				}
+				},
+				packageId
 			}
 		});
 
