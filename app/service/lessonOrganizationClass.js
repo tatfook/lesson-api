@@ -132,13 +132,18 @@ class LessonOrgClassService extends Service {
 		if (!cls) return this.ctx.throw(400, Err.CLASS_NOT_EXISTS);
 
 		// 针对过期班级做检查
-		if (new Date(cls.end).getTime() < new Date().getTime()) {
-			const [organ, studentCount] = await Promise.all([
+		const now = new Date().getTime();
+		if (new Date(cls.end).getTime() < now
+			&& new Date(cls.end).getTime() < new Date(params.end).getTime()
+			&& new Date(params.end).getTime() > now) {
+
+			const [organ, studentCount, clsStudentCount] = await Promise.all([
 				this.ctx.service.lessonOrganization.getByCondition({ id: cls.organizationId }),
-				this.ctx.service.lessonOrganization.getStudentCount(cls.organizationId)
+				this.ctx.service.lessonOrganization.getStudentCount(cls.organizationId),
+				this.ctx.model.LessonOrganization.getMemberCount(cls.organizationId, 1, cls.id)
 			]);
 
-			if (studentCount > organ.count) {
+			if (studentCount + clsStudentCount > organ.count) {
 				return this.ctx.throw(400, Err.MEMBERS_UPPER_LIMIT);
 			}
 		}
