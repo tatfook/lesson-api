@@ -145,6 +145,13 @@ module.exports = app => {
 			sourceKey: "id",
 			constraints: false,
 		});
+
+		app.model.User.hasMany(app.model.Package, {
+			as: "packages",
+			foreignKey: "userId",
+			sourceKey: "id",
+			constraints: false,
+		});
 	};
 
 	return model;

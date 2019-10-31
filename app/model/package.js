@@ -148,10 +148,10 @@ module.exports = app => {
 			constraints: false,
 		});
 
-		app.model.Package.hasOne(app.model.User, {
+		app.model.Package.belongsTo(app.model.User, {
 			as: "User",
-			foreignKey: "id",
-			sourceKey: "userId",
+			foreignKey: "userId",
+			targetKey: "id",
 			constraints: false,
 		});
 	};
