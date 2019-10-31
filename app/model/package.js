@@ -147,6 +147,12 @@ module.exports = app => {
 			sourceKey: "id",
 			constraints: false,
 		});
+
+		app.model.Package.hasOne(app.model.User, {
+			as: "User",
+			foreignKey: "id",
+			constraints: false,
+		});
 	};
 
 	hooks(app);
