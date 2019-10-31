@@ -166,9 +166,9 @@ const verifyCode = {
 
 const updateUserInfo = {
 	portrait: {
-		isURL: {
+		isReg: {
 			errmsg: Err.PORTRAIT_ERR,
-			param: { protocols: ["http", "https"] }
+			param: /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/
 		}
 	},
 	realname: {

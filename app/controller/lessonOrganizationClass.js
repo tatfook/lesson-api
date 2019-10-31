@@ -8,6 +8,7 @@ const {
 } = require("../common/consts.js");
 
 const Err = require("../common/err");
+const moment = require("moment");
 
 const LessonOrganizationClass = class extends Controller {
 	get modelName() {
@@ -36,9 +37,15 @@ const LessonOrganizationClass = class extends Controller {
 
 		let list;
 		if (!roleId) {
-			list = await this.ctx.service.lessonOrganizationClass.findAllByCondition({ organizationId });
+			list = await this.ctx.service.lessonOrganizationClass.findAllByCondition({
+				organizationId,
+				end: { "$gt": moment().format("YYYY-MM-DD HH:mm:ss") }
+			});
 		} else {
-			list = await this.ctx.service.lessonOrganizationClass.findByUserIdRoleIdAndOrganizationId({ userId, organizationId, roleId });
+			list = await this.ctx.service.lessonOrganizationClass.findByUserIdRoleIdAndOrganizationId({
+				userId,
+				organizationId, roleId
+			});
 		}
 
 		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: list });
