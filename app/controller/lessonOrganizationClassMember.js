@@ -45,6 +45,7 @@ const LessonOrganizationClassMember = class extends Controller {
 	async destroy() {
 		const { organizationId, roleId, userId, username } = this.authenticated();
 		const { id } = this.validate({ id: "number" });
+		const params = this.validate();
 
 		await this.ctx.service.lessonOrganizationClassMember.destroyMember(params, { organizationId, roleId, userId, username }, id);
 		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: "OK" });
