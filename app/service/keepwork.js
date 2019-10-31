@@ -32,7 +32,7 @@ class KeepworkService extends Service {
 	 * @param {*} order 
 	 */
 	async getAllProjectByCondition(condition, order) {
-		const list = await this.ctx.helper.curl("get", `${this.baseUrl}projects`, Object.assign(condition, { "x-order": order }));
+		const list = await this.ctx.helper.curl("get", `${this.baseUrl}lessons/projects`, Object.assign({ condition }, { order, apiKey }), {}, true);
 		return list ? list : this.ctx.throw(500, Err.UNKNOWN_ERR);
 	}
 

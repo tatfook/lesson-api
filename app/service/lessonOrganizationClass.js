@@ -193,7 +193,7 @@ class LessonOrgClassService extends Service {
 		let [projects, users] = await Promise.all([
 			this.ctx.service.keepwork.getAllProjectByCondition({
 				userId: { "$in": userIds },
-			}, "updatedAt-desc"),
+			}, [["updatedAt", "desc"]]),
 
 			this.ctx.service.keepwork.getAllUserByCondition({ id: { "$in": userIds }})
 		]);
