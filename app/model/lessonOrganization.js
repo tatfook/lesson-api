@@ -135,7 +135,7 @@ module.exports = app => {
 			select * from lessonOrganizationClassMembers as locm 
 			where locm.organizationId = ${organizationId} 
 			and roleId & ${roleId} and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
-				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId 
+				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId )
 				) group by memberId) as t`;
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
 		return list[0].count || 0;
