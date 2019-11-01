@@ -140,7 +140,7 @@ class LessonOrgClassService extends Service {
 			const [organ, studentCount, clsStudentCount] = await Promise.all([
 				this.ctx.service.lessonOrganization.getByCondition({ id: cls.organizationId }),
 				this.ctx.service.lessonOrganization.getStudentCount(cls.organizationId),
-				this.ctx.model.LessonOrganization.getMemberCount(cls.organizationId, 1, cls.id)
+				this.ctx.model.LessonOrganization.memberCount(cls.organizationId, 1, cls.id)
 			]);
 
 			if (studentCount + clsStudentCount > organ.count) {

@@ -129,6 +129,18 @@ module.exports = app => {
 		return list[0].count || 0;
 	};
 
+	// 这个不限制班级是否过期
+	model.memberCount = async (organizationId, roleId, classId) => {
+		const sql = `select count(*) as count from (
+			select * from lessonOrganizationClassMembers as locm 
+			where locm.organizationId = ${organizationId} 
+			and roleId & ${roleId} and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
+				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId 
+				) group by memberId) as t`;
+		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		return list[0].count || 0;
+	};
+
 	model.getMembers = async (organizationId, roleId, classId) => {
 		const sql = `select * from lessonOrganizationClassMembers as locm where locm.organizationId = ${organizationId} and 
 		roleId & ${roleId} and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
