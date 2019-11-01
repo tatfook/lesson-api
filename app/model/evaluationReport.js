@@ -84,7 +84,8 @@ module.exports = app => {
 		FROM
 		  evaluationReports r
 		  LEFT JOIN evaluationUserReports ur ON r.id = ur.reportId
-		  LEFT JOIN lessonOrganizationClassMembers m ON m.memberId = r.userId and m.roleId &2
+		  LEFT JOIN lessonOrganizationClassMembers m 
+		  	ON m.memberId = r.userId and m.roleId &2 and m.classId = r.classId
 		  LEFT JOIN users u ON u.id = r.userId ${condition}
 		GROUP BY r.id
 		) a LEFT JOIN (SELECT
