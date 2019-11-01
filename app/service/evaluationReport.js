@@ -351,7 +351,7 @@ class EvalReportService extends Service {
 			} = dataArr[i];
 
 			if (this.app.config.self.env !== 'unittest') {
-				tasksArr.push(this.app.sendSms(parentPhoneNum, [
+				tasksArr.push(this.ctx.service.user.sendSms(parentPhoneNum, [
 					reportName,
 					realname,
 					realname,
