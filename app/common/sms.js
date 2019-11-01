@@ -59,5 +59,7 @@ module.exports = app => {
 		return false;
 	};
 
+	app.model.Log.create({ text: `INFO: sendSms function load SUCCESS!!` });
+
 	app.sendSms = sendSms;
 };
