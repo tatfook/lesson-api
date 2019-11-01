@@ -436,7 +436,7 @@ module.exports = app => {
 			SELECT
 		  		r.userId,
 		  		r.type,
-		  		m.realname,
+		  		m.realname teacherName,
 		  		c.name className
 		 	FROM
 		  		evaluationReports r

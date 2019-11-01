@@ -64,6 +64,7 @@ module.exports = app => {
 		a.id,
 		a.name reportName,
 		a.username,
+		a.realname teacherName,
 		a.type,
 		a.createdAt,
 		a.commentCount,
@@ -74,6 +75,7 @@ module.exports = app => {
 		  r.id,
 		  r.name,
 		  u.username,
+		  m.realname,
 		  r.type,
 		  r.createdAt,
 		  r.classId,
@@ -82,6 +84,7 @@ module.exports = app => {
 		FROM
 		  evaluationReports r
 		  LEFT JOIN evaluationUserReports ur ON r.id = ur.reportId
+		  LEFT JOIN lessonOrganizationClassMembers m ON m.memberId = r.userId and m.roleId &2
 		  LEFT JOIN users u ON u.id = r.userId ${condition}
 		GROUP BY r.id
 		) a LEFT JOIN (SELECT
