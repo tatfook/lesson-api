@@ -1,3 +1,4 @@
+"use strict";
 
 /* 机构表单 */
 
@@ -63,8 +64,6 @@ module.exports = app => {
 		charset: "utf8mb4",
 		collate: "utf8mb4_bin",
 	});
-
-	// model.sync({force:true});
 
 	model.associate = () => {
 		app.model.LessonOrganizationFormSubmit.belongsTo(app.model.LessonOrganizationForm, {

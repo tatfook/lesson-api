@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = app => {
 	const {
@@ -68,9 +69,6 @@ module.exports = app => {
 		if (curtime > user.endTime || curtime < user.startTime) return false;
 
 		return true;
-		// const privilege = user.privilege;
-
-		// return privilege & TEACHER_PRIVILEGE_TEACH;
 	};
 
 	model.getByUserId = async function (userId) {

@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = app => {
 	const {
@@ -71,8 +72,6 @@ module.exports = app => {
 		charset: "utf8mb4",
 		collate: "utf8mb4_bin",
 	});
-
-	// model.sync({force:true});
 
 	model.associate = () => {
 		app.model.LessonOrganizationActivateCode.belongsTo(app.model.LessonOrganizationClass, {

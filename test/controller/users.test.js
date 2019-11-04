@@ -50,7 +50,7 @@ describe("test/controller/users.test.js", () => {
 				vedioUrl: "http://www.baidu.com",
 			}
 		}).set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(lesson.id, 1);
+		assert.equal(lesson.data.id, 1);
 
 		await app.httpRequest().post("/packages").send({
 			packageName: "前端",
@@ -79,12 +79,12 @@ describe("test/controller/users.test.js", () => {
 		let user = await app.httpRequest().get("/users/1")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
-		assert.equal(user.nickname, "xiaoyao");
+		assert.equal(user.data.nickname, "xiaoyao");
 
 		user = await app.httpRequest().get("/users")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 
-		assert(user.id);
+		assert(user.data.id);
 	});
 
 	it("POST /users/1/teacher", async () => {
@@ -108,31 +108,13 @@ describe("test/controller/users.test.js", () => {
 		let user = await app.httpRequest()
 			.get("/users/1").set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.ok(user.identify & 2);
+		assert.ok(user.data.identify & 2);
 
 		const isTeach = await app.httpRequest()
 			.get("/users/1/isTeach")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
 		assert.ok(isTeach);
 	});
-
-	// it("POST|GET /users/1/subscribes", async () => {
-	// 	const token = await app.login().then(o => o.token);
-	// 	assert.ok(token);
-
-	// 	const url = "/users/1/subscribes";
-	// 	await app.httpRequest().post("/users/1/subscribes")
-	// 		.send({ packageId: 1 }).set("Authorization", `Bearer ${token}`).expect(200);
-
-	// 	let list = await app.httpRequest().get(url)
-	// 		.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-	// 	assert.equal(list.length, 1);
-
-	// 	let isSubscribe = await app.httpRequest()
-	// 		.get("/users/1/isSubscribe?packageId=1")
-	// 		.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-	// 	assert.ok(isSubscribe === true);
-	// });
 
 	it("GET /users/1/skills", async () => {
 		const token = await app.login().then(o => o.token);
@@ -145,36 +127,12 @@ describe("test/controller/users.test.js", () => {
 			state: 1,
 		}).set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert.equal(lr.id, 1);
+		assert.equal(lr.data.id, 1);
 
 		const skills = await app.httpRequest().get("/users/1/skills")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(skills.length, 2);
+		assert.equal(skills.data.length, 2);
 		// console.log(skills);
 	});
 
-	// it("POST /users/expense", async () => {
-	// 	let user = await app.model.users.create({ username: "jack", nickname: "jack" });
-	// 	await app.keepworkModel.accounts.create({ userId: user.id, coin: 50, bean: 30 });
-
-	// 	const token = await app.adminLogin().then(o => o.token);
-	// 	assert.ok(token);
-
-	// 	await app.httpRequest().put("/admins/users/1").send({
-	// 		coin: 50,
-	// 		bean: 30
-	// 	}).set("Authorization", `Bearer ${token}`).expect(200);
-
-	// 	user = await app.httpRequest().get("/users/1")
-	// 		.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-
-	// 	assert(user.coin === 50);
-	// 	assert(user.bean === 30);
-
-	// 	await app.httpRequest().post("users/expense").send({
-	// 		coin: 20,
-	// 		bean: 10
-	// 	}).set("Authorization", `Bearer ${token}`).expect(200);
-
-	// });
 });

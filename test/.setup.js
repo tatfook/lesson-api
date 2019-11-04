@@ -15,7 +15,5 @@ afterEach(async () => {
 	const opts = { restartIdentity: true, cascade: true };
 	const list = [];
 	_.each(tables, tableName => list.push(app.model[tableName] && app.model[tableName].truncate(opts)));
-	const keepworkTables = await app.keepworkModel.query(`show tables`, { type: app.keepworkModel.QueryTypes.SHOWTABLES }).then(list => _.filter(list, o => o != "SequelizeMeta"));
-	_.each(keepworkTables, tableName => list.push(app.keepworkModel[tableName] && app.keepworkModel[tableName].truncate(opts)));
 	await Promise.all(list);
 });

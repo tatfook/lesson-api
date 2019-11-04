@@ -1,16 +1,20 @@
+"use strict";
 
 const _ = require("lodash");
-const Controller = require("../core/baseController.js");
+const Controller = require("./baseController.js");
+const Err = require("../common/err");
 
 class AdminsController extends Controller {
+	// 检查model存不存在，和管理员权限
 	parseParams() {
+		const { ctx } = this;
 		const params = this.ctx.params || {};
 		const resourceName = params["resources"] || "";
 
 		this.resource = this.ctx.model[_.upperFirst(resourceName)];
 		this.resourceName = resourceName;
 
-		if (!this.resource) this.ctx.throw(400, "args error");
+		if (!this.resource) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
 
 		this.adminAuthenticated();
 
@@ -19,7 +23,9 @@ class AdminsController extends Controller {
 
 	async query() {
 		this.adminAuthenticated();
+		const { ctx } = this;
 
+		// 只允许select语句，且不可执行多条语句
 		const { sql } = this.validate({ sql: "string" });
 		const _sql = sql.toLowerCase();
 		if (_sql.indexOf("select ") != 0 ||
@@ -31,17 +37,19 @@ class AdminsController extends Controller {
 			_sql.indexOf("create ") >= 0 ||
 			_sql.indexOf("show ") >= 0 ||
 			_sql.indexOf("alter ") >= 0) {
-			return this.throw(404, "sql 不合法");
+			return ctx.helper.fail({ ctx, status: 400, errMsg: Err.SQL_ERR });
 		}
 
 		const list = await this.model.query(sql, {
 			type: this.model.QueryTypes.SELECT,
 		});
 
-		return this.success(list);
+		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
 	async resourcesQuery() {
+		const { ctx } = this;
+
 		this.adminAuthenticated();
 		this.parseParams();
 
@@ -52,10 +60,11 @@ class AdminsController extends Controller {
 
 		const list = await this.resource.findAndCount(query);
 
-		this.success(list);
+		ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
 	async search() {
+		const { ctx } = this;
 		this.parseParams();
 		const query = this.validate();
 
@@ -63,7 +72,7 @@ class AdminsController extends Controller {
 
 		const list = await this.resource.findAndCount({ ...this.queryOptions, where: query });
 
-		this.success(list);
+		ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
 	async index() {
@@ -73,7 +82,7 @@ class AdminsController extends Controller {
 		const query = ctx.query || {};
 		const list = await this.resource.findAndCount({ ...this.queryOptions, where: query });
 
-		this.success(list);
+		ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
 	async show() {
@@ -81,11 +90,11 @@ class AdminsController extends Controller {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 
-		if (!id) ctx.throw(400, "args error");
+		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ID_ERR });
 
 		const data = await this.resource.findOne({ where: { id } });
 
-		return this.success(data);
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async create() {
@@ -95,7 +104,7 @@ class AdminsController extends Controller {
 
 		const data = await this.resource.create(params);
 
-		return this.success(data);
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async update() {
@@ -104,12 +113,12 @@ class AdminsController extends Controller {
 		const params = ctx.request.body;
 		const id = _.toNumber(ctx.params.id);
 
-		if (!id) ctx.throw(400, "args error");
+		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ID_ERR });
 
 		const data = await this.resource.update(params, { where: { id } });
 
 		if (this.resource.adminUpdateHook) await this.resource.adminUpdateHook(params);
-		return this.success(data);
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async destroy() {
@@ -117,11 +126,11 @@ class AdminsController extends Controller {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 
-		if (!id) ctx.throw(400, "args error");
+		if (!id) return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ID_ERR });
 
 		const data = await this.resource.destroy({ where: { id } });
 
-		return this.success(data);
+		return ctx.helper.success({ ctx, status: 200, res: data });
 	}
 }
 

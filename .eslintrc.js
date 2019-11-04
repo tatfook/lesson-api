@@ -158,7 +158,7 @@ module.exports = {
         // disallow magic numbers
         // https://eslint.org/docs/rules/no-magic-numbers
         "no-magic-numbers": ["error", {
-            ignore: [0, 1, -1, 200, 400, 401, 403, 404, 411],
+            ignore: [0, 1, -1, 200, 400, 401, 403, 404, 409, 411, 500],
             ignoreArrayIndexes: true,
             enforceConst: true,
             detectObjects: false,

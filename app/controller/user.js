@@ -1,21 +1,14 @@
+"use strict";
 
 const _ = require("lodash");
 const jwt = require("jwt-simple");
-const consts = require("../core/consts.js");
-const Controller = require("../core/baseController.js");
+const Controller = require("./baseController.js");
+const Err = require("../common/err");
 
 const {
-	USER_IDENTIFY_TEACHER,
-	USER_IDENTIFY_APPLY_TEACHER,
-
-	USER_ROLE_ALLIANCE_MEMBER,
-	USER_ROLE_TUTOR,
-
-	TEACHER_PRIVILEGE_TEACH,
-
-	TRADE_TYPE_BEAN,
-	TRADE_TYPE_COIN,
-} = consts;
+	sendSms, verifyCode, updateUserInfo,
+	updateParentNum, updateParentNum2
+} = require("../common/validatorRules/evaluationReport");
 
 const ONEYEAR = 1000 * 3600 * 24 * 365;
 
@@ -23,82 +16,154 @@ class UsersController extends Controller {
 	token() {
 		const env = this.app.config.env;
 		this.enauthenticated();
-		const user = this.getUser();
+		const user = this.currentUser();
 		user.exp = Date.now() / 1000 + (env === "prod" ? 3600 * 24 * 1000 : 3600 * 24);
 		const token = jwt.encode(user, this.app.config.self.secret);
 
-		return this.success(token);
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: token });
 	}
 
 	tokeninfo() {
-		return this.success(this.enauthenticated());
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: this.enauthenticated() });
 	}
 
 	// 获取当前用户  不存在则创建
 	async index() {
 		const { ctx } = this;
 		this.enauthenticated();
-		const user = this.getUser();
+		const user = this.currentUser();
 
-		const data = await ctx.model.User.getById(user.userId, user.username);
-		if (!data) return this.throw(404, "用户不存在");
+		const data = await this.ctx.service.user.getCurrentUser(user);
 
-		const userId = user.userId;
-		const account = await this.app.keepworkModel.accounts.getByUserId(userId) || {};
-		data.rmb = account.rmb;
-		data.coin = account.coin;
-		data.bean = account.bean;
-		data.tutorService = await this.model.Tutor.getByUserId(user.userId);
-		data.teacher = await this.model.Teacher.getByUserId(userId);
-		data.allianceMember = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId);
-		data.tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId);
-
-		return this.success(data);
+		return this.ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	// 获取用户信息
 	async show() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
-		const data = await ctx.model.User.getById(id);
-		if (!data) return this.throw(404, "用户不存在");
+		const data = await ctx.service.user.getCurrentUser({ userId: id });
 
-		const userId = id;
-		const account = await this.app.keepworkModel.accounts.getByUserId(userId) || {};
-		data.rmb = account.rmb;
-		data.coin = account.coin;
-		data.bean = account.bean;
+		return this.ctx.helper.success({ ctx, status: 200, res: data });
+	}
 
-		data.tutorService = await this.model.Tutor.getByUserId(userId);
-		data.teacher = await this.model.Teacher.getByUserId(userId);
+	// 发送短信验证码
+	async sendSms() {
+		const { ctx } = this;
+		this.enauthenticated();
 
-		data.allianceMember = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId);
-		data.tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId);
+		const { cellphone } = ctx.request.body;
+		this.validateCgi({ cellphone }, sendSms);
 
-		return this.success(data);
+		const env = this.app.config.self.env;
+		const code = env === "unittest" ? "123456" : _.times(6, () => _.random(0, 9, false)).join("");
+
+		const check = await this.app.redis.get(`verifCode:${cellphone}`);
+		if (check) ctx.throw(400, Err.DONT_SEND_REPEAT);
+
+		await this.app.redis.set(`verifCode:${cellphone}`, code, "EX", 60 * 3);
+		if (env !== "unittest") {
+			const res = await ctx.service.user.sendSms(cellphone, [code, "3分钟"]);
+			if (!res) {
+				await this.app.redis.del(`verifCode:${cellphone}`);
+				ctx.throw(400, Err.SENDSMS_ERR);
+			}
+		}
+
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
+	}
+
+	// 校验验证码
+	async verifyCode() {
+		const { ctx } = this;
+		this.enauthenticated();
+
+		const { cellphone, verifCode } = ctx.request.body;
+		this.validateCgi({ cellphone, verifCode }, verifyCode);
+
+		const check = await this.app.redis.get(`verifCode:${cellphone}`);
+
+		return ctx.helper.success({ ctx, status: 200, res: check === verifCode });
+	}
+
+	// 获取用户信息，keepwork头像，机构中的realname,和家长手机号
+	async getUserInfo() {
+		const { ctx } = this;
+		const { userId, organizationId } = this.enauthenticated();
+		const { studentId } = ctx.request.query;// 老师获取学生的信息，传该参数
+		// 检查师生身份
+		if (studentId) {
+			const check = await ctx.service.user.checkTeacherRole(userId, organizationId, studentId);
+			if (!check) ctx.throw(403, Err.AUTH_ERR);
+		}
+
+		const ret = await ctx.service.user.getPortraitRealNameParentNum(studentId ? studentId : userId, organizationId);
+
+		return ctx.helper.success({ ctx, status: 200, res: ret });
+	}
+
+	// 修改keepwork头像，在机构中的realname和家长手机号【也可不传parentPhoneNum, verifCode】
+	async updateUserInfo() {
+		const { ctx } = this;
+		const { userId, organizationId } = this.enauthenticated();
+
+		const { portrait, realname, parentPhoneNum, verifCode } = ctx.request.body;
+
+		this.validateCgi({ realname }, updateUserInfo);
+
+		if (parentPhoneNum) {
+			this.validateCgi({ parentPhoneNum, verifCode }, updateParentNum);
+			const check = await this.app.redis.get(`verifCode:${parentPhoneNum}`);
+			if (check !== verifCode) ctx.throw(400, Err.VERIFCODE_ERR);
+		}
+
+		await ctx.service.user.updatePortraitRealNameParentNum({
+			portrait, realname, parentPhoneNum, userId, organizationId
+		});
+
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
+	}
+
+	// 修改家长手机号【第二步】
+	async updateParentphonenum() {
+		const { ctx } = this;
+		const { userId, organizationId } = this.enauthenticated();
+
+		const { parentPhoneNum, verifCode, newParentPhoneNum, newVerifCode } = ctx.request.body;
+		this.validateCgi({ parentPhoneNum, verifCode, newParentPhoneNum, newVerifCode }, updateParentNum2);
+
+		const [check1, check2] = await Promise.all([
+			this.app.redis.get(`verifCode:${parentPhoneNum}`),
+			this.app.redis.get(`verifCode:${newParentPhoneNum}`)
+		]);
+		if (check1 !== verifCode || check2 !== newVerifCode) ctx.throw(400, Err.VERIFCODE_ERR);
+
+		await ctx.service.user.updateParentphonenum(userId, organizationId, newParentPhoneNum);
+
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
 	}
 
 	async create() {
 		const { ctx } = this;
 		this.enauthenticated();
-		const user = this.getUser();
+		const user = this.currentUser();
 
-		const data = await ctx.model.User.getById(user.userId, user.username);
+		const data = await ctx.service.user.getByIdOrCreate(user.userId, user.username);
 
-		return this.success(data);
+		return this.ctx.helper.success({ ctx, status: 200, res: data });
 	}
 
 	async update() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
+		const userId = this.currentUser().userId;
 
-		if (~~id !== userId) ctx.throw(400, "args error");
+		if (~~id !== userId) ctx.throw(400, Err.ARGS_ERR);
 
 		const params = ctx.request.body;
 
@@ -108,9 +173,9 @@ class UsersController extends Controller {
 		delete params.identify;
 		delete params.username;
 
-		const result = await ctx.model.User.update(params, { where: { id }});
+		const result = await ctx.service.user.updateUserByCondition(params, { id });
 
-		return this.success(result);
+		return this.ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	// 申请成老师
@@ -121,161 +186,105 @@ class UsersController extends Controller {
 		this.success("未实现, 空接口");
 	}
 
-	// 成为老师
+	// 成为老师 废弃
 	async teacher() {
-		// const { ctx } = this;
+		const { ctx } = this;
 		const { id, key, school } = this.validate({
 			id: "int",
 			key: "string",
 			school: "string_optional"
 		});
 
-		const user = await this.model.User.getById(id);
-		if (!user) this.throw(400, "arg error");
+		const result = await ctx.service.user.becomeTeacher(id, key, school);
 
-		const isOk = await this.model.TeacherCDKey.useKey(key, id);
-		if (!isOk) this.throw(400, "key invalid");
-
-		const cdKey = await this.model.TeacherCDKey.findOne({ where: { key }}).then(o => o && o.toJSON());
-		const startTime = new Date().getTime();
-
-		user.identify = (user.identify | USER_IDENTIFY_TEACHER) & (~USER_IDENTIFY_APPLY_TEACHER);
-		const teacher = await this.model.Teacher.findOne({
-			where: { userId: id }
-		})
-			.then(o => o && o.toJSON())
-			|| {
-				userId: id, startTime, endTime: startTime,
-				key, school, privilege: TEACHER_PRIVILEGE_TEACH
-			};
-
-		if (teacher.endTime < startTime) {
-			teacher.endTime = teacher.startTime = startTime;
-		}
-		teacher.endTime += cdKey.expire;
-
-		await this.model.Teacher.upsert(teacher);
-		const result = await this.model.User.update(user, { where: { id }});
-
-		return this.success(result);
+		return ctx.helper.success({ ctx, status: 200, res: result });
 	}
 
 	// 是否允许教课
 	async isTeach() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
-		const ok = await ctx.model.Teacher.isAllowTeach(id);
+		const ok = await ctx.service.teacher.isAllowTeach(id);
 
-		return this.success(ok);
+		return ctx.helper.success({ ctx, status: 200, res: ok });
 	}
 
 	// 用户课程包
 	async getSubscribes() {
-		// const { userId } = this.enauthenticated();
 		const { id, packageState } = this.validate({
 			id: "int",
 			packageState: "int_optional",
 		});
 
-		const list = await this.model.Subscribe.getByUserId(id, packageState);
+		const list = await this.ctx.service.subscribe.getByUserId(id, packageState);
 
-		return this.success(list);
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: list });
 	}
 
 	async isSubscribe() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
 		const params = ctx.query;
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
-		if (~~id !== userId) ctx.throw(400, "args error");
+		const userId = this.currentUser().userId;
+		if (~~id !== userId) ctx.throw(400, Err.ARGS_ERR);
+
 		const packageId = params.packageId && _.toNumber(params.packageId);
-		if (!packageId) ctx.throw(400, "args error");
+		if (!packageId) ctx.throw(400, Err.ARGS_ERR);
 
-		const result = await ctx.model.Subscribe.isSubscribePackage(userId, packageId);
+		const result = await ctx.service.subscribe.getByCondition({ userId, packageId });
 
-		return this.success(result);
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: result ? true : false });
 	}
-
-	// // 用户订阅
-	// async postSubscribes() {
-	// const {ctx} = this;
-	// const id = _.toNumber(ctx.params.id);
-	// const params = ctx.request.body;
-	// if (!id) ctx.throw(400, "id invalid");
-
-	// this.enauthenticated();
-	// const userId = this.getUser().userId;
-	// if (id != userId) ctx.throw(400, "args error");
-
-	// ctx.validate({
-	// packageId: 'int',
-	// }, params);
-
-	// const packageId = params.packageId;
-	// const result = await ctx.model.Subscribes.subscribePackage(userId, packageId);
-
-	// if (result.id != 0) ctx.throw(400, result.message);
-
-	// return this.success("OK");
-	// }
 
 	// 获取知识币变更列表
 	async coins() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
 		this.enauthenticated();
-		const userId = this.getUser().userId;
-		if (~~id !== userId) ctx.throw(400, "args error");
+		const userId = this.currentUser().userId;
+		if (~~id !== userId) ctx.throw(400, Err.ARGS_ERR);
 
-		const list = await ctx.model.Coin.findAll({ where: { userId }});
-		return this.success(list);
+		const list = await ctx.service.coin.getAllByCondition({ userId });
+		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: list });
 	}
 
 	// 获取用户已学习的技能列表
 	async skills() {
 		const { ctx } = this;
 		const id = _.toNumber(ctx.params.id);
-		if (!id) ctx.throw(400, "id invalid");
+		if (!id) ctx.throw(400, Err.ID_ERR);
 
-		const list = await ctx.model.UserLearnRecord.getSkills(id);
+		const list = await ctx.service.learnRecord.getSkills(id);
 
-		this.success(list);
+		return ctx.helper.success({ ctx, status: 200, res: list });
 	}
 
 	// 用户花费知识币和知识豆
 	async expense() {
 		const { userId } = this.enauthenticated();
-		const { coin, bean, description } = this.validate({ coin: "int_optional", bean: "int_optional", description: "string_optional" });
+		const { coin, bean, description } = this.validate({
+			coin: "int_optional", bean: "int_optional", description: "string_optional"
+		});
 
-		const user = await this.model.User.getById(userId);
-		if (!user) this.throw(400);
-		if ((bean && bean > user.bean) || (coin && coin > user.coin)) this.throw(400, "余额不足");
-		if (user.bean && bean && user.bean >= bean && bean > 0) {
-			user.bean = user.bean - bean;
-			await this.model.Trade.create({ userId, type: TRADE_TYPE_BEAN, amount: bean * -1, description });
-		}
-		if (user.coin && coin && user.coin >= coin && coin > 0) {
-			user.coin = user.coin - coin;
-			await this.model.Trade.create({ userId, type: TRADE_TYPE_COIN, amount: coin * -1, description });
-		}
+		await this.ctx.service.user.expense(userId, { coin, bean, description });
 
-		await this.model.User.update(user, { fields: ["coin", "bean"], where: { id: userId }});
-
-		return this.success("OK");
+		return ctx.helper.success({ ctx, status: 200, res: "OK" });
 	}
 
-	// 导师服务回调
+	// 导师服务回调 废弃
 	async tutorServiceCB() {
 		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
 		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent || !signature || sigcontent !== this.app.util.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) return this.throw(400, "未知请求");
+		if (!sigcontent || !signature || sigcontent !== this.ctx.helper.rsaDecrypt(
+			this.app.config.self.rsa.publicKey, signature)
+		) return this.ctx.throw(400, Err.UNKNOWN_REQ);
 
 		const params = this.validate({ userId: "int" });
 		const userId = params.userId;
@@ -299,61 +308,6 @@ class UsersController extends Controller {
 		await this.model.Tutor.upsert(tutor);
 
 		return this.success("OK");
-	}
-
-	// 成为导师回调
-	async tutorCB() {
-		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
-		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent || !signature || sigcontent !== this.app.util.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) return this.throw(400, "未知请求");
-
-		const params = this.validate({ userId: "int" });
-		const userId = params.userId;
-		const amount = params.amount || { rmb: 0, coin: 0, bean: 0 };
-		if (amount.rmb != 100) return this.throw(400, "金额不对");
-
-		const tutor = await this.app.keepworkModel.roles.getTutorByUserId(userId) || { userId, roleId: USER_ROLE_TUTOR };
-		const curtitme = new Date().getTime();
-
-		if (tutor.endTime <= curtitme) {
-			tutor.startTime = curtitme;
-			tutor.endTime = curtitme + ONEYEAR;
-		} else {
-			tutor.startTime = tutor.startTime || curtitme;
-			tutor.endTime = (tutor.endTime || curtitme) + ONEYEAR;
-		}
-
-		await this.app.keepworkModel.roles.upsert(tutor);
-
-		return this.success("OK");
-	}
-
-	// 共享会员
-	async allianceMemberCB() {
-		const sigcontent = this.ctx.headers["x-keepwork-sigcontent"];
-		const signature = this.ctx.headers["x-keepwork-signature"];
-		if (!sigcontent || !signature || sigcontent !== this.app.util.rsaDecrypt(this.app.config.self.rsa.publicKey, signature)) return this.throw(400, "未知请求");
-
-		const params = this.validate({ userId: "int" });
-		const userId = params.userId;
-		const amount = params.amount || { rmb: 0, coin: 0, bean: 0 };
-		if (amount.rmb != 100) return this.throw(400, "金额不对");
-
-		const alliance = await this.app.keepworkModel.roles.getAllianceMemberByUserId(userId) || { userId, roleId: USER_ROLE_ALLIANCE_MEMBER };
-		const curtitme = new Date().getTime();
-
-		if (alliance.endTime <= curtitme) {
-			alliance.startTime = curtitme;
-			alliance.endTime = curtitme + ONEYEAR;
-		} else {
-			alliance.startTime = alliance.startTime || curtitme;
-			alliance.endTime = (alliance.endTime || curtitme) + ONEYEAR;
-		}
-
-		await this.app.keepworkModel.roles.upsert(alliance);
-
-		return this.success("OK");
-
 	}
 }
 

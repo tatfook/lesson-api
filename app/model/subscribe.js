@@ -1,9 +1,6 @@
+"use strict";
+
 const _ = require("lodash");
-const consts = require("../core/consts.js");
-const {
-	COIN_TYPE_PACKAGE_REWARD,
-	PACKAGE_SUBSCRIBE_STATE_BUY,
-} = consts;
 
 module.exports = app => {
 	const {
@@ -51,9 +48,7 @@ module.exports = app => {
 		],
 	});
 
-	// model.sync({force:true});
-
-	model.getPackagesByUserId = async function (userId) {
+	model.getPackagesByUserId = async userId => {
 		const sql = `select packages.*, subscribes.createdAt joinAt, subscribes.state subscribeState 
 			from subscribes, packages 
 			where subscribes.packageId = packages.id and
@@ -68,7 +63,7 @@ module.exports = app => {
 		return list;
 	};
 
-	model.getByUserId = async function (userId, packageState) {
+	model.getByUserId = async (userId, packageState) => {
 		let sql = `select packages.*, subscribes.extra subscribeExtra, subscribes.createdAt joinAt, subscribes.state subscribeState 
 			from subscribes, packages 
 			where subscribes.packageId = packages.id and
@@ -96,49 +91,7 @@ module.exports = app => {
 		return packages;
 	};
 
-	model.isSubscribePackage = async function (userId, packageId) {
-		let data = await app.model.Subscribe.findOne({
-			where: {
-				userId,
-				packageId,
-				// state: PACKAGE_SUBSCRIBE_STATE_BUY,
-			}
-		});
-		if (data) return true;
-
-		return false;
-	};
-
-	model.packageReward = async function (userId, packageId) {
-		const data = await app.model.Subscribe.findOne({
-			where: {
-				userId,
-				packageId,
-				state: PACKAGE_SUBSCRIBE_STATE_BUY,
-			}
-		});
-		if (!data) return;
-
-		const _package = await app.model.Package.getById(packageId);
-		if (!_package) return;
-
-		const user = await app.model.User.getById(userId);
-		if (!user) return;
-
-		await app.model.User.update({
-			coin: user.coin + _package.reward,
-		}, {
-			where: { id: userId }
-		});
-
-		await app.model.Coin.create({
-			userId,
-			amount: _package.reward,
-			type: COIN_TYPE_PACKAGE_REWARD,
-		});
-	};
-
-	model.addTeachedLesson = async function (userId, packageId, lessonId) {
+	model.addTeachedLesson = async (userId, packageId, lessonId) => {
 		let subscribe = await app.model.Subscribe.findOne({
 			where: {
 				userId,
@@ -147,6 +100,7 @@ module.exports = app => {
 		});
 		if (!subscribe) return;
 		subscribe = subscribe.get({ plain: true });
+
 		const extra = subscribe.extra || {};
 		extra.teachedLessons = extra.teachedLessons || [];
 		const index = _.findIndex(extra.teachedLessons, val => ~~val === ~~lessonId);
@@ -162,16 +116,16 @@ module.exports = app => {
 		}
 	};
 
-	model.addLearnedLesson = async function (userId, packageId, lessonId) {
+	model.addLearnedLesson = async (userId, packageId, lessonId) => {
 		let subscribe = await app.model.Subscribe.findOne({
 			where: {
 				userId,
 				packageId,
 			}
 		});
-		if (!subscribe) return console.log("未购买此课程包");
-
+		if (!subscribe) return;
 		subscribe = subscribe.get({ plain: true });
+
 		const extra = subscribe.extra || {};
 		extra.learnedLessons = extra.learnedLessons || [];
 		const index = _.findIndex(extra.learnedLessons, val => ~~val === ~~lessonId);

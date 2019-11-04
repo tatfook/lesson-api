@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = app => {
 	const {
@@ -57,8 +58,6 @@ module.exports = app => {
 		],
 	});
 
-	// model.sync({force:true});
-
 	model.associate = () => {
 		app.model.LessonOrganizationPackage.belongsTo(app.model.LessonOrganization, {
 			as: "lessonOrganizations",
@@ -77,6 +76,13 @@ module.exports = app => {
 		app.model.LessonOrganizationPackage.belongsTo(app.model.LessonOrganizationClass, {
 			as: "lessonOrganizationClasses",
 			foreignKey: "classId",
+			targetKey: "id",
+			constraints: false,
+		});
+
+		app.model.LessonOrganizationPackage.belongsTo(app.model.Package, {
+			as: "packages",
+			foreignKey: "packageId",
 			targetKey: "id",
 			constraints: false,
 		});

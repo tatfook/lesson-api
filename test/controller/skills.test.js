@@ -16,14 +16,14 @@ describe("/admins/skills", () => {
 		})
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert(data.skillName, "唱歌");
+		assert(data.data.skillName, "唱歌");
 
 		data = await app.httpRequest().post("/admins/skill").send({
 			skillName: "跳舞",
 		})
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
-		assert(data.skillName, "跳舞");
+		assert(data.data.skillName, "跳舞");
 
 	});
 
@@ -33,11 +33,11 @@ describe("/admins/skills", () => {
 
 		let list = await app.httpRequest().get("/admins/skill")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(list.count, 2);
+		assert.equal(list.data.count, 2);
 
 		list = await app.httpRequest().get("/skills")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(list.length, 2);
+		assert.equal(list.data.length, 2);
 	});
 
 	it("GET /admins/skill/1", async () => {
@@ -48,7 +48,7 @@ describe("/admins/skills", () => {
 			.set("Authorization", `Bearer ${token}`)
 			.expect(200).then(res => res.body);
 		assert.ok(skill);
-		assert.equal(skill.skillName, "唱歌");
+		assert.equal(skill.data.skillName, "唱歌");
 	});
 
 	it("DELETE /admins/skill/1", async () => {
@@ -59,6 +59,6 @@ describe("/admins/skills", () => {
 			.set("Authorization", `Bearer ${token}`).expect(200);
 		const list = await app.httpRequest().get("/admins/skill")
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert.equal(list.count, 1);
+		assert.equal(list.data.count, 1);
 	});
 });

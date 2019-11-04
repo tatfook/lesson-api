@@ -1,6 +1,7 @@
+"use strict";
 
 const _ = require("lodash");
-const consts = require("../core/consts.js");
+const consts = require("../common/consts.js");
 const {
 	CLASSROOM_STATE_USING,
 	CLASSROOM_STATE_USED,
@@ -70,16 +71,40 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
+	// 下课
+	model.dismiss = async function (userId, classroomId, username) {
+		let data = await app.model.Classroom.findOne({
+			where: {
+				id: classroomId,
+				userId,
+				state: CLASSROOM_STATE_USING,
+			}
+		});
+
+		if (!data) return false;
+		data = data.get({ plain: true });
+
+		await Promise.all([
+			app.model.LessonOrganizationLog.classroomLog({ classroom: data, action: "dismiss", handleId: userId, username }),
+			app.model.Classroom.update({ state: CLASSROOM_STATE_USED }, { where: { userId, id: data.id }}),	// 更新课堂状态
+			app.model.Subscribe.addTeachedLesson(userId, data.packageId, data.lessonId)	// 更新订阅包信息
+		]);
+
+		return true;
+	};
+
 	model.createClassroom = async function (params) {
 		let classroom = await app.model.Classroom.create(params);
 		if (!classroom) return;
 		classroom = classroom.get({ plain: true });
+
 		classroom.key = _.padEnd(_.toString(classroom.id), 6, "" + _.random(10000000, 99999999));
-		await app.model.Classroom.update(classroom, { where: { id: classroom.id }});
+		await app.model.Classroom.update({ key: classroom.key }, { where: { id: classroom.id }});
 
 		const userId = classroom.userId;
 		const user = await app.model.User.getById(userId);
 		const extra = user.extra || {};
+
 		// 下课旧学堂
 		if (extra.classroomId) await this.dismiss(userId, extra.classroomId);
 		extra.classroomId = classroom.id;
@@ -94,67 +119,11 @@ module.exports = app => {
 		return classroom;
 	};
 
-	model.getById = async function (classroomId, userId) {
-		const where = { id: classroomId };
-
-		if (userId) where.userId = userId;
-		let data = await app.model.Classroom.findOne({ where });
-
-		if (data) data = data.get({ plain: true });
-
-		return data;
-	};
-
-	model.isClassing = async function (classroomId) {
-		const classroom = await this.getById(classroomId);
-		if (classroom && ~~classroom.state === CLASSROOM_STATE_USING) return true;
-
-		return false;
-	};
-
-	model.isTeached = async function (userId, packageId, lessonId) {
-		const data = await app.model.Classroom.findOne({
-			where: {
-				userId,
-				packageId,
-				lessonId
-			}
-		});
-
-		if (data) return true;
-
-		return false;
-	};
-
-	model.quit = async function (studentId, username) {
-		const user = await app.model.User.getById(studentId);
-
-		const classroomId = user.extra.classroomId;
-		if (!classroomId) return;
-
-		const classroom = await app.model.Classroom.getById(classroomId);
-		if (~~classroom.state !== CLASSROOM_STATE_USING) return;
-
-		app.model.LessonOrganizationLog.classroomLog({ classroom, action: "quit", handleId: studentId, username });
-		app.model.LearnRecord.destroy({
-			where: {
-				classroomId,
-				userId: studentId,
-			}
-		});
-
-		// 教师退出自己的课堂 不置当前课堂id
-		if (~~classroom.userId !== ~~studentId) {
-			user.extra.classroomId = undefined;
-			await app.model.User.update({ extra: user.extra }, { where: { id: user.id }});
-		}
-
-	};
-
-	model.join = async function (studentId, key, username) {
+	model.join = async (studentId, key, username) => {
 		let data = await app.model.Classroom.findOne({ where: { key }});
 		if (!data) return;
 		data = data.get({ plain: true });
+
 		const classroomId = data.id;
 		const lessonId = data.lessonId;
 		// 课程未开始或结束
@@ -196,38 +165,8 @@ module.exports = app => {
 		return learnRecord;
 	};
 
-	// 下课
-	model.dismiss = async function (userId, classroomId, username) {
-		let data = await app.model.Classroom.findOne({
-			where: {
-				id: classroomId,
-				userId,
-				state: CLASSROOM_STATE_USING,
-			}
-		});
-
-		if (!data) return false;
-		data = data.get({ plain: true });
-
-		app.model.LessonOrganizationLog.classroomLog({ classroom: data, action: "dismiss", handleId: userId, username });
-		// 更新课堂状态
-		await app.model.Classroom.update({
-			state: CLASSROOM_STATE_USED,
-		}, {
-			where: {
-				userId,
-				id: data.id,
-			}
-		});
-
-		// 更新订阅包信息
-		await app.model.Subscribe.addTeachedLesson(userId, data.packageId, data.lessonId);
-
-		return true;
-	};
-
 	// 获取最后一次教课记录 
-	model.getLastTeach = async function (userId, packageId) {
+	model.getLastTeach = async (userId, packageId) => {
 		const list = await app.model.Classroom.findAll({
 			order: [["createdAt", "DESC"]],
 			limit: 1,
@@ -235,8 +174,6 @@ module.exports = app => {
 		});
 
 		if (list.length === 1) return list[0];
-
-
 	};
 
 	// 获取课程包周上课量
@@ -248,7 +185,8 @@ module.exports = app => {
 			where: {
 				createdAt: {
 					[app.model.Op.gt]: new Date(startTime),
-				}
+				},
+				packageId
 			}
 		});
 

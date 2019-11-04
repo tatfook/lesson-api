@@ -1,10 +1,12 @@
 
 const md5 = require("blueimp-md5");
-const { app, mock, assert } = require("egg-mock/bootstrap");
+const { app, assert } = require("egg-mock/bootstrap");
 
 describe("机构学生", () => {
 	before(async () => {
-		await app.keepworkModel.Users.sync({ force: true });
+		const ctx = app.mockContext();
+		await ctx.service.keepwork.truncate({ resources: "users" });
+
 		await app.model.LessonOrganization.sync({ force: true });
 		await app.model.LessonOrganizationClass.sync({ force: true });
 		await app.model.LessonOrganizationClassMember.sync({ force: true });
@@ -14,8 +16,9 @@ describe("机构学生", () => {
 		const user = await app.adminLogin();
 		const token = user.token;
 
-		let user2 = await app.keepworkModel.Users.create({ username: "user005", password: md5("123456") });
-		user2 = user2.get();
+		const ctx = app.mockContext();
+		const user2 = await ctx.service.keepwork.createRecord({ resources: "users", username: "user005", password: md5("123456") });
+
 		// 创建机构
 		const organ = await app.model.LessonOrganization.create({ name: "org0000", count: 1 }).then(o => o.toJSON());
 
@@ -57,33 +60,29 @@ describe("机构学生", () => {
 		// 学生
 		let students = await app.httpRequest().get(`/lessonOrganizationClassMembers/student?classId=${cls.id}`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(students.count === 0);
+		assert(students.data.count === 1);
 
 		// 移除班级成员
 		// await app.httpRequest().delete(`/lessonOrganizationClassMembers/${students.rows[0].id}?roleId=1`)
 		// 	.set("Authorization", `Bearer ${token}`).expect(200);
 
-		students = await app.httpRequest().get(`/lessonOrganizationClassMembers/student?classId=${cls.id}`)
-			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(students.count === 0);
-
 		students = await app.httpRequest().get(`/lessonOrganizationClassMembers/student?classId=${cls2.id}`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(students.count === 0);
+		assert(students.data.count === 0);
 
 		// 教师
 		let teachers = await app.httpRequest().get(`/lessonOrganizationClassMembers/teacher?classId=${cls2.id}`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(teachers.length === 0);
+		assert(teachers.data.length === 0);
 
-		let user3 = app.keepworkModel.Users.create({ username: "jacky", password: md5("123456") });
-		user3 = user3.get();
+		const user3 = await ctx.service.keepwork.createRecord({ resources: "users", username: "jacky", password: md5("123456") });
+
 		await app.model.LessonOrganizationClassMember.create({
 			organizationId: organ.id, classId: cls2.id, roleId: 2, memberId: user3.id
 		});
 
 		teachers = await app.httpRequest().get(`/lessonOrganizationClassMembers/teacher?classId=${cls2.id}`)
 			.set("Authorization", `Bearer ${token}`).expect(200).then(res => res.body);
-		assert(teachers.length === 1);
+		assert(teachers.data.length === 1);
 	});
 });

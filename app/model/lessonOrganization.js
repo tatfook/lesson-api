@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = app => {
 	const {
@@ -80,7 +81,14 @@ module.exports = app => {
 			type: JSON,
 			defaultValue: {},
 		},
-
+		QRCode: {
+			type: STRING,
+			defaultValue: "",
+		},
+		propaganda: {
+			type: STRING,
+			defaultValue: "",
+		},
 		createdAt: {
 			type: DATE,
 		},
@@ -95,20 +103,8 @@ module.exports = app => {
 		collate: "utf8mb4_bin",
 	});
 
-	// model.sync({force:true});
-
-	model.getValidOrganizationById = async function (organizationId) {
-		// const curdate = new Date();
-		return await app.model.LessonOrganization.findOne({
-			where: {
-				id: organizationId,
-				endDate: { $gte: new Date() },
-			}
-		}).then(o => o && o.toJSON());
-	};
-
 	// 获取机构已用人数
-	model.getUsedCount = async function (organizationId) {
+	model.getUsedCount = async organizationId => {
 		const sql = `select count(*) as count from (
 			select * from lessonOrganizationClassMembers as locm 
 			where locm.organizationId = ${organizationId} 
@@ -122,37 +118,64 @@ module.exports = app => {
 		return list[0].count || 0;
 	};
 
-	model.getStudentCount = async function (organizationId) {
-		return await this.getMemberCount(organizationId, 1);
-	};
-
-	model.getMemberCount = async function (organizationId, roleId, classId) {
+	model.getMemberCount = async (organizationId, roleId, classId) => {
 		const sql = `select count(*) as count from (
 			select * from lessonOrganizationClassMembers as locm 
-			where locm.organizationId = ${organizationId} and roleId & ${roleId} 
-			and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
+			where locm.organizationId = ${organizationId} 
+			and roleId & ${roleId} and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
 				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and end > current_timestamp())
 				) group by memberId) as t`;
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
 		return list[0].count || 0;
 	};
 
-	model.getMembers = async function (organizationId, roleId, classId) {
+	// 这个不限制班级是否过期
+	model.memberCount = async (organizationId, roleId, classId) => {
+		const sql = `select count(*) as count from (
+			select * from lessonOrganizationClassMembers as locm 
+			where locm.organizationId = ${organizationId} 
+			and roleId & ${roleId} and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
+				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId )
+				) group by memberId) as t`;
+		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		return list[0].count || 0;
+	};
+
+	model.getMembers = async (organizationId, roleId, classId) => {
 		const sql = `select * from lessonOrganizationClassMembers as locm where locm.organizationId = ${organizationId} and 
-		roleId & ${roleId} and classId ${classId == undefined ? ">= 0" : ("= " + classId)}  and (
+		roleId & ${roleId} and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
 			classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and end > current_timestamp())
 			) group by memberId`;
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
 		return list;
 	};
 
-	model.getTeachers = async function (organizationId, classId) {
-		const sql = `select * from lessonOrganizationClassMembers as locm 
-		where locm.organizationId = ${organizationId} and roleId & 2 
-		and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
+	model.getTeachers = async (organizationId, classId) => {
+		const sql = `select * from lessonOrganizationClassMembers as locm where locm.organizationId = ${organizationId} and
+		roleId & 2 and classId ${classId === undefined ? ">= 0" : ("= " + classId)}  and (
 			classId = 0 or exists (select * from lessonOrganizationClasses where id = classId)
 			) group by memberId`;
 		const list = await app.model.query(sql, { type: app.model.QueryTypes.SELECT });
+		return list;
+	};
+
+	// 获取机构课程包
+	model.getOrgPackages = async (organizationId) => {
+		const sql = `
+		SELECT 
+   			distinct p.id,p.packageName,op.lessons
+		FROM
+    		packages p
+        	LEFT JOIN lessonOrganizationPackages op ON op.packageId = p.id
+    		LEFT JOIN lessonOrganizations o on o.id = op.organizationId
+    	where o.id = :organizationId 
+		`;
+		const list = await app.model.query(sql, {
+			type: app.model.QueryTypes.SELECT,
+			replacements: {
+				organizationId
+			}
+		});
 		return list;
 	};
 

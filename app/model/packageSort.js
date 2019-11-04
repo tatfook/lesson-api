@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = app => {
 	const {
@@ -31,7 +32,7 @@ module.exports = app => {
 
 	// model.sync({force:true});
 
-	model.getHots = async function () {
+	model.getHots = async () => {
 		const sql = `select packages.* 
 			from packageSorts, packages 
 			where packageSorts.packageId = packages.id 

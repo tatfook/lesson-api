@@ -1,3 +1,4 @@
+"use strict";
 
 module.exports = app => {
 	const { router, config, controller } = app;
@@ -15,6 +16,11 @@ module.exports = app => {
 	const users = controller.user;
 	router.get(prefix + "users/token", users.token);
 	router.get(prefix + "users/tokeninfo", users.tokeninfo);
+	router.get(`${prefix}users/userInfo`, users.getUserInfo);
+	router.put(`${prefix}users/userInfo`, users.updateUserInfo);
+	router.put(`${prefix}users/parentPhoneNum`, users.updateParentphonenum);
+	router.post(`${prefix}users/sendSms`, users.sendSms);
+	router.post(`${prefix}users/verifyCode`, users.verifyCode);
 	router.post(prefix + "users/expense", users.expense);
 	router.resources("users", prefix + "users", users);
 	router.post(prefix + "users/:id/applyTeacher", users.applyTeacher);
@@ -25,9 +31,9 @@ module.exports = app => {
 	router.get(prefix + "users/:id/coins", users.coins);
 	router.get(prefix + "users/:id/skills", users.skills);
 	router.get(prefix + "users/:id/isTeach", users.isTeach);
-	router.post(prefix + "users/tutorCB", users.tutorCB);
-	router.post(prefix + "users/tutorServiceCB", users.tutorServiceCB);
-	router.post(prefix + "users/allianceMemberCB", users.allianceMemberCB);
+	// router.post(prefix + "users/tutorCB", users.tutorCB);
+	// router.post(prefix + "users/tutorServiceCB", users.tutorServiceCB);
+	// router.post(prefix + "users/allianceMemberCB", users.allianceMemberCB);
 
 	const packages = controller.package;
 	router.get(prefix + "packages/teach", packages.teach);
@@ -85,9 +91,9 @@ module.exports = app => {
 	router.resources("skills", prefix + "skills", skills);
 	// router.resources("skills", prefix + "admins/skills", skills);
 
-	const teacherCDKeys = controller.teacherCDKey;
-	router.post(prefix + "admins/teacherCDKeys/generate", teacherCDKeys.generate);
-	router.resources("teacherCDKeys", prefix + "admins/teacherCDKeys", teacherCDKeys);
+	// const teacherCDKeys = controller.teacherCDKey;
+	// router.post(prefix + "admins/teacherCDKeys/generate", teacherCDKeys.generate);
+	// router.resources("teacherCDKeys", prefix + "admins/teacherCDKeys", teacherCDKeys);
 
 	const admins = controller.admin;
 	router.post(`${prefix}admins/query`, admins.query);
@@ -95,12 +101,29 @@ module.exports = app => {
 	router.resources("admins", prefix + "admins/:resources", admins);
 	router.post("admins", prefix + "admins/:resources/search", admins.search);
 
-	const pays = controller.pay;
-	router.post("pays", prefix + "pays/callback", pays.callback);
-	router.resources(prefix + "pays", pays);
+	// 评估报告api
+	const evaluationReport = controller.evaluationReport;
+	router.post(`${prefix}evaluationReports`, evaluationReport.create);
+	router.get(`${prefix}evaluationReports`, evaluationReport.index);
+	router.post(`${prefix}evaluationReports/userReport`, evaluationReport.createUserReport);
+	router.delete(`${prefix}evaluationReports/:id`, evaluationReport.destroy);
+	router.put(`${prefix}evaluationReports/userReport/:id`, evaluationReport.updateUserReport);
+	router.put(`${prefix}evaluationReports/:id`, evaluationReport.update);
+	router.get(`${prefix}evaluationReports/statistics`, evaluationReport.evaluationStatistics);
+	router.get(`${prefix}evaluationReports/evaluationCommentList`, evaluationReport.getEvaluationCommentList);
+	router.get(`${prefix}evaluationReports/orgClassReport`, evaluationReport.adminGetReport);
+	router.get(`${prefix}evaluationReports/classReport`, evaluationReport.getClassReport);
+	router.get(`${prefix}evaluationReports/:id`, evaluationReport.show);
+	router.delete(`${prefix}evaluationReports/userReport/:id`, evaluationReport.destroyUserReport);
+	router.get(`${prefix}evaluationReports/userReport/:id`, evaluationReport.getUserReportDetail);
+	router.post(`${prefix}evaluationReports/reportToParent`, evaluationReport.reportToParent);
 
-	const trades = controller.trade;
-	router.resources(prefix + "trades", trades);
+	// const pays = controller.pay;
+	// router.post("pays", prefix + "pays/callback", pays.callback);
+	// router.resources(prefix + "pays", pays);
+
+	// const trades = controller.trade;
+	// router.resources(prefix + "trades", trades);
 
 	// -----------------------------add from coreservice--------------------------------------------------------
 	// LESSON three 
@@ -110,6 +133,10 @@ module.exports = app => {
 	router.get(`${prefix}lessonOrganizations/packageDetail`, lessonOrganization.packageDetail);
 	router.get(`${prefix}lessonOrganizations/getByName`, lessonOrganization.getByName);
 	router.get(`${prefix}lessonOrganizations/getByUrl`, lessonOrganization.getByUrl);
+	router.get(`${prefix}lessonOrganizations/getMemberCountByRole`, lessonOrganization.getMemberCountByRole);
+	router.get(`${prefix}lessonOrganizations/checkUserInvalid`, lessonOrganization.checkUserInvalid);
+	router.get(`${prefix}lessonOrganizations/getOrgPackages`, lessonOrganization.getPackages);
+	router.get(`${prefix}lessonOrganizations/getRealNameInOrg`, lessonOrganization.getRealNameInOrg);
 	router.post(`${prefix}lessonOrganizations/login`, lessonOrganization.login);
 	router.post(`${prefix}lessonOrganizations/search`, lessonOrganization.search);
 	router.resources(`${prefix}lessonOrganizations`, lessonOrganization);
@@ -140,10 +167,10 @@ module.exports = app => {
 	router.resources(`${prefix}lessonOrganizationActivateCodes`, lessonOrganizationActivateCode);
 
 	// organization user 
-	const lessonOrganizationUser = controller.lessonOrganizationUser;
-	router.post(`${prefix}lessonOrganizationUsers/batch`, lessonOrganizationUser.batchCreateUser);
-	router.post(`${prefix}lessonOrganizationUsers/unbind`, lessonOrganizationUser.unbind);
-	router.post(`${prefix}lessonOrganizationUsers/setpwd`, lessonOrganizationUser.setpwd);
+	// const lessonOrganizationUser = controller.lessonOrganizationUser;
+	// router.post(`${prefix}lessonOrganizationUsers/batch`, lessonOrganizationUser.batchCreateUser);
+	// router.post(`${prefix}lessonOrganizationUsers/unbind`, lessonOrganizationUser.unbind);
+	// router.post(`${prefix}lessonOrganizationUsers/setpwd`, lessonOrganizationUser.setpwd);
 
 	// organization form
 	const lessonOrganizationForm = controller.lessonOrganizationForm;

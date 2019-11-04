@@ -1,5 +1,12 @@
+"use strict";
 
 const moment = require("moment");
+const _ = require("lodash");
+
+const {
+	CLASS_MEMBER_ROLE_STUDENT,
+	CLASS_MEMBER_ROLE_TEACHER
+} = require("../common/consts.js");
 
 module.exports = app => {
 	const {
@@ -59,9 +66,7 @@ module.exports = app => {
 		collate: "utf8mb4_bin",
 	});
 
-	// model.sync({force:true});
-
-	model.classroomLog = async function ({ classroom = {}, lr, action = "create", username, handleId, organizationId }) {
+	model.classroomLog = async ({ classroom = {}, lr, action = "create", username, handleId, organizationId }) => {
 		const log = {
 			organizationId: organizationId || classroom.organizationId,
 			type: "课堂",
@@ -80,9 +85,13 @@ module.exports = app => {
 		} else if (action === "learn") {
 			const packageId = lr.packageId;
 			const lessonId = lr.lessonId;
-			const pkg = await app.model.Package.findOne({ where: { id: packageId }});
-			const lesson = await app.model.Lesson.findOne({ where: { id: lessonId }});
-			const packageLesson = await app.model.PackageLesson.findOne({ where: { packageId: packageId, lessonId: lessonId }});
+
+			const [pkg, lesson, packageLesson] = await Promise.all([
+				app.model.Package.findOne({ where: { id: packageId }}),
+				app.model.Lesson.findOne({ where: { id: lessonId }}),
+				app.model.PackageLesson.findOne({ where: { packageId: packageId, lessonId: lessonId }})
+			]);
+
 			const packageName = pkg.packageName;
 			const lessonName = lesson.lessonName;
 			const lessonNo = packageLesson.extra.lessonNo;
@@ -94,11 +103,12 @@ module.exports = app => {
 		await app.model.LessonOrganizationLog.create(log);
 	};
 
-	model.classLog = async function ({ cls, params = {}, action, count = 0, username, handleId, organizationId }) {
+	model.classLog = async ({ cls, params = {}, action, count = 0, username, handleId, organizationId }) => {
 		const begin = moment(new Date(cls.begin)).format("YYYY/MM/DD");
 		const end = moment(new Date(cls.end)).format("YYYY/MM/DD");
 		const paramsBegin = params.begin ? moment(new Date(params.begin)).format("YYYY/MM/DD") : begin;
 		const paramsEnd = params.end ? moment(new Date(params.end)).format("YYYY/MM/DD") : end;
+
 		if (action === "createClass") {
 			return await app.model.LessonOrganizationLog.create({
 				organizationId, type: "班级", description: `新建, 班级: ${cls.name}, 开班时间 ${begin} - ${end}`, username, handleId
@@ -126,10 +136,10 @@ module.exports = app => {
 		}
 	};
 
-	model.studentLog = async function ({ oldmembers, roleId, classIds, realname = "", memberId, username, handleId, organizationId }) {
+	model.studentLog = async ({ oldmembers, roleId, classIds, realname = "", memberId, username, handleId, organizationId }) => {
 		if (classIds.length === 0) {
 			if (!oldmembers || oldmembers.length === 0) {
-				oldmembers = await app.model.lessonOrganizationClassMembers.findAll({
+				oldmembers = await app.model.LessonOrganizationClassMember.findAll({
 					where: { memberId, organizationId }
 				}).then(list => list.map(o => o.toJSON()));
 			}
@@ -152,6 +162,7 @@ module.exports = app => {
 					organizationId, type: "学生", description: "添加学生: " + realname, username, handleId
 				});
 			}
+
 			if (roleId === CLASS_MEMBER_ROLE_TEACHER) {
 				const member = _.find(oldmembers, o => o.classId === 0 && o.roleId && CLASS_MEMBER_ROLE_TEACHER);
 				if (member) {
@@ -160,15 +171,15 @@ module.exports = app => {
 					});
 				}
 				return await app.model.LessonOrganizationLog.create({ organizationId, type: "老师", description: "添加老师: " + realname, username, handleId });
-
 			}
 		}
 
 		for (let i = 0; i < oldmembers.length; i++) {
 			const member = oldmembers[i];
 			const index = classIds.indexOf(member.classId);
-			const cls = await app.model.lessonOrganizationClasses.findOne({ where: { id: member.classId }});
+			const cls = await app.model.LessonOrganizationClass.findOne({ where: { id: member.classId }});
 			member.realname = member.realname || "";
+
 			if (index < 0 && cls) {
 				if (roleId === CLASS_MEMBER_ROLE_STUDENT) {
 					await app.model.LessonOrganizationLog.create({
@@ -180,7 +191,6 @@ module.exports = app => {
 						organizationId, type: "班级", description: `移除老师, ${cls.name}, 移除老师: ${member.realname}`, handleId, username
 					});
 				}
-				continue;
 			} else {
 				if (member.realname !== realname && realname) {
 					if (roleId === CLASS_MEMBER_ROLE_STUDENT) {
@@ -194,7 +204,6 @@ module.exports = app => {
 						});
 					}
 					realname = member.realname;
-					continue;
 				}
 			}
 		}
@@ -203,8 +212,10 @@ module.exports = app => {
 			const classId = classIds[i];
 			const member = _.find(oldmembers, o => o.classIds === classId && o.roleId & roleId);
 			if (member) continue;
+
 			const cls = await app.model.LessonOrganizationClass.findOne({ where: { id: classId }});
 			if (!cls) continue;
+
 			if (roleId === CLASS_MEMBER_ROLE_STUDENT) {
 				await app.model.LessonOrganizationLog.create({
 					organizationId, type: "班级", description: `添加学生, ${cls.name}, 添加学生: ${realname}`, handleId, username
