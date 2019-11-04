@@ -2,14 +2,8 @@
 
 const _ = require("lodash");
 const jwt = require("jwt-simple");
-const consts = require("../common/consts.js");
 const Controller = require("./baseController.js");
 const Err = require("../common/err");
-
-const {
-	USER_ROLE_ALLIANCE_MEMBER,
-	USER_ROLE_TUTOR,
-} = consts;
 
 const {
 	sendSms, verifyCode, updateUserInfo,
@@ -115,9 +109,9 @@ class UsersController extends Controller {
 		const { ctx } = this;
 		const { userId, organizationId } = this.enauthenticated();
 
-		const { portrait, realname, parentPhoneNum = undefined, verifCode = undefined } = ctx.request.body;
+		const { portrait, realname, parentPhoneNum, verifCode } = ctx.request.body;
 
-		this.validateCgi({ portrait, realname }, updateUserInfo);
+		this.validateCgi({ realname }, updateUserInfo);
 
 		if (parentPhoneNum) {
 			this.validateCgi({ parentPhoneNum, verifCode }, updateParentNum);

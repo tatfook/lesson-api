@@ -165,12 +165,6 @@ const verifyCode = {
 
 
 const updateUserInfo = {
-	portrait: {
-		isReg: {
-			errmsg: Err.PORTRAIT_ERR,
-			param: /[a-zA-Z0-9][-a-zA-Z0-9]{0,62}(\.[a-zA-Z0-9][-a-zA-Z0-9]{0,62})+\.?/
-		}
-	},
 	realname: {
 		isLength: {
 			errmsg: Err.REALNAME_ERR,
