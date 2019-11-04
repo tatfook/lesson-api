@@ -281,11 +281,16 @@ class LessonOrgClassMemberService extends Service {
 
 		const members = await this.model.LessonOrganizationClassMember.bulkCreate(datas);
 
-		if (params.realname || params.parentPhoneNum)
+		if (params.realname) {
 			await this.model.LessonOrganizationClassMember.update({
-				realname: params.realname,
-				parentPhoneNum: params.parentPhoneNum
+				realname: params.realname
 			}, { where: { id: { "$in": ids } } });
+		}
+		if (params.parentPhoneNum) {
+			await this.model.LessonOrganizationClassMember.update({
+				parentPhoneNum: params.parentPhoneNum
+			}, { where: { memberId: params.memberId, organizationId: oldmembers[0].organizationId } });
+		}
 
 		if (params.realname && classIds.length) {
 			await this.ctx.service.lessonOrganizationActivateCode.updateByCondition({ realname: params.realname }, {
