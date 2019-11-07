@@ -3,6 +3,7 @@
 const _ = require("lodash");
 
 const Controller = require("./baseController.js");
+const { CLASS_MEMBER_ROLE_ADMIN } = require("../common/consts");
 
 const LessonOrganizationForm = class extends Controller {
 	get modelName() {
@@ -74,6 +75,25 @@ const LessonOrganizationForm = class extends Controller {
 
 		const ok = await this.ctx.service.lessonOrganizationForm.updateFormSubmit(params, { userId, organizationId, roleId });
 		return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: ok });
+	}
+
+	// 管理员可以删除任何表单，普通人只能删除自己的表单
+	async destroy() {
+		const { ctx } = this;
+		const id = _.toNumber(ctx.params.id);
+		if (!id) ctx.throw(400, Err.ID_ERR);
+
+		const { userId, roleId } = this.authenticated();
+		let condition;
+		if (roleId & CLASS_MEMBER_ROLE_ADMIN) {
+			condition = { id };
+		} else {
+			condition = { id, userId };
+		}
+
+		const model = this.model[this.modelName];
+		const result = await model.destroy({ where: condition });
+		ctx.helper.success({ ctx, status: 200, res: result });
 	}
 };
 
