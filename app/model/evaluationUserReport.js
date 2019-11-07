@@ -435,16 +435,16 @@ module.exports = app => {
 			b.sendCount
 	  	FROM (
 			SELECT
-		  		r.userId,
+		  		m.memberId userId,
 		  		r.type,
 		  		m.realname teacherName,
 		  		c.name className
 		 	FROM
-		  		evaluationReports r
-		  		LEFT JOIN lessonOrganizationClassMembers m
-					ON m.memberId = r.userId AND m.roleId & 2 
-		   		LEFT JOIN lessonOrganizationClasses c ON c.id = r.classId
-			WHERE r.classId = :classId ${cond} GROUP BY r.userId, r.type
+				lessonOrganizationClassMembers m
+                left join evaluationReports r 
+					ON m.memberId = r.userId  and r.classId = m.classId
+		   		LEFT JOIN lessonOrganizationClasses c ON c.id = m.classId
+			WHERE m.classId = :classId AND m.roleId & 2 ${cond} GROUP BY r.userId, r.type
 		) a
 		LEFT JOIN(  
 			SELECT
