@@ -431,12 +431,12 @@ module.exports = app => {
 		const sql = `
 		SELECT
 			a.*,
-			b.commentCount,
-			b.sendCount
+			ifnull(b.commentCount,0) commentCount,
+			ifnull(b.sendCount,0) sendCount
 	  	FROM (
 			SELECT
 		  		m.memberId userId,
-		  		r.type,
+		  		ifnull(r.type,0) type,
 		  		m.realname teacherName,
 		  		c.name className
 		 	FROM
@@ -444,7 +444,7 @@ module.exports = app => {
                 left join evaluationReports r 
 					ON m.memberId = r.userId  and r.classId = m.classId
 		   		LEFT JOIN lessonOrganizationClasses c ON c.id = m.classId
-			WHERE m.classId = :classId AND m.roleId & 2 ${cond} GROUP BY r.userId, r.type
+			WHERE m.classId = :classId AND m.roleId & 2 GROUP BY r.userId, r.type
 		) a
 		LEFT JOIN(  
 			SELECT
