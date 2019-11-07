@@ -444,7 +444,7 @@ module.exports = app => {
                 left join evaluationReports r 
 					ON m.memberId = r.userId  and r.classId = m.classId
 		   		LEFT JOIN lessonOrganizationClasses c ON c.id = m.classId
-			WHERE m.classId = :classId AND m.roleId & 2 GROUP BY r.userId, r.type
+			WHERE m.classId = :classId AND m.roleId & 2 GROUP BY m.memberId, r.type
 		) a
 		LEFT JOIN(  
 			SELECT
