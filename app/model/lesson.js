@@ -1,135 +1,143 @@
-"use strict";
+'use strict';
 
 module.exports = app => {
-	const {
-		BIGINT,
-		STRING,
-		JSON,
-		TEXT,
-	} = app.Sequelize;
+    const { BIGINT, STRING, TEXT } = app.Sequelize;
 
-	const model = app.model.define("lessons", {
-		id: {
-			type: BIGINT,
-			autoIncrement: true,
-			primaryKey: true,
-		},
+    const model = app.model.define(
+        'lessons',
+        {
+            id: {
+                type: BIGINT,
+                autoIncrement: true,
+                primaryKey: true,
+            },
 
-		userId: {
-			type: BIGINT,
-			allowNull: false,
-		},
+            userId: {
+                type: BIGINT,
+                allowNull: false,
+            },
 
-		lessonName: {
-			type: STRING,
-			allowNull: false,
-		},
+            lessonName: {
+                type: STRING,
+                allowNull: false,
+            },
 
-		subjectId: {
-			type: BIGINT,
-		},
+            subjectId: {
+                type: BIGINT,
+            },
 
-		url: {
-			type: STRING,
-			unique: true,
-			// allowNull: false,
-		},
+            url: {
+                type: STRING,
+                unique: true,
+                // allowNull: false,
+            },
 
-		coursewareUrl: { // 课程URL 允许为空
-			type: STRING,
-		},
+            coursewareUrl: {
+                // 课程URL 允许为空
+                type: STRING,
+            },
 
-		goals: {
-			type: TEXT,
-		},
+            goals: {
+                type: TEXT,
+            },
+            coverUrl: {
+                // 封面url
+                type: STRING,
+            },
+            duration: {
+                // 时长，如：'90min'
+                type: STRING,
+            },
+            teacherVideoUrl: {
+                // 老师视频url
+                type: STRING,
+            },
+            videoUrl: {
+                // 学生视频url
+                type: STRING,
+            },
+        },
+        {
+            underscored: false,
+            charset: 'utf8mb4',
+            collate: 'utf8mb4_bin',
+        }
+    );
 
-		extra: {
-			type: JSON,
-			defaultValue: {
-				coverUrl: "",
-				vedioUrl: "",
-			},
-		},
+    // model.sync({force:true});
 
-	}, {
-		underscored: false,
-		charset: "utf8mb4",
-		collate: "utf8mb4_bin",
-	});
+    model.getById = async function(id, userId) {
+        const where = { id };
 
-	// model.sync({force:true});
+        if (userId) where.userId = userId;
 
-	model.getById = async function (id, userId) {
-		const where = { id };
+        const data = await app.model.Lesson.findOne({ where });
 
-		if (userId) where.userId = userId;
+        return data && data.get({ plain: true });
+    };
 
-		const data = await app.model.Lesson.findOne({ where });
+    model.addSkill = async function(userId, lessonId, skillId, score) {
+        const [ lesson, skill ] = await Promise.all([
+            app.model.Lesson.findOne({ where: { userId, id: lessonId } }),
+            app.model.Skill.findOne({ where: { id: skillId } }),
+        ]);
 
-		return data && data.get({ plain: true });
-	};
+        if (!lesson || !skill) return false;
 
-	model.addSkill = async function (userId, lessonId, skillId, score) {
-		const [lesson, skill] = await Promise.all([
-			app.model.Lesson.findOne({ where: { userId, id: lessonId }}),
-			app.model.Skill.findOne({ where: { id: skillId }})
-		]);
+        const data = await app.model.LessonSkill.create({
+            userId,
+            lessonId,
+            skillId,
+            score,
+        });
 
-		if (!lesson || !skill) return false;
+        return !!data;
+    };
 
-		const data = await app.model.LessonSkill.create({
-			userId,
-			lessonId,
-			skillId,
-			score,
-		});
+    model.getSkills = async function(lessonId) {
+        const list = await app.model.LessonSkill.findAll({
+            include: [
+                {
+                    as: 'skills',
+                    model: app.model.Skill,
+                    attributes: [ 'skillName' ],
+                },
+            ],
+            where: { lessonId },
+        });
 
-		return !data ? false : true;
-	};
+        return list.map(r => {
+            r = r.get();
+            r.skillName = r.skills.skillName;
+            delete r.skills;
+            return r;
+        });
+    };
 
-	model.getSkills = async function (lessonId) {
-		let list = await app.model.LessonSkill.findAll({
-			include: [{
-				as: "skills",
-				model: app.model.Skill,
-				attributes: ["skillName"]
-			}],
-			where: { lessonId }
-		});
-
-		return list.map(r => {
-			r = r.get();
-			r.skillName = r.skills.skillName;
-			delete r.skills;
-			return r;
-		});
-	};
-
-	model.getPackagesByLessonId = async function (lessonId) {
-		let sql = `select packages.* 
+    model.getPackagesByLessonId = async function(lessonId) {
+        const sql = `select packages.* 
 			from packageLessons, packages 
 			where packageLessons.packageId = packages.id and
 			packageLessons.lessonId = :lessonId`;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT,
-			replacements: {
-				lessonId,
-			}
-		});
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                lessonId,
+            },
+        });
 
-		return list;
-	};
+        return list;
+    };
 
-	model.associate = () => {
-		app.model.Lesson.hasMany(app.model.PackageLesson, {
-			as: "packageLessons",
-			foreignKey: "lessonId",
-			sourceKey: "id",
-			constraints: false,
-		});
-	};
+    model.associate = () => {
+        app.model.Lesson.hasMany(app.model.PackageLesson, {
+            as: 'packageLessons',
+            foreignKey: 'lessonId',
+            sourceKey: 'id',
+            constraints: false,
+        });
+    };
 
-
-	return model;
+    return model;
 };

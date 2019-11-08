@@ -1,28 +1,28 @@
-"use strict";
+'use strict';
 
-const _ = require("lodash");
-const Controller = require("./baseController.js");
+const _ = require('lodash');
+const Controller = require('./baseController.js');
 
 class IndexController extends Controller {
-	// get
-	async index() {
-		const count = await this.model.Classroom.getPackageWeekClassroomCount(56);
-		this.success(count);
-	}
+    // get
+    async index() {
+        const user = await this.model.User.findOne();
+        this.success(user);
+    }
 
-	show() {
-		this.ctx.throw(400);
-	}
+    show() {
+        this.ctx.throw(400);
+    }
 
-	async config() {
-		const params = this.ctx.request.body;
+    async config() {
+        const params = this.ctx.request.body;
 
-		this.ensureAdmin();
+        this.ensureAdmin();
 
-		_.merge(this.app.config.self, params);
+        _.merge(this.app.config.self, params);
 
-		return this.success("OK");
-	}
+        return this.success('OK');
+    }
 }
 
 module.exports = IndexController;
