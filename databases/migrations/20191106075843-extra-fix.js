@@ -80,7 +80,7 @@ module.exports = {
                 queryInterface.removeColumn('lessons', 'teacherVideoUrl', {
                     transaction: t,
                 }),
-                queryInterface.removeColumn('lessons', 'videoUrl', {
+                queryInterface.removeColumn('lessons', 'studentVideoUrl', {
                     transaction: t,
                 }),
 
@@ -89,6 +89,10 @@ module.exports = {
                 }),
 
                 queryInterface.removeColumn('packages', 'coverUrl', {
+                    transaction: t,
+                }),
+
+                queryInterface.removeColumn('packages', 'refuseMsg', {
                     transaction: t,
                 }),
 
