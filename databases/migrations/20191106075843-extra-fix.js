@@ -29,7 +29,7 @@ module.exports = {
                 ),
                 queryInterface.addColumn(
                     'lessons',
-                    'videoUrl',
+                    'studentVideoUrl',
                     { type: Sequelize.STRING(512), comment: '学生视频' },
                     { transaction: t }
                 ),
@@ -48,6 +48,13 @@ module.exports = {
                     'packages',
                     'coverUrl',
                     { type: Sequelize.STRING(512), comment: '课程序号' },
+                    { transaction: t }
+                ),
+
+                queryInterface.addColumn(
+                    'packages',
+                    'refuseMsg',
+                    { type: Sequelize.STRING(512), comment: '审核拒绝信息' },
                     { transaction: t }
                 ),
 

@@ -20,8 +20,8 @@ module.exports = {
                         str += ` duration='${element.extra.duration}',`;
                     if (element.extra.teacherVideoUrl)
                         str += ` teacherVideoUrl='${element.extra.teacherVideoUrl}',`;
-                    if (element.extra.videoUrl)
-                        str += ` videoUrl='${element.extra.videoUrl}',`;
+                    if (element.extra.studentVideoUrl)
+                        str += ` studentVideoUrl='${element.extra.studentVideoUrl}',`;
                     if (str) {
                         str = str.substring(0, str.length - 1);
                         await queryInterface.sequelize.query(
@@ -60,10 +60,16 @@ module.exports = {
             for (let i = 0; i < packages.length; i++) {
                 // 更新packages
                 const element = packages[i];
-                if (element.extra && element.extra.lessonNo) {
+                let str = ``;
+                if (element.extra && element.extra.coverUrl)
+                    str += ` coverUrl='${element.extra.coverUrl}',`;
+                if (element.extra && element.extra.refuseMsg)
+                    str += ` refuseMsg='${element.extra.refuseMsg}',`;
+                if (str) {
+                    str = str.substring(0, str.length - 1);
                     await queryInterface.sequelize.query(
                         `
-            update packages set coverUrl='${element.extra.coverUrl}' where id = ${element.id}
+            update packages set ${str} where id = ${element.id}
           `,
                         { type: Sequelize.QueryTypes.UPDATE, transaction }
                     );
