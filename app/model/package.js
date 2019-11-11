@@ -72,6 +72,13 @@ module.exports = app => {
                 type: INTEGER,
                 defaultValue: 0,
             },
+            coverUrl: {
+                // 封面url
+                type: STRING,
+            },
+            refuseMsg: { // 审核拒绝信息
+                type: STRING,
+            },
         },
         {
             underscored: false,

@@ -52,7 +52,7 @@ module.exports = app => {
                 // 老师视频url
                 type: STRING,
             },
-            videoUrl: {
+            studentVideoUrl: {
                 // 学生视频url
                 type: STRING,
             },
