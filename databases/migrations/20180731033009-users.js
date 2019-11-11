@@ -42,6 +42,10 @@ module.exports = {
                     type: INTEGER, // 0 = 默认 1 - 学生  2 - 教师 4 - 申请老师
                     defaultValue: 0,
                 },
+                bean: {
+                    type: INTEGER,
+                    defaultValue: 0,
+                },
 
                 extra: {
                     // 额外数据

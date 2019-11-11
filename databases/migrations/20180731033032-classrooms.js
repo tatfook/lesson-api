@@ -17,6 +17,11 @@ module.exports = {
                     type: BIGINT,
                     allowNull: false,
                 },
+                classId: {
+                    // 课堂Id
+                    type: BIGINT,
+                    defaultValue: 0,
+                },
 
                 packageId: {
                     // 所属课程包ID
