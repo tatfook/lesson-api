@@ -173,7 +173,7 @@ class Api {
                     description: inst.description,
                     age_min: inst.minAge,
                     age_max: inst.maxAge,
-                    cover: inst.extra.coverUrl,
+                    cover: inst.coverUrl,
                     created_at: inst.createdAt,
                     updated_at: inst.updatedAt,
                     recent_view: inst.lastClassroomCount,
