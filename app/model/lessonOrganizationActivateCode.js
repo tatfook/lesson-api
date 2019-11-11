@@ -60,7 +60,8 @@ module.exports = app => {
             updatedAt: {
                 type: DATE,
             },
-            name: { // 这个激活码是给哪个用户使用的，实际不这么用
+            name: {
+                // 这个激活码是给哪个用户使用的，实际不这么用
                 type: STRING,
             },
         },
