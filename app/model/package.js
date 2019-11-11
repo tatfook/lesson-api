@@ -76,7 +76,8 @@ module.exports = app => {
                 // 封面url
                 type: STRING,
             },
-            refuseMsg: { // 审核拒绝信息
+            refuseMsg: {
+                // 审核拒绝信息
                 type: STRING,
             },
         },
