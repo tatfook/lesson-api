@@ -166,20 +166,26 @@ class PackageService extends Service {
     }
 
     /**
-	 * 审核
-	 * @param {*} params params
-	 * @param {*} userId userId
+     * 审核
+     * @param {*} params params
+     * @param {*} userId userId
      * @param {*} packageId packageId
-	 */
+     */
     async audit(params, userId, packageId) {
-        this.ctx.validate({
-            state: [ PACKAGE_STATE_UNAUDIT, PACKAGE_STATE_AUDITING ],
-        }, params);
+        this.ctx.validate(
+            {
+                state: [ PACKAGE_STATE_UNAUDIT, PACKAGE_STATE_AUDITING ],
+            },
+            params
+        );
 
         const data = this.getByCondition({ id: packageId, userId });
         if (!data) this.ctx.throw(400, Err.NOT_FOUND);
 
-        const result = await this.ctx.model.Package.update({ state: params.state }, { where: { id: packageId } });
+        const result = await this.ctx.model.Package.update(
+            { state: params.state },
+            { where: { id: packageId } }
+        );
         return result;
     }
 
