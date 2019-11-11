@@ -4,6 +4,11 @@ const Service = require('../common/service.js');
 const Err = require('../common/err');
 const _ = require('lodash');
 
+const {
+    PACKAGE_STATE_UNAUDIT,
+    PACKAGE_STATE_AUDITING,
+} = require('../common/consts');
+
 class PackageService extends Service {
     /**
      * 通过条件获取package
@@ -158,6 +163,24 @@ class PackageService extends Service {
             }),
         ]);
         return retArr[0];
+    }
+
+    /**
+	 * 审核
+	 * @param {*} params params
+	 * @param {*} userId userId
+     * @param {*} packageId packageId
+	 */
+    async audit(params, userId, packageId) {
+        this.ctx.validate({
+            state: [ PACKAGE_STATE_UNAUDIT, PACKAGE_STATE_AUDITING ],
+        }, params);
+
+        const data = this.getByCondition({ id: packageId, userId });
+        if (!data) this.ctx.throw(400, Err.NOT_FOUND);
+
+        const result = await this.ctx.model.Package.update({ state: params.state }, { where: { id: packageId } });
+        return result;
     }
 
     /**

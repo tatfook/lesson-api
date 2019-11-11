@@ -108,6 +108,18 @@ class PackagesController extends Controller {
         return this.ctx.helper.success({ ctx, status: 200, res: result });
     }
 
+    async audit() {
+        const { ctx } = this;
+        const id = _.toNumber(ctx.params.id);
+        if (!id) ctx.throw(400, Err.ID_ERR);
+        const params = ctx.request.body;
+        const { userId } = this.enauthenticated();
+
+        const result = await this.ctx.service.package.audit(params, userId, id);
+
+        return this.ctx.helper.success({ ctx, status: 200, res: result });
+    }
+
     async hots() {
         const { ctx } = this;
 
