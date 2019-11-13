@@ -237,7 +237,10 @@ class LessonOrgActivateCodeService extends Service {
             },
             { key }
         );
-
+        // 更新用户vip和t信息
+        await this.ctx.service.lessonOrganizationClassMember.updateUserVipAndTLevel(
+            userId
+        );
         return Object.assign(member, { roleId, realname });
     }
 }

@@ -49,7 +49,10 @@ describe('test/controller/packages.test.js', () => {
             .send({
                 lessonName: 'HTML',
                 subjectId: 1,
-                skills: [{ id: 1, score: 10 }, { id: 2, score: 8 }],
+                skills: [
+                    { id: 1, score: 10 },
+                    { id: 2, score: 8 },
+                ],
                 goals: '掌握基本的前端编程',
                 coverUrl: 'http://www.baidu.com',
                 vedioUrl: 'http://www.baidu.com',
