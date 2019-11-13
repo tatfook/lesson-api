@@ -435,6 +435,8 @@ class LessonOrgClassMemberService extends Service {
                 }
             );
         }
+        // 更新用户vip和t信息
+        await this.updateUserVipAndTLevel(params.memberId);
         return members;
     }
 
@@ -498,6 +500,8 @@ class LessonOrgClassMemberService extends Service {
                     ? CLASS_MEMBER_ROLE_TEACHER
                     : CLASS_MEMBER_ROLE_STUDENT,
         });
+        // 更新用户vip和t信息
+        await this.updateUserVipAndTLevel(member.memberId);
     }
 
     /**
@@ -508,6 +512,40 @@ class LessonOrgClassMemberService extends Service {
         return await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
             members
         );
+    }
+
+    async updateUserVipAndTLevel(userId) {
+        if (!userId) {
+            return;
+        }
+        // 查出此用户所有的LessonOrganizationClassMember
+        const members = await this.ctx.model.LessonOrganizationClassMember.findAll(
+            {
+                where: {
+                    memberId: userId,
+                },
+            }
+        );
+        let isVip = 0;
+        let tLevel = 0;
+        members.forEach(member => {
+            // 是学生那么就是vip
+            if (!isVip && member.roleId & CLASS_MEMBER_ROLE_STUDENT) {
+                isVip = 1;
+            }
+            // 是机构老师则就是tLevel
+            if (!tLevel && member.roleId & CLASS_MEMBER_ROLE_TEACHER) {
+                tLevel = 1;
+            }
+        });
+        const updateParam = {
+            vip: isVip,
+            tLevel,
+        };
+        if (!tLevel) {
+            delete updateParam.tLevel;
+        }
+        await this.ctx.service.keepwork.updateUser(userId, updateParam);
     }
 }
 

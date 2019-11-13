@@ -128,6 +128,16 @@ class KeepworkService extends Service {
         );
         return ret;
     }
+
+    // 更新用户的VIP和tLevel信息
+    async updateUser(userId, params) {
+        const ret = await this.ctx.helper.curl(
+            'post',
+            `${this.baseUrl}lessons/users/${userId}`,
+            { params, apiKey }
+        );
+        return ret;
+    }
 }
 
 module.exports = KeepworkService;
