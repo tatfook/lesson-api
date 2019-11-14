@@ -54,7 +54,7 @@ module.exports = app => {
 	});
 
 	model.getReportList = async function ({ classId, roleId, userId, name, type, days }) {
-		let condition = ` where r.classId = :classId `;
+		let condition = ` where r.classId = :classId and sm.id is not null `;
 		if (~~roleId !== CLASS_MEMBER_ROLE_ADMIN) condition += ` and r.userId = :userId`;
 		if (name) condition += ` and r.name like concat('%',:name,'%')`;
 		if (type) condition += ` and r.type = :type`;
@@ -85,7 +85,9 @@ module.exports = app => {
 		  evaluationReports r
 		  LEFT JOIN evaluationUserReports ur ON r.id = ur.reportId
 		  LEFT JOIN lessonOrganizationClassMembers m 
-		  	ON m.memberId = r.userId and m.roleId &2 and m.classId = r.classId
+			  ON m.memberId = r.userId and m.roleId &2 and m.classId = r.classId
+		  LEFT JOIN lessonOrganizationClassMembers sm
+              ON sm.memberId = ur.userId and sm.roleId &1 and sm.classId = r.classId
 		  LEFT JOIN users u ON u.id = r.userId ${condition}
 		GROUP BY r.id
 		) a LEFT JOIN (SELECT
