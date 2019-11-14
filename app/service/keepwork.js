@@ -12,7 +12,7 @@ class KeepworkService extends Service {
     }
 
     /**
-     * attributes: ["id", "username", "nickname", "portrait"]
+     * attributes: ["id", "username", "nickname", "portrait", "vip", "tLevel"]
      * @param {*} condition condition
      */
     async getAllUserByCondition(condition) {

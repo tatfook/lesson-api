@@ -139,7 +139,7 @@ class EvalReportService extends Service {
         return ret ? ret.get() : undefined;
     }
 
-    // 获取对学生的点评和学生的头像
+    // 获取对学生的点评和学生的头像以及学生是否是vip和tLevel等级
     async getUserReportAndOrgInfo(userReportId) {
         const repo = await this.ctx.model.EvaluationUserReport.getReportAndOrgNameById(
             userReportId
@@ -147,7 +147,12 @@ class EvalReportService extends Service {
         const users = await this.ctx.service.keepwork.getAllUserByCondition({
             id: repo.userId,
         });
-        return { ...repo, portrait: users[0].portrait };
+        return {
+            ...repo,
+            portrait: users[0].portrait,
+            vip: users[0].vip,
+            tLevel: users[0].tLevel,
+        };
     }
 
     // 获取一条发起的点评

@@ -49,7 +49,7 @@ class User extends Service {
         );
     }
 
-    // 获取keepwork头像，在机构中的realname和家长手机号
+    // 获取keepwork头像，在机构中的realname和家长手机号，以及vip和tLevel
     async getPortraitRealNameParentNum(userId, organizationId) {
         const [ users, member ] = await Promise.all([
             this.ctx.service.keepwork.getAllUserByCondition({ id: userId }),
@@ -61,6 +61,8 @@ class User extends Service {
 
         return {
             portrait: users.length ? users[0].portrait : '',
+            vip: users.length ? users[0].vip : 0,
+            tLevel: users.length ? users[0].tLevel : 0,
             realname: member ? member.realname : '',
             parentPhoneNum: member ? member.parentPhoneNum : '',
         };
