@@ -1,360 +1,552 @@
-"use strict";
+'use strict';
 
-const Service = require("../common/service.js");
+const Service = require('../common/service.js');
 const {
-	CLASS_MEMBER_ROLE_TEACHER,
-	CLASS_MEMBER_ROLE_STUDENT,
-	CLASS_MEMBER_ROLE_ADMIN
-} = require("../common/consts.js");
+    CLASS_MEMBER_ROLE_TEACHER,
+    CLASS_MEMBER_ROLE_STUDENT,
+    CLASS_MEMBER_ROLE_ADMIN,
+} = require('../common/consts.js');
 const Err = require('../common/err');
-const _ = require('lodash')
+const _ = require('lodash');
 
 class LessonOrgClassMemberService extends Service {
-	/**
- 	* 通过条件获取lessonOrganizationClassMember
- 	* @param {*} condition  必选,对象
- 	*/
-	async getByCondition(condition) {
-		let data = await this.ctx.model.LessonOrganizationClassMember.findOne({ where: condition });
-		if (data) data = data.get({ plain: true });
+    /**
+     * 通过条件获取lessonOrganizationClassMember
+     * @param {*} condition  必选,对象
+     */
+    async getByCondition(condition) {
+        let data = await this.ctx.model.LessonOrganizationClassMember.findOne({
+            where: condition,
+        });
+        if (data) data = data.get({ plain: true });
 
-		return data;
-	}
+        return data;
+    }
 
-	/**
-	 * 根据条件查找全部的记录
-	 * @param {*} condition 必选 对象
-	 */
-	async getAllByCondition(condition) {
-		let list = await this.ctx.model.LessonOrganizationClassMember.findAll({ where: condition });
-		return list ? list.map(r => r.get()) : [];
-	}
+    /**
+     * 根据条件查找全部的记录
+     * @param {*} condition 必选 对象
+     */
+    async getAllByCondition(condition) {
+        const list = await this.ctx.model.LessonOrganizationClassMember.findAll(
+            {
+                where: condition,
+            }
+        );
+        return list ? list.map(r => r.get()) : [];
+    }
 
-	/**
-	 * 根据条件查找全部的记录，并且带连表查询
-	 * @param {*} include 关联表
-	 * @param {*} condition 必选 对象
-	 */
-	async getAllAndExtraByCondition(include, condition) {
-		const list = await this.ctx.model.LessonOrganizationClassMember.findAll({
-			include,
-			where: condition
-		});
+    /**
+     * 根据条件查找全部的记录，并且带连表查询
+     * @param {*} include 关联表
+     * @param {*} condition 必选 对象
+     */
+    async getAllAndExtraByCondition(include, condition) {
+        const list = await this.ctx.model.LessonOrganizationClassMember.findAll(
+            {
+                include,
+                where: condition,
+            }
+        );
 
-		return list ? list.map(r => r.get()) : [];
-	}
+        return list ? list.map(r => r.get()) : [];
+    }
 
-	/**
- 	* 根据条件删除机构成员
- 	* @param {*} condition 
- 	*/
-	async destroyByCondition(condition) {
-		return await this.ctx.model.LessonOrganizationClassMember.destroy({ where: condition });
-	}
+    /**
+     * 根据条件删除机构成员
+     * @param {*} condition condition
+     */
+    async destroyByCondition(condition) {
+        return await this.ctx.model.LessonOrganizationClassMember.destroy({
+            where: condition,
+        });
+    }
 
-	/**
-	 * 根据条件更新
-	 * @param {*} params 更新的字段
-	 * @param {*} condition 条件
-	 */
-	async updateByCondition(params, condition) {
-		return await this.ctx.model.LessonOrganizationClassMember.update(params, { where: condition });
-	}
+    /**
+     * 根据条件更新
+     * @param {*} params 更新的字段
+     * @param {*} condition 条件
+     */
+    async updateByCondition(params, condition) {
+        return await this.ctx.model.LessonOrganizationClassMember.update(
+            params,
+            {
+                where: condition,
+            }
+        );
+    }
 
-	/**
-	 * 
-	 * @param {*} params 
-	 */
-	async create(params) {
-		const ret = await this.ctx.model.LessonOrganizationClassMember.create(params);
-		return ret ? ret.get() : undefined;
-	}
+    /**
+     *
+     * @param {*} params params
+     */
+    async create(params) {
+        const ret = await this.ctx.model.LessonOrganizationClassMember.create(
+            params
+        );
+        return ret ? ret.get() : undefined;
+    }
 
-	/**
-	 * 获取教师列表
-	 * @param {*} organizationId 
-	 * @param {*} classId 
-	 */
-	async getTeachers(organizationId, classId) {
-		const members = await this.ctx.service.lessonOrganization.getTeachers(organizationId, classId);
-		const memberIds = members.map(o => o.memberId);
-		if (memberIds.length === 0) return [];
+    /**
+     * 获取教师列表
+     * @param {*} organizationId organizationId
+     * @param {*} classId classId
+     */
+    async getTeachers(organizationId, classId) {
+        const members = await this.ctx.service.lessonOrganization.getTeachers(
+            organizationId,
+            classId
+        );
+        const memberIds = members.map(o => o.memberId);
+        if (memberIds.length === 0) return [];
 
-		const curtime = new Date();
-		const list = await this.model.LessonOrganizationClassMember.findAll({
-			include: [
-				{
-					as: "lessonOrganizationClasses",
-					model: this.model.LessonOrganizationClass,
-					where: {
-						end: { $gte: curtime },
-					},
-					required: false,
-				}
-			],
-			where: {
-				organizationId,
-				memberId: {
-					[this.model.Op.in]: memberIds,
-				},
-				classId: classId ? classId : { "$gte": 0 }
-			}
-		}).then(list => list.map(o => o.toJSON()));
+        const curtime = new Date();
+        const list = await this.model.LessonOrganizationClassMember.findAll({
+            include: [
+                {
+                    as: 'lessonOrganizationClasses',
+                    model: this.model.LessonOrganizationClass,
+                    where: {
+                        end: { $gte: curtime },
+                    },
+                    required: false,
+                },
+            ],
+            where: {
+                organizationId,
+                memberId: {
+                    [this.model.Op.in]: memberIds,
+                },
+                classId: classId ? classId : { $gte: 0 },
+            },
+        }).then(list => list.map(o => o.toJSON()));
 
-		const users = await this.ctx.service.keepwork.getAllUserByCondition({ id: { $in: memberIds } });
+        const users = await this.ctx.service.keepwork.getAllUserByCondition({
+            id: { $in: memberIds },
+        });
 
-		const map = {};
-		_.each(list, o => {
-			if (!(o.roleId & CLASS_MEMBER_ROLE_TEACHER)) return;
-			map[o.memberId] = map[o.memberId] || o;
-			map[o.memberId].classes = map[o.memberId].classes || [];
+        const map = {};
+        _.each(list, o => {
+            if (!(o.roleId & CLASS_MEMBER_ROLE_TEACHER)) return;
+            map[o.memberId] = map[o.memberId] || o;
+            map[o.memberId].classes = map[o.memberId].classes || [];
 
-			if (o.lessonOrganizationClasses) map[o.memberId].classes.push(o.lessonOrganizationClasses);
+            if (o.lessonOrganizationClasses) {
+                map[o.memberId].classes.push(o.lessonOrganizationClasses);
+            }
 
-			const index = _.findIndex(users, obj => { return obj.id === o.memberId; });
-			if (index > -1) {
-				map[o.memberId].username = users[index].username;
-			}
-			map[o.memberId].realname = map[o.memberId].realname || o.realname;
-			delete o.lessonOrganizationClasses;
-		});
+            const index = _.findIndex(users, obj => {
+                return obj.id === o.memberId;
+            });
+            if (index > -1) {
+                map[o.memberId].username = users[index].username;
+            }
+            map[o.memberId].realname = map[o.memberId].realname || o.realname;
+            delete o.lessonOrganizationClasses;
+        });
 
-		const datas = [];
-		_.each(map, o => datas.push(o));
+        const datas = [];
+        _.each(map, o => datas.push(o));
 
-		return datas;
-	}
+        return datas;
+    }
 
-	/**
-	 * 获取学生列表
-	 * @param {*} organizationId 
-	 * @param {*} classId 
-	 */
-	async getStudents(organizationId, classId) {
-		const members = await this.ctx.service.lessonOrganization.getMembers(organizationId, 1, classId);
-		const memberIds = members.map(o => o.memberId);
-		if (memberIds.length === 0) return { count: 0, rows: [] };
+    /**
+     * 获取学生列表
+     * @param {*} organizationId organizationId
+     * @param {*} classId classId
+     */
+    async getStudents(organizationId, classId) {
+        const members = await this.ctx.service.lessonOrganization.getMembers(
+            organizationId,
+            1,
+            classId
+        );
+        const memberIds = members.map(o => o.memberId);
+        if (memberIds.length === 0) return { count: 0, rows: [] };
 
-		const curtime = new Date();
+        const curtime = new Date();
 
-		const [list, users] = await Promise.all([
-			this.model.LessonOrganizationClassMember.findAll({
-				include: [
-					{
-						as: "lessonOrganizationClasses",
-						model: this.model.LessonOrganizationClass,
-						where: {
-							end: { $gte: curtime },
-						},
-						required: false,
-					},
-				],
-				where: {
-					organizationId,
-					memberId: { $in: memberIds },
-					classId: classId ? classId : { "$gt": 0 },
-				}
-			}),
+        const [ list, users ] = await Promise.all([
+            this.model.LessonOrganizationClassMember.findAll({
+                include: [
+                    {
+                        as: 'lessonOrganizationClasses',
+                        model: this.model.LessonOrganizationClass,
+                        where: {
+                            end: { $gte: curtime },
+                        },
+                        required: false,
+                    },
+                ],
+                where: {
+                    organizationId,
+                    memberId: { $in: memberIds },
+                    classId: classId ? classId : { $gt: 0 },
+                },
+            }),
 
-			this.ctx.service.keepwork.getAllUserByCondition({ id: { $in: memberIds } })
-		]);
+            this.ctx.service.keepwork.getAllUserByCondition({
+                id: { $in: memberIds },
+            }),
+        ]);
 
-		const map = {};
-		const rows = [];
-		let count = 0;
+        const map = {};
+        const rows = [];
+        let count = 0;
 
-		_.each(list, o => {
-			o = o.get();
-			if (!(o.roleId & CLASS_MEMBER_ROLE_STUDENT) || !o.lessonOrganizationClasses) return;
-			if (!map[o.memberId]) {
-				count++;
-				map[o.memberId] = o;
-				o.classes = [];
+        _.each(list, o => {
+            o = o.get();
+            if (
+                !(o.roleId & CLASS_MEMBER_ROLE_STUDENT) ||
+                !o.lessonOrganizationClasses
+            ) {
+                return;
+            }
+            if (!map[o.memberId]) {
+                count++;
+                map[o.memberId] = o;
+                o.classes = [];
 
-				const index = _.findIndex(users, obj => { return obj.id === o.memberId; });
-				if (index > -1) {
-					o.users = users[index];
-				}
-				rows.push(o);
-			}
-			map[o.memberId].realname = map[o.memberId].realname || o.realname;
-			if (o.lessonOrganizationClasses) map[o.memberId].classes.push(o.lessonOrganizationClasses);
-			delete o.lessonOrganizationClasses;
-		});
-		_.each(rows, o => { o.lessonOrganizationClasses = o.classes; });
+                const index = _.findIndex(users, obj => {
+                    return obj.id === o.memberId;
+                });
+                if (index > -1) {
+                    o.users = users[index];
+                }
+                rows.push(o);
+            }
+            map[o.memberId].realname = map[o.memberId].realname || o.realname;
+            if (o.lessonOrganizationClasses) {
+                map[o.memberId].classes.push(o.lessonOrganizationClasses);
+            }
+            delete o.lessonOrganizationClasses;
+        });
+        _.each(rows, o => {
+            o.lessonOrganizationClasses = o.classes;
+        });
 
-		return { count, rows };
-	}
+        return { count, rows };
+    }
 
-	/**
-	 * 这个接口逻辑复杂又乱。。。先放这儿
-	 * @param {*} params 
-	 * @param {*} authParams 
-	 */
-	async createMember(params, authParams) {
-		let { organizationId, roleId, userId, username } = authParams;
+    /**
+     * 这个接口逻辑复杂又乱。。。先放这儿
+     * @param {*} params params
+     * @param {*} authParams authParams
+     */
+    async createMember(params, authParams) {
+        let { organizationId, roleId, userId, username } = authParams;
 
-		if (params.organizationId && params.organizationId != organizationId) {
-			organizationId = params.organizationId;
-			roleId = await this.ctx.service.organization.getRoleId(organizationId, userId);
-		}
+        if (params.organizationId && params.organizationId !== organizationId) {
+            organizationId = params.organizationId;
+            roleId = await this.ctx.service.organization.getRoleId(
+                organizationId,
+                userId
+            );
+        }
 
-		params.organizationId = organizationId;
-		params.roleId = params.roleId || CLASS_MEMBER_ROLE_STUDENT;
-		const classIds = _.uniq(params.classIds || []);
+        params.organizationId = organizationId;
+        params.roleId = params.roleId || CLASS_MEMBER_ROLE_STUDENT;
+        const classIds = _.uniq(params.classIds || []);
 
-		if (!params.memberId) {
-			if (!params.memberName) return this.ctx.throw(400, Err.ARGS_ERR);
+        if (!params.memberId) {
+            if (!params.memberName) return this.ctx.throw(400, Err.ARGS_ERR);
 
-			const users = await this.ctx.service.keepwork.getAllUserByCondition({ username: params.memberName })
-			if (!users || !users.length) return this.ctx.throw(400, Err.USER_NOT_EXISTS);
+            const users = await this.ctx.service.keepwork.getAllUserByCondition(
+                {
+                    username: params.memberName,
+                }
+            );
+            if (!users || !users.length) {
+                return this.ctx.throw(400, Err.USER_NOT_EXISTS);
+            }
 
-			params.memberId = users[0].id;
-		}
+            params.memberId = users[0].id;
+        }
 
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
+            if (roleId <= CLASS_MEMBER_ROLE_STUDENT) {
+                return this.ctx.throw(403, Err.AUTH_ERR);
+            }
 
-		if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
-			if (roleId <= CLASS_MEMBER_ROLE_STUDENT) return this.ctx.throw(403, Err.AUTH_ERR);
+            const organ = await this.ctx.service.lessonOrganization.getByCondition(
+                {
+                    id: organizationId,
+                }
+            );
+            if (!organ) return this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
 
-			const organ = await this.ctx.service.lessonOrganization.getByCondition({ id: organizationId });
-			if (!organ) return this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+            if (organ.privilege && 1 === 0) {
+                return this.ctx.throw(403, Err.AUTH_ERR);
+            }
+        }
 
-			if (organ.privilege && 1 === 0) return this.ctx.throw(403, Err.AUTH_ERR);
-		}
+        let oldmembers = await this.ctx.model.LessonOrganizationClassMember.findAll(
+            {
+                order: [[ 'id', 'desc' ]],
+                include: [
+                    {
+                        as: 'lessonOrganizationClasses',
+                        model: this.ctx.model.LessonOrganizationClass,
+                        required: false,
+                    },
+                ],
+                where: { organizationId, memberId: params.memberId },
+            }
+        ).then(list => list.map(o => o.toJSON()));
 
-		let oldmembers = await this.ctx.model.LessonOrganizationClassMember.findAll({
-			order: [["id", "desc"]],
-			include: [{ as: "lessonOrganizationClasses", model: this.ctx.model.LessonOrganizationClass, required: false }],
-			where: { organizationId, memberId: params.memberId }
-		}).then(list => list.map(o => o.toJSON()));
+        oldmembers = _.filter(oldmembers, o => {
+            if (
+                o.roleId === CLASS_MEMBER_ROLE_STUDENT &&
+                o.lessonOrganizationClasses &&
+                new Date(o.lessonOrganizationClasses.end).getTime() <
+                    new Date().getTime()
+            ) {
+                return false;
+            }
+            return true;
+        });
 
-		oldmembers = _.filter(oldmembers, o => {
-			if (o.roleId == CLASS_MEMBER_ROLE_STUDENT && o.lessonOrganizationClasses
-				&& new Date(o.lessonOrganizationClasses.end).getTime() < new Date().getTime()
-			) return false;
-			return true;
-		});
+        const ids = _.map(oldmembers, o => o.id);
 
-		const ids = _.map(oldmembers, o => o.id);
+        if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
+            const oldClassIds = _.filter(
+                oldmembers,
+                o => o.roleId & CLASS_MEMBER_ROLE_STUDENT
+            ).map(r => r.classId);
+            const delClassIds = _.difference(oldClassIds, classIds);
+            // 这个人在这些班级的学生身份被删除，这里检查是否要更新评估报告的统计数据
+            if (delClassIds.length) {
+                await this.ctx.service.evaluationReport.checkEvaluationStatus(
+                    params.memberId,
+                    delClassIds
+                );
+            }
+        }
 
-		if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
-			const oldClassIds = _.filter(oldmembers, o => o.roleId & CLASS_MEMBER_ROLE_STUDENT).map(r => r.classId);
-			const delClassIds = _.difference(oldClassIds, classIds);
-			// 这个人在这些班级的学生身份被删除，这里检查是否要更新评估报告的统计数据
-			if (delClassIds.length) await this.ctx.service.evaluationReport.checkEvaluationStatus(params.memberId, delClassIds);
-		}
+        // ???
+        const organ = await this.ctx.service.lessonOrganization.getByCondition({
+            id: organizationId,
+        });
+        if (!organ) return this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
 
-		//???
-		const organ = await this.ctx.service.lessonOrganization.getByCondition({ id: organizationId });
-		if (!organ) return this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+        // 检查人数是否达到上限
+        const organCount = organ.count;
+        const isStudent = !!_.find(
+            oldmembers,
+            o => o.roleId & CLASS_MEMBER_ROLE_STUDENT
+        );
+        if (!isStudent && params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
+            const usedCount = await this.ctx.service.lessonOrganization.getOrganMemberCount(
+                organizationId
+            );
+            if (usedCount >= organCount && classIds.length > 0) {
+                return this.ctx.throw(400, Err.MEMBERS_UPPER_LIMIT);
+            }
+        }
 
-		// 检查人数是否达到上限
-		const organCount = organ.count;
-		const isStudent = _.find(oldmembers, o => o.roleId & CLASS_MEMBER_ROLE_STUDENT) ? true : false;
-		if (!isStudent && (params.roleId & CLASS_MEMBER_ROLE_STUDENT)) {
-			const usedCount = await this.ctx.service.lessonOrganization.getOrganMemberCount(organizationId);
-			if (usedCount >= organCount && classIds.length > 0) return this.ctx.throw(400, Err.MEMBERS_UPPER_LIMIT);
-		}
+        await this.ctx.service.lessonOrganizationLog.studentLog({
+            ...params,
+            handleId: userId,
+            username,
+            classIds,
+            oldmembers,
+            organizationId,
+        });
 
-		await this.ctx.service.lessonOrganizationLog.studentLog({ ...params, handleId: userId, username, classIds, oldmembers, organizationId });
+        // 合并其它身份
+        const datas = _.map(classIds, classId => ({
+            ...params,
+            classId,
+            roleId:
+                params.roleId |
+                (
+                    _.find(oldmembers, m => m.classId === ~~classId) || {
+                        roleId: 0,
+                    }
+                ).roleId,
+        }));
 
-		// 合并其它身份
-		const datas = _.map(classIds, classId => ({
-			...params, classId, roleId: params.roleId | (_.find(oldmembers, m => m.classId == classId) || { roleId: 0 }).roleId
-		}));
-
-		// 删除要创建的
-		if (classIds.length) await this.destroyByCondition({ organizationId, memberId: params.memberId, classId: { $in: classIds } });
-		// 取消全部班级此身份
-		if (ids.length) await this.model.query(
-			`
+        // 删除要创建的
+        if (classIds.length) {
+            await this.destroyByCondition({
+                organizationId,
+                memberId: params.memberId,
+                classId: { $in: classIds },
+            });
+        }
+        // 取消全部班级此身份
+        if (ids.length) {
+            await this.model.query(
+                `
 			update lessonOrganizationClassMembers 
 			set roleId = roleId & ~${params.roleId} 
 			where id in (:ids)
-			`, {
-			type: this.model.QueryTypes.UPDATE, replacements: { ids }
-		});
-		// 删除roleId=0为0的成员
-		await this.destroyByCondition({ organizationId, memberId: params.memberId, roleId: 0 });
+			`,
+                {
+                    type: this.model.QueryTypes.UPDATE,
+                    replacements: { ids },
+                }
+            );
+        }
+        // 删除roleId=0为0的成员
+        await this.destroyByCondition({
+            organizationId,
+            memberId: params.memberId,
+            roleId: 0,
+        });
 
-		if (datas.length == 0) return [];
+        if (datas.length === 0) return [];
 
-		const members = await this.model.LessonOrganizationClassMember.bulkCreate(datas);
+        const members = await this.model.LessonOrganizationClassMember.bulkCreate(
+            datas
+        );
 
-		if (params.realname) {
-			await this.model.LessonOrganizationClassMember.update({
-				realname: params.realname
-			}, { where: { id: { "$in": ids } } });
-		}
-		if (params.parentPhoneNum) {
-			await this.model.LessonOrganizationClassMember.update({
-				parentPhoneNum: params.parentPhoneNum
-			}, { where: { memberId: params.memberId, organizationId: oldmembers[0].organizationId } });
-		}
+        if (params.realname) {
+            await this.model.LessonOrganizationClassMember.update(
+                {
+                    realname: params.realname,
+                },
+                { where: { id: { $in: ids } } }
+            );
+        }
+        if (params.parentPhoneNum) {
+            await this.model.LessonOrganizationClassMember.update(
+                {
+                    parentPhoneNum: params.parentPhoneNum,
+                },
+                {
+                    where: {
+                        memberId: params.memberId,
+                        organizationId: oldmembers[0].organizationId,
+                    },
+                }
+            );
+        }
 
-		if (params.realname && classIds.length) {
-			await this.ctx.service.lessonOrganizationActivateCode.updateByCondition({ realname: params.realname }, {
-				organizationId,
-				activateUserId: params.memberId,
-				state: 1,
-				classId: { $in: classIds },
-			});
-		}
-		return members;
-	}
+        if (params.realname && classIds.length) {
+            await this.ctx.service.lessonOrganizationActivateCode.updateByCondition(
+                { realname: params.realname },
+                {
+                    organizationId,
+                    activateUserId: params.memberId,
+                    state: 1,
+                    classId: { $in: classIds },
+                }
+            );
+        }
+        // 更新用户vip和t信息
+        await this.updateUserVipAndTLevel(params.memberId);
+        return members;
+    }
 
-	/**
-	 * 删除成员
-	 * @param {*} params 
-	 * @param {*} authParams 
-	 * @param {*} id memberId
-	 */
-	async destroyMember(params, authParams, id) {
-		const { organizationId, roleId, userId, username } = authParams;
+    /**
+     * 删除成员
+     * @param {*} params params
+     * @param {*} authParams authParams
+     * @param {*} id memberId
+     */
+    async destroyMember(params, authParams, id) {
+        const { organizationId, roleId, userId, username } = authParams;
 
-		const member = await this.getByCondition({ organizationId, id });
-		if (!member) return;
+        const member = await this.getByCondition({ organizationId, id });
+        if (!member) return;
 
-		if (member.roleId >= roleId) return this.ctx.throw(411, Err.AUTH_ERR);
+        if (member.roleId >= roleId) return this.ctx.throw(411, Err.AUTH_ERR);
 
-		if (roleId < CLASS_MEMBER_ROLE_ADMIN) {
-			if (roleId <= CLASS_MEMBER_ROLE_STUDENT) return this.throw(403, Err.AUTH_ERR);
+        if (roleId < CLASS_MEMBER_ROLE_ADMIN) {
+            if (roleId <= CLASS_MEMBER_ROLE_STUDENT) {
+                return this.throw(403, Err.AUTH_ERR);
+            }
 
-			const organ = await this.ctx.service.lessonOrganization.getByCondition({ id: organizationId });
-			if (!organ) return this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+            const organ = await this.ctx.service.lessonOrganization.getByCondition(
+                {
+                    id: organizationId,
+                }
+            );
+            if (!organ) return this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
 
-			if (organ.privilege && 2 === 0) return this.throw(403, Err.AUTH_ERR);
-		}
+            if (organ.privilege & (CLASS_MEMBER_ROLE_TEACHER === 0)) {
+                return this.throw(403, Err.AUTH_ERR);
+            }
+        }
 
-		// 这个人在班级的学生身份被删除，这里检查是否要更新评估报告的统计数据
-		if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
-			await this.ctx.service.evaluationReport.checkEvaluationStatus(member.memberId, [member.classId]);
-		}
+        // 这个人在班级的学生身份被删除，这里检查是否要更新评估报告的统计数据
+        if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
+            await this.ctx.service.evaluationReport.checkEvaluationStatus(
+                member.memberId,
+                [ member.classId ]
+            );
+        }
 
-		if (!params.roleId || params.roleId == member.roleId) {
-			await this.destroyByCondition({ id });
-		} else {
-			await this.updateByCondition({ roleId: member.roleId & (~params.roleId) }, { id });
-		}
+        if (!params.roleId || params.roleId === member.roleId) {
+            await this.destroyByCondition({ id });
+        } else {
+            await this.updateByCondition(
+                { roleId: member.roleId & ~params.roleId },
+                { id }
+            );
+        }
 
-		const memberRoleId = params.roleId ? params.roleId : member.roleId;
-		await this.ctx.service.lessonOrganizationLog.studentLog({
-			organizationId,
-			handleId: userId,
-			username,
-			oldmembers: [member],
-			classIds: [-1],
-			roleId: memberRoleId & CLASS_MEMBER_ROLE_TEACHER ? CLASS_MEMBER_ROLE_TEACHER : CLASS_MEMBER_ROLE_STUDENT,
-		});
-	}
+        const memberRoleId = params.roleId ? params.roleId : member.roleId;
+        await this.ctx.service.lessonOrganizationLog.studentLog({
+            organizationId,
+            handleId: userId,
+            username,
+            oldmembers: [ member ],
+            classIds: [ -1 ],
+            roleId:
+                memberRoleId & CLASS_MEMBER_ROLE_TEACHER
+                    ? CLASS_MEMBER_ROLE_TEACHER
+                    : CLASS_MEMBER_ROLE_STUDENT,
+        });
+        // 更新用户vip和t信息
+        await this.updateUserVipAndTLevel(member.memberId);
+    }
 
-	/**
-	 * 
-	 * @param {*} members 
-	 */
-	async bulkCreateMembers(members) {
-		return await this.ctx.model.LessonOrganizationClassMember.bulkCreate(members);
-	}
+    /**
+     *
+     * @param {*} members members
+     */
+    async bulkCreateMembers(members) {
+        return await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
+            members
+        );
+    }
+
+    async updateUserVipAndTLevel(userId) {
+        if (!userId) {
+            return;
+        }
+        // 查出此用户所有的LessonOrganizationClassMember
+        const members = await this.ctx.model.LessonOrganizationClassMember.findAll(
+            {
+                where: {
+                    memberId: userId,
+                },
+            }
+        );
+        let isVip = 0;
+        let tLevel = 0;
+        members.forEach(member => {
+            // 是学生那么就是vip
+            if (!isVip && member.roleId & CLASS_MEMBER_ROLE_STUDENT) {
+                isVip = 1;
+            }
+            // 是机构老师则就是tLevel
+            if (!tLevel && member.roleId & CLASS_MEMBER_ROLE_TEACHER) {
+                tLevel = 1;
+            }
+        });
+        const updateParam = {
+            vip: isVip,
+            tLevel,
+        };
+        if (!tLevel) {
+            delete updateParam.tLevel;
+        }
+        await this.ctx.service.keepwork.updateUser(userId, updateParam);
+    }
 }
 
 module.exports = LessonOrgClassMemberService;

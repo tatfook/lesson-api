@@ -1,48 +1,34 @@
-"use strict";
+'use strict';
 
 module.exports = app => {
-	const {
-		BIGINT,
-		STRING,
-		JSON,
-	} = app.Sequelize;
+    const { BIGINT, STRING } = app.Sequelize;
+    const SIXTYFOUR = 64;
 
-	const model = app.model.define("skills", {
-		id: {
-			type: BIGINT,
-			autoIncrement: true,
-			primaryKey: true,
-		},
+    const model = app.model.define(
+        'skills',
+        {
+            id: {
+                type: BIGINT,
+                autoIncrement: true,
+                primaryKey: true,
+            },
 
-		skillName: {
-			type: STRING(64),
-			unique: true,
-			allowNull: false,
-		},
+            skillName: {
+                type: STRING(SIXTYFOUR),
+                unique: true,
+                allowNull: false,
+            },
 
-		enSkillName: {
-			type: STRING(64),
-		},
+            enSkillName: {
+                type: STRING(SIXTYFOUR),
+            },
+        },
+        {
+            underscored: false,
+            charset: 'utf8mb4',
+            collate: 'utf8mb4_bin',
+        }
+    );
 
-		extra: {
-			type: JSON,
-			defaultValue: {},
-		},
-
-	}, {
-		underscored: false,
-		charset: "utf8mb4",
-		collate: "utf8mb4_bin",
-	});
-
-	model.associate = () => {
-		app.model.Skill.hasMany(app.model.LessonSkill, {
-			as: "lessonSkills",
-			foreignKey: "skillId",
-			sourceKey: "id",
-			constraints: false,
-		});
-	};
-
-	return model;
+    return model;
 };

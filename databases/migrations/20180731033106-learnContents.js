@@ -1,65 +1,63 @@
-"use strict";
+'use strict';
 
 module.exports = {
-	up: (queryInterface, Sequelize) => {
-		const {
-			BIGINT,
-			INTEGER,
-			TEXT,
-			JSON,
-		} = Sequelize;
+    up: (queryInterface, Sequelize) => {
+        const { BIGINT, INTEGER, TEXT, JSON } = Sequelize;
 
-		return queryInterface.createTable("lessonContents", {
-			id: {
-				type: BIGINT,
-				autoIncrement: true,
-				primaryKey: true,
-			},
+        return queryInterface.createTable(
+            'lessonContents',
+            {
+                id: {
+                    type: BIGINT,
+                    autoIncrement: true,
+                    primaryKey: true,
+                },
 
-			userId: {
-				type: BIGINT,
-				allowNull: false,
-			},
+                userId: {
+                    type: BIGINT,
+                    allowNull: false,
+                },
 
-			lessonId: {
-				type: BIGINT,
-				allowNull: false,
-			},
+                lessonId: {
+                    type: BIGINT,
+                    allowNull: false,
+                },
 
-			version: {
-				type: INTEGER,
-				allowNull: false,
-				defaultValue: 0,
-			},
+                version: {
+                    type: INTEGER,
+                    allowNull: false,
+                    defaultValue: 0,
+                },
 
-			content: {
-				type: TEXT,
-				defaultValue: "",
-			},
+                content: {
+                    type: TEXT,
+                    defaultValue: '',
+                },
 
-			extra: {
-				type: JSON,
-				defaultValue: {},
-			},
+                extra: {
+                    type: JSON,
+                    defaultValue: {},
+                },
 
-			createdAt: {
-				allowNull: false,
-				type: Sequelize.DATE
-			},
+                createdAt: {
+                    allowNull: false,
+                    type: Sequelize.DATE,
+                },
 
-			updatedAt: {
-				allowNull: false,
-				type: Sequelize.DATE
-			},
+                updatedAt: {
+                    allowNull: false,
+                    type: Sequelize.DATE,
+                },
+            },
+            {
+                underscored: false,
+                charset: 'utf8mb4',
+                collate: 'utf8mb4_bin',
+            }
+        );
+    },
 
-		}, {
-			underscored: false,
-			charset: "utf8mb4",
-			collate: "utf8mb4_bin",
-		});
-	},
-
-	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable("lessonContents");
-	}
+    down: (queryInterface, Sequelize) => {
+        return queryInterface.dropTable('lessonContents');
+    },
 };

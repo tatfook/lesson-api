@@ -1,39 +1,34 @@
-"use strict";
+'use strict';
 
 module.exports = app => {
-	const {
-		BIGINT,
-		STRING,
-		JSON,
-	} = app.Sequelize;
+    const { BIGINT, STRING } = app.Sequelize;
+    const SIXTYFOUR = 64;
 
-	const model = app.model.define("subjects", {
-		id: {
-			type: BIGINT,
-			autoIncrement: true,
-			primaryKey: true,
-		},
+    const model = app.model.define(
+        'subjects',
+        {
+            id: {
+                type: BIGINT,
+                autoIncrement: true,
+                primaryKey: true,
+            },
 
-		subjectName: {
-			type: STRING(64),
-			unique: true,
-			allowNull: false,
-		},
+            subjectName: {
+                type: STRING(SIXTYFOUR),
+                unique: true,
+                allowNull: false,
+            },
 
-		enSubjectName: {
-			type: STRING(64),
-		},
+            enSubjectName: {
+                type: STRING(SIXTYFOUR),
+            },
+        },
+        {
+            underscored: false,
+            charset: 'utf8mb4',
+            collate: 'utf8mb4_bin',
+        }
+    );
 
-		extra: {
-			type: JSON,
-			defaultValue: {},
-		},
-
-	}, {
-		underscored: false,
-		charset: "utf8mb4",
-		collate: "utf8mb4_bin",
-	});
-
-	return model;
+    return model;
 };

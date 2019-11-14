@@ -1,53 +1,52 @@
-"use strict";
+'use strict';
 
 module.exports = {
-	up: (queryInterface, Sequelize) => {
-		const {
-			BIGINT,
-			STRING,
-			JSON,
-		} = Sequelize;
+    up: (queryInterface, Sequelize) => {
+        const { BIGINT, STRING, JSON } = Sequelize;
 
-		return queryInterface.createTable("subjects", {
-			id: {
-				type: BIGINT,
-				autoIncrement: true,
-				primaryKey: true,
-			},
+        return queryInterface.createTable(
+            'subjects',
+            {
+                id: {
+                    type: BIGINT,
+                    autoIncrement: true,
+                    primaryKey: true,
+                },
 
-			subjectName: {
-				type: STRING(64),
-				unique: true,
-				allowNull: false,
-			},
+                subjectName: {
+                    type: STRING(64),
+                    unique: true,
+                    allowNull: false,
+                },
 
-			enSubjectName: {
-				type: STRING(64),
-			},
+                enSubjectName: {
+                    type: STRING(64),
+                },
 
-			extra: {
-				type: JSON,
-				defaultValue: {},
-			},
+                extra: {
+                    type: JSON,
+                    defaultValue: {},
+                },
 
-			createdAt: {
-				allowNull: false,
-				type: Sequelize.DATE
-			},
+                createdAt: {
+                    allowNull: false,
+                    type: Sequelize.DATE,
+                },
 
-			updatedAt: {
-				allowNull: false,
-				type: Sequelize.DATE
-			},
+                updatedAt: {
+                    allowNull: false,
+                    type: Sequelize.DATE,
+                },
+            },
+            {
+                underscored: false,
+                charset: 'utf8mb4',
+                collate: 'utf8mb4_bin',
+            }
+        );
+    },
 
-		}, {
-			underscored: false,
-			charset: "utf8mb4",
-			collate: "utf8mb4_bin",
-		});
-	},
-
-	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable("subjects");
-	}
+    down: (queryInterface, Sequelize) => {
+        return queryInterface.dropTable('subjects');
+    },
 };

@@ -1,96 +1,100 @@
-"use strict";
+'use strict';
 
-const moment = require("moment");
+const moment = require('moment');
 module.exports = app => {
-	const {
-		BIGINT,
-		STRING,
-		INTEGER,
-		DATE,
-		JSON
-	} = app.Sequelize;
+    const { BIGINT, STRING, INTEGER, DATE, JSON } = app.Sequelize;
 
-	const model = app.model.define("evaluationUserReports", {
-		id: {
-			type: BIGINT,
-			autoIncrement: true,
-			primaryKey: true,
-		},
-		userId: {
-			type: BIGINT,
-			defaultValue: 0,
-		},
+    const QUARTERK = 256;
+    const model = app.model.define(
+        'evaluationUserReports',
+        {
+            id: {
+                type: BIGINT,
+                autoIncrement: true,
+                primaryKey: true,
+            },
+            userId: {
+                type: BIGINT,
+                defaultValue: 0,
+            },
 
-		reportId: {
-			type: BIGINT,
-			defaultValue: 0,
-		},
+            reportId: {
+                type: BIGINT,
+                defaultValue: 0,
+            },
 
-		star: {
-			type: INTEGER,
-			defaultValue: 1,
-		},
+            star: {
+                type: INTEGER,
+                defaultValue: 1,
+            },
 
-		spatial: {
-			type: INTEGER,
-			defaultValue: 1,
-		},
+            spatial: {
+                type: INTEGER,
+                defaultValue: 1,
+            },
 
-		collaborative: {
-			type: INTEGER,
-			defaultValue: 1,
-		},
+            collaborative: {
+                type: INTEGER,
+                defaultValue: 1,
+            },
 
-		creative: {
-			type: INTEGER,
-			defaultValue: 1,
-		},
-		logical: {
-			type: INTEGER,
-			defaultValue: 1,
-		},
-		compute: {
-			type: INTEGER,
-			defaultValue: 1,
-		},
-		coordinate: {
-			type: INTEGER,
-			defaultValue: 1,
-		},
-		comment: {
-			type: STRING(256),
-			defaultValue: "",
-		},
-		mediaUrl: {
-			type: JSON,
-			defaultValue: [],
-		},
-		isSend: {
-			type: INTEGER,
-			defaultValue: 0
-		},
-		createdAt: {
-			allowNull: false,
-			type: DATE
-		},
+            creative: {
+                type: INTEGER,
+                defaultValue: 1,
+            },
+            logical: {
+                type: INTEGER,
+                defaultValue: 1,
+            },
+            compute: {
+                type: INTEGER,
+                defaultValue: 1,
+            },
+            coordinate: {
+                type: INTEGER,
+                defaultValue: 1,
+            },
+            comment: {
+                type: STRING(QUARTERK),
+                defaultValue: '',
+            },
+            mediaUrl: {
+                type: JSON,
+                defaultValue: [],
+            },
+            isSend: {
+                type: INTEGER,
+                defaultValue: 0,
+            },
+            createdAt: {
+                allowNull: false,
+                type: DATE,
+            },
 
-		updatedAt: {
-			allowNull: false,
-			type: DATE
-		},
-	}, {
-		underscored: false,
-		charset: "utf8mb4",
-		collate: "utf8mb4_bin"
-	});
+            updatedAt: {
+                allowNull: false,
+                type: DATE,
+            },
+        },
+        {
+            underscored: false,
+            charset: 'utf8mb4',
+            collate: 'utf8mb4_bin',
+        }
+    );
 
-	model.getUserReportList = async function ({ reportId, status, isSend, realname }) {
-		let cond = ``;
-		if (isSend) cond += ` and ur.isSend =:isSend`;
-		if (realname) cond += ` and m.realname like concat('%',:realname,'%')`;
+    model.getUserReportList = async function({
+        reportId,
+        status,
+        isSend,
+        realname,
+    }) {
+        let cond = '';
+        if (isSend) cond += ' and ur.isSend =:isSend';
+        if (realname) cond += " and m.realname like concat('%',:realname,'%')";
 
-		// 已点评名单sql
-		const sql1 = `SELECT
+        // 已点评名单sql
+        const sql1 = `SELECT
 		ur.id userReportId,
 		ur.userId studentId,
 		ur.createdAt,
@@ -105,8 +109,8 @@ module.exports = app => {
 		  ON ur.userId = m.memberId and m.roleId & 1 and m.classId = r.classId
 	  WHERE ur.reportId = :reportId ${cond}`;
 
-		// 未点评名单sql
-		const sql2 = `SELECT
+        // 未点评名单sql
+        const sql2 = `SELECT
 		m.memberId studentId,
 		m.realname
 	  FROM
@@ -115,19 +119,21 @@ module.exports = app => {
 		LEFT JOIN evaluationUserReports ur ON m.memberId= ur.userId AND ur.reportId=r.id
 		WHERE r.id =:reportId AND ur.id IS NULL AND m.roleId &1`;
 
-		const sql = ~~status === 1 ? sql2 : sql1;
+        const sql = ~~status === 1 ? sql2 : sql1;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT,
-			replacements: {
-				isSend, realname, reportId
-			}
-		});
-		return list;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                isSend,
+                realname,
+                reportId,
+            },
+        });
+        return list;
+    };
 
-	model.getTeacherByUserReportId = async function (userReportId) {
-		const sql = `
+    model.getTeacherByUserReportId = async function(userReportId) {
+        const sql = `
 		select 
 			r.userId teacherId,
 			ur.userId studentId,
@@ -137,36 +143,36 @@ module.exports = app => {
 		left join evaluationUserReports ur on r.id = ur.reportId
 		where ur.id = :userReportId
 		`;
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT,
-			replacements: {
-				userReportId
-			}
-		});
-		return list[0] ? list[0] : undefined;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                userReportId,
+            },
+        });
+        return list[0] ? list[0] : undefined;
+    };
 
-	// 获取这个报告中已经点评了的学生id
-	model.getStudentIdsByReportId = async function (reportId) {
-		const sql = `
+    // 获取这个报告中已经点评了的学生id
+    model.getStudentIdsByReportId = async function(reportId) {
+        const sql = `
 		select 
 			ur.userId studentId
 		from evaluationUserReports ur 
 			left join evaluationReports r on r.id = ur.reportId
 		where r.id = :reportId
 		`;
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT,
-			replacements: {
-				reportId
-			}
-		});
-		return list;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                reportId,
+            },
+        });
+        return list;
+    };
 
-	// 
-	model.getByUserIdAndClassIds = async function (studentId, classIds) {
-		const sql = `
+    //
+    model.getByUserIdAndClassIds = async function(studentId, classIds) {
+        const sql = `
 		select
 			  ur.*,
 			  r.classId
@@ -176,18 +182,19 @@ module.exports = app => {
     	where r.classId in (:classIds) and ur.userId =:studentId 
 		`;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT,
-			replacements: {
-				studentId, classIds: classIds.toString()
-			}
-		});
-		return list ? list : [];
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                studentId,
+                classIds: classIds.toString(),
+            },
+        });
+        return list ? list : [];
+    };
 
-	// 
-	model.getReportAndOrgNameById = async function (userReportId) {
-		const sql = `
+    //
+    model.getReportAndOrgNameById = async function(userReportId) {
+        const sql = `
 		select 
 			distinct
   			ur.*,
@@ -207,17 +214,18 @@ module.exports = app => {
 		where ur.id = :userReportId
 		`;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT, replacements: {
-				userReportId
-			}
-		});
-		return list[0] ? list[0] : undefined;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                userReportId,
+            },
+        });
+        return list[0] ? list[0] : undefined;
+    };
 
-	// 获取本班同学本次点评的平均能力值
-	model.getClassmatesAvgStarById = async function (reportId) {
-		const sql = `
+    // 获取本班同学本次点评的平均能力值
+    model.getClassmatesAvgStarById = async function(reportId) {
+        const sql = `
 		SELECT
 			ROUND(AVG(ur2.star),2) starAvg,
 			ROUND(AVG(ur2.\`spatial\`),2) spatialAvg,
@@ -232,17 +240,18 @@ module.exports = app => {
   			LEFT JOIN evaluationUserReports ur2 ON ur2.userId=m.memberId AND ur2.reportId = r.id
 		WHERE r.id = :reportId
 		`;
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT, replacements: {
-				reportId
-			}
-		});
-		return list[0] ? list[0] : undefined;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                reportId,
+            },
+        });
+        return list[0] ? list[0] : undefined;
+    };
 
-	// 本班历次能力值总和的平均值
-	model.getClassmatesHistoryAvgStar = async function (classId) {
-		const sql = `
+    // 本班历次能力值总和的平均值
+    model.getClassmatesHistoryAvgStar = async function(classId) {
+        const sql = `
 		SELECT
 			ROUND(SUM(star) /COUNT(DISTINCT userId),2) starAvg,
 			ROUND(SUM(\`spatial\`)/COUNT(DISTINCT userId),2) spatialAvg,
@@ -261,17 +270,18 @@ module.exports = app => {
   				LEFT JOIN evaluationUserReports ur2 ON ur2.userId=m.memberId AND ur2.reportId= ur.reportId
 			WHERE r.classId = :classId AND ur2.id IS NOT NULL) a
 		`;
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT, replacements: {
-				classId
-			}
-		});
-		return list[0] ? list[0] : undefined;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                classId,
+            },
+        });
+        return list[0] ? list[0] : undefined;
+    };
 
-	// 获取学生在这个班历次能力值总和
-	model.getUserSumStar = async function (studentId, classId) {
-		const sql = `
+    // 获取学生在这个班历次能力值总和
+    model.getUserSumStar = async function(studentId, classId) {
+        const sql = `
 		SELECT 
 			SUM(ur.star) starCount,
 			SUM(ur.\`spatial\`) spatialCount,
@@ -285,17 +295,19 @@ module.exports = app => {
 		WHERE ur.userId = :studentId AND r.classId = :classId
 		`;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT, replacements: {
-				studentId, classId
-			}
-		});
-		return list[0] ? list[0] : undefined;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                studentId,
+                classId,
+            },
+        });
+        return list[0] ? list[0] : undefined;
+    };
 
-	// 获取学生在这个班的历次成长
-	model.getUserHistoryStar = async function (studentId, classId) {
-		const sql = `
+    // 获取学生在这个班的历次成长
+    model.getUserHistoryStar = async function(studentId, classId) {
+        const sql = `
 		SELECT
 			ur.reportId,
 			ur.star,
@@ -311,17 +323,19 @@ module.exports = app => {
 		ORDER BY ur.reportId
 		`;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT, replacements: {
-				studentId, classId
-			}
-		});
-		return list;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                studentId,
+                classId,
+            },
+        });
+        return list;
+    };
 
-	// 获取同学历次成长的平均值
-	model.getClassmatesHistoryAvgStarGroupByReportId = async function (classId) {
-		const sql = `
+    // 获取同学历次成长的平均值
+    model.getClassmatesHistoryAvgStarGroupByReportId = async function(classId) {
+        const sql = `
 		SELECT 
 			reportId,
 			ROUND(AVG(star),2) starAvg,
@@ -342,17 +356,18 @@ module.exports = app => {
 		) a GROUP BY a.reportId ORDER BY a.reportId
 		`;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT, replacements: {
-				classId
-			}
-		});
-		return list;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                classId,
+            },
+        });
+        return list;
+    };
 
-	// 学生获得的历次点评列表
-	model.getEvaluationCommentListSql = async function (userId, classId) {
-		const sql = `
+    // 学生获得的历次点评列表
+    model.getEvaluationCommentListSql = async function(userId, classId) {
+        const sql = `
 		SELECT
 			distinct
 			ur.id,
@@ -369,20 +384,26 @@ module.exports = app => {
   			where ur.userId=:userId and r.classId = :classId
 		`;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT, replacements: {
-				userId, classId
-			}
-		});
-		return list;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                userId,
+                classId,
+            },
+        });
+        return list;
+    };
 
-	// 机构的班级列表，以及它们的评估状态
-	model.getClassAndEvalStatus = async function (organizationId, days) {
-		let cond = ``;
-		if (days) cond += ` where r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
-		// status 1.发送给家长,2.未点评,3.待发送
-		const sql = `
+    // 机构的班级列表，以及它们的评估状态
+    model.getClassAndEvalStatus = async function(organizationId, days) {
+        let cond = '';
+        if (days) {
+            cond += ` where r.createdAt>='${moment()
+                .subtract(days, 'days')
+                .format('YYYY-MM-DD HH:mm:ss')}'`;
+        }
+        // status 1.发送给家长,2.未点评,3.待发送
+        const sql = `
 		select
 			a.*,
 			b.sendCount,
@@ -396,7 +417,9 @@ module.exports = app => {
 			from
 		  		lessonOrganizationClasses c
 		  		left join lessonOrganizationClassMembers m on m.classId = c.id and m.roleId & 2
-			where c.organizationId = :organizationId and c.end > '${moment().format("YYYY-MM-DD HH:mm:ss")}'
+			where c.organizationId = :organizationId and c.end > '${moment().format(
+        'YYYY-MM-DD HH:mm:ss'
+    )}'
 			group by c.id
 		) a
 		left join(
@@ -415,20 +438,25 @@ module.exports = app => {
 			) c group by c.classId
 		) b on a.classId = b.classId`;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT, replacements: {
-				organizationId
-			}
-		});
-		return list;
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                organizationId,
+            },
+        });
+        return list;
+    };
 
-	// 班级各个老师的点评情况
-	model.getTeacherCommentStatistics = async function (classId, days) {
-		let cond = ``;
-		if (days) cond += ` and r.createdAt>='${moment().subtract(days, "days").format("YYYY-MM-DD HH:mm:ss")}'`;
+    // 班级各个老师的点评情况
+    model.getTeacherCommentStatistics = async function(classId, days) {
+        let cond = '';
+        if (days) {
+            cond += ` and r.createdAt>='${moment()
+                .subtract(days, 'days')
+                .format('YYYY-MM-DD HH:mm:ss')}'`;
+        }
 
-		const sql = `
+        const sql = `
 		SELECT
 			a.*,
 			ifnull(b.commentCount,0) commentCount,
@@ -466,17 +494,18 @@ module.exports = app => {
 		) b ON a.userId = b.userId AND a.type = b.type
 		`;
 
-		const list = await app.model.query(sql, {
-			type: app.model.QueryTypes.SELECT, replacements: {
-				classId
-			}
-		});
-		return list.map(r => {
-			r.commentCount = parseInt(r.commentCount, 10);
-			r.sendCount = parseInt(r.sendCount, 10);
-			return r;
-		});
-	};
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                classId,
+            },
+        });
+        return list.map(r => {
+            r.commentCount = parseInt(r.commentCount, 10);
+            r.sendCount = parseInt(r.sendCount, 10);
+            return r;
+        });
+    };
 
-	return model;
+    return model;
 };
