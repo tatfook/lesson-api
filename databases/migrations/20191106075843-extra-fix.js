@@ -9,14 +9,14 @@ module.exports = {
                 queryInterface.addColumn(
                     'lessons',
                     'coverUrl',
-                    { type: STRING, comment: '封面url' },
+                    { type: Sequelize.STRING(1024), comment: '封面url' },
                     { transaction: t }
                 ),
                 queryInterface.addColumn(
                     'lessons',
                     'duration',
                     {
-                        type: STRING(32),
+                        type: Sequelize.STRING(32),
                         comment: '所需时长，如:90min',
                     },
                     { transaction: t }
@@ -24,13 +24,13 @@ module.exports = {
                 queryInterface.addColumn(
                     'lessons',
                     'teacherVideoUrl',
-                    { type: STRING(1024), comment: '老师视频' },
+                    { type: Sequelize.STRING(1024), comment: '老师视频' },
                     { transaction: t }
                 ),
                 queryInterface.addColumn(
                     'lessons',
                     'studentVideoUrl',
-                    { type: STRING(1024), comment: '学生视频' },
+                    { type: Sequelize.STRING(1024), comment: '学生视频' },
                     { transaction: t }
                 ),
 
@@ -38,7 +38,7 @@ module.exports = {
                     'packageLessons',
                     'lessonNo',
                     {
-                        type: INTEGER,
+                        type: Sequelize.INTEGER,
                         comment: '在这个课程包内的序号',
                     },
                     { transaction: t }
@@ -47,21 +47,21 @@ module.exports = {
                 queryInterface.addColumn(
                     'packages',
                     'coverUrl',
-                    { type: STRING, comment: '课程序号' },
+                    { type: Sequelize.STRING(1024), comment: '课程序号' },
                     { transaction: t }
                 ),
 
                 queryInterface.addColumn(
                     'packages',
                     'refuseMsg',
-                    { type: STRING(512), comment: '审核拒绝信息' },
+                    { type: Sequelize.STRING(512), comment: '审核拒绝信息' },
                     { transaction: t }
                 ),
 
                 queryInterface.addColumn(
                     'lessonOrganizationActivateCodes',
                     'name',
-                    { type: STRING(64), comment: '用户名' },
+                    { type: Sequelize.STRING(64), comment: '用户名' },
                     { transaction: t }
                 ),
             ])
