@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-    const { BIGINT, STRING, TEXT } = app.Sequelize;
+    const { BIGINT, STRING, TEXT, JSON } = app.Sequelize;
 
     const model = app.model.define(
         'lessons',
@@ -40,22 +40,25 @@ module.exports = app => {
             goals: {
                 type: TEXT,
             },
-            coverUrl: {
-                // 封面url
-                type: STRING,
+            extra: {
+                type: JSON,
             },
-            duration: {
-                // 时长，如：'90min'
-                type: STRING,
-            },
-            teacherVideoUrl: {
-                // 老师视频url
-                type: STRING,
-            },
-            studentVideoUrl: {
-                // 学生视频url
-                type: STRING,
-            },
+            // coverUrl: {
+            //     // 封面url
+            //     type: STRING,
+            // },
+            // duration: {
+            //     // 时长，如：'90min'
+            //     type: STRING,
+            // },
+            // teacherVideoUrl: {
+            //     // 老师视频url
+            //     type: STRING,
+            // },
+            // studentVideoUrl: {
+            //     // 学生视频url
+            //     type: STRING,
+            // },
         },
         {
             underscored: false,
