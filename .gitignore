@@ -4,7 +4,7 @@ node_modules
 # logs
 npm-debug.log
 
-
+coverage
 config/config.*.js
 
 .vscode

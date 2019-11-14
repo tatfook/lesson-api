@@ -1,78 +1,80 @@
-"use strict";
+'use strict';
 
 /* 机构表单 */
 
 module.exports = app => {
-	const {
-		BIGINT,
-		INTEGER,
-		STRING,
-		JSON,
-		DATE
-	} = app.Sequelize;
+    const { BIGINT, INTEGER, STRING, JSON, DATE } = app.Sequelize;
 
-	const model = app.model.define("lessonOrganizationFormSubmits", {
-		id: {
-			type: BIGINT,
-			autoIncrement: true,
-			primaryKey: true,
-		},
+    const ONEK = 1024;
+    const model = app.model.define(
+        'lessonOrganizationFormSubmits',
+        {
+            id: {
+                type: BIGINT,
+                autoIncrement: true,
+                primaryKey: true,
+            },
 
-		userId: { // 用户 ID
-			type: BIGINT,
-			defaultValue: 0,
-		},
+            userId: {
+                // 用户 ID
+                type: BIGINT,
+                defaultValue: 0,
+            },
 
-		organizationId: { // 机构 ID
-			type: BIGINT,
-			defaultValue: 0,
-		},
+            organizationId: {
+                // 机构 ID
+                type: BIGINT,
+                defaultValue: 0,
+            },
 
-		formId: { // 表单 ID
-			type: BIGINT,
-			defaultValue: 0,
-		},
+            formId: {
+                // 表单 ID
+                type: BIGINT,
+                defaultValue: 0,
+            },
 
-		state: { // 关联状态 0 - 未处理  1 - 通过  2 - 已停止
-			type: INTEGER,
-			defaultValue: 0,
-		},
+            state: {
+                // 关联状态 0 - 未处理  1 - 通过  2 - 已停止
+                type: INTEGER,
+                defaultValue: 0,
+            },
 
-		quizzes: { // 包含结果的 quizzes
-			type: JSON,
-		},
+            quizzes: {
+                // 包含结果的 quizzes
+                type: JSON,
+            },
 
-		comment: { // 备注
-			type: STRING(1024),
-			defaultValue: "",
-		},
+            comment: {
+                // 备注
+                type: STRING(ONEK),
+                defaultValue: '',
+            },
+            createdAt: {
+                type: DATE,
+            },
 
-		extra: { // 附加数据
-			type: JSON,
-			defaultValue: {},
-		},
-		createdAt: {
-			type: DATE,
-		},
+            updatedAt: {
+                type: DATE,
+            },
+        },
+        {
+            underscored: false,
+            charset: 'utf8mb4',
+            collate: 'utf8mb4_bin',
+        }
+    );
 
-		updatedAt: {
-			type: DATE,
-		}
+    model.associate = () => {
+        app.model.LessonOrganizationFormSubmit.belongsTo(
+            app.model.LessonOrganizationForm,
+            {
+                as: 'lessonOrganizationForms',
+                foreignKey: 'formId',
+                targetKey: 'id',
+                constraints: false,
+            }
+        );
+    };
 
-	}, {
-		underscored: false,
-		charset: "utf8mb4",
-		collate: "utf8mb4_bin",
-	});
-
-	model.associate = () => {
-		app.model.LessonOrganizationFormSubmit.belongsTo(app.model.LessonOrganizationForm, {
-			as: "lessonOrganizationForms",
-			foreignKey: "formId",
-			targetKey: "id",
-			constraints: false,
-		});
-	};
-
-	return model;
+    return model;
 };
