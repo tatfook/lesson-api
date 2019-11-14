@@ -345,7 +345,12 @@ class LessonOrgService extends Service {
                     o => o.id === _lessons[j].lessonId
                 );
                 if (index > -1) {
-                    _lessons[j] = lessons[index];
+                    // _lessons[j] = lessons[index];
+                    _lessons[j] = {
+                        id: lessons[index].id,
+                        lessonName: lessons[index].lessonName,
+                        lessonNo: _lessons[j].lessonNo,
+                    };
                 }
             }
         }
