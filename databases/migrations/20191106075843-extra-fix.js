@@ -9,7 +9,7 @@ module.exports = {
                 queryInterface.addColumn(
                     'lessons',
                     'coverUrl',
-                    { type: Sequelize.STRING(512), comment: '封面url' },
+                    { type: Sequelize.STRING(1024), comment: '封面url' },
                     { transaction: t }
                 ),
                 queryInterface.addColumn(
@@ -24,13 +24,13 @@ module.exports = {
                 queryInterface.addColumn(
                     'lessons',
                     'teacherVideoUrl',
-                    { type: Sequelize.STRING(512), comment: '老师视频' },
+                    { type: Sequelize.STRING(1024), comment: '老师视频' },
                     { transaction: t }
                 ),
                 queryInterface.addColumn(
                     'lessons',
                     'studentVideoUrl',
-                    { type: Sequelize.STRING(512), comment: '学生视频' },
+                    { type: Sequelize.STRING(1024), comment: '学生视频' },
                     { transaction: t }
                 ),
 
@@ -47,7 +47,7 @@ module.exports = {
                 queryInterface.addColumn(
                     'packages',
                     'coverUrl',
-                    { type: Sequelize.STRING(512), comment: '课程序号' },
+                    { type: Sequelize.STRING(1024), comment: '课程序号' },
                     { transaction: t }
                 ),
 
