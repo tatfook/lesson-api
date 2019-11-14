@@ -1,41 +1,52 @@
 {
-  "name": "lesson",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "dev": "egg-bin dev",
-    "start": "egg-scripts start",
-    "test": "egg-bin test",
-    "debug": "egg-bin debug"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "axios": "^0.18.0",
-    "blueimp-md5": "^2.12.0",
-    "egg": "^2.9.1",
-    "egg-cors": "^2.1.0",
-    "egg-redis": "^2.4.0",
-    "egg-scripts": "^2.6.0",
-    "egg-sequelize": "^4.2.0",
-    "egg-validate": "^1.0.0",
-    "joi": "^13.6.0",
-    "js-base64": "^2.5.1",
-    "jwt-simple": "^0.5.1",
-    "lodash": "^4.17.10",
-    "memory-cache": "^0.2.0",
-    "mysql2": "^1.5.3",
-    "nodemailer": "^4.6.8",
-    "pingpp": "^2.1.4",
-    "uuid": "^3.3.2",
-    "validator": "^11.1.0"
-  },
-  "devDependencies": {
-    "egg-bin": "^4.7.1",
-    "egg-mock": "^3.17.3",
-    "sequelize-cli": "^5.5.0",
-    "chance": "^1.0.18",
-    "factory-girl": "^5.0.4"
-  }
+    "name": "lesson",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "egg-bin dev",
+        "start": "egg-scripts start",
+        "test": "egg-bin test",
+        "debug": "egg-bin debug",
+        "cov": "egg-bin cov",
+        "lint": "eslint . --fix",
+        "format": "prettier --write \"**/**/*.{js,json}\""
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^0.18.0",
+        "blueimp-md5": "^2.12.0",
+        "egg": "^2.9.1",
+        "egg-cors": "^2.1.0",
+        "egg-redis": "^2.4.0",
+        "egg-scripts": "^2.6.0",
+        "egg-sequelize": "^4.2.0",
+        "egg-validate": "^1.0.0",
+        "joi": "^13.6.0",
+        "js-base64": "^2.5.1",
+        "jwt-simple": "^0.5.1",
+        "lodash": "^4.17.10",
+        "memory-cache": "^0.2.0",
+        "mysql2": "^1.5.3",
+        "nodemailer": "^4.6.8",
+        "pingpp": "^2.1.4",
+        "uuid": "^3.3.2",
+        "validator": "^11.1.0"
+    },
+    "devDependencies": {
+        "chance": "^1.0.18",
+        "egg-bin": "^4.7.1",
+        "egg-mock": "^3.17.3",
+        "eslint": "^6.6.0",
+        "eslint-config-egg": "^7.5.1",
+        "factory-girl": "^5.0.4",
+        "pre-commit": "^1.2.2",
+        "prettier": "^1.18.2",
+        "sequelize-cli": "^5.5.0"
+    },
+    "pre-commit": [
+        "format",
+        "lint"
+    ]
 }

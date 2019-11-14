@@ -1,14 +1,15 @@
-"use strict";
+'use strict';
 
+const _ = require('lodash');
 module.exports = {
-	async log(text) {
-		const config = this.app.config.self;
+    async log(text) {
+        const config = this.app.config.self;
 
-		if (!config.log) return;
+        if (!config.log) return;
 
-		await this.model.Log.create({ text });
-	},
-	getParams() {
-		return _.merge({}, this.request.body, this.query, this.params);
-	}
+        await this.model.Log.create({ text });
+    },
+    getParams() {
+        return _.merge({}, this.request.body, this.query, this.params);
+    },
 };

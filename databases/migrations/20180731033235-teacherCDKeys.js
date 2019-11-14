@@ -1,58 +1,57 @@
-"use strict";
+'use strict';
 
 module.exports = {
-	up: (queryInterface, Sequelize) => {
-		const {
-			BIGINT,
-			STRING,
-			INTEGER,
-			JSON,
-		} = Sequelize;
+    up: (queryInterface, Sequelize) => {
+        const { BIGINT, STRING, INTEGER, JSON } = Sequelize;
 
-		return queryInterface.createTable("teacherCDKeys", {
-			id: {
-				type: BIGINT,
-				autoIncrement: true,
-				primaryKey: true,
-			},
+        return queryInterface.createTable(
+            'teacherCDKeys',
+            {
+                id: {
+                    type: BIGINT,
+                    autoIncrement: true,
+                    primaryKey: true,
+                },
 
-			userId: { // 谁在使用此激活码
-				type: BIGINT,
-			},
+                userId: {
+                    // 谁在使用此激活码
+                    type: BIGINT,
+                },
 
-			key: {
-				type: STRING(64),
-				allowNull: false,
-			},
+                key: {
+                    type: STRING(64),
+                    allowNull: false,
+                },
 
-			state: {
-				type: INTEGER,
-				defaultValue: 0, // 0 --未使用 1 -- 已使用 2 -- 禁用态
-			},
+                state: {
+                    type: INTEGER,
+                    defaultValue: 0, // 0 --未使用 1 -- 已使用 2 -- 禁用态
+                },
 
-			extra: {
-				type: JSON,
-				defaultValue: {},
-			},
+                extra: {
+                    type: JSON,
+                    defaultValue: {},
+                },
 
-			createdAt: {
-				allowNull: false,
-				type: Sequelize.DATE
-			},
+                createdAt: {
+                    allowNull: false,
+                    type: Sequelize.DATE,
+                },
 
-			updatedAt: {
-				allowNull: false,
-				type: Sequelize.DATE
-			},
+                updatedAt: {
+                    allowNull: false,
+                    type: Sequelize.DATE,
+                },
+            },
+            {
+                underscored: false,
+                charset: 'utf8mb4',
+                collate: 'utf8mb4_bin',
+            }
+        );
+    },
 
-		}, {
-			underscored: false,
-			charset: "utf8mb4",
-			collate: "utf8mb4_bin",
-		});
-	},
-
-	down: (queryInterface, Sequelize) => {
-		return queryInterface.dropTable("teacherCDKeys");
-	}
+    down: (queryInterface, Sequelize) => {
+        return queryInterface.dropTable('teacherCDKeys');
+    },
 };

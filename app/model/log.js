@@ -1,27 +1,28 @@
-"use strict";
+'use strict';
 
 module.exports = app => {
-	const {
-		BIGINT,
-		TEXT,
-	} = app.Sequelize;
+    const { BIGINT, TEXT } = app.Sequelize;
 
-	const model = app.model.define("logs", {
-		id: {
-			type: BIGINT,
-			autoIncrement: true,
-			primaryKey: true,
-		},
+    const model = app.model.define(
+        'logs',
+        {
+            id: {
+                type: BIGINT,
+                autoIncrement: true,
+                primaryKey: true,
+            },
 
-		text: {
-			type: TEXT,
-			defaultValue: "",
-		}
-	}, {
-		underscored: false,
-		charset: "utf8mb4",
-		collate: "utf8mb4_bin",
-	});
+            text: {
+                type: TEXT,
+                defaultValue: '',
+            },
+        },
+        {
+            underscored: false,
+            charset: 'utf8mb4',
+            collate: 'utf8mb4_bin',
+        }
+    );
 
-	return model;
+    return model;
 };

@@ -1,9 +1,11 @@
+const path = require('path');
 
-const path = require("path");
-
-const { factory } = require("factory-girl");
+const { factory } = require('factory-girl');
 
 module.exports = app => {
-	app.factory = factory;
-	app.loader.loadToApp(path.join(app.config.baseDir, "test/mock/factory"), Symbol("_factory"));
+    app.factory = factory;
+    app.loader.loadToApp(
+        path.join(app.config.baseDir, 'test/mock/factory'),
+        Symbol('_factory')
+    );
 };
