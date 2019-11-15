@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-    const { BIGINT, JSON } = app.Sequelize;
+    const { BIGINT, INTEGER } = app.Sequelize;
 
     const model = app.model.define(
         'packageLessons',
@@ -26,14 +26,11 @@ module.exports = app => {
                 type: BIGINT,
                 allowNull: false,
             },
-            extra: {
-                type: JSON,
-            },
 
-            // lessonNo: {
-            //     // 课程包内的序号
-            //     type: INTEGER,
-            // },
+            lessonNo: {
+                // 课程包内的序号
+                type: INTEGER,
+            },
         },
         {
             underscored: false,

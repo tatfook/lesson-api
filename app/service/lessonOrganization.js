@@ -120,6 +120,14 @@ class LessonOrgService extends Service {
             roleId: CLASS_MEMBER_ROLE_ADMIN,
         }));
         await this.model.LessonOrganizationClassMember.bulkCreate(members);
+        // 为管理员添加tLevel
+        await Promise.all(
+            users.map(user => {
+                return this.ctx.service.lessonOrganizationClassMember.updateUserVipAndTLevel(
+                    user.id
+                );
+            })
+        );
     }
 
     /**
@@ -345,7 +353,12 @@ class LessonOrgService extends Service {
                     o => o.id === _lessons[j].lessonId
                 );
                 if (index > -1) {
-                    _lessons[j] = lessons[index];
+                    // _lessons[j] = lessons[index];
+                    _lessons[j] = {
+                        id: lessons[index].id,
+                        lessonName: lessons[index].lessonName,
+                        lessonNo: _lessons[j].lessonNo,
+                    };
                 }
             }
         }

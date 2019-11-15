@@ -77,7 +77,6 @@ class UsersController extends Controller {
         const six = 6;
         const nine = 9;
         const sixty = 60;
-        const three = 3;
 
         const env = this.app.config.self.env;
         const code =
@@ -88,16 +87,11 @@ class UsersController extends Controller {
         const check = await this.app.redis.get(`verifCode:${cellphone}`);
         if (check) ctx.throw(400, Err.DONT_SEND_REPEAT);
 
-        await this.app.redis.set(
-            `verifCode:${cellphone}`,
-            code,
-            'EX',
-            sixty * three
-        );
+        await this.app.redis.set(`verifCode:${cellphone}`, code, 'EX', sixty);
         if (env !== 'unittest') {
             const res = await ctx.service.user.sendSms(cellphone, [
                 code,
-                '3分钟',
+                '1分钟',
             ]);
             if (!res) {
                 await this.app.redis.del(`verifCode:${cellphone}`);
