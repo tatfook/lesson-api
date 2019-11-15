@@ -111,6 +111,8 @@ module.exports = {
                 return res.data;
             })
             .catch(res => {
+                // eslint-disable-next-line no-console
+                console.log(res);
                 this.app.logger.debug(
                     `请求:${url}失败`,
                     res.responsestatus,
