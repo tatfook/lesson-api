@@ -5,7 +5,7 @@ const hooks = require('../common/sequelizeHooks');
 const { PACKAGE_STATE_AUDIT_SUCCESS } = require('../common/consts.js');
 
 module.exports = app => {
-    const { BIGINT, STRING, INTEGER, DATE, JSON } = app.Sequelize;
+    const { BIGINT, STRING, INTEGER, DATE } = app.Sequelize;
 
     const HALFK = 512;
 
@@ -72,17 +72,14 @@ module.exports = app => {
                 type: INTEGER,
                 defaultValue: 0,
             },
-            extra: {
-                type: JSON,
+            coverUrl: {
+                // 封面url
+                type: STRING,
             },
-            // coverUrl: {
-            //     // 封面url
-            //     type: STRING,
-            // },
-            // refuseMsg: {
-            //     // 审核拒绝信息
-            //     type: STRING,
-            // },
+            refuseMsg: {
+                // 审核拒绝信息
+                type: STRING,
+            },
         },
         {
             underscored: false,

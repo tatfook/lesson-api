@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-    const { BIGINT, INTEGER, STRING, DATE, JSON } = app.Sequelize;
+    const { BIGINT, INTEGER, STRING, DATE } = app.Sequelize;
 
     const model = app.model.define(
         'lessonOrganizationActivateCodes',
@@ -60,13 +60,10 @@ module.exports = app => {
             updatedAt: {
                 type: DATE,
             },
-            extra: {
-                type: JSON,
+            name: {
+                // 这个激活码是给哪个用户使用的，实际不这么用
+                type: STRING,
             },
-            // name: {
-            //     // 这个激活码是给哪个用户使用的，实际不这么用
-            //     type: STRING,
-            // },
         },
         {
             underscored: false,
