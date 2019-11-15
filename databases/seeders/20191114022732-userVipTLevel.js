@@ -3,6 +3,7 @@
  * 用户的VIP和tLevel信息进行更新
  */
 const mock = require('egg-mock');
+mock.env('prod'); // dev、release、master环境均为prod
 const app = mock.app();
 module.exports = {
     up: async (queryInterface, Sequelize) => {
