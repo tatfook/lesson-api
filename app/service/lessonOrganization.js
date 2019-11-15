@@ -120,6 +120,14 @@ class LessonOrgService extends Service {
             roleId: CLASS_MEMBER_ROLE_ADMIN,
         }));
         await this.model.LessonOrganizationClassMember.bulkCreate(members);
+        // 为管理员添加tLevel
+        await Promise.all(
+            users.map(user => {
+                return this.ctx.service.lessonOrganizationClassMember.updateUserVipAndTLevel(
+                    user.id
+                );
+            })
+        );
     }
 
     /**
