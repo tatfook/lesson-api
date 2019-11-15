@@ -65,7 +65,30 @@ class AdminsController extends Controller {
 
         ctx.helper.success({ ctx, status: 200, res: list });
     }
-
+    async vipTLevelUpdate() {
+        const { ctx } = this;
+        this.adminAuthenticated();
+        const members = await this.app.model.queryInterface.sequelize.query(
+            `SELECT DISTINCT
+                memberId
+            FROM
+                lessonOrganizationClassMembers;`,
+            { type: this.app.model.QueryTypes.SELECT }
+        );
+        const memberIds = members.map(member => member.memberId);
+        await Promise.all(
+            memberIds.map(id => {
+                return ctx.service.lessonOrganizationClassMember.updateUserVipAndTLevel(
+                    id
+                );
+            })
+        );
+        ctx.helper.success({
+            ctx,
+            status: 200,
+            res: { memberIds, length: memberIds.length },
+        });
+    }
     async search() {
         const { ctx } = this;
         this.parseParams();

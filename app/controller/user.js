@@ -87,12 +87,7 @@ class UsersController extends Controller {
         const check = await this.app.redis.get(`verifCode:${cellphone}`);
         if (check) ctx.throw(400, Err.DONT_SEND_REPEAT);
 
-        await this.app.redis.set(
-            `verifCode:${cellphone}`,
-            code,
-            'EX',
-            sixty
-        );
+        await this.app.redis.set(`verifCode:${cellphone}`, code, 'EX', sixty);
         if (env !== 'unittest') {
             const res = await ctx.service.user.sendSms(cellphone, [
                 code,
