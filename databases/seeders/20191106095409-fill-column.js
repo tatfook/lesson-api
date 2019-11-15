@@ -15,7 +15,10 @@ module.exports = {
                 const element = lessons[i];
                 if (element.extra && JSON.stringify(element.extra) !== '{}') {
                     let str = ``;
-                    if (element.extra.coverUrl && element.extra.coverUrl.length < ONEK)
+                    if (
+                        element.extra.coverUrl &&
+                        element.extra.coverUrl.length < ONEK
+                    )
                         str += ` coverUrl='${element.extra.coverUrl}',`;
                     if (element.extra.duration)
                         str += ` duration='${element.extra.duration}',`;
@@ -62,7 +65,11 @@ module.exports = {
                 // 更新packages
                 const element = packages[i];
                 let str = ``;
-                if (element.extra && element.extra.coverUrl && element.extra.coverUrl.length < ONEK)
+                if (
+                    element.extra &&
+                    element.extra.coverUrl &&
+                    element.extra.coverUrl.length < ONEK
+                )
                     str += ` coverUrl='${element.extra.coverUrl}',`;
                 if (element.extra && element.extra.refuseMsg)
                     str += ` refuseMsg='${element.extra.refuseMsg}',`;

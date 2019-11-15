@@ -51,12 +51,23 @@ module.exports = app => {
         }
     );
 
-    model.getReportList = async function({ classId, roleId, userId, name, type, days }) {
+    model.getReportList = async function({
+        classId,
+        roleId,
+        userId,
+        name,
+        type,
+        days,
+    }) {
         let condition = ' where r.classId = :classId and sm.id is not null ';
-        if (~~roleId !== CLASS_MEMBER_ROLE_ADMIN) condition += ' and r.userId = :userId';
-        if (name) condition += ' and r.name like concat(\'%\',:name,\'%\')';
+        if (~~roleId !== CLASS_MEMBER_ROLE_ADMIN) { condition += ' and r.userId = :userId'; }
+        if (name) condition += " and r.name like concat('%',:name,'%')";
         if (type) condition += ' and r.type = :type';
-        if (days) condition += ` and r.createdAt>='${moment().subtract(days, 'days').format('YYYY-MM-DD HH:mm:ss')}'`;
+        if (days) {
+            condition += ` and r.createdAt>='${moment()
+                .subtract(days, 'days')
+                .format('YYYY-MM-DD HH:mm:ss')}'`;
+        }
 
         const sql = `SELECT
 		a.id,

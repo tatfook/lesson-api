@@ -52,7 +52,10 @@ module.exports = app => {
     router.resources('admins', prefix + 'admins/:resources', admins);
     router.post('admins', prefix + 'admins/:resources/search', admins.search);
     // 刷数据更新user的vip和t等级
-    router.get(`${prefix}admins/task/once/vipTLevelUpdate`, admins.vipTLevelUpdate);
+    router.get(
+        `${prefix}admins/task/once/vipTLevelUpdate`,
+        admins.vipTLevelUpdate
+    );
 
     // 评估报告api
     const evaluationReport = controller.evaluationReport;
