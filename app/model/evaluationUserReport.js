@@ -107,7 +107,7 @@ module.exports = app => {
 		LEFT JOIN evaluationReports r ON r.id = ur.reportId
 		LEFT JOIN lessonOrganizationClassMembers m
 		  ON ur.userId = m.memberId and m.roleId & 1 and m.classId = r.classId
-	  WHERE ur.reportId = :reportId ${cond}`;
+	  WHERE ur.reportId = :reportId and m.id is not null ${cond}`;
 
         // 未点评名单sql
         const sql2 = `SELECT
