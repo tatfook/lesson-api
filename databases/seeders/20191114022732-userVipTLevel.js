@@ -7,7 +7,7 @@ const app = mock.app();
 module.exports = {
     up: async (queryInterface, Sequelize) => {
         await app.ready();
-        const members = await queryInterface.sequelize.query(
+        const members = await app.model.queryInterface.sequelize.query(
             `SELECT DISTINCT
                 memberId
             FROM
