@@ -60,7 +60,9 @@ module.exports = app => {
         days,
     }) {
         let condition = ' where r.classId = :classId and sm.id is not null ';
-        if (~~roleId !== CLASS_MEMBER_ROLE_ADMIN) { condition += ' and r.userId = :userId'; }
+        if (~~roleId !== CLASS_MEMBER_ROLE_ADMIN) {
+            condition += ' and r.userId = :userId';
+        }
         if (name) condition += " and r.name like concat('%',:name,'%')";
         if (type) condition += ' and r.type = :type';
         if (days) {
