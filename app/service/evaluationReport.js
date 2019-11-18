@@ -549,7 +549,7 @@ class EvalReportService extends Service {
         const tasksArr = [];
         const successIds = []; // 发送成功报告id
         const failArr = []; // 发送失败用户名字
-
+        const ctx = this.ctx;
         // 发短信任务
         for (let i = 0; i < dataArr.length; i++) {
             const {
@@ -563,18 +563,20 @@ class EvalReportService extends Service {
 
             if (this.app.config.self.env !== 'unittest') {
                 tasksArr.push(
-                    this.ctx.service.user.sendSms(
-                        parentPhoneNum,
-                        [
-                            reportName,
-                            realname,
-                            realname,
-                            orgName,
-                            star,
-                            `${baseUrl}`,
-                        ],
-                        '479638'
-                    )
+                    async function() {
+                        return await ctx.service.user.sendSms(
+                            parentPhoneNum,
+                            [
+                                reportName,
+                                realname,
+                                realname,
+                                orgName,
+                                star,
+                                `${baseUrl}`,
+                            ],
+                            '479638'
+                        );
+                    }
                 );
             }
         }
@@ -582,7 +584,7 @@ class EvalReportService extends Service {
         const sendRetArr =
             this.app.config.self.env === 'unittest'
                 ? Array(dataArr.length).fill(true)
-                : await Promise.all(tasksArr);
+                : await Promise.all(tasksArr.map(r => r.call()));
 
         for (let i = 0; i < dataArr.length; i++) {
             sendRetArr[i]
