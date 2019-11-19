@@ -14,7 +14,7 @@ const Err = require('../common/err');
 class LessonOrgService extends Service {
     /**
      * 合并这个人在这个机构中的全部角色,并且生成一个token
-     * @param {*} params 结构：{members,userId,username,organizationId}
+     * @param {*} params 结构：{members,userId,username,organizationId,loginUrl}
      * @param {*} config token 的密钥，过期时间等
      */
     async mergeRoleIdAndGenToken(params, config) {
@@ -30,6 +30,7 @@ class LessonOrgService extends Service {
                 roleId,
                 username: params.username,
                 organizationId: params.organizationId,
+                loginUrl: params.loginUrl,
             },
             config.secret,
             config.tokenExpire || TOKEN_DEFAULT_EXPIRE
