@@ -70,6 +70,7 @@ const LessonOrganization = class extends Controller {
         const organ = await ctx.service.lessonOrganization.getByCondition({
             $or: [{
                 name: organizationName,
+            }, {
                 id: organizationId,
             }],
         });
