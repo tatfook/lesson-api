@@ -533,8 +533,12 @@ class LessonOrgClassMemberService extends Service {
             if (!isVip && member.roleId & CLASS_MEMBER_ROLE_STUDENT) {
                 isVip = 1;
             }
-            // 是机构老师则就是tLevel
-            if (!tLevel && member.roleId & CLASS_MEMBER_ROLE_TEACHER) {
+            // 是机构老师或者管理员则就是tLevel
+            if (
+                !tLevel &&
+                (member.roleId & CLASS_MEMBER_ROLE_TEACHER ||
+                    member.roleId & CLASS_MEMBER_ROLE_ADMIN)
+            ) {
                 tLevel = 1;
             }
         });
