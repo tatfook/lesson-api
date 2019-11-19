@@ -15,7 +15,7 @@ module.exports = app => {
                 type: BIGINT,
             },
 
-            messageId: {
+            msgId: {
                 type: BIGINT,
             },
 
@@ -38,6 +38,37 @@ module.exports = app => {
             ],
         }
     );
+
+    // 各个机构【包括系统】的未读消息数
+    model.getUnReadCount = async function(userId) {
+        const sql = `
+        select 
+            m.organizationId,ifnull(o.name,'系统') name,count(um.id) unReadCount
+            from userMessages um 
+            join messages m on m.id = um.msgId 
+            left join lessonOrganizations o on o.id = m.organizationId
+        where 
+            um.status = 0 and um.userId = :userId 
+        group by m.organizationId`;
+
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                userId,
+            },
+        });
+
+        return list;
+    };
+
+    model.associate = () => {
+        app.model.UserMessage.belongsTo(app.model.Message, {
+            as: 'messages',
+            foreignKey: 'messageId',
+            targetKey: 'id',
+            constraints: false,
+        });
+    };
 
     return model;
 };

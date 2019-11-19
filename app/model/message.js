@@ -18,8 +18,9 @@ module.exports = app => {
                 type: BIGINT,
             },
 
-            organizationId: { // 机构id
+            organizationId: { // 机构id,
                 type: BIGINT,
+                defaultValue: 0,
             },
 
             type: {
@@ -70,7 +71,7 @@ module.exports = app => {
         const sql =
             `
             select id, createdAt from messages where all = :all and createdAt > :createdAt 
-            and id not in (select messageId from userMessages where userId = :userId)
+            and id not in (select msgId from userMessages where userId = :userId)
             `;
         const list = await app.model.query(sql, {
             type: app.model.QueryTypes.SELECT,
@@ -88,6 +89,15 @@ module.exports = app => {
         }));
         await app.model.userMessages.bulkCreate(datas);
         return;
+    };
+
+    model.associate = () => {
+        app.model.Message.hasMany(app.model.UserMessage, {
+            as: 'userMessages',
+            foreignKey: 'messageId',
+            sourceKey: 'id',
+            constraints: false,
+        });
     };
 
     return model;
