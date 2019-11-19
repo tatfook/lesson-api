@@ -101,6 +101,14 @@ module.exports = app => {
         evaluationReport.reportToParent
     );
 
+    // 消息
+    const userMessage = controller.userMessage;
+    const message = controller.message;
+    router.get(`${prefix}userMessages`, userMessage.index);
+    router.put(`${prefix}userMessages/status`, userMessage.setStatus);
+    router.get(`${prefix}userMessages/unReadCount`, userMessage.unReadCount);
+    router.post(`${prefix}messages`, message.createMsg);
+
     // -----------------------------add from coreservice--------------------------------------------------------
     // LESSON three
     const lessonOrganization = controller.lessonOrganization;

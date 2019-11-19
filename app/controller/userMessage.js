@@ -3,7 +3,7 @@
 const Controller = require('./baseController.js');
 const Err = require('../common/err');
 
-const Message = class extends Controller {
+const UserMessage = class extends Controller {
 
     // 获取我的消息列表
     async index() {
@@ -36,11 +36,6 @@ const Message = class extends Controller {
         const list = await this.ctx.service.userMessage.getUnReadCount(userId);
         return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: list });
     }
-
-    // 发送
-    async createMSg() {
-
-    }
 };
 
-module.exports = Message;
+module.exports = UserMessage;
