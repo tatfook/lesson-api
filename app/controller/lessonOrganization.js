@@ -18,16 +18,17 @@ const LessonOrganization = class extends Controller {
         const { userId, username } = this.authenticated();
         const { organizationId } = this.validate({ organizationId: 'number' });
 
-        const members = await ctx.service.lessonOrganizationClassMember.getAllByCondition(
-            { organizationId, memberId: userId }
-        );
+        const [ members, org ] = await Promise.all([
+            ctx.service.lessonOrganizationClassMember.getAllByCondition({ organizationId, memberId: userId }),
+            ctx.service.lessonOrganization.getByCondition({ id: organizationId }),
+        ]);
         if (!members.length) return ctx.throw(400, Err.MEMBER_NOT_EXISTS);
 
         // 合并这个人在这个机构中的全部角色,并且生成一个token
         const {
             token,
         } = await ctx.service.lessonOrganization.mergeRoleIdAndGenToken(
-            { members, userId, username, organizationId },
+            { members, userId, username, organizationId, loginUrl: org.loginUrl },
             this.app.config.self
         );
 
@@ -65,15 +66,16 @@ const LessonOrganization = class extends Controller {
         }
         const user = users[0];
 
-        // 找到organizationId
-        if (!organizationId) {
-            if (!organizationName) return ctx.throw(400, Err.ARGS_ERR);
-            const organ = await ctx.service.lessonOrganization.getByCondition({
+        // 找到机构
+        const organ = await ctx.service.lessonOrganization.getByCondition({
+            $or: [{
                 name: organizationName,
-            });
-            if (!organ) return ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
-            organizationId = organ.id;
-        }
+                id: organizationId,
+            }],
+        });
+        if (!organ) ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+        if (organizationId && organ.id !== ~~organizationId) ctx.throw(400, Err.ARGS_ERR);
+        if (!organizationId) organizationId = organ.id;
 
         // 找到这个人在机构中的members
         const curtime = new Date();
@@ -107,6 +109,7 @@ const LessonOrganization = class extends Controller {
                 userId: user.id,
                 username: user.username,
                 organizationId,
+                loginUrl: organ.loginUrl,
             },
             this.app.config.self
         );
