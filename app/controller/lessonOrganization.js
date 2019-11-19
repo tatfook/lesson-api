@@ -46,6 +46,7 @@ const LessonOrganization = class extends Controller {
         } = this.validate({ username: 'string', password: 'string' });
 
         username = username.trim();
+        password = password.trim();
 
         const users = await ctx.service.keepwork.getAllUserByCondition({
             $or: [
