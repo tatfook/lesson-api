@@ -8,10 +8,9 @@ const UserMessage = class extends Controller {
     // 获取我的消息列表
     async index() {
         const { userId } = this.authenticated();
-        const where = this.validate();
-        where.userId = userId;
+        const { organizationId } = this.validate();
 
-        const ret = await this.ctx.service.userMessage.getMyMessages(userId, where);
+        const ret = await this.ctx.service.userMessage.getMyMessages(userId, organizationId);
         return this.ctx.helper.success({
             ctx: this.ctx,
             status: 200,

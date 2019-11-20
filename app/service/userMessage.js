@@ -16,9 +16,9 @@ class UserMessage extends Service {
     /**
      * 获取我的消息列表
      * @param {*} userId userId
-     * @param {*} where where 条件
+     * @param {*} organizationId organizationId 机构名称
      */
-    async getMyMessages(userId, where) {
+    async getMyMessages(userId, organizationId) {
         await this.ctx.model.Message.mergeMessage(userId);
 
         return await this.ctx.model.UserMessage
@@ -30,7 +30,7 @@ class UserMessage extends Service {
                         model: this.model.Message,
                     },
                 ],
-                where,
+                where: { userId, organizationId },
             })
             .then(o => {
                 o.rows = o.rows.map(o => o.toJSON());

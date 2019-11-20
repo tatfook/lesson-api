@@ -22,6 +22,10 @@ module.exports = app => {
                 type: BIGINT,
                 defaultValue: 0,
             },
+            sendSms: { // 是否发送短信，0.不发送，1.发送
+                type: INTEGER,
+                defaultValue: 0,
+            },
 
             type: {
                 // 消息类型 0 - 系统消息,1.机构消息

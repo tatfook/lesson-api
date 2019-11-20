@@ -107,7 +107,8 @@ module.exports = app => {
     router.get(`${prefix}userMessages`, userMessage.index);
     router.put(`${prefix}userMessages/status`, userMessage.setStatus);
     router.get(`${prefix}userMessages/unReadCount`, userMessage.unReadCount);
-    router.post(`${prefix}messages`, message.createMsg);
+    router.post(`${prefix}messages`, message.create);
+    router.get(`${prefix}messages`, message.index);
 
     // -----------------------------add from coreservice--------------------------------------------------------
     // LESSON three

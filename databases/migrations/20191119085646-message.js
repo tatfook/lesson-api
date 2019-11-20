@@ -16,6 +16,10 @@ module.exports = {
           sender: {
             type: BIGINT,
           },
+          sendSms: { // 是否发送短信，0.不发送，1.发送
+            type: INTEGER,
+            defaultValue: 0,
+          },
           organizationId: { // 机构id,
             type: BIGINT,
             defaultValue: 0,
