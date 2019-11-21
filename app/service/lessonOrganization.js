@@ -383,6 +383,54 @@ class LessonOrgService extends Service {
         );
         if (isTeacher) this.ctx.throw(409, Err.ALREADY_ISTEACHER_IN_ORG);
     }
+
+    // 获取机构的所有班级，嵌套返回所有成员
+    async getClassAndMembers(organizationId, roleId, userId) {
+
+        const list = await this.ctx.model.LessonOrganizationClass.findAll({
+            where: { organizationId },
+            attributes: [[ 'id', 'classId' ], [ 'name', 'className' ]],
+            include: [{
+                as: 'lessonOrganizationClassMembers',
+                model: this.model.LessonOrganizationClassMember,
+                attributes: [ 'memberId', 'realname', 'roleId' ],
+            }],
+        });
+
+        const retArr = [];
+        for (let i = 0; i < list.length; i++) {
+            const element = list[i].get();
+
+            const obj = {
+                classId: element.classId,
+                className: element.className,
+                teacherList: [],
+                studentList: [],
+            };
+
+            const members = element.lessonOrganizationClassMembers;
+            if (roleId === CLASS_MEMBER_ROLE_TEACHER) { // 老师只返回自己执教的班级
+                const index = _.findIndex(members, o => o.memberId === userId && (o.roleId & CLASS_MEMBER_ROLE_TEACHER));
+                if (index === -1) continue;
+            }
+
+            // 老师学生分别加到teacherList和studentList中
+            for (let j = 0; j < members.length; j++) {
+                if (members[j].roleId & CLASS_MEMBER_ROLE_TEACHER) {
+                    obj.teacherList.push({
+                        userId: members[j].memberId, realname: members[j].realname,
+                    });
+                }
+                if (members[j].roleId & CLASS_MEMBER_ROLE_STUDENT) {
+                    obj.studentList.push({
+                        userId: members[j].memberId, realname: members[j].realname,
+                    });
+                }
+            }
+            retArr.push(obj);
+        }
+        return retArr;
+    }
 }
 
 module.exports = LessonOrgService;

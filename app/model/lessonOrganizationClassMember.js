@@ -1,6 +1,11 @@
 'use strict';
 const _ = require('lodash');
 
+const {
+    CLASS_MEMBER_ROLE_TEACHER,
+    CLASS_MEMBER_ROLE_STUDENT,
+} = require('../common/consts');
+
 module.exports = app => {
     const { BIGINT, INTEGER, STRING, DATE } = app.Sequelize;
 
@@ -79,7 +84,11 @@ module.exports = app => {
         organizationId,
     }) {
         const sql =
-            'select classId from lessonOrganizationClassMembers where organizationId = :organizationId and memberId = :memberId and roleId & :roleId';
+            `select 
+                classId 
+            from lessonOrganizationClassMembers 
+            where organizationId = :organizationId 
+            and memberId = :memberId and roleId & :roleId`;
         const list = await app.model.query(sql, {
             type: app.model.QueryTypes.SELECT,
             replacements: {
@@ -91,6 +100,55 @@ module.exports = app => {
         const classIds = _.uniq(_.map(list, o => o.classId));
 
         return classIds;
+    };
+
+    // 获取这个机构的全部用户id,去重
+    model.getUserIdsByOrganizationId = async function(organizationId, classIds, userIds) {
+
+        let cond = '';
+        if (classIds.length) cond += ' and classId in (:classIds)';
+        if (userIds.length) cond += ' and memberId in (:userIds)';
+
+        const sql = `
+        select distinct memberId from 
+        lessonOrganizationClassMembers
+        where organizationId=:organizationId and classId>0 
+        and (roleId &1 or roleId&2)${cond}`;
+
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                organizationId,
+                classIds,
+                userIds,
+            },
+        });
+        return list ? list.map(r => r.memberId) : [];
+    };
+
+    // 获取这个机构的全部用户,分角色
+    model.getMembersAndRoleId = async function(organizationId, classIds, userIds) {
+
+        let cond = '';
+        if (classIds.length) cond += ' and classId in (:classIds)';
+        if (userIds.length) cond += ' and memberId in (:userIds)';
+
+        const sql = `
+        select memberId,roleId&1 roleId from 
+        lessonOrganizationClassMembers
+        where organizationId=:organizationId and classId>0 
+        and roleId &1  ${cond}`;
+
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                organizationId,
+                classIds,
+                userIds,
+            },
+        });
+
+        return list;
     };
 
     // 检查师生身份

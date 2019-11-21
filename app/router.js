@@ -101,6 +101,15 @@ module.exports = app => {
         evaluationReport.reportToParent
     );
 
+    // 消息
+    const userMessage = controller.userMessage;
+    const message = controller.message;
+    router.get(`${prefix}userMessages`, userMessage.index);
+    router.put(`${prefix}userMessages/status`, userMessage.setStatus);
+    router.get(`${prefix}userMessages/unReadCount`, userMessage.unReadCount);
+    router.post(`${prefix}messages`, message.create);
+    router.get(`${prefix}messages`, message.index);
+
     // -----------------------------add from coreservice--------------------------------------------------------
     // LESSON three
     const lessonOrganization = controller.lessonOrganization;
@@ -108,6 +117,10 @@ module.exports = app => {
     router.get(
         `${prefix}lessonOrganizations/packages`,
         lessonOrganization.packages
+    );
+    router.get(
+        `${prefix}lessonOrganizations/classAndMembers`,
+        lessonOrganization.getClassAndMembers
     );
     router.get(
         `${prefix}lessonOrganizations/packageDetail`,
