@@ -10,7 +10,7 @@ const UserMessage = class extends Controller {
         const { userId } = this.authenticated();
         const { organizationId } = this.validate();
 
-        const ret = await this.ctx.service.userMessage.getMyMessages(userId, organizationId);
+        const ret = await this.ctx.service.userMessage.getMyMessages(this.queryOptions, userId, organizationId);
         return this.ctx.helper.success({
             ctx: this.ctx,
             status: 200,

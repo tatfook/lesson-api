@@ -15,22 +15,35 @@ class UserMessage extends Service {
 
     /**
      * 获取我的消息列表
+     * @param {*} queryOptions queryOptions
      * @param {*} userId userId
      * @param {*} organizationId organizationId 机构名称
      */
-    async getMyMessages(userId, organizationId) {
+    async getMyMessages(queryOptions, userId, organizationId) {
         await this.ctx.model.Message.mergeMessage(userId);
 
+        let condition = {};
+        if (organizationId) {
+            condition = { organizationId };
+        }
+        const seq = this.app.model.Sequelize;
         return await this.ctx.model.UserMessage
             .findAndCountAll({
-                ...this.queryOptions,
+                ...queryOptions,
                 include: [
                     {
                         as: 'messages',
+                        attributes: [ 'id', 'msg', 'senderName', 'senderPortrait' ],
                         model: this.model.Message,
+                        where: condition,
+                        include: [{
+                            as: 'lessonOrganizations',
+                            attributes: [[ seq.fn('ifnull', seq.col('name'), '系统'), 'name' ]],
+                            model: this.model.LessonOrganization,
+                        }],
                     },
                 ],
-                where: { userId, organizationId },
+                where: { userId },
             })
             .then(o => {
                 o.rows = o.rows.map(o => o.toJSON());

@@ -33,7 +33,7 @@ module.exports = app => {
             indexes: [
                 {
                     unique: true,
-                    fields: [ 'userId', 'messageId' ],
+                    fields: [ 'userId', 'msgId' ],
                 },
             ],
         }
@@ -43,13 +43,28 @@ module.exports = app => {
     model.getUnReadCount = async function(userId) {
         const sql = `
         select 
-            m.organizationId,ifnull(o.name,'系统') name,count(um.id) unReadCount
-            from userMessages um 
-            join messages m on m.id = um.msgId 
-            left join lessonOrganizations o on o.id = m.organizationId
-        where 
-            um.status = 0 and um.userId = :userId 
-        group by m.organizationId`;
+            a.id organizationId,
+            a.name organizationName,
+            ifnull(b.unReadCount,0) unReadCount
+            from (
+                select 
+                    distinct o.id,
+                    o.name
+                from lessonOrganizations o 
+                join lessonOrganizationClassMembers cm 
+                    on cm.organizationId = o.id where cm.memberId = :userId
+                union all (select 0 id,'系统' name)
+            ) a left join (
+                select 
+                    m.organizationId,
+                    ifnull(o.name,'系统') name,
+                    count(um.id) unReadCount
+                from userMessages um 
+                join messages m on m.id = um.msgId 
+                left join lessonOrganizations o on o.id = m.organizationId
+                where um.status = 0 and um.userId = :userId 
+                group by m.organizationId
+            ) b on a.id = b.organizationId`;
 
         const list = await app.model.query(sql, {
             type: app.model.QueryTypes.SELECT,
@@ -61,10 +76,31 @@ module.exports = app => {
         return list;
     };
 
+    model.getClassNamesByMsgId = async function(msgIds) {
+        const sql = `
+        SELECT 
+            um.msgId,
+            group_concat(c.name) sendTo
+        FROM
+            userMessages um
+            JOIN lessonOrganizationClassMembers m ON m.memberId = um.userId 
+            JOIN lessonOrganizationClasses c ON c.id = m.classId
+        WHERE um.msgId in (:msgIds) group by um.msgId`;
+
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                msgIds,
+            },
+        });
+
+        return list;
+    };
+
     model.associate = () => {
         app.model.UserMessage.belongsTo(app.model.Message, {
             as: 'messages',
-            foreignKey: 'messageId',
+            foreignKey: 'msgId',
             targetKey: 'id',
             constraints: false,
         });

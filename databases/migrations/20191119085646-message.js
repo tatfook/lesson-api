@@ -2,7 +2,7 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    const { STRING, INTEGER, BIGINT } = Sequelize;
+    const { STRING, INTEGER, BIGINT, DATE, JSON } = Sequelize;
 
     return queryInterface.sequelize.transaction(t =>
       Promise.all([

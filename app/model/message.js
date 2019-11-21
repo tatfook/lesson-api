@@ -74,8 +74,15 @@ module.exports = app => {
 
         const sql =
             `
-            select id, createdAt from messages where all = :all and createdAt > :createdAt 
-            and id not in (select msgId from userMessages where userId = :userId)
+            select 
+                id, 
+                createdAt 
+            from messages 
+            where \`all\` = :all 
+            and createdAt > :createdAt 
+            and id not in (
+                select msgId from userMessages where userId = :userId
+            )
             `;
         const list = await app.model.query(sql, {
             type: app.model.QueryTypes.SELECT,
@@ -87,21 +94,31 @@ module.exports = app => {
         });
         const datas = _.map(list, o => ({
             userId,
-            messageId: o.id,
-            state: 0,
+            msgId: o.id,
+            status: 0,
             createdAt: o.createdAt,
         }));
-        await app.model.userMessages.bulkCreate(datas);
+        await app.model.UserMessage.bulkCreate(datas);
         return;
     };
 
     model.associate = () => {
         app.model.Message.hasMany(app.model.UserMessage, {
             as: 'userMessages',
-            foreignKey: 'messageId',
+            foreignKey: 'msgId',
             sourceKey: 'id',
             constraints: false,
         });
+
+        app.model.Message.belongsTo(
+            app.model.LessonOrganization,
+            {
+                as: 'lessonOrganizations',
+                foreignKey: 'organizationId',
+                targetKey: 'id',
+                constraints: false,
+            }
+        );
     };
 
     return model;

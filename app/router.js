@@ -119,6 +119,10 @@ module.exports = app => {
         lessonOrganization.packages
     );
     router.get(
+        `${prefix}lessonOrganizations/classAndMembers`,
+        lessonOrganization.getClassAndMembers
+    );
+    router.get(
         `${prefix}lessonOrganizations/packageDetail`,
         lessonOrganization.packageDetail
     );

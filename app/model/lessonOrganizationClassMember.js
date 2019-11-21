@@ -119,8 +119,8 @@ module.exports = app => {
             type: app.model.QueryTypes.SELECT,
             replacements: {
                 organizationId,
-                classIds: classIds.toString(),
-                userIds: userIds.toString(),
+                classIds,
+                userIds,
             },
         });
         return list ? list.map(r => r.memberId) : [];
@@ -143,8 +143,8 @@ module.exports = app => {
             type: app.model.QueryTypes.SELECT,
             replacements: {
                 organizationId,
-                classIds: classIds.toString(),
-                userIds: userIds.toString(),
+                classIds,
+                userIds,
             },
         });
 
