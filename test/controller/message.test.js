@@ -8,15 +8,16 @@ describe('test/controller/message.test.js', () => {
 	});
 
 	it('001 发送机构消息', async () => {
-		const user = await app.login({ id: 1 });
+		const user = await app.login({ id: 1, roleId: 2 });
 		const token = user.token;
 
-		await app
+		const ret = await app
 			.httpRequest()
 			.post('/messages')
 			.send({
 				msg: { type: 3, text: '纯文本消息' },
-				userIds: [{ userId: 1, roleId: 1 }]
+				userIds: [{ userId: 1, roleId: 1 }],
+				sendSms: 0
 			})
 			.set('Authorization', `Bearer ${token}`)
 			.expect(200)

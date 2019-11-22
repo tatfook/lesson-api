@@ -37,7 +37,7 @@ const UserMessage = class extends Controller {
         return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: list });
     }
 
-    // 获取某个消息在列表中的位置(index从0开始)，给前端跳转用的辅助接口
+    // 获取某个消息在列表中的位置(index从1开始)，给前端跳转用的辅助接口
     async getIndexOfMessage() {
         this.authenticated();
         const { id, organizationId } = this.validate();
@@ -45,7 +45,7 @@ const UserMessage = class extends Controller {
 
         const index = await this.ctx.service.userMessage.getIndexOfMessage(id, organizationId);
 
-        return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: index });
+        return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: index + 1 });
     }
 };
 
