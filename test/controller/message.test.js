@@ -7,22 +7,20 @@ describe('test/controller/message.test.js', () => {
 		await app.model.Log.truncate();
 	});
 
-	it('001 发送消息', async () => {
+	it('001 发送机构消息', async () => {
 		const user = await app.login({ id: 1 });
 		const token = user.token;
 
-		const report = await app
+		await app
 			.httpRequest()
 			.post('/messages')
 			.send({
-				name: '这是名字',
-				type: 1,
-				classId: 1,
+				msg: { type: 3, text: '纯文本消息' },
+				userIds: [{ userId: 1, roleId: 1 }]
 			})
 			.set('Authorization', `Bearer ${token}`)
 			.expect(200)
 			.then(res => res.body.data);
 
-		assert(report.id === 1);
 	});
 });

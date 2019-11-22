@@ -3,6 +3,7 @@
 const Service = require('../common/service.js');
 const Err = require('../common/err');
 const moment = require('moment');
+const { EVA_REPO_TEMPLETID } = require('../common/consts');
 
 class EvalReportService extends Service {
     // 发起点评
@@ -574,7 +575,7 @@ class EvalReportService extends Service {
                                 star,
                                 `${baseUrl}`,
                             ],
-                            '479638'
+                            EVA_REPO_TEMPLETID
                         );
                     }
                 );
