@@ -38,7 +38,9 @@ class UserMessage extends Service {
                         where: condition,
                         include: [{
                             as: 'lessonOrganizations',
-                            attributes: [[ seq.fn('ifnull', seq.col('name'), '系统'), 'name' ]],
+                            attributes: [
+                                [ seq.literal('ifnull(`messages->lessonOrganizations`.`id`, 0)'), 'id' ],
+                                [ seq.fn('ifnull', seq.col('name'), '系统'), 'name' ]],
                             model: this.model.LessonOrganization,
                         }],
                     },
@@ -60,13 +62,13 @@ class UserMessage extends Service {
     }
 
     //
-    async getIndexOfMessage(userId, userMessageId) {
+    async getIndexOfMessage(messageId, organizationId) {
         const seq = this.app.model.Sequelize;
-        return await this.ctx.model.UserMessage.count({
+        return await this.ctx.model.Message.count({
             where: {
-                userId,
+                organizationId,
                 createdAt: {
-                    $gt: seq.literal(`(select createdAt from userMessages where id = ${userMessageId})`),
+                    $gt: seq.literal(`(select createdAt from messages where id = ${messageId})`),
                 },
             },
         });

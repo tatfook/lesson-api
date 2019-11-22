@@ -4,7 +4,8 @@ const Service = require('../common/service.js');
 const {
     CLASS_MEMBER_ROLE_TEACHER,
     CLASS_MEMBER_ROLE_ADMIN,
-    CLASS_MEMBER_ROLE_STUDENT } = require('../common/consts');
+    CLASS_MEMBER_ROLE_STUDENT,
+    ORG_MSG_TEMPLEID } = require('../common/consts');
 const Err = require('../common/err');
 const _ = require('lodash');
 
@@ -39,7 +40,7 @@ class Message extends Service {
     }
 
     // 创建userMessages,推送和发短信
-    async pushAndSendSms(organizationId, classIds, userIds, sendSms, msg, msgId) {
+    async pushAndSendSms({ organizationId, classIds, userIds, sendSms, msg, msgId, senderName }) {
         const userIdArr = await this.getUserIds(organizationId, classIds, userIds.map(r => r.userId));
 
         const userMsg = userIdArr.map(r => {
@@ -48,17 +49,23 @@ class Message extends Service {
                 msgId,
             };
         });
-        // 创建userMessages
-        await this.ctx.model.UserMessage.bulkCreate(userMsg);
 
-        // to push-server
-        await this.ctx.helper.curl('post', `${this.pushServerUrl()}api/v0/app/msg`, {
-            userIds: userIdArr, msg,
-        }, {
-            headers: {
-                Authorization: this.ctx.request.header.authorization,
-            },
-        });
+        const [ , , org ] = await Promise.all([
+            // 创建userMessages
+            this.ctx.model.UserMessage.bulkCreate(userMsg),
+
+            // to push-server 推送
+            this.ctx.helper.curl('post', `${this.pushServerUrl()}api/v0/app/msg`, {
+                userIds: userIdArr, msg,
+            }, {
+                headers: {
+                    Authorization: this.ctx.request.header.authorization,
+                },
+            }),
+
+            // get OrgName
+            this.ctx.model.LessonOrganization.findOne({ attributes: [ 'name' ], where: { id: organizationId } }),
+        ]);
 
         const limited = 200;
         // 发送短信,一次只能给200个手机发短信，每分钟只能发300次
@@ -69,7 +76,7 @@ class Message extends Service {
                 const element = phoneList[i];
                 if (_.isInteger((i + 1) / limited)) {
                     sendPhone += `${element}`;
-                    await this.ctx.service.user.sendSms(sendPhone, [ msg.text ], 'XXX');
+                    await this.ctx.service.user.sendSms(sendPhone, [ org.name, senderName, msg.text ], ORG_MSG_TEMPLEID);
                     sendPhone = '';
                 } else {
                     sendPhone += `${element},`;
@@ -78,7 +85,7 @@ class Message extends Service {
 
             if (sendPhone) {
                 sendPhone = sendPhone.substring(0, sendPhone.length - 1);
-                await this.ctx.service.user.sendSms(sendPhone, [ msg.text ], 'XXX');
+                await this.ctx.service.user.sendSms(sendPhone, [ org.name, senderName, msg.text ], ORG_MSG_TEMPLEID);
             }
         }
     }
@@ -108,7 +115,15 @@ class Message extends Service {
         });
 
         // 推送，创建用户消息，和发送短信
-        await this.pushAndSendSms(organizationId, classIds, userIds, sendSms, msg, message.id);
+        await this.pushAndSendSms({
+            organizationId,
+            classIds,
+            userIds,
+            sendSms,
+            msg,
+            msgId: message.id,
+            senderName: roleId === CLASS_MEMBER_ROLE_ADMIN ? '' : `${member.realname}`,
+        });
     }
 
     async getMessages(queryOptions, userId, roleId, organizationId) {
@@ -136,8 +151,8 @@ class Message extends Service {
 
         const ids = ret.rows.map(r => r.id);
 
+        // 通过msgIds找出分别发给了哪些班级,并塞到message列表中
         const classNames = await this.ctx.model.UserMessage.getClassNamesByMsgId(ids);
-
         ret.rows = ret.rows.map(r => {
             r = r.get();
             const index = _.findIndex(classNames, o => o.msgId === r.id);
