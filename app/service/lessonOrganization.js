@@ -388,7 +388,7 @@ class LessonOrgService extends Service {
     async getClassAndMembers(organizationId, roleId, userId) {
 
         const list = await this.ctx.model.LessonOrganizationClass.findAll({
-            where: { organizationId },
+            where: { organizationId, end: { $gt: new Date() } },
             attributes: [[ 'id', 'classId' ], [ 'name', 'className' ]],
             include: [{
                 as: 'lessonOrganizationClassMembers',
