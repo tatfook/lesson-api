@@ -41,7 +41,7 @@ const UserMessage = class extends Controller {
     async getIndexOfMessage() {
         this.authenticated();
         const { id, organizationId } = this.validate();
-        if (!_.isNumber(id)) return this.ctx.throw(400, Err.ID_ERR);
+        if (!_.isNumber(Number(id))) return this.ctx.throw(400, Err.ID_ERR);
 
         const index = await this.ctx.service.userMessage.getIndexOfMessage(id, organizationId);
 
