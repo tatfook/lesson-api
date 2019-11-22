@@ -58,6 +58,19 @@ class UserMessage extends Service {
     async getUnReadCount(userId) {
         return await this.ctx.model.UserMessage.getUnReadCount(userId);
     }
+
+    //
+    async getIndexOfMessage(userId, userMessageId) {
+        const seq = this.app.model.Sequelize;
+        return await this.ctx.model.UserMessage.count({
+            where: {
+                userId,
+                createdAt: {
+                    $gt: seq.literal(`(select createdAt from userMessages where id = ${userMessageId})`),
+                },
+            },
+        });
+    }
 }
 
 module.exports = UserMessage;

@@ -2,6 +2,7 @@
 
 const Controller = require('./baseController.js');
 const Err = require('../common/err');
+const _ = require('lodash');
 
 const UserMessage = class extends Controller {
 
@@ -34,6 +35,17 @@ const UserMessage = class extends Controller {
         const { userId } = this.authenticated();
         const list = await this.ctx.service.userMessage.getUnReadCount(userId);
         return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: list });
+    }
+
+    // 获取某个消息在列表中的位置(index从0开始)，给前端跳转用的辅助接口
+    async getIndexOfMessage() {
+        const { userId } = this.authenticated();
+        const { id } = this.validate();
+        if (!_.isNumber(id)) return this.ctx.throw(400, Err.ID_ERR);
+
+        const index = await this.ctx.service.userMessage.getIndexOfMessage(userId, id);
+
+        return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: index });
     }
 };
 
