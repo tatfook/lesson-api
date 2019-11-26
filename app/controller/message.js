@@ -25,7 +25,12 @@ const Message = class extends Controller {
             msg = {},
             classIds = [],
             userIds = [],
+            sendClassIds,
         } = this.validate();
+
+        if (!Array.isArray(sendClassIds)) {
+            return this.ctx.throw(400, Err.ARGS_ERR);
+        }
 
         this.validateCgi(
             { sendSms, type: msg.type, text: msg.text },
@@ -33,7 +38,7 @@ const Message = class extends Controller {
         );
 
         await ctx.service.message.createMsg(
-            { sendSms, msg, classIds, userIds },
+            { sendSms, msg, classIds, userIds, sendClassIds },
             { userId, roleId, organizationId, username },
             _roleId
         );

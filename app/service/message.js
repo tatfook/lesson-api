@@ -142,7 +142,7 @@ class Message extends Service {
 
     // 发送消息
     async createMsg(
-        { sendSms, msg, classIds, userIds },
+        { sendSms, msg, classIds, userIds, sendClassIds },
         { userId, roleId, organizationId, username },
         _roleId
     ) {
@@ -164,6 +164,7 @@ class Message extends Service {
             sender: ~~_roleId === CLASS_MEMBER_ROLE_ADMIN ? -1 : userId,
             organizationId,
             sendSms,
+            sendClassIds,
             type: 1,
             all: 0,
             msg,
@@ -198,22 +199,33 @@ class Message extends Service {
 
         const ret = await this.ctx.model.Message.findAndCountAll({
             ...queryOptions,
-            attributes: [ 'id', 'msg', 'sendSms', 'createdAt' ],
+            attributes: [ 'id', 'msg', 'sendSms', 'sendClassIds', 'createdAt' ],
             where: condition,
         });
 
-        const ids = ret.rows.map(r => r.id);
+        const sendClassIds = _.uniq(
+            ret.rows.reduce((p, c) => [ ...p, ...c.sendClassIds ], [])
+        );
 
-        // 通过msgIds找出分别发给了哪些班级,并塞到message列表中
-        const classNames = await this.ctx.model.UserMessage.getClassNamesByMsgId(
-            ids
+        // 找出分别发给了哪些班级
+        const classNames = await this.ctx.model.LessonOrganizationClass.findAll(
+            {
+                attributes: [ 'id', 'name' ],
+                where: { id: { $in: sendClassIds } },
+            }
         );
         ret.rows = ret.rows.map(r => {
             r = r.get ? r.get() : r;
-            const index = _.findIndex(classNames, o => o.msgId === r.id);
-            if (index > -1) {
-                r.sendTo = classNames[index].sendTo;
-            }
+            const sendClassIds = r.sendClassIds;
+            let sendTo = '';
+            sendClassIds.forEach(r => {
+                const index = _.findIndex(classNames, o => o.id === ~~r);
+                if (index > -1) {
+                    sendTo += classNames[index].name;
+                }
+            });
+            r.sendTo = sendTo;
+            delete r.sendClassIds;
             return r;
         });
 

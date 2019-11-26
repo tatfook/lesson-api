@@ -29,7 +29,10 @@ module.exports = app => {
                 type: INTEGER,
                 defaultValue: 0,
             },
-
+            sendClassIds: {
+                // 发送的班级id，显示用，不代表全部的成员
+                type: JSON,
+            },
             type: {
                 // 消息类型 0 - 系统消息,1.机构消息
                 type: INTEGER,
