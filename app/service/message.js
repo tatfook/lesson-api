@@ -21,6 +21,7 @@ class Message extends Service {
             .getUserIdsByOrganizationId(organizationId, classIds, userIds);
     }
 
+    // 获取学生用户
     async getMembersAndRole(organizationId, classIds, userIds) {
         return await this.ctx.model.LessonOrganizationClassMember
             .getMembersAndRoleId(organizationId, classIds, userIds);
@@ -163,6 +164,27 @@ class Message extends Service {
         });
 
         return ret;
+    }
+
+    // 创建用户的注册消息
+    async createRegisterMsg(user) {
+        const msg = await this.ctx.model.Message
+            .create({
+                sender: 0,
+                type: 0,
+                all: 0,
+                msg: {
+                    type: 1,
+                    user: {
+                        ...user,
+                        password: undefined,
+                    },
+                },
+            })
+            .then(o => o && o.toJSON());
+        return await this.ctx.model.UserMessage
+            .create({ userId: user.id, msgId: msg.id, status: 0 })
+            .then(o => o && o.toJSON());
     }
 }
 

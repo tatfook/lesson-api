@@ -111,6 +111,11 @@ module.exports = app => {
     router.post(`${prefix}messages`, message.create);
     router.get(`${prefix}messages`, message.index);
 
+    // --------------------------apis for coreApi project-------------------------
+    const coreApi = controller.coreApi;
+    router.post(`${prefix}coreApi/registerMsg`, coreApi.createRegisterMsg);
+    // --------------------------apis for coreApi project-------------------------
+
     // -----------------------------add from coreservice--------------------------------------------------------
     // LESSON three
     const lessonOrganization = controller.lessonOrganization;

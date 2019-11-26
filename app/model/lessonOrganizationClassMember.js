@@ -126,7 +126,7 @@ module.exports = app => {
         return list ? list.map(r => r.memberId) : [];
     };
 
-    // 获取这个机构的全部用户,分角色
+    // 获取这个机构的学生用户,分角色
     model.getMembersAndRoleId = async function(organizationId, classIds, userIds) {
 
         let cond = '';
