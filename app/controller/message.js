@@ -16,12 +16,12 @@ const Message = class extends Controller {
         const ctx = this.ctx;
         const { userId, roleId, organizationId, username } = this.authenticated();
 
-        const { sendSms, msg = {}, classIds = [], userIds = [] } = this.validate();
+        const { sendSms, _roleId, msg = {}, classIds = [], userIds = [] } = this.validate();
 
         this.validateCgi({ sendSms, type: msg.type, text: msg.text }, createMsg);
 
         await ctx.service.message.createMsg({ sendSms, msg, classIds, userIds },
-            { userId, roleId, organizationId, username });
+            { userId, roleId, organizationId, username }, _roleId);
 
         return ctx.helper.success({ ctx, status: 200, res: 'OK' });
     }
