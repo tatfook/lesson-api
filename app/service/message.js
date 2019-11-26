@@ -184,7 +184,9 @@ class Message extends Service {
             msg,
             msgId: message.id,
             senderName:
-                roleId === CLASS_MEMBER_ROLE_ADMIN ? '' : `${member.realname}`,
+                ~~_roleId === CLASS_MEMBER_ROLE_ADMIN
+                    ? ''
+                    : `${member.realname}`,
         });
     }
 
@@ -224,7 +226,7 @@ class Message extends Service {
             ids
         );
         ret.rows = ret.rows.map(r => {
-            r = r.get();
+            r = r.get ? r.get() : r;
             const index = _.findIndex(classNames, o => o.msgId === r.id);
             if (index > -1) {
                 r.sendTo = classNames[index].sendTo;
