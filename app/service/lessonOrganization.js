@@ -396,7 +396,12 @@ class LessonOrgService extends Service {
                 {
                     as: 'lessonOrganizationClassMembers',
                     model: this.model.LessonOrganizationClassMember,
-                    attributes: [ 'memberId', 'realname', 'roleId' ],
+                    attributes: [
+                        'memberId',
+                        'realname',
+                        'roleId',
+                        'parentPhoneNum',
+                    ],
                 },
             ],
         });
@@ -436,6 +441,7 @@ class LessonOrgService extends Service {
                     obj.studentList.push({
                         userId: members[j].memberId,
                         realname: members[j].realname,
+                        parentPhoneNum: members[j].parentPhoneNum,
                     });
                 }
             }

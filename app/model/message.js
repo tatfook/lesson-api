@@ -14,7 +14,7 @@ module.exports = app => {
             },
 
             sender: {
-                // 0.keepwork,或者机构管理员的userId,或者机构老师的id
+                // 0.keepwork,-1.机构管理员,大于0.机构老师的id
                 // 消息发送者
                 type: BIGINT,
             },
@@ -29,7 +29,10 @@ module.exports = app => {
                 type: INTEGER,
                 defaultValue: 0,
             },
-
+            sendClassIds: {
+                // 发送的班级id，显示用，不代表全部的成员
+                type: JSON,
+            },
             type: {
                 // 消息类型 0 - 系统消息,1.机构消息
                 type: INTEGER,
