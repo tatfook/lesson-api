@@ -203,13 +203,17 @@ class Message extends Service {
             where: condition,
         });
 
-        const sendClassIds = _.uniq(ret.rows.reduce((p, c) => [ ...p, ...c.sendClassIds ], []));
+        const sendClassIds = _.uniq(
+            ret.rows.reduce((p, c) => [ ...p, ...c.sendClassIds ], [])
+        );
 
         // 找出分别发给了哪些班级
-        const classNames = await this.ctx.model.LessonOrganizationClass.findAll({
-            attributes: [ 'id', 'name' ],
-            where: { id: { $in: sendClassIds } },
-        });
+        const classNames = await this.ctx.model.LessonOrganizationClass.findAll(
+            {
+                attributes: [ 'id', 'name' ],
+                where: { id: { $in: sendClassIds } },
+            }
+        );
         ret.rows = ret.rows.map(r => {
             r = r.get ? r.get() : r;
             const sendClassIds = r.sendClassIds;

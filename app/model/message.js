@@ -29,7 +29,8 @@ module.exports = app => {
                 type: INTEGER,
                 defaultValue: 0,
             },
-            sendClassIds: { // 发送的班级id，显示用，不代表全部的成员
+            sendClassIds: {
+                // 发送的班级id，显示用，不代表全部的成员
                 type: JSON,
             },
             type: {

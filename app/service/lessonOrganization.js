@@ -396,7 +396,12 @@ class LessonOrgService extends Service {
                 {
                     as: 'lessonOrganizationClassMembers',
                     model: this.model.LessonOrganizationClassMember,
-                    attributes: [ 'memberId', 'realname', 'roleId', 'parentPhoneNum' ],
+                    attributes: [
+                        'memberId',
+                        'realname',
+                        'roleId',
+                        'parentPhoneNum',
+                    ],
                 },
             ],
         });
