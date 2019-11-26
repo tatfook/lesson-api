@@ -21,6 +21,11 @@ const createMsg = {
             param: { min: 1, max: 512 },
         },
     },
+    sendClassIds: {
+        isArray: {
+            errmsg: Err.ARGS_ERR,
+        },
+    },
 };
 
 module.exports = {
