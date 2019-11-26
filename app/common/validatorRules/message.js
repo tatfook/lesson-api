@@ -12,7 +12,7 @@ const createMsg = {
     type: {
         isInt: {
             errmsg: Err.MSG_TYPE_ERR,
-            param: { min: 3, max: 3 },
+            param: { min: 2, max: 2 },
         },
     },
     text: {
