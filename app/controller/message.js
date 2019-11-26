@@ -28,7 +28,9 @@ const Message = class extends Controller {
             sendClassIds,
         } = this.validate();
 
-        if (!Array.isArray(sendClassIds)) { return this.ctx.throw(400, Err.ARGS_ERR); }
+        if (!Array.isArray(sendClassIds)) {
+            return this.ctx.throw(400, Err.ARGS_ERR);
+        }
 
         this.validateCgi(
             { sendSms, type: msg.type, text: msg.text },
