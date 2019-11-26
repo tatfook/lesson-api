@@ -2,81 +2,121 @@ const { app, mock, assert } = require('egg-mock/bootstrap');
 const axios = require('axios');
 
 describe('test/service/message.test.js', () => {
+    describe('getCellPhone', () => {
+        it('001', async () => {
+            const ctx = app.mockContext();
 
-	describe('getCellPhone', () => {
-		it('001', async () => {
-			const ctx = app.mockContext();
+            mock(
+                ctx.model.LessonOrganizationClassMember,
+                'getMembersAndRoleId',
+                () => {
+                    return [];
+                }
+            );
 
-			mock(ctx.model.LessonOrganizationClassMember,
-				'getMembersAndRoleId', () => {
-					return []
-				});
+            mock(ctx.model.LessonOrganizationClassMember, 'findAll', () => {
+                return [
+                    { parentPhoneNum: '13509450686' },
+                    { parentPhoneNum: '13509450686' },
+                ];
+            });
 
-			mock(ctx.model.LessonOrganizationClassMember,
-				'findAll', () => {
-					return [
-						{ parentPhoneNum: '13509450686' },
-						{ parentPhoneNum: '13509450686' }
-					]
-				});
+            const list = await ctx.service.message.getCellPhone(
+                1,
+                [1],
+                [{ userId: 1, roleId: 1 }]
+            );
 
-			const list = await ctx
-				.service
-				.message
-				.getCellPhone(1, [1], [{ userId: 1, roleId: 1 }]);
+            assert(list.length === 1);
+        });
+    });
 
-			assert(list.length === 1);
-		});
-	});
+    describe('pushAndSendSms', () => {
+        beforeEach('do mock', () => {
+            const ctx = app.mockContext();
+            mock(
+                ctx.model.LessonOrganizationClassMember,
+                'getUserIdsByOrganizationId',
+                () => {
+                    return [1, 2, 3, 4];
+                }
+            );
+            mock(ctx.model.UserMessage, 'bulkCreate', () => 0);
+            mock(ctx.helper, 'curl', () => {
+                return {};
+            });
+            mock(ctx.model.LessonOrganization, 'findOne', () => {
+                return { name: '机构名称' };
+            });
+            app.mockService('user', 'sendSms', () => true);
+        });
 
-	describe('pushAndSendSms', () => {
+        it('001', async () => {
+            const ctx = app.mockContext();
 
-		beforeEach('do mock', () => {
-			const ctx = app.mockContext();
-			mock(ctx.model.LessonOrganizationClassMember,
-				'getUserIdsByOrganizationId', () => {
-					return [1, 2, 3, 4]
-				});
-			mock(ctx.model.UserMessage, 'bulkCreate', () => 0);
-			mock(ctx.helper, 'curl', () => {
-				return {}
-			});
-			mock(ctx.model.LessonOrganization, 'findOne', () => { return { name: '机构名称' } });
-			app.mockService('user', 'sendSms', () => true);
-		});
+            mock(ctx.helper, 'curl', () => {
+                return {};
+            });
 
-		it('001', async () => {
-			const ctx = app.mockContext();
+            await ctx.service.message.pushAndSendSms({
+                sendSms: 0,
+                userIds: [{ userId: 1 }],
+            });
+        });
 
-			mock(ctx.helper, 'curl', () => {
-				return {}
-			});
+        it('002', async () => {
+            const ctx = app.mockContext();
 
-			await ctx.service.message.pushAndSendSms({ sendSms: 0, userIds: [{ userId: 1 }] })
-		});
+            mock(ctx.helper, 'curl', () => {
+                return {};
+            });
 
-		it('002', async () => {
-			const ctx = app.mockContext();
+            app.mockService('message', 'getCellPhone', () => {
+                return ['13590450686'];
+            });
 
-			mock(ctx.helper, 'curl', () => {
-				return {}
-			});
+            await ctx.service.message.pushAndSendSms({
+                sendSms: 1,
+                userIds: [{ userId: 1 }],
+                msg: { text: '' },
+            });
+        });
+    });
 
-			app.mockService('message', 'getCellPhone', () => {
-				return ['13590450686']
-			});
+    describe('createMsg', () => {
+        beforeEach('do mock', () => {
+            const ctx = app.mockContext();
 
-			await ctx.service.message.pushAndSendSms({
-				sendSms: 1,
-				userIds: [{ userId: 1 }],
-				msg: { text: '' }
-			})
-		});
-	});
+            mock(ctx.model.Message, 'create', () => {
+                return { name: '机构名称' };
+            });
+            app.mockService('keepwork', 'getAllUserByCondition', () => {
+                return [{ portrait: '' }];
+            });
+            app.mockService(
+                'lessonOrganizationClassMember',
+                'getByCondition',
+                () => {
+                    return { realname: '' };
+                }
+            );
+            app.mockService('message', 'pushAndSendSms', () => 0);
+        });
 
-	describe('createMsg', () => {
-		it('001', async () => {
+        it('001', async () => {
+            const ctx = app.mockContext();
 
-		});
-	});
+            await ctx.service.message.createMsg(
+                {
+                    sendSms: 1,
+                    msg: {
+                        type: 3,
+                        text: '纯本文',
+                    },
+                },
+                { userId: 1, roleId: 2, organizationId: 1, username: '' },
+                2
+            );
+        });
+    });
 });

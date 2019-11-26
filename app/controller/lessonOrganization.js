@@ -20,8 +20,13 @@ const LessonOrganization = class extends Controller {
         const { organizationId } = this.validate({ organizationId: 'number' });
 
         const [ members, org ] = await Promise.all([
-            ctx.service.lessonOrganizationClassMember.getAllByCondition({ organizationId, memberId: userId }),
-            ctx.service.lessonOrganization.getByCondition({ id: organizationId }),
+            ctx.service.lessonOrganizationClassMember.getAllByCondition({
+                organizationId,
+                memberId: userId,
+            }),
+            ctx.service.lessonOrganization.getByCondition({
+                id: organizationId,
+            }),
         ]);
         if (!members.length) return ctx.throw(400, Err.MEMBER_NOT_EXISTS);
 
@@ -29,7 +34,13 @@ const LessonOrganization = class extends Controller {
         const {
             token,
         } = await ctx.service.lessonOrganization.mergeRoleIdAndGenToken(
-            { members, userId, username, organizationId, loginUrl: org.loginUrl },
+            {
+                members,
+                userId,
+                username,
+                organizationId,
+                loginUrl: org.loginUrl,
+            },
             this.app.config.self
         );
 
@@ -72,14 +83,19 @@ const LessonOrganization = class extends Controller {
 
         // 找到机构
         const organ = await ctx.service.lessonOrganization.getByCondition({
-            $or: [{
-                name: organizationName,
-            }, {
-                id: organizationId,
-            }],
+            $or: [
+                {
+                    name: organizationName,
+                },
+                {
+                    id: organizationId,
+                },
+            ],
         });
         if (!organ) ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
-        if (organizationId && organ.id !== ~~organizationId) ctx.throw(400, Err.ARGS_ERR);
+        if (organizationId && organ.id !== ~~organizationId) {
+            ctx.throw(400, Err.ARGS_ERR);
+        }
         if (!organizationId) organizationId = organ.id;
 
         // 找到这个人在机构中的members
@@ -361,13 +377,20 @@ const LessonOrganization = class extends Controller {
         const { ctx } = this;
         const { organizationId, roleId, userId } = this.authenticated();
 
-        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN) && !(roleId & CLASS_MEMBER_ROLE_TEACHER)) {
+        if (
+            !(roleId & CLASS_MEMBER_ROLE_ADMIN) &&
+            !(roleId & CLASS_MEMBER_ROLE_TEACHER)
+        ) {
             return this.ctx.throw(403, Err.AUTH_ERR);
         }
 
         const { _roleId } = this.validate();
 
-        const list = await ctx.service.lessonOrganization.getClassAndMembers(organizationId, ~~_roleId, userId);
+        const list = await ctx.service.lessonOrganization.getClassAndMembers(
+            organizationId,
+            ~~_roleId,
+            userId
+        );
 
         return ctx.helper.success({ ctx, status: 200, res: list });
     }

@@ -3,14 +3,15 @@
 const Service = require('../common/service.js');
 
 class UserMessage extends Service {
-
     /**
      * 根据条件更新
      * @param {*} params params
      * @param {*} condition condition
      */
     async updateByCondition(params, condition) {
-        return await this.ctx.model.UserMessage.update(params, { where: condition });
+        return await this.ctx.model.UserMessage.update(params, {
+            where: condition,
+        });
     }
 
     /**
@@ -27,30 +28,39 @@ class UserMessage extends Service {
             condition = { organizationId };
         }
         const seq = this.app.model.Sequelize;
-        return await this.ctx.model.UserMessage
-            .findAndCountAll({
-                ...queryOptions,
-                include: [
-                    {
-                        as: 'messages',
-                        attributes: [ 'id', 'msg', 'senderName', 'senderPortrait' ],
-                        model: this.model.Message,
-                        where: condition,
-                        include: [{
+        return await this.ctx.model.UserMessage.findAndCountAll({
+            ...queryOptions,
+            include: [
+                {
+                    as: 'messages',
+                    attributes: [ 'id', 'msg', 'senderName', 'senderPortrait' ],
+                    model: this.model.Message,
+                    where: condition,
+                    include: [
+                        {
                             as: 'lessonOrganizations',
                             attributes: [
-                                [ seq.literal('ifnull(`messages->lessonOrganizations`.`id`, 0)'), 'id' ],
-                                [ seq.fn('ifnull', seq.col('name'), '系统'), 'name' ]],
+                                [
+                                    seq.literal(
+                                        'ifnull(`messages->lessonOrganizations`.`id`, 0)'
+                                    ),
+                                    'id',
+                                ],
+                                [
+                                    seq.fn('ifnull', seq.col('name'), '系统'),
+                                    'name',
+                                ],
+                            ],
                             model: this.model.LessonOrganization,
-                        }],
-                    },
-                ],
-                where: { userId },
-            })
-            .then(o => {
-                o.rows = o.rows.map(o => o.toJSON());
-                return o;
-            });
+                        },
+                    ],
+                },
+            ],
+            where: { userId },
+        }).then(o => {
+            o.rows = o.rows.map(o => o.toJSON());
+            return o;
+        });
     }
 
     /**
@@ -68,7 +78,9 @@ class UserMessage extends Service {
             where: {
                 organizationId,
                 createdAt: {
-                    $gt: seq.literal(`(select createdAt from messages where id = ${messageId})`),
+                    $gt: seq.literal(
+                        `(select createdAt from messages where id = ${messageId})`
+                    ),
                 },
             },
         });
