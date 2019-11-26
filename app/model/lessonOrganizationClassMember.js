@@ -1,11 +1,6 @@
 'use strict';
 const _ = require('lodash');
 
-const {
-    CLASS_MEMBER_ROLE_TEACHER,
-    CLASS_MEMBER_ROLE_STUDENT,
-} = require('../common/consts');
-
 module.exports = app => {
     const { BIGINT, INTEGER, STRING, DATE } = app.Sequelize;
 
@@ -83,8 +78,7 @@ module.exports = app => {
         roleId,
         organizationId,
     }) {
-        const sql =
-            `select 
+        const sql = `select 
                 classId 
             from lessonOrganizationClassMembers 
             where organizationId = :organizationId 
@@ -103,8 +97,11 @@ module.exports = app => {
     };
 
     // 获取这个机构的全部用户id,去重
-    model.getUserIdsByOrganizationId = async function(organizationId, classIds, userIds) {
-
+    model.getUserIdsByOrganizationId = async function(
+        organizationId,
+        classIds,
+        userIds
+    ) {
         let cond = '';
         if (classIds.length) cond += ' and classId in (:classIds)';
         if (userIds.length) cond += ' and memberId in (:userIds)';
@@ -127,8 +124,11 @@ module.exports = app => {
     };
 
     // 获取这个机构的学生用户,分角色
-    model.getMembersAndRoleId = async function(organizationId, classIds, userIds) {
-
+    model.getMembersAndRoleId = async function(
+        organizationId,
+        classIds,
+        userIds
+    ) {
         let cond = '';
         if (classIds.length) cond += ' and classId in (:classIds)';
         if (userIds.length) cond += ' and memberId in (:userIds)';

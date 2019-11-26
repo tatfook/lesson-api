@@ -5,13 +5,16 @@ const Err = require('../common/err');
 const _ = require('lodash');
 
 const UserMessage = class extends Controller {
-
     // 获取我的消息列表
     async index() {
         const { userId } = this.authenticated();
         const { organizationId } = this.validate();
 
-        const ret = await this.ctx.service.userMessage.getMyMessages(this.queryOptions, userId, organizationId);
+        const ret = await this.ctx.service.userMessage.getMyMessages(
+            this.queryOptions,
+            userId,
+            organizationId
+        );
         return this.ctx.helper.success({
             ctx: this.ctx,
             status: 200,
@@ -25,7 +28,10 @@ const UserMessage = class extends Controller {
         const { ids = [] } = this.validate();
         if (ids.length === 0) return this.ctx.throw(400, Err.ARGS_ERR);
 
-        await this.ctx.service.userMessage.updateByCondition({ status: 1 }, { userId, id: { $in: ids } });
+        await this.ctx.service.userMessage.updateByCondition(
+            { status: 1 },
+            { userId, id: { $in: ids } }
+        );
 
         return this.ctx.helper.success({ ctx: this.ctx, status: 200 });
     }
@@ -34,7 +40,11 @@ const UserMessage = class extends Controller {
     async unReadCount() {
         const { userId } = this.authenticated();
         const list = await this.ctx.service.userMessage.getUnReadCount(userId);
-        return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: list });
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+            res: list,
+        });
     }
 
     // 获取某个消息在列表中的位置(index从1开始)，给前端跳转用的辅助接口
@@ -43,9 +53,16 @@ const UserMessage = class extends Controller {
         const { id, organizationId } = this.validate();
         if (!_.isNumber(Number(id))) return this.ctx.throw(400, Err.ID_ERR);
 
-        const index = await this.ctx.service.userMessage.getIndexOfMessage(id, organizationId);
+        const index = await this.ctx.service.userMessage.getIndexOfMessage(
+            id,
+            organizationId
+        );
 
-        return this.ctx.helper.success({ ctx: this.ctx, status: 200, res: index + 1 });
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+            res: index + 1,
+        });
     }
 };
 
