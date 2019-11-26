@@ -14,7 +14,7 @@ module.exports = app => {
             },
 
             sender: {
-                // 0.keepwork,或者机构管理员的userId,或者机构老师的id
+                // 0.keepwork,-1.机构管理员,大于0.机构老师的id
                 // 消息发送者
                 type: BIGINT,
             },

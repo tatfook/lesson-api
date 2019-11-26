@@ -161,7 +161,7 @@ class Message extends Service {
         ]);
 
         const message = await this.ctx.model.Message.create({
-            sender: userId,
+            sender: ~~_roleId === CLASS_MEMBER_ROLE_ADMIN ? -1 : userId,
             organizationId,
             sendSms,
             type: 1,
@@ -191,27 +191,10 @@ class Message extends Service {
     }
 
     async getMessages(queryOptions, userId, roleId, organizationId) {
-        let condition;
-        if (~~roleId === CLASS_MEMBER_ROLE_ADMIN) {
-            const orgAdmins = await this.ctx.model.LessonOrganizationClassMember.findAll(
-                {
-                    attributes: [ 'memberId' ],
-                    where: {
-                        organizationId,
-                        roleId: { $in: [ '64', '65', '66', '67' ] },
-                    },
-                }
-            );
-            condition = {
-                organizationId,
-                sender: { $in: orgAdmins.map(r => r.memberId) },
-            };
-        } else {
-            condition = {
-                organizationId,
-                sender: userId,
-            };
-        }
+        const condition = {
+            organizationId,
+            sender: ~~roleId === CLASS_MEMBER_ROLE_ADMIN ? -1 : userId,
+        };
 
         const ret = await this.ctx.model.Message.findAndCountAll({
             ...queryOptions,
