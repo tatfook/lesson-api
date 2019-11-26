@@ -184,7 +184,9 @@ class Message extends Service {
             msg,
             msgId: message.id,
             senderName:
-                ~~_roleId === CLASS_MEMBER_ROLE_ADMIN ? '' : `${member.realname}`,
+                ~~_roleId === CLASS_MEMBER_ROLE_ADMIN
+                    ? ''
+                    : `${member.realname}`,
         });
     }
 
