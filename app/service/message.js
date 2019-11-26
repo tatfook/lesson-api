@@ -30,7 +30,7 @@ class Message extends Service {
     // 获取要发送短信的手机号
     async getCellPhone(organizationId, classIds, userIds) {
         const list = await this.getMembersAndRole(organizationId, classIds, userIds.map(r => r.userId));
-        const userIdArr = [...list, ...(userIds.filter(o => o.roleId === CLASS_MEMBER_ROLE_STUDENT))];
+        const userIdArr = [ ...list, ...(userIds.filter(o => o.roleId === CLASS_MEMBER_ROLE_STUDENT)) ];
 
         const parentPhone = await this.ctx.model.LessonOrganizationClassMember.findAll({
             where: {
@@ -51,7 +51,7 @@ class Message extends Service {
             };
         });
 
-        const [, , org] = await Promise.all([
+        const [ , , org ] = await Promise.all([
             // 创建userMessages
             this.ctx.model.UserMessage.bulkCreate(userMsg),
 
@@ -65,7 +65,7 @@ class Message extends Service {
             }),
 
             // get OrgName
-            this.ctx.model.LessonOrganization.findOne({ attributes: ['name'], where: { id: organizationId } }),
+            this.ctx.model.LessonOrganization.findOne({ attributes: [ 'name' ], where: { id: organizationId } }),
         ]);
 
         const limited = 200;
@@ -77,7 +77,7 @@ class Message extends Service {
                 const element = phoneList[i];
                 if (_.isInteger((i + 1) / limited)) {
                     sendPhone += `${element}`;
-                    await this.ctx.service.user.sendSms(sendPhone, [org.name, senderName, msg.text], ORG_MSG_TEMPLEID);
+                    await this.ctx.service.user.sendSms(sendPhone, [ org.name, senderName, msg.text ], ORG_MSG_TEMPLEID);
                     sendPhone = '';
                 } else {
                     sendPhone += `${element},`;
@@ -86,7 +86,7 @@ class Message extends Service {
 
             if (sendPhone) {
                 sendPhone = sendPhone.substring(0, sendPhone.length - 1);
-                await this.ctx.service.user.sendSms(sendPhone, [org.name, senderName, msg.text], ORG_MSG_TEMPLEID);
+                await this.ctx.service.user.sendSms(sendPhone, [ org.name, senderName, msg.text ], ORG_MSG_TEMPLEID);
             }
         }
     }
@@ -98,7 +98,7 @@ class Message extends Service {
         if (!(CLASS_MEMBER_ROLE_TEACHER & roleId) && !(CLASS_MEMBER_ROLE_ADMIN & roleId)) {
             return this.ctx.throw(403, Err.AUTH_ERR);
         }
-        const [senderInfo, member] = await Promise.all([
+        const [ senderInfo, member ] = await Promise.all([
             this.ctx.service.keepwork.getAllUserByCondition({ id: userId }),
             this.ctx.service.lessonOrganizationClassMember.getByCondition({ memberId: userId, organizationId }),
         ]);
@@ -131,7 +131,7 @@ class Message extends Service {
         let condition;
         if (~~roleId === CLASS_MEMBER_ROLE_ADMIN) {
             const orgAdmins = await this.ctx.model.LessonOrganizationClassMember.findAll({
-                attributes: ['memberId'], where: { organizationId, roleId: { $in: ['64', '65', '66', '67'] } },
+                attributes: [ 'memberId' ], where: { organizationId, roleId: { $in: [ '64', '65', '66', '67' ] } },
             });
             condition = {
                 organizationId,
@@ -146,7 +146,7 @@ class Message extends Service {
 
         const ret = await this.ctx.model.Message.findAndCountAll({
             ...queryOptions,
-            attributes: ['id', 'msg', 'sendSms', 'createdAt'],
+            attributes: [ 'id', 'msg', 'sendSms', 'createdAt' ],
             where: condition,
         });
 

@@ -75,8 +75,25 @@ describe('test/service/message.test.js', () => {
 	});
 
 	describe('createMsg', () => {
-		it('001', async () => {
+		beforeEach('do mock', () => {
+			const ctx = app.mockContext();
 
+			mock(ctx.model.Message, 'create', () => { return { name: '机构名称' } });
+			app.mockService('keepwork', 'getAllUserByCondition', () => { return [{ portrait: '' }] });
+			app.mockService('lessonOrganizationClassMember', 'getByCondition', () => { return { realname: '' } });
+			app.mockService('message', 'pushAndSendSms', () => 0);
+		});
+
+		it('001', async () => {
+			const ctx = app.mockContext();
+
+			await ctx.service.message.createMsg({
+				sendSms: 1,
+				msg: {
+					type: 3,
+					text: '纯本文',
+				},
+			}, { userId: 1, roleId: 2, organizationId: 1, username: '' }, 2);
 		});
 	});
 });
