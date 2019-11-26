@@ -76,27 +76,6 @@ module.exports = app => {
         return list;
     };
 
-    model.getClassNamesByMsgId = async function(msgIds) {
-        const sql = `
-        SELECT 
-            um.msgId,
-            group_concat(c.name) sendTo
-        FROM
-            userMessages um
-            JOIN lessonOrganizationClassMembers m ON m.memberId = um.userId 
-            JOIN lessonOrganizationClasses c ON c.id = m.classId
-        WHERE um.msgId in (:msgIds) group by um.msgId`;
-
-        const list = await app.model.query(sql, {
-            type: app.model.QueryTypes.SELECT,
-            replacements: {
-                msgIds,
-            },
-        });
-
-        return list;
-    };
-
     model.associate = () => {
         app.model.UserMessage.belongsTo(app.model.Message, {
             as: 'messages',
