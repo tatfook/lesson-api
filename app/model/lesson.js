@@ -66,7 +66,7 @@ module.exports = app => {
 
     // model.sync({force:true});
 
-    model.getById = async function (id, userId) {
+    model.getById = async function(id, userId) {
         const where = { id };
 
         if (userId) where.userId = userId;
@@ -76,8 +76,8 @@ module.exports = app => {
         return data && data.get({ plain: true });
     };
 
-    model.addSkill = async function (userId, lessonId, skillId, score) {
-        const [lesson, skill] = await Promise.all([
+    model.addSkill = async function(userId, lessonId, skillId, score) {
+        const [ lesson, skill ] = await Promise.all([
             app.model.Lesson.findOne({ where: { userId, id: lessonId } }),
             app.model.Skill.findOne({ where: { id: skillId } }),
         ]);
@@ -94,13 +94,13 @@ module.exports = app => {
         return !!data;
     };
 
-    model.getSkills = async function (lessonId) {
+    model.getSkills = async function(lessonId) {
         const list = await app.model.LessonSkill.findAll({
             include: [
                 {
                     as: 'skills',
                     model: app.model.Skill,
-                    attributes: ['skillName'],
+                    attributes: [ 'skillName' ],
                 },
             ],
             where: { lessonId },
@@ -114,7 +114,7 @@ module.exports = app => {
         });
     };
 
-    model.getPackagesByLessonId = async function (lessonId) {
+    model.getPackagesByLessonId = async function(lessonId) {
         const sql = `select packages.* 
 			from packageLessons, packages 
 			where packageLessons.packageId = packages.id and

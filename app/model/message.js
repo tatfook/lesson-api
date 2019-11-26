@@ -13,16 +13,19 @@ module.exports = app => {
                 primaryKey: true,
             },
 
-            sender: { // 0.keepwork,或者机构管理员的userId,或者机构老师的id
+            sender: {
+                // 0.keepwork,或者机构管理员的userId,或者机构老师的id
                 // 消息发送者
                 type: BIGINT,
             },
 
-            organizationId: { // 机构id,
+            organizationId: {
+                // 机构id,
                 type: BIGINT,
                 defaultValue: 0,
             },
-            sendSms: { // 是否发送短信，0.不发送，1.发送
+            sendSms: {
+                // 是否发送短信，0.不发送，1.发送
                 type: INTEGER,
                 defaultValue: 0,
             },
@@ -41,20 +44,24 @@ module.exports = app => {
             /** - msg.type = 0 文本消息  msg.text为文本值(html文本格式)
                 - msg.type = 1 注册消息  msg.user 为新注册的用户信息对象{id:用户Id, username:用户名}
                 - msg.type = 2 纯文本消息 msg.text为纯文本 */
-            msg: { // 消息体
+            msg: {
+                // 消息体
                 type: JSON,
                 defaultValue: {},
             },
 
-            operator: { // 当前登录用户名
+            operator: {
+                // 当前登录用户名
                 type: STRING,
             },
 
-            senderName: { // 如果是系统消息，这里则是keepwork；如果是机构消息，这里是['管理员','XX老师']
+            senderName: {
+                // 如果是系统消息，这里则是keepwork；如果是机构消息，这里是['管理员','XX老师']
                 type: STRING,
             },
 
-            senderPortrait: { // 如果是系统消息，这里则是keepwork官方头像；如果是机构消息，这里是[管理员头像,老师头像]
+            senderPortrait: {
+                // 如果是系统消息，这里则是keepwork官方头像；如果是机构消息，这里是[管理员头像,老师头像]
                 type: STRING,
             },
         },
@@ -67,13 +74,12 @@ module.exports = app => {
 
     // 主动合并消息
     model.mergeMessage = async function(userId) {
-        const user = await app.model.User
-            .findOne({ where: { id: userId } })
-            .then(o => o && o.toJSON());
+        const user = await app.model.User.findOne({
+            where: { id: userId },
+        }).then(o => o && o.toJSON());
         if (!user) return;
 
-        const sql =
-            `
+        const sql = `
             select 
                 id, 
                 createdAt 
@@ -110,15 +116,12 @@ module.exports = app => {
             constraints: false,
         });
 
-        app.model.Message.belongsTo(
-            app.model.LessonOrganization,
-            {
-                as: 'lessonOrganizations',
-                foreignKey: 'organizationId',
-                targetKey: 'id',
-                constraints: false,
-            }
-        );
+        app.model.Message.belongsTo(app.model.LessonOrganization, {
+            as: 'lessonOrganizations',
+            foreignKey: 'organizationId',
+            targetKey: 'id',
+            constraints: false,
+        });
     };
 
     return model;

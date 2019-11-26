@@ -386,15 +386,19 @@ class LessonOrgService extends Service {
 
     // 获取机构的所有班级，嵌套返回所有成员
     async getClassAndMembers(organizationId, roleId, userId) {
-
         const list = await this.ctx.model.LessonOrganizationClass.findAll({
             where: { organizationId, end: { $gt: new Date() } },
-            attributes: [[ 'id', 'classId' ], [ 'name', 'className' ]],
-            include: [{
-                as: 'lessonOrganizationClassMembers',
-                model: this.model.LessonOrganizationClassMember,
-                attributes: [ 'memberId', 'realname', 'roleId' ],
-            }],
+            attributes: [
+                [ 'id', 'classId' ],
+                [ 'name', 'className' ],
+            ],
+            include: [
+                {
+                    as: 'lessonOrganizationClassMembers',
+                    model: this.model.LessonOrganizationClassMember,
+                    attributes: [ 'memberId', 'realname', 'roleId' ],
+                },
+            ],
         });
 
         const retArr = [];
@@ -409,8 +413,14 @@ class LessonOrgService extends Service {
             };
 
             const members = element.lessonOrganizationClassMembers;
-            if (roleId === CLASS_MEMBER_ROLE_TEACHER) { // 老师只返回自己执教的班级
-                const index = _.findIndex(members, o => o.memberId === userId && (o.roleId & CLASS_MEMBER_ROLE_TEACHER));
+            if (roleId === CLASS_MEMBER_ROLE_TEACHER) {
+                // 老师只返回自己执教的班级
+                const index = _.findIndex(
+                    members,
+                    o =>
+                        o.memberId === userId &&
+                        o.roleId & CLASS_MEMBER_ROLE_TEACHER
+                );
                 if (index === -1) continue;
             }
 
@@ -418,12 +428,14 @@ class LessonOrgService extends Service {
             for (let j = 0; j < members.length; j++) {
                 if (members[j].roleId & CLASS_MEMBER_ROLE_TEACHER) {
                     obj.teacherList.push({
-                        userId: members[j].memberId, realname: members[j].realname,
+                        userId: members[j].memberId,
+                        realname: members[j].realname,
                     });
                 }
                 if (members[j].roleId & CLASS_MEMBER_ROLE_STUDENT) {
                     obj.studentList.push({
-                        userId: members[j].memberId, realname: members[j].realname,
+                        userId: members[j].memberId,
+                        realname: members[j].realname,
                     });
                 }
             }

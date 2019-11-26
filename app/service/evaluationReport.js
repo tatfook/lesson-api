@@ -563,22 +563,20 @@ class EvalReportService extends Service {
             } = dataArr[i];
 
             if (this.app.config.self.env !== 'unittest') {
-                tasksArr.push(
-                    async function() {
-                        return await ctx.service.user.sendSms(
-                            parentPhoneNum,
-                            [
-                                reportName,
-                                realname,
-                                realname,
-                                orgName,
-                                star,
-                                `${baseUrl}`,
-                            ],
-                            EVA_REPO_TEMPLETID
-                        );
-                    }
-                );
+                tasksArr.push(async function() {
+                    return await ctx.service.user.sendSms(
+                        parentPhoneNum,
+                        [
+                            reportName,
+                            realname,
+                            realname,
+                            orgName,
+                            star,
+                            `${baseUrl}`,
+                        ],
+                        EVA_REPO_TEMPLETID
+                    );
+                });
             }
         }
 

@@ -77,11 +77,11 @@ class UsersController extends Controller {
         const six = 6;
         const nine = 9;
         const sixty = 60;
-        const list = [ '15219998888' ];// 需要返回特定验证码的手机号
+        const list = [ '15219998888' ]; // 需要返回特定验证码的手机号
 
         const env = this.app.config.self.env;
         const code =
-            (env === 'unittest' || list.includes(cellphone))
+            env === 'unittest' || list.includes(cellphone)
                 ? '123456'
                 : _.times(six, () => _.random(0, nine, false)).join('');
 

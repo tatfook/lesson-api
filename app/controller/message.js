@@ -2,9 +2,7 @@
 
 const Controller = require('./baseController.js');
 const Err = require('../common/err');
-const {
-    createMsg,
-} = require('../common/validatorRules/message');
+const { createMsg } = require('../common/validatorRules/message');
 const {
     CLASS_MEMBER_ROLE_TEACHER,
     CLASS_MEMBER_ROLE_ADMIN,
@@ -14,14 +12,31 @@ const Message = class extends Controller {
     // 机构发送消息
     async create() {
         const ctx = this.ctx;
-        const { userId, roleId, organizationId, username } = this.authenticated();
+        const {
+            userId,
+            roleId,
+            organizationId,
+            username,
+        } = this.authenticated();
 
-        const { sendSms, msg = {}, classIds = [], userIds = [] } = this.validate();
+        const {
+            sendSms,
+            _roleId,
+            msg = {},
+            classIds = [],
+            userIds = [],
+        } = this.validate();
 
-        this.validateCgi({ sendSms, type: msg.type, text: msg.text }, createMsg);
+        this.validateCgi(
+            { sendSms, type: msg.type, text: msg.text },
+            createMsg
+        );
 
-        await ctx.service.message.createMsg({ sendSms, msg, classIds, userIds },
-            { userId, roleId, organizationId, username });
+        await ctx.service.message.createMsg(
+            { sendSms, msg, classIds, userIds },
+            { userId, roleId, organizationId, username },
+            _roleId
+        );
 
         return ctx.helper.success({ ctx, status: 200, res: 'OK' });
     }
@@ -32,11 +47,19 @@ const Message = class extends Controller {
         const { userId, organizationId } = this.authenticated();
         const { roleId } = this.validate();
 
-        if (!(CLASS_MEMBER_ROLE_TEACHER & roleId) && !(CLASS_MEMBER_ROLE_ADMIN & roleId)) {
+        if (
+            !(CLASS_MEMBER_ROLE_TEACHER & roleId) &&
+            !(CLASS_MEMBER_ROLE_ADMIN & roleId)
+        ) {
             return this.ctx.throw(403, Err.AUTH_ERR);
         }
 
-        const list = await ctx.service.message.getMessages(this.queryOptions, userId, roleId, organizationId);
+        const list = await ctx.service.message.getMessages(
+            this.queryOptions,
+            userId,
+            roleId,
+            organizationId
+        );
 
         return ctx.helper.success({ ctx, status: 200, res: list });
     }
