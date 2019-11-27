@@ -1,5 +1,4 @@
 const { app, mock, assert } = require('egg-mock/bootstrap');
-const axios = require('axios');
 
 describe('test/service/message.test.js', () => {
     describe('getCellPhone', () => {
@@ -145,10 +144,10 @@ describe('test/service/message.test.js', () => {
             const ctx = app.mockContext();
 
             mock(ctx.model.Message, 'findAndCountAll', () => {
-                return { rows: [{ id: 1 }], count: 1 };
+                return { rows: [{ id: 1, sendClassIds: [1] }], count: 1 };
             });
-            mock(ctx.model.UserMessage, 'getClassNamesByMsgId', () => {
-                return [{ msgId: 1, sendTo: '这些班级,那些班级' }];
+            mock(ctx.model.LessonOrganizationClass, 'findAll', () => {
+                return [{ id: 1, name: '这些班级' }];
             });
             app.mockService('keepwork', 'getAllUserByCondition', () => {
                 return [{ portrait: '' }];
@@ -174,7 +173,7 @@ describe('test/service/message.test.js', () => {
             assert(
                 ret.count === 1 &&
                     ret.rows[0].id === 1 &&
-                    ret.rows[0].sendTo === '这些班级,那些班级'
+                    ret.rows[0].sendTo === '这些班级'
             );
         });
         it('002 teacher消息', async () => {
@@ -184,7 +183,7 @@ describe('test/service/message.test.js', () => {
             assert(
                 ret.count === 1 &&
                     ret.rows[0].id === 1 &&
-                    ret.rows[0].sendTo === '这些班级,那些班级'
+                    ret.rows[0].sendTo === '这些班级'
             );
         });
     });
