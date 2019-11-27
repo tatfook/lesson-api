@@ -60,6 +60,6 @@ module.exports = {
 
     API_KEY: 'cda5ab42f101e9f739156e532f54db0d', // lesson_api的md5值
 
-    ORG_MSG_TEMPLEID: '486724', // 机构消息模板id
+    ORG_MSG_TEMPLEID: '487513', // 机构消息模板id
     EVA_REPO_TEMPLETID: '479638', // 评估报告模板id
 };
