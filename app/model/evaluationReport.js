@@ -59,7 +59,7 @@ module.exports = app => {
         type,
         days,
     }) {
-        let condition = ' where r.classId = :classId and sm.id is not null ';
+        let condition = ' where r.classId = :classId ';
         if (~~roleId !== CLASS_MEMBER_ROLE_ADMIN) {
             condition += ' and r.userId = :userId';
         }
@@ -90,15 +90,19 @@ module.exports = app => {
 		  r.type,
 		  r.createdAt,
 		  r.classId,
-		  COUNT(ur.id) commentCount,
-		  COUNT(ur.isSend = 1 OR NULL) sendCount
+		  COUNT(distinct ur.id) commentCount,
+		  COUNT(distinct ur.id,ur.isSend = 1 OR NULL) sendCount
 		FROM
 		  evaluationReports r
-		  LEFT JOIN evaluationUserReports ur ON r.id = ur.reportId
+		  LEFT JOIN (
+            select 
+                ur.* 
+            from evaluationUserReports ur 
+            join lessonOrganizationClassMembers m on ur.userId= m.memberId and m.roleId&1 
+            where m.classId=:classId
+          ) ur ON r.id = ur.reportId
 		  LEFT JOIN lessonOrganizationClassMembers m 
 			  ON m.memberId = r.userId and m.roleId &2 and m.classId = r.classId
-		  LEFT JOIN lessonOrganizationClassMembers sm
-              ON sm.memberId = ur.userId and sm.roleId &1 and sm.classId = r.classId
 		  LEFT JOIN users u ON u.id = r.userId ${condition}
 		GROUP BY r.id
 		) a LEFT JOIN (SELECT
