@@ -24,13 +24,13 @@ async function readModelDir() {
 async function truncateAllTables() {
     const files = await readModelDir();
     const ModelName = files.map(r => {
-        return r.charAt(0).toUpperCase() + r.substring(1, r.length - 3)
+        return r.charAt(0).toUpperCase() + r.substring(1, r.length - 3);
     });
 
     const opts = { restartIdentity: true, cascade: true };
     const list = [];
     _.each(ModelName, m => {
-        return list.push(app.model[m] && app.model[m].truncate(opts))
+        return list.push(app.model[m] && app.model[m].truncate(opts));
     });
     await Promise.all(list);
 }

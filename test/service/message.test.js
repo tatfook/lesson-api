@@ -172,8 +172,8 @@ describe('test/service/message.test.js', () => {
             const ret = await ctx.service.message.getMessages(null, 1, 64, 1);
             assert(
                 ret.count === 1 &&
-                ret.rows[0].id === 1 &&
-                ret.rows[0].sendTo === '这些班级'
+                    ret.rows[0].id === 1 &&
+                    ret.rows[0].sendTo === '这些班级'
             );
         });
         it('002 teacher消息', async () => {
@@ -182,8 +182,8 @@ describe('test/service/message.test.js', () => {
             const ret = await ctx.service.message.getMessages(null, 1, 2, 1);
             assert(
                 ret.count === 1 &&
-                ret.rows[0].id === 1 &&
-                ret.rows[0].sendTo === '这些班级'
+                    ret.rows[0].id === 1 &&
+                    ret.rows[0].sendTo === '这些班级'
             );
         });
     });
