@@ -300,7 +300,7 @@ class LessonOrgClassMemberService extends Service {
                 o.roleId === CLASS_MEMBER_ROLE_STUDENT &&
                 o.lessonOrganizationClasses &&
                 new Date(o.lessonOrganizationClasses.end).getTime() <
-                    new Date().getTime()
+                new Date().getTime()
             ) {
                 return false;
             }
@@ -410,19 +410,19 @@ class LessonOrgClassMemberService extends Service {
                 { where: { id: { $in: ids } } }
             );
         }
-        if (params.parentPhoneNum) {
-            await this.model.LessonOrganizationClassMember.update(
-                {
-                    parentPhoneNum: params.parentPhoneNum,
+
+        // 此处update已和前端沟通过了，不修改parentPhoneNum则传旧值，修改则传新值，清空则传空串
+        await this.model.LessonOrganizationClassMember.update(
+            {
+                parentPhoneNum: params.parentPhoneNum,
+            },
+            {
+                where: {
+                    memberId: params.memberId,
+                    organizationId: oldmembers[0].organizationId,
                 },
-                {
-                    where: {
-                        memberId: params.memberId,
-                        organizationId: oldmembers[0].organizationId,
-                    },
-                }
-            );
-        }
+            }
+        );
 
         if (params.realname && classIds.length) {
             await this.ctx.service.lessonOrganizationActivateCode.updateByCondition(
