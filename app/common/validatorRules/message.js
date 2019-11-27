@@ -18,7 +18,7 @@ const createMsg = {
     text: {
         isLength: {
             errmsg: Err.MSG_TEXT_ERR,
-            param: { min: 1, max: 512 },
+            param: { min: 1, max: 256 },
         },
     },
     sendClassIds: {
