@@ -4,6 +4,7 @@ describe('test/service/userMessage.test.js', () => {
     let userId;
     let organizationId;
     let orgName;
+    let msgId;
     beforeEach(async () => {
         // 前置操作
         const userMsg = await app.factory.create('UserMessage');
@@ -13,6 +14,7 @@ describe('test/service/userMessage.test.js', () => {
             where: { id: userMsg.msgId },
         });
         organizationId = msg.organizationId;
+        msgId = msg.id;
 
         const org = await app.model.LessonOrganization.findOne({
             where: { id: organizationId },
