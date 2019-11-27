@@ -410,19 +410,19 @@ class LessonOrgClassMemberService extends Service {
                 { where: { id: { $in: ids } } }
             );
         }
-        if (params.parentPhoneNum) {
-            await this.model.LessonOrganizationClassMember.update(
-                {
-                    parentPhoneNum: params.parentPhoneNum,
+
+        // 此处update已和前端沟通过了，不修改parentPhoneNum则传旧值，修改则传新值，清空则传空串
+        await this.model.LessonOrganizationClassMember.update(
+            {
+                parentPhoneNum: params.parentPhoneNum,
+            },
+            {
+                where: {
+                    memberId: params.memberId,
+                    organizationId: oldmembers[0].organizationId,
                 },
-                {
-                    where: {
-                        memberId: params.memberId,
-                        organizationId: oldmembers[0].organizationId,
-                    },
-                }
-            );
-        }
+            }
+        );
 
         if (params.realname && classIds.length) {
             await this.ctx.service.lessonOrganizationActivateCode.updateByCondition(
