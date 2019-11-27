@@ -160,6 +160,11 @@ class Message extends Service {
             }),
         ]);
 
+        const senderName =
+            ~~_roleId === CLASS_MEMBER_ROLE_ADMIN
+                ? '管理员'
+                : `${member.realname}老师`;
+
         const message = await this.ctx.model.Message.create({
             sender: ~~_roleId === CLASS_MEMBER_ROLE_ADMIN ? -1 : userId,
             organizationId,
@@ -169,10 +174,7 @@ class Message extends Service {
             all: 0,
             msg,
             operator: username,
-            senderName:
-                ~~_roleId === CLASS_MEMBER_ROLE_ADMIN
-                    ? '管理员'
-                    : `${member.realname}老师`,
+            senderName,
             senderPortrait: senderInfo.length ? senderInfo[0].portrait : '',
         });
 
@@ -184,10 +186,7 @@ class Message extends Service {
             sendSms,
             msg,
             msgId: message.id,
-            senderName:
-                ~~_roleId === CLASS_MEMBER_ROLE_ADMIN
-                    ? ''
-                    : `${member.realname}`,
+            senderName,
         });
     }
 
