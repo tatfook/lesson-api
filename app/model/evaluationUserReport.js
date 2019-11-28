@@ -413,7 +413,7 @@ module.exports = app => {
 			select
 		  		c.id classId,
 				c.name,
-				group_concat(m.realname) teacherNames
+				group_concat(distinct m.realname) teacherNames
 			from
 		  		lessonOrganizationClasses c
 		  		left join lessonOrganizationClassMembers m on m.classId = c.id and m.roleId & 2
@@ -433,7 +433,10 @@ module.exports = app => {
 					count(ur.isSend = 1 or null)  sendCount, 
 					count(ur.id) commentCount
 				from evaluationReports r 
-					left join evaluationUserReports ur on ur.reportId = r.id ${cond}
+                    left join evaluationUserReports ur on ur.reportId = r.id 
+                    join lessonOrganizationClassMembers sm 
+                     on sm.classId = r.classId and sm.memberId = ur.userId and sm.roleId&1 
+                    ${cond}
 					group by r.id,r.classId
 			) c group by c.classId
 		) b on a.classId = b.classId`;
