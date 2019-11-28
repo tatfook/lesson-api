@@ -413,10 +413,11 @@ module.exports = app => {
 			select
 		  		c.id classId,
 				c.name,
-				group_concat(distinct m.realname) teacherNames
+				group_concat(m.realname) teacherNames
 			from
 		  		lessonOrganizationClasses c
-		  		left join lessonOrganizationClassMembers m on m.classId = c.id and m.roleId & 2
+                  left join lessonOrganizationClassMembers m 
+                  on m.classId = c.id and m.roleId & 2 and m.organizationId = c.organizationId
 			where c.organizationId = :organizationId and c.end > '${moment().format(
         'YYYY-MM-DD HH:mm:ss'
     )}'
