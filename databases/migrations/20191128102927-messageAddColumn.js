@@ -3,7 +3,7 @@
 module.exports = {
     up: (queryInterface, Sequelize) => {
         return queryInterface.addColumn('messages', 'roleId', {
-            type: Sequelize.JSON,
+            type: Sequelize.INTEGER,
             comment: '发机构消息时候的roleId，0 || 2 || 64',
         });
     },
