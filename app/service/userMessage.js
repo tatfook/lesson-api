@@ -83,6 +83,7 @@ class UserMessage extends Service {
                 o => o.id === r.messages.sender
             );
             r.messages.tLevel = index > -1 ? teachersInfo[index].tLevel : 0;
+            r.messages.vip = index > -1 ? teachersInfo[index].vip : 0;
         });
 
         return userMsg;
