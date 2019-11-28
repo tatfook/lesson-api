@@ -3,6 +3,7 @@
 const Service = require('../common/service.js');
 const Err = require('../common/err');
 const moment = require('moment');
+const { EVA_REPO_TEMPLETID } = require('../common/consts');
 
 class EvalReportService extends Service {
     // 发起点评
@@ -562,22 +563,20 @@ class EvalReportService extends Service {
             } = dataArr[i];
 
             if (this.app.config.self.env !== 'unittest') {
-                tasksArr.push(
-                    async function() {
-                        return await ctx.service.user.sendSms(
-                            parentPhoneNum,
-                            [
-                                reportName,
-                                realname,
-                                realname,
-                                orgName,
-                                star,
-                                `${baseUrl}`,
-                            ],
-                            '479638'
-                        );
-                    }
-                );
+                tasksArr.push(async function() {
+                    return await ctx.service.user.sendSms(
+                        parentPhoneNum,
+                        [
+                            reportName,
+                            realname,
+                            realname,
+                            orgName,
+                            star,
+                            `${baseUrl}`,
+                        ],
+                        EVA_REPO_TEMPLETID
+                    );
+                });
             }
         }
 

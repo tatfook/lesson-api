@@ -186,7 +186,7 @@ module.exports = app => {
             type: app.model.QueryTypes.SELECT,
             replacements: {
                 studentId,
-                classIds: classIds.toString(),
+                classIds,
             },
         });
         return list ? list : [];

@@ -62,4 +62,6 @@ module.exports = {
     PORTRAIT_ERR: '头像地址错误',
     REALNAME_ERR: '名字长度错误',
     BASEURL_ERR: 'baseUrl错误',
+    MSG_TYPE_ERR: '消息类型错误',
+    MSG_TEXT_ERR: '消息内容长度错误',
 };

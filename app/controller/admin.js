@@ -141,6 +141,18 @@ class AdminsController extends Controller {
         return ctx.helper.success({ ctx, status: 200, res: data });
     }
 
+    async bulkCreate() {
+        this.adminAuthenticated();
+
+        const { datas } = this.parseParams();
+
+        const data = await this.resource.bulkCreate(datas);
+
+        this.action();
+
+        return this.success(data);
+    }
+
     async update() {
         this.parseParams();
         const { ctx } = this;

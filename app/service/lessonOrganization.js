@@ -14,7 +14,7 @@ const Err = require('../common/err');
 class LessonOrgService extends Service {
     /**
      * 合并这个人在这个机构中的全部角色,并且生成一个token
-     * @param {*} params 结构：{members,userId,username,organizationId}
+     * @param {*} params 结构：{members,userId,username,organizationId,loginUrl}
      * @param {*} config token 的密钥，过期时间等
      */
     async mergeRoleIdAndGenToken(params, config) {
@@ -30,6 +30,7 @@ class LessonOrgService extends Service {
                 roleId,
                 username: params.username,
                 organizationId: params.organizationId,
+                loginUrl: params.loginUrl,
             },
             config.secret,
             config.tokenExpire || TOKEN_DEFAULT_EXPIRE
@@ -381,6 +382,72 @@ class LessonOrgService extends Service {
             }
         );
         if (isTeacher) this.ctx.throw(409, Err.ALREADY_ISTEACHER_IN_ORG);
+    }
+
+    // 获取机构的所有班级，嵌套返回所有成员
+    async getClassAndMembers(organizationId, roleId, userId) {
+        const list = await this.ctx.model.LessonOrganizationClass.findAll({
+            where: { organizationId, end: { $gt: new Date() } },
+            attributes: [
+                [ 'id', 'classId' ],
+                [ 'name', 'className' ],
+            ],
+            include: [
+                {
+                    as: 'lessonOrganizationClassMembers',
+                    model: this.model.LessonOrganizationClassMember,
+                    attributes: [
+                        'memberId',
+                        'realname',
+                        'roleId',
+                        'parentPhoneNum',
+                    ],
+                },
+            ],
+        });
+
+        const retArr = [];
+        for (let i = 0; i < list.length; i++) {
+            const element = list[i].get();
+
+            const obj = {
+                classId: element.classId,
+                className: element.className,
+                teacherList: [],
+                studentList: [],
+            };
+
+            const members = element.lessonOrganizationClassMembers;
+            if (roleId === CLASS_MEMBER_ROLE_TEACHER) {
+                // 老师只返回自己执教的班级
+                const index = _.findIndex(
+                    members,
+                    o =>
+                        o.memberId === userId &&
+                        o.roleId & CLASS_MEMBER_ROLE_TEACHER
+                );
+                if (index === -1) continue;
+            }
+
+            // 老师学生分别加到teacherList和studentList中
+            for (let j = 0; j < members.length; j++) {
+                if (members[j].roleId & CLASS_MEMBER_ROLE_TEACHER) {
+                    obj.teacherList.push({
+                        userId: members[j].memberId,
+                        realname: members[j].realname,
+                    });
+                }
+                if (members[j].roleId & CLASS_MEMBER_ROLE_STUDENT) {
+                    obj.studentList.push({
+                        userId: members[j].memberId,
+                        realname: members[j].realname,
+                        parentPhoneNum: members[j].parentPhoneNum,
+                    });
+                }
+            }
+            retArr.push(obj);
+        }
+        return retArr;
     }
 }
 
