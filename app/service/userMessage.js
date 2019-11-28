@@ -34,7 +34,13 @@ class UserMessage extends Service {
             include: [
                 {
                     as: 'messages',
-                    attributes: ['id', 'sender', 'msg', 'senderName', 'senderPortrait'],
+                    attributes: [
+                        'id',
+                        'sender',
+                        'msg',
+                        'senderName',
+                        'senderPortrait',
+                    ],
                     model: this.model.Message,
                     where: condition,
                     include: [
@@ -64,10 +70,18 @@ class UserMessage extends Service {
         });
 
         // 老师的id,要找他们的tLevel
-        const senders = _.filter(userMsg.rows.map(r => r.messages.sender), o => o > 0);
-        const teachersInfo = await this.ctx.service.keepwork.getAllUserByCondition({ id: { $in: senders } });
+        const senders = _.filter(
+            userMsg.rows.map(r => r.messages.sender),
+            o => o > 0
+        );
+        const teachersInfo = await this.ctx.service.keepwork.getAllUserByCondition(
+            { id: { $in: senders } }
+        );
         userMsg.rows.forEach(r => {
-            const index = _.findIndex(teachersInfo, o => o.id === r.messages.sender);
+            const index = _.findIndex(
+                teachersInfo,
+                o => o.id === r.messages.sender
+            );
             r.messages.tLevel = index > -1 ? teachersInfo[index].tLevel : 0;
         });
 
