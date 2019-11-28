@@ -166,7 +166,8 @@ class Message extends Service {
                 : `${member.realname}老师`;
 
         const message = await this.ctx.model.Message.create({
-            sender: ~~_roleId === CLASS_MEMBER_ROLE_ADMIN ? -1 : userId,
+            sender: userId,
+            roleId: _roleId,
             organizationId,
             sendSms,
             sendClassIds,
@@ -193,8 +194,13 @@ class Message extends Service {
     async getMessages(queryOptions, userId, roleId, organizationId) {
         const condition = {
             organizationId,
-            sender: ~~roleId === CLASS_MEMBER_ROLE_ADMIN ? -1 : userId,
         };
+
+        if (~~roleId === CLASS_MEMBER_ROLE_ADMIN) {
+            condition.roleId = CLASS_MEMBER_ROLE_ADMIN;
+        } else {
+            condition.sender = userId;
+        }
 
         const ret = await this.ctx.model.Message.findAndCountAll({
             ...queryOptions,
