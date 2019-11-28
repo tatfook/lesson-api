@@ -14,11 +14,14 @@ module.exports = app => {
             },
 
             sender: {
-                // 0.keepwork,-1.机构管理员,大于0.机构老师的id
+                // 0.keepwork,大于0.机构老师的id或者管理员的id
                 // 消息发送者
                 type: BIGINT,
             },
-
+            roleId: { // 发机构消息时候的roleId，0 || 2 || 64
+                type: INTEGER,
+                defaultValue: 0, // keepwork发的消息为0
+            },
             organizationId: {
                 // 机构id,
                 type: BIGINT,
