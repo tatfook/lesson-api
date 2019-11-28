@@ -20,7 +20,7 @@ class AdminsController extends Controller {
 
         this.adminAuthenticated();
 
-        return;
+        return params;
     }
 
     async query() {
@@ -142,15 +142,15 @@ class AdminsController extends Controller {
     }
 
     async bulkCreate() {
-        this.adminAuthenticated();
+        const { ctx } = this;
 
-        const { datas } = this.parseParams();
+        this.parseParams();
+
+        const { datas } = this.validate();
 
         const data = await this.resource.bulkCreate(datas);
 
-        this.action();
-
-        return this.success(data);
+        return ctx.helper.success({ ctx, status: 200, res: data });
     }
 
     async update() {
