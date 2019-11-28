@@ -200,6 +200,7 @@ class Message extends Service {
             condition.roleId = CLASS_MEMBER_ROLE_ADMIN;
         } else {
             condition.sender = userId;
+            condition.roleId = CLASS_MEMBER_ROLE_TEACHER;
         }
 
         const ret = await this.ctx.model.Message.findAndCountAll({
