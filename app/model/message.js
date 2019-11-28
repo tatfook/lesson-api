@@ -18,7 +18,8 @@ module.exports = app => {
                 // 消息发送者
                 type: BIGINT,
             },
-            roleId: { // 发机构消息时候的roleId，0 || 2 || 64
+            roleId: {
+                // 发机构消息时候的roleId，0 || 2 || 64
                 type: INTEGER,
                 defaultValue: 0, // keepwork发的消息为0
             },
