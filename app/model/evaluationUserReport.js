@@ -416,7 +416,8 @@ module.exports = app => {
 				group_concat(m.realname) teacherNames
 			from
 		  		lessonOrganizationClasses c
-		  		left join lessonOrganizationClassMembers m on m.classId = c.id and m.roleId & 2
+                  left join lessonOrganizationClassMembers m 
+                  on m.classId = c.id and m.roleId & 2 and m.organizationId = c.organizationId
 			where c.organizationId = :organizationId and c.end > '${moment().format(
         'YYYY-MM-DD HH:mm:ss'
     )}'
@@ -433,7 +434,10 @@ module.exports = app => {
 					count(ur.isSend = 1 or null)  sendCount, 
 					count(ur.id) commentCount
 				from evaluationReports r 
-					left join evaluationUserReports ur on ur.reportId = r.id ${cond}
+                    left join evaluationUserReports ur on ur.reportId = r.id 
+                    join lessonOrganizationClassMembers sm 
+                     on sm.classId = r.classId and sm.memberId = ur.userId and sm.roleId&1 
+                    ${cond}
 					group by r.id,r.classId
 			) c group by c.classId
 		) b on a.classId = b.classId`;
