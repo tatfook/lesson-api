@@ -143,9 +143,10 @@ class AdminsController extends Controller {
 
     async bulkCreate() {
         const { ctx } = this;
-        this.adminAuthenticated();
 
-        const datas = this.parseParams();
+        this.parseParams();
+
+        const { datas } = this.validate();
 
         const data = await this.resource.bulkCreate(datas);
 
