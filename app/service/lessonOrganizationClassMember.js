@@ -396,7 +396,10 @@ class LessonOrgClassMemberService extends Service {
             roleId: 0,
         });
 
-        if (datas.length === 0) return [];
+        if (datas.length === 0) {
+            await this.updateUserVipAndTLevel(params.memberId);
+            return [];
+        }
 
         const members = await this.model.LessonOrganizationClassMember.bulkCreate(
             datas
