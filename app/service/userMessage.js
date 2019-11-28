@@ -1,6 +1,7 @@
 'use strict';
 
 const Service = require('../common/service.js');
+const _ = require('lodash');
 
 class UserMessage extends Service {
     /**
@@ -28,12 +29,12 @@ class UserMessage extends Service {
             condition = { organizationId };
         }
         const seq = this.app.model.Sequelize;
-        return await this.ctx.model.UserMessage.findAndCountAll({
+        const userMsg = await this.ctx.model.UserMessage.findAndCountAll({
             ...queryOptions,
             include: [
                 {
                     as: 'messages',
-                    attributes: [ 'id', 'msg', 'senderName', 'senderPortrait' ],
+                    attributes: ['id', 'sender', 'msg', 'senderName', 'senderPortrait'],
                     model: this.model.Message,
                     where: condition,
                     include: [
@@ -61,6 +62,16 @@ class UserMessage extends Service {
             o.rows = o.rows.map(o => o.toJSON());
             return o;
         });
+
+        // 老师的id,要找他们的tLevel
+        const senders = _.filter(userMsg.rows.map(r => r.messages.sender), o => o > 0);
+        const teachersInfo = await this.ctx.service.keepwork.getAllUserByCondition({ id: { $in: senders } });
+        userMsg.rows.forEach(r => {
+            const index = _.findIndex(teachersInfo, o => o.id === r.messages.sender);
+            r.messages.tLevel = index > -1 ? teachersInfo[index].tLevel : 0;
+        });
+
+        return userMsg;
     }
 
     /**
