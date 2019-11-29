@@ -230,7 +230,7 @@ class Message extends Service {
                     sendTo += `${classNames[index].name},`;
                 }
             });
-            r.sendTo = sendTo;
+            r.sendTo = sendTo ? sendTo.substring(0, sendTo.length - 1) : '';
             delete r.sendClassIds;
             return r;
         });
