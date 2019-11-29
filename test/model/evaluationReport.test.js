@@ -77,8 +77,8 @@ describe('test/model/evaluationReport.test.js', () => {
         });
         assert(
             list.length === 2 &&
-            list[0].studentId === 2 &&
-            list[1].studentId === 4
+                list[0].studentId === 2 &&
+                list[1].studentId === 4
         );
     });
 
@@ -149,8 +149,8 @@ describe('test/model/evaluationReport.test.js', () => {
         );
         assert(
             ret.orgName === '什么机构' &&
-            ret.realname === '什么学生' &&
-            ret.teacherName === '什么老师'
+                ret.realname === '什么学生' &&
+                ret.teacherName === '什么老师'
         );
     });
 
@@ -160,12 +160,12 @@ describe('test/model/evaluationReport.test.js', () => {
         );
         assert(
             ret.starAvg === '2.00' &&
-            ret.spatialAvg === '3.00' &&
-            ret.collaborativeAvg === '4.00' &&
-            ret.creativeAvg === '1.00' &&
-            ret.logicalAvg === '5.00' &&
-            ret.computeAvg === '1.00' &&
-            ret.coordinateAvg === '2.00'
+                ret.spatialAvg === '3.00' &&
+                ret.collaborativeAvg === '4.00' &&
+                ret.creativeAvg === '1.00' &&
+                ret.logicalAvg === '5.00' &&
+                ret.computeAvg === '1.00' &&
+                ret.coordinateAvg === '2.00'
         );
     });
 
@@ -175,12 +175,12 @@ describe('test/model/evaluationReport.test.js', () => {
         );
         assert(
             ret.starAvg === '2.00' &&
-            ret.spatialAvg === '3.00' &&
-            ret.collaborativeAvg === '4.00' &&
-            ret.creativeAvg === '1.00' &&
-            ret.logicalAvg === '5.00' &&
-            ret.computeAvg === '1.00' &&
-            ret.coordinateAvg === '2.00'
+                ret.spatialAvg === '3.00' &&
+                ret.collaborativeAvg === '4.00' &&
+                ret.creativeAvg === '1.00' &&
+                ret.logicalAvg === '5.00' &&
+                ret.computeAvg === '1.00' &&
+                ret.coordinateAvg === '2.00'
         );
     });
 
@@ -188,12 +188,12 @@ describe('test/model/evaluationReport.test.js', () => {
         const ret = await app.model.EvaluationUserReport.getUserSumStar(2, 1);
         assert(
             ret.starCount === '2' &&
-            ret.spatialCount === '3' &&
-            ret.collaborativeCount === '4' &&
-            ret.creativeCount === '1' &&
-            ret.logicalCount === '5' &&
-            ret.computeCount === '1' &&
-            ret.coordinateCount === '2'
+                ret.spatialCount === '3' &&
+                ret.collaborativeCount === '4' &&
+                ret.creativeCount === '1' &&
+                ret.logicalCount === '5' &&
+                ret.computeCount === '1' &&
+                ret.coordinateCount === '2'
         );
     });
 
@@ -205,12 +205,12 @@ describe('test/model/evaluationReport.test.js', () => {
         assert(ret.length === 1);
         assert(
             ret[0].star === 2 &&
-            ret[0].spatial === 3 &&
-            ret[0].collaborative === 4 &&
-            ret[0].creative === 1 &&
-            ret[0].logical === 5 &&
-            ret[0].compute === 1 &&
-            ret[0].coordinate === 2
+                ret[0].spatial === 3 &&
+                ret[0].collaborative === 4 &&
+                ret[0].creative === 1 &&
+                ret[0].logical === 5 &&
+                ret[0].compute === 1 &&
+                ret[0].coordinate === 2
         );
     });
 
@@ -221,12 +221,12 @@ describe('test/model/evaluationReport.test.js', () => {
         assert(ret.length === 1);
         assert(
             ret[0].starAvg === '2.00' &&
-            ret[0].spatialAvg === '3.00' &&
-            ret[0].collaborativeAvg === '4.00' &&
-            ret[0].creativeAvg === '1.00' &&
-            ret[0].logicalAvg === '5.00' &&
-            ret[0].computeAvg === '1.00' &&
-            ret[0].coordinateAvg === '2.00'
+                ret[0].spatialAvg === '3.00' &&
+                ret[0].collaborativeAvg === '4.00' &&
+                ret[0].creativeAvg === '1.00' &&
+                ret[0].logicalAvg === '5.00' &&
+                ret[0].computeAvg === '1.00' &&
+                ret[0].coordinateAvg === '2.00'
         );
     });
 
@@ -238,8 +238,8 @@ describe('test/model/evaluationReport.test.js', () => {
         assert(ret.length === 1);
         assert(
             ret[0].star === 2 &&
-            ret[0].teacherName === '什么老师' &&
-            ret[0].reportName === '什么报告'
+                ret[0].teacherName === '什么老师' &&
+                ret[0].reportName === '什么报告'
         );
     });
 
@@ -258,8 +258,8 @@ describe('test/model/evaluationReport.test.js', () => {
         );
         assert(
             ret.length === 1 &&
-            ret[0].commentCount === 1 &&
-            ret[0].sendCount === 0
+                ret[0].commentCount === 1 &&
+                ret[0].sendCount === 0
         );
     });
 });

@@ -34,6 +34,6 @@ module.exports = app => {
                 length: 8,
             }),
         },
-        createdAt: new Date()
+        createdAt: new Date(),
     });
 };
