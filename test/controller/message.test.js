@@ -16,7 +16,7 @@ describe('test/controller/message.test.js', () => {
                 msg: { type: 2, text: '纯文本消息' },
                 userIds: [{ userId: 1, roleId: 1 }],
                 sendSms: 0,
-                sendClassIds: [1, 2]
+                sendClassIds: [1, 2],
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(200)
