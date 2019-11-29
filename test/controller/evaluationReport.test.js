@@ -52,7 +52,9 @@ describe('test/controller/evaluationReport.test.js', () => {
         //     resources: 'users',
         // });
 
-        const org = await app.factory.create('LessonOrganization', { name: '什么机构' });
+        const org = await app.factory.create('LessonOrganization', {
+            name: '什么机构',
+        });
         const cls1 = await app.factory.create('LessonOrganizationClass', {
             organizationId: org.id,
             name: '什么班级',
@@ -655,7 +657,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             compute: 1,
             coordinate: 1,
             comment: '',
-            mediaUrl: "",
+            mediaUrl: '',
         });
 
         const report = await app
@@ -690,7 +692,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             compute: 1,
             coordinate: 1,
             comment: '',
-            mediaUrl: "",
+            mediaUrl: '',
         });
 
         const report = await app
@@ -700,10 +702,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .expect(200)
             .then(res => res.body.data);
 
-        assert(
-            report.length === 1 &&
-            report[0].isSend === 0
-        );
+        assert(report.length === 1 && report[0].isSend === 0);
     });
 
     it('024 点评详情列表 不是自己发起的点评 应该失败', async () => {
@@ -772,7 +771,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             compute: 1,
             coordinate: 1,
             comment: '',
-            mediaUrl: "",
+            mediaUrl: '',
         });
 
         const report = await app
