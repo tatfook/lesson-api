@@ -227,7 +227,7 @@ class Message extends Service {
             sendClassIds.forEach(r => {
                 const index = _.findIndex(classNames, o => o.id === ~~r);
                 if (index > -1) {
-                    sendTo += classNames[index].name;
+                    sendTo += `${classNames[index].name},`;
                 }
             });
             r.sendTo = sendTo;
