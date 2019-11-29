@@ -77,7 +77,7 @@ const LessonOrganizationActivateCode = class extends Controller {
             organizationId,
             parentPhoneNum,
             verifCode,
-        } = this.validate({ key: 'string', organizationId: 'number' });
+        } = this.validate({ key: 'string', realname: 'string' });
 
         const data = await this.ctx.service.lessonOrganizationActivateCode.useActivateCode(
             {
