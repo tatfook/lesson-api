@@ -2,25 +2,16 @@ const md5 = require('blueimp-md5');
 const { app, assert } = require('egg-mock/bootstrap');
 
 describe('机构学生', () => {
-    before(async () => {
-        const ctx = app.mockContext();
-        await ctx.service.keepwork.truncate({ resources: 'users' });
-
-        await app.model.LessonOrganization.sync({ force: true });
-        await app.model.LessonOrganizationClass.sync({ force: true });
-        await app.model.LessonOrganizationClassMember.sync({ force: true });
+    beforeEach(async () => {
+        app.mockService('keepwork', 'getAllUserByCondition', () => { return [{ id: 1, username: 'u' }] });
+        app.mockService('keepwork', 'getUserDatas', () => { return { tokens: ['XXX'] } });
+        app.mockService('keepwork', 'setUserDatas', () => 0);
+        app.mockService('keepwork', 'updateUser', () => 0);
     });
 
     it('001 机构学生添加', async () => {
-        const user = await app.adminLogin();
+        const user = await app.login({ roleId: 67 });
         const token = user.token;
-
-        const ctx = app.mockContext();
-        const user2 = await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'user005',
-            password: md5('123456'),
-        });
 
         // 创建机构
         const organ = await app.model.LessonOrganization.create({
@@ -46,7 +37,7 @@ describe('机构学生', () => {
         // 添加为管理员
         await app.model.LessonOrganizationClassMember.create({
             organizationId: organ.id,
-            memberId: user.id,
+            memberId: 1,
             roleId: 64,
             classId: 0,
         });
@@ -56,7 +47,7 @@ describe('机构学生', () => {
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
-                memberId: user2.id,
+                memberId: 1,
                 organizationId: organ.id,
                 classIds: [cls.id],
             })
@@ -69,7 +60,7 @@ describe('机构学生', () => {
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
-                memberId: user2.id,
+                memberId: 1,
                 organizationId: organ.id,
                 classIds: [0],
             })
@@ -82,7 +73,7 @@ describe('机构学生', () => {
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
-                memberId: user2.id,
+                memberId: 1,
                 organizationId: organ.id,
                 classIds: [cls.id, cls2.id],
             })
@@ -95,7 +86,7 @@ describe('机构学生', () => {
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
-                memberId: user2.id,
+                memberId: 1,
                 organizationId: organ.id,
                 classIds: [cls.id],
             })
@@ -113,9 +104,9 @@ describe('机构学生', () => {
             .then(res => res.body);
         assert(students.data.count === 1);
 
-        // 移除班级成员
-        // await app.httpRequest().delete(`/lessonOrganizationClassMembers/${students.rows[0].id}?roleId=1`)
-        // 	.set("Authorization", `Bearer ${token}`).expect(200);
+        // // 移除班级成员
+        await app.httpRequest().delete(`/lessonOrganizationClassMembers/${students.data.rows[0].id}?roleId=1`)
+            .set("Authorization", `Bearer ${token}`).expect(200);
 
         students = await app
             .httpRequest()
@@ -134,17 +125,11 @@ describe('机构学生', () => {
             .then(res => res.body);
         assert(teachers.data.length === 0);
 
-        const user3 = await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'jacky',
-            password: md5('123456'),
-        });
-
         await app.model.LessonOrganizationClassMember.create({
             organizationId: organ.id,
             classId: cls2.id,
             roleId: 2,
-            memberId: user3.id,
+            memberId: 2,
         });
 
         teachers = await app

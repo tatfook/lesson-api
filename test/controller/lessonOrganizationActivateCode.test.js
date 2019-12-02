@@ -3,14 +3,11 @@ const { app, mock, assert } = require('egg-mock/bootstrap');
 
 describe('机构激活码', () => {
     before(async () => {
-        await app.model.LessonOrganizationActivateCode.sync({ force: true });
-        await app.model.LessonOrganizationClassMember.sync({ force: true });
-        await app.model.LessonOrganization.sync({ force: true });
-        await app.model.LessonOrganizationClass.sync({ force: true });
+
     });
 
     it('001 机构激活码', async () => {
-        const user = await app.adminLogin({ organizationId: 1 });
+        const user = await app.login({ organizationId: 1, roleId: 67 });
         const token = user.token;
 
         // 创建机构
@@ -66,7 +63,7 @@ describe('机构激活码', () => {
             .expect(403);
 
         // 无效机构
-        const user2 = await app.adminLogin({ organizationId: 999 });
+        const user2 = await app.login({ organizationId: 999 });
         const token2 = user2.token;
         await app
             .httpRequest()
@@ -77,9 +74,9 @@ describe('机构激活码', () => {
                 classId: cls.id,
             })
             .set('Authorization', `Bearer ${token2}`)
-            .expect(400);
+            .expect(403);
 
-        // 测试获取激活码
+        //  测试获取激活码
         let Activecode = await app
             .httpRequest()
             .get('/lessonOrganizationActivateCodes?organizationId=' + organ.id)
@@ -87,7 +84,7 @@ describe('机构激活码', () => {
             .expect(200)
             .then(res => res.body)
             .catch(e => console.log(e));
-        console.log('----id----', organ.id);
+
         assert(
             Activecode.data.count === 20 && Activecode.data.rows.length === 20
         );
@@ -106,12 +103,13 @@ describe('机构激活码', () => {
         assert(Activecode.data.count === 20);
 
         // 使用激活码
+        app.mockService('keepwork', 'updateUser', () => 0)
         let member = await app
             .httpRequest()
             .post('/lessonOrganizationActivateCodes/activate')
             .send({
                 key: Activecode.data.rows[0].key,
-                realname: '',
+                realname: 'a',
                 organizationId: organ.id,
             })
             .set('Authorization', `Bearer ${token}`)
@@ -133,7 +131,7 @@ describe('机构激活码', () => {
             .then(res => res.body);
         // assert(ret.code === 2);
 
-        // 应该少了一个
+        // // 应该少了一个
         Activecode = await app
             .httpRequest()
             .post('/lessonOrganizationActivateCodes/search')
@@ -160,7 +158,7 @@ describe('机构激活码', () => {
             .then(res => res.body);
         // assert(ret.code === 7);
 
-        // 已经是该班级学生
+        // // 已经是该班级学生
         ret = await app
             .httpRequest()
             .post('/lessonOrganizationActivateCodes/activate')
@@ -174,7 +172,7 @@ describe('机构激活码', () => {
             .then(res => res.body);
         // assert(ret.code === 6);
 
-        // 人数已达上限
+        // // 人数已达上限
         const user2token = await app.login({ id: 2 }).then(res => res.token);
         ret = await app
             .httpRequest()

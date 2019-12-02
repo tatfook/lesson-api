@@ -300,7 +300,7 @@ class LessonOrgClassMemberService extends Service {
                 o.roleId === CLASS_MEMBER_ROLE_STUDENT &&
                 o.lessonOrganizationClasses &&
                 new Date(o.lessonOrganizationClasses.end).getTime() <
-                    new Date().getTime()
+                new Date().getTime()
             ) {
                 return false;
             }

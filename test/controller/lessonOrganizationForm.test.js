@@ -3,18 +3,11 @@ const { app, assert } = require('egg-mock/bootstrap');
 
 describe('机构表单', () => {
     before(async () => {
-        const ctx = app.mockContext();
-        await ctx.service.keepwork.truncate({ resources: 'users' });
 
-        await app.model.LessonOrganization.sync({ force: true });
-        await app.model.LessonOrganizationClass.sync({ force: true });
-        await app.model.LessonOrganizationClassMember.sync({ force: true });
-        await app.model.LessonOrganizationForm.sync({ force: true });
-        await app.model.LessonOrganizationFormSubmit.sync({ force: true });
     });
 
     it('001 机构', async () => {
-        const user = await app.adminLogin();
+        const user = await app.login({ roleId: 64 });
         const token = user.token;
 
         // 创建机构
@@ -26,7 +19,7 @@ describe('机构表单', () => {
         // 创建管理员
         await app.model.LessonOrganizationClassMember.create({
             organizationId: organ.id,
-            memberId: user.id,
+            memberId: 1,
             roleId: 64,
             classId: 0,
         });
