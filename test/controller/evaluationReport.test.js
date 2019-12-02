@@ -2,55 +2,8 @@ const { app, assert } = require('egg-mock/bootstrap');
 
 describe('test/controller/evaluationReport.test.js', () => {
     beforeEach(async () => {
-        // await app.model.LessonOrganization.truncate();
-        // await app.model.LessonOrganizationClass.truncate();
-        // await app.model.LessonOrganizationClassMember.truncate();
-        // await app.model.EvaluationReport.truncate();
-        // await app.model.EvaluationUserReport.truncate();
-        // await app.model.Log.truncate();
-
-        // const ctx = app.mockContext();
-        // await ctx.service.keepwork.truncate({ resources: 'users' });
 
         await app.redis.flushdb();
-
-        // 创建机构，班级，老师，学生，管理员
-
-        // await ctx.service.keepwork.createRecord({
-        //     id: 1,
-        //     username: 'user1',
-        //     password: 'e35cf7b66449df565f93c607d5a81d09',
-        //     roleId: 1,
-        //     resources: 'users',
-        // });
-        // await ctx.service.keepwork.createRecord({
-        //     id: 2,
-        //     username: 'user2',
-        //     password: 'e35cf7b66449df565f93c607d5a81d09',
-        //     roleId: 1,
-        //     resources: 'users',
-        // });
-        // await ctx.service.keepwork.createRecord({
-        //     id: 3,
-        //     username: 'user3',
-        //     password: 'e35cf7b66449df565f93c607d5a81d09',
-        //     roleId: 1,
-        //     resources: 'users',
-        // });
-        // await ctx.service.keepwork.createRecord({
-        //     id: 4,
-        //     username: 'user4',
-        //     password: 'e35cf7b66449df565f93c607d5a81d09',
-        //     roleId: 1,
-        //     resources: 'users',
-        // });
-        // await ctx.service.keepwork.createRecord({
-        //     id: 5,
-        //     username: 'user5',
-        //     password: 'e35cf7b66449df565f93c607d5a81d09',
-        //     roleId: 1,
-        //     resources: 'users',
-        // });
 
         const org = await app.factory.create('LessonOrganization', {
             name: '什么机构',
@@ -962,8 +915,8 @@ describe('test/controller/evaluationReport.test.js', () => {
 
         assert(
             report.length === 1 &&
-                report[0].reportName === '这个名字修改了' &&
-                report[0].type === 1
+            report[0].reportName === '这个名字修改了' &&
+            report[0].type === 1
         );
     });
 
@@ -1220,22 +1173,22 @@ describe('test/controller/evaluationReport.test.js', () => {
 
         assert(
             report.userRepo.star === 3 &&
-                report.userRepo.spatial === 4 &&
-                report.userRepo.collaborative === 3 &&
-                report.userRepo.creative === 3 &&
-                report.userRepo.logical === 5 &&
-                report.userRepo.compute === 2 &&
-                report.userRepo.coordinate === 3
+            report.userRepo.spatial === 4 &&
+            report.userRepo.collaborative === 3 &&
+            report.userRepo.creative === 3 &&
+            report.userRepo.logical === 5 &&
+            report.userRepo.compute === 2 &&
+            report.userRepo.coordinate === 3
         );
 
         assert(
             report.classmatesAvgStar.starAvg === '4.00' &&
-                report.classmatesAvgStar.spatialAvg === '4.00' &&
-                report.classmatesAvgStar.collaborativeAvg === '3.00' &&
-                report.classmatesAvgStar.creativeAvg === '3.00' &&
-                report.classmatesAvgStar.logicalAvg === '5.00' &&
-                report.classmatesAvgStar.computeAvg === '2.00' &&
-                report.classmatesAvgStar.coordinateAvg === '3.00'
+            report.classmatesAvgStar.spatialAvg === '4.00' &&
+            report.classmatesAvgStar.collaborativeAvg === '3.00' &&
+            report.classmatesAvgStar.creativeAvg === '3.00' &&
+            report.classmatesAvgStar.logicalAvg === '5.00' &&
+            report.classmatesAvgStar.computeAvg === '2.00' &&
+            report.classmatesAvgStar.coordinateAvg === '3.00'
         );
     });
 
@@ -1301,22 +1254,22 @@ describe('test/controller/evaluationReport.test.js', () => {
         // 本次能力值情况和班级平均值
         assert(
             report.userRepo.star === 5 &&
-                report.userRepo.spatial === 4 &&
-                report.userRepo.collaborative === 3 &&
-                report.userRepo.creative === 3 &&
-                report.userRepo.logical === 5 &&
-                report.userRepo.compute === 2 &&
-                report.userRepo.coordinate === 3
+            report.userRepo.spatial === 4 &&
+            report.userRepo.collaborative === 3 &&
+            report.userRepo.creative === 3 &&
+            report.userRepo.logical === 5 &&
+            report.userRepo.compute === 2 &&
+            report.userRepo.coordinate === 3
         );
 
         assert(
             report.classmatesAvgStar.starAvg === '4.00' &&
-                report.classmatesAvgStar.spatialAvg === '4.00' &&
-                report.classmatesAvgStar.collaborativeAvg === '3.00' &&
-                report.classmatesAvgStar.creativeAvg === '3.00' &&
-                report.classmatesAvgStar.logicalAvg === '5.00' &&
-                report.classmatesAvgStar.computeAvg === '2.00' &&
-                report.classmatesAvgStar.coordinateAvg === '3.00'
+            report.classmatesAvgStar.spatialAvg === '4.00' &&
+            report.classmatesAvgStar.collaborativeAvg === '3.00' &&
+            report.classmatesAvgStar.creativeAvg === '3.00' &&
+            report.classmatesAvgStar.logicalAvg === '5.00' &&
+            report.classmatesAvgStar.computeAvg === '2.00' &&
+            report.classmatesAvgStar.coordinateAvg === '3.00'
         );
 
         const userHistoryStar = report.growthTrack.userHistoryStar;
@@ -1326,7 +1279,7 @@ describe('test/controller/evaluationReport.test.js', () => {
         // 个人历次成长
         assert(
             userHistoryStar.length === 1 &&
-                classmatesHistoryAvgStar.length === 1
+            classmatesHistoryAvgStar.length === 1
         );
         assert(userHistoryStar[0].star === 3);
         assert(userHistoryStar[0].spatial === 4);
@@ -1345,750 +1298,1108 @@ describe('test/controller/evaluationReport.test.js', () => {
         assert(classmatesHistoryAvgStar[0].coordinateAvg === 3);
     });
 
-    // it('043 修改对学生的点评 不是自己写的点评 应该失败', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const report = await app
-    //         .httpRequest()
-    //         .put(`/evaluationReports/userReport/2`)
-    //         .send({
-    //             star: 1,
-    //             spatial: 2,
-    //             collaborative: 3,
-    //             creative: 4,
-    //             logical: 5,
-    //             compute: 2,
-    //             coordinate: 3,
-    //             comment: '这个记录已经修改了',
-    //             mediaUrl: [],
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(403)
-    //         .then(res => res.body);
-    //     assert(report.message === '没有权限');
-    // });
-
-    // it('044 修改对学生的点评 star参数错误 应该失败', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const report = await app
-    //         .httpRequest()
-    //         .put(`/evaluationReports/userReport/2`)
-    //         .send({
-    //             star: 0,
-    //             spatial: 2,
-    //             collaborative: 3,
-    //             creative: 4,
-    //             logical: 5,
-    //             compute: 2,
-    //             coordinate: 3,
-    //             comment: '这个记录已经修改了',
-    //             mediaUrl: [],
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-    //     assert(report.message === '评星数量错误');
-    // });
-
-    // it('045 修改对学生的点评 comment参数错误 应该失败', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const report = await app
-    //         .httpRequest()
-    //         .put(`/evaluationReports/userReport/2`)
-    //         .send({
-    //             star: 1,
-    //             spatial: 2,
-    //             collaborative: 3,
-    //             creative: 4,
-    //             logical: 5,
-    //             compute: 2,
-    //             coordinate: 3,
-    //             comment: '',
-    //             mediaUrl: [],
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-    //     assert(report.message === '文字评价长度错误');
-    // });
-
-    // it('046 修改对学生的点评 mediaUrl参数错误 应该失败', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const report = await app
-    //         .httpRequest()
-    //         .put(`/evaluationReports/userReport/2`)
-    //         .send({
-    //             star: 1,
-    //             spatial: 2,
-    //             collaborative: 3,
-    //             creative: 4,
-    //             logical: 5,
-    //             compute: 2,
-    //             coordinate: 3,
-    //             comment: '这个记录已经修改了',
-    //             mediaUrl: '',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-    //     assert(report.message === '媒体文件路径格式错误');
-    // });
-
-    // it('047 修改对学生的点评 应该成功', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const report = await app
-    //         .httpRequest()
-    //         .put(`/evaluationReports/userReport/2`)
-    //         .send({
-    //             star: 1,
-    //             spatial: 2,
-    //             collaborative: 3,
-    //             creative: 4,
-    //             logical: 5,
-    //             compute: 2,
-    //             coordinate: 3,
-    //             comment: '这个记录已经修改了',
-    //             mediaUrl: [],
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-    //     assert(report === 'OK');
-
-    //     // 后置操作，检查记录是否真的修改
-    //     const re = await app.model.EvaluationUserReport.findOne({
-    //         where: { id: 2 },
-    //     });
-    //     assert(
-    //         re.comment === '这个记录已经修改了' &&
-    //         re.star === 1 &&
-    //         re.spatial === 2 &&
-    //         re.collaborative === 3 &&
-    //         re.creative === 4 &&
-    //         re.logical === 5
-    //     );
-    // });
-
-    // it('048 发送短信验证码 应该成功', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .post(`/users/sendSms`)
-    //         .send({
-    //             cellphone: '18603042568',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret === 'OK');
-    // });
-
-    // it('049 发送短信验证码 重复发送 应该失败', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .post(`/users/sendSms`)
-    //         .send({
-    //             cellphone: '18603042568',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-
-    //     assert(ret.message === '请勿重复发送');
-    // });
-
-    // it('050 校验短信验证码 应该成功', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const code = await app.redis.get(`verifCode:18603042568`);
-    //     const ret = await app
-    //         .httpRequest()
-    //         .post(`/users/verifyCode`)
-    //         .send({
-    //             cellphone: '18603042568',
-    //             verifCode: code,
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret === true);
-    // });
-
-    // it('051 校验短信验证码 验证码错误 应该返回false', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .post(`/users/verifyCode`)
-    //         .send({
-    //             cellphone: '18603042568',
-    //             verifCode: '123457',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret === false);
-    // });
-
-    // it('052 修改keepwork头像 在机构中的realname', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .put(`/users/userInfo`)
-    //         .send({
-    //             portrait: 'http://pics1.baidu.com',
-    //             realname: '修改了的名字',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret === 'OK');
-
-    //     const ctx = app.mockContext();
-    //     const user_ = await ctx.service.keepwork.getAllUserByCondition({
-    //         id: 2,
-    //     });
-    //     assert(user_[0].portrait === 'http://pics1.baidu.com');
-    //     const member = await app.model.LessonOrganizationClassMember.findOne({
-    //         where: { memberId: 2, organizationId: 1 },
-    //     });
-    //     assert(member.realname === '修改了的名字');
-    // });
-
-    // it('053 修改keepwork头像 在机构中的realname 头像错误 应该成功', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .put(`/users/userInfo`)
-    //         .send({
-    //             portrait: '',
-    //             realname: '修改了的名字?',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body);
-    // });
-
-    // it('054 修改keepwork头像 在机构中的realname 名字错误 应该失败', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .put(`/users/userInfo`)
-    //         .send({
-    //             portrait: 'http://pics1.baidu.com',
-    //             realname: '',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-
-    //     assert(ret.message === '名字长度错误');
-    // });
-
-    // it('055 修改keepwork头像 在机构中的realname和家长手机号 应该成功', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .put(`/users/userInfo`)
-    //         .send({
-    //             portrait: 'http://pics1.alibaba.com',
-    //             realname: '又修改了的名字',
-    //             parentPhoneNum: '18603042568',
-    //             verifCode: '123456',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret === 'OK');
-
-    //     const ctx = app.mockContext();
-    //     const user_ = await ctx.service.keepwork.getAllUserByCondition({
-    //         id: 2,
-    //     });
-    //     assert(user_[0].portrait === 'http://pics1.alibaba.com');
-    //     const member = await app.model.LessonOrganizationClassMember.findOne({
-    //         where: { memberId: 2, organizationId: 1 },
-    //     });
-    //     assert(member.realname === '又修改了的名字');
-    //     assert(member.parentPhoneNum === '18603042568');
-    // });
-
-    // it('056 修改keepwork头像 在机构中的realname和家长手机号 验证码错误 应该失败', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .put(`/users/userInfo`)
-    //         .send({
-    //             portrait: 'http://pics1.alibaba.com',
-    //             realname: '又修改了的名字',
-    //             parentPhoneNum: '18603042568',
-    //             verifCode: '123457',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-
-    //     assert(ret.message === '验证码错误');
-
-    //     // 后置操作
-    //     await app.redis.del(`verifCode:18603042568`);
-    // });
-
-    // it('057 获取用户信息 自己获取自己的信息 应该成功', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/users/userInfo`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret.portrait === 'http://pics1.alibaba.com');
-    //     assert(ret.realname === '又修改了的名字');
-    //     assert(ret.parentPhoneNum === '18603042568');
-    // });
-
-    // it('058 获取用户信息 老师获取自己学生的信息 应该成功', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/users/userInfo?studentId=2`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret.portrait === 'http://pics1.alibaba.com');
-    //     assert(ret.realname === '又修改了的名字');
-    //     assert(ret.parentPhoneNum === '18603042568');
-    // });
-
-    // it('059 获取用户信息 老师获取不是自己的学生的信息 应该失败', async () => {
-    //     const user = await app.login({ id: 1 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/users/userInfo?studentId=5`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(403)
-    //         .then(res => res.body);
-
-    //     assert(ret.message === '没有权限');
-    // });
-
-    // it('060 修改家长手机号【第二步】 ', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     // 前置操作
-    //     await Promise.all([
-    //         app.redis.set(`verifCode:18603042568`, '123456'),
-    //         app.redis.set(`verifCode:13590450686`, '123123'),
-    //     ]);
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .put(`/users/parentPhoneNum`)
-    //         .send({
-    //             parentPhoneNum: '18603042568',
-    //             verifCode: '123456',
-    //             newParentPhoneNum: '13590450686',
-    //             newVerifCode: '123123',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret === 'OK');
-
-    //     // 检查是否真的修改成功
-    //     const member = await app.model.LessonOrganizationClassMember.findOne({
-    //         where: { memberId: 2, organizationId: 1 },
-    //     });
-    //     assert(member.parentPhoneNum === '13590450686');
-    // });
-
-    // it('061 修改家长手机号【第二步】 验证码错误1 应该失败', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .put(`/users/parentPhoneNum`)
-    //         .send({
-    //             parentPhoneNum: '13590450686',
-    //             verifCode: '12598',
-    //             newParentPhoneNum: '18603042568',
-    //             newVerifCode: '123456',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-
-    //     assert(ret.message === '验证码错误');
-    // });
-
-    // it('062 修改家长手机号【第二步】 验证码错误2 应该失败', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .put(`/users/parentPhoneNum`)
-    //         .send({
-    //             parentPhoneNum: '13590450686',
-    //             verifCode: '123123',
-    //             newParentPhoneNum: '18603042568',
-    //             newVerifCode: '123548',
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-
-    //     assert(ret.message === '验证码错误');
-
-    //     // 后置操作
-    //     await Promise.all([
-    //         app.redis.del(`verifCode:18603042568`),
-    //         app.redis.del(`verifCode:13590450686`),
-    //     ]);
-    // });
-
-    // it('063 我的评估报告-数据统计 userId:2', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/evaluationReports/statistics?classId=1`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     const classmatesHistoryAvgStar =
-    //         ret.historyStarStatistics.classmatesHistoryAvgStar;
-    //     const userSumStar = ret.historyStarStatistics.userSumStar;
-    //     const userHistoryStar = ret.growthTrack.userHistoryStar;
-    //     const classmatesHistoryAvgStar2 =
-    //         ret.growthTrack.classmatesHistoryAvgStar2;
-
-    //     // 历次能力值统计
-    //     assert(
-    //         classmatesHistoryAvgStar.starAvg === '7.00' &&
-    //         classmatesHistoryAvgStar.spatialAvg === '7.00' &&
-    //         classmatesHistoryAvgStar.collaborativeAvg === '6.50' &&
-    //         classmatesHistoryAvgStar.creativeAvg === '7.00' &&
-    //         classmatesHistoryAvgStar.logicalAvg === '10.00' &&
-    //         classmatesHistoryAvgStar.computeAvg === '5.00' &&
-    //         classmatesHistoryAvgStar.coordinateAvg === '6.00'
-    //     );
-    //     assert(
-    //         userSumStar.starCount === '6' &&
-    //         userSumStar.spatialCount === '6' &&
-    //         userSumStar.collaborativeCount === '6' &&
-    //         userSumStar.creativeCount === '7' &&
-    //         userSumStar.logicalCount === '10' &&
-    //         userSumStar.computeCount === '4' &&
-    //         userSumStar.coordinateCount === '6'
-    //     );
-
-    //     // 历次成长轨迹
-    //     assert(
-    //         userHistoryStar[0].star === 1 &&
-    //         userHistoryStar[0].spatial === 2 &&
-    //         userHistoryStar[0].collaborative === 3 &&
-    //         userHistoryStar[0].creative === 4 &&
-    //         userHistoryStar[0].logical === 5 &&
-    //         userHistoryStar[0].compute === 2 &&
-    //         userHistoryStar[0].coordinate === 3
-    //     );
-    //     assert(
-    //         userHistoryStar[1].star === 6 &&
-    //         userHistoryStar[1].spatial === 6 &&
-    //         userHistoryStar[1].collaborative === 6 &&
-    //         userHistoryStar[1].creative === 7 &&
-    //         userHistoryStar[1].logical === 10 &&
-    //         userHistoryStar[1].compute === 4 &&
-    //         userHistoryStar[1].coordinate === 6
-    //     );
-    //     assert(
-    //         classmatesHistoryAvgStar2[0].starAvg === 3 &&
-    //         classmatesHistoryAvgStar2[0].spatialAvg === 3 &&
-    //         classmatesHistoryAvgStar2[0].collaborativeAvg === 3 &&
-    //         classmatesHistoryAvgStar2[0].creativeAvg === 4.5 &&
-    //         classmatesHistoryAvgStar2[0].logicalAvg === 5 &&
-    //         classmatesHistoryAvgStar2[0].computeAvg === 3 &&
-    //         classmatesHistoryAvgStar2[0].coordinateAvg === 3
-    //     );
-    //     assert(
-    //         classmatesHistoryAvgStar2[1].starAvg === 7 &&
-    //         classmatesHistoryAvgStar2[1].spatialAvg === 7 &&
-    //         classmatesHistoryAvgStar2[1].collaborativeAvg === 6.5 &&
-    //         classmatesHistoryAvgStar2[1].creativeAvg === 7 &&
-    //         classmatesHistoryAvgStar2[1].logicalAvg === 10 &&
-    //         classmatesHistoryAvgStar2[1].computeAvg === 5 &&
-    //         classmatesHistoryAvgStar2[1].coordinateAvg === 6
-    //     );
-    // });
-
-    // it('064 我的评估报告-数据统计 userId:4', async () => {
-    //     const user = await app.login({ id: 4 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/evaluationReports/statistics?classId=1`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     const classmatesHistoryAvgStar =
-    //         ret.historyStarStatistics.classmatesHistoryAvgStar;
-    //     const userSumStar = ret.historyStarStatistics.userSumStar;
-    //     const userHistoryStar = ret.growthTrack.userHistoryStar;
-    //     const classmatesHistoryAvgStar2 =
-    //         ret.growthTrack.classmatesHistoryAvgStar2;
-
-    //     // 历次能力值统计
-    //     assert(
-    //         classmatesHistoryAvgStar.starAvg === '7.00' &&
-    //         classmatesHistoryAvgStar.spatialAvg === '7.00' &&
-    //         classmatesHistoryAvgStar.collaborativeAvg === '6.50' &&
-    //         classmatesHistoryAvgStar.creativeAvg === '7.00' &&
-    //         classmatesHistoryAvgStar.logicalAvg === '10.00' &&
-    //         classmatesHistoryAvgStar.computeAvg === '5.00' &&
-    //         classmatesHistoryAvgStar.coordinateAvg === '6.00'
-    //     );
-    //     assert(
-    //         userSumStar.starCount === '8' &&
-    //         userSumStar.spatialCount === '8' &&
-    //         userSumStar.collaborativeCount === '7' &&
-    //         userSumStar.creativeCount === '7' &&
-    //         userSumStar.logicalCount === '10' &&
-    //         userSumStar.computeCount === '6' &&
-    //         userSumStar.coordinateCount === '6'
-    //     );
-
-    //     // 历次成长轨迹
-    //     assert(
-    //         userHistoryStar[0].star === 5 &&
-    //         userHistoryStar[0].spatial === 4 &&
-    //         userHistoryStar[0].collaborative === 3 &&
-    //         userHistoryStar[0].creative === 5 &&
-    //         userHistoryStar[0].logical === 5 &&
-    //         userHistoryStar[0].compute === 4 &&
-    //         userHistoryStar[0].coordinate === 3
-    //     );
-    //     assert(
-    //         userHistoryStar[1].star === 8 &&
-    //         userHistoryStar[1].spatial === 8 &&
-    //         userHistoryStar[1].collaborative === 7 &&
-    //         userHistoryStar[1].creative === 7 &&
-    //         userHistoryStar[1].logical === 10 &&
-    //         userHistoryStar[1].compute === 6 &&
-    //         userHistoryStar[1].coordinate === 6
-    //     );
-    //     assert(
-    //         classmatesHistoryAvgStar2[0].starAvg === 3 &&
-    //         classmatesHistoryAvgStar2[0].spatialAvg === 3 &&
-    //         classmatesHistoryAvgStar2[0].collaborativeAvg === 3 &&
-    //         classmatesHistoryAvgStar2[0].creativeAvg === 4.5 &&
-    //         classmatesHistoryAvgStar2[0].logicalAvg === 5 &&
-    //         classmatesHistoryAvgStar2[0].computeAvg === 3 &&
-    //         classmatesHistoryAvgStar2[0].coordinateAvg === 3
-    //     );
-    //     assert(
-    //         classmatesHistoryAvgStar2[1].starAvg === 7 &&
-    //         classmatesHistoryAvgStar2[1].spatialAvg === 7 &&
-    //         classmatesHistoryAvgStar2[1].collaborativeAvg === 6.5 &&
-    //         classmatesHistoryAvgStar2[1].creativeAvg === 7 &&
-    //         classmatesHistoryAvgStar2[1].logicalAvg === 10 &&
-    //         classmatesHistoryAvgStar2[1].computeAvg === 5 &&
-    //         classmatesHistoryAvgStar2[1].coordinateAvg === 6
-    //     );
-    // });
-
-    // it('065 我的评估报告-历次点评列表 userId:2', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/evaluationReports/evaluationCommentList?classId=1`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret.length === 2);
-    //     assert(
-    //         ret[0].reportName === '这个名字修改了' &&
-    //         ret[0].type === 1 &&
-    //         ret[0].star === 1
-    //     );
-    //     assert(
-    //         ret[1].reportName === '这是阶段点评的名字' &&
-    //         ret[1].type === 2 &&
-    //         ret[1].star === 5
-    //     );
-    // });
-
-    // it('066 我的评估报告-历次点评列表 userId:4', async () => {
-    //     const user = await app.login({ id: 4 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/evaluationReports/evaluationCommentList?classId=1`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret.length === 2);
-    //     assert(
-    //         ret[0].reportName === '这个名字修改了' &&
-    //         ret[0].type === 1 &&
-    //         ret[0].star === 5
-    //     );
-    //     assert(
-    //         ret[1].reportName === '这是阶段点评的名字' &&
-    //         ret[1].type === 2 &&
-    //         ret[1].star === 3
-    //     );
-    // });
-
-    // it('067 发送报告给家长', async () => {
-    //     const user = await app.login({ id: 2 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .post(`/evaluationReports/reportToParent`)
-    //         .send({
-    //             dataArr: [
-    //                 {
-    //                     baseUrl: 'www.baidu.com/',
-    //                     reportName: '这个名字修改了',
-    //                     studentId: 2,
-    //                     realname: '什么学生',
-    //                     orgName: '什么机构',
-    //                     star: 1,
-    //                     classId: 1,
-    //                     type: 1,
-    //                     userReportId: 2,
-    //                     parentPhoneNum: '18603042568',
-    //                 },
-    //             ],
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-    //     assert(ret.length === 0);
-
-    //     const userRepo = await app.model.EvaluationUserReport.findOne({
-    //         where: { id: 2 },
-    //     });
-    //     assert(userRepo.isSend === 1);
-    // });
-
-    // it('068 管理员查看报告', async () => {
-    //     const user = await app.login({ id: 3 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/evaluationReports/orgClassReport`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret.length === 2);
-    //     assert(
-    //         ret[0].name === '什么班级' &&
-    //         ret[0].teacherNames === '什么老师' &&
-    //         ret[0].sendCount === 1 &&
-    //         ret[0].commentCount === 2
-    //     );
-
-    //     assert(
-    //         ret[1].name === '什么班级2' &&
-    //         ret[1].teacherNames === null &&
-    //         ret[1].sendCount === null &&
-    //         ret[1].commentCount === null
-    //     );
-    // });
-
-    // it('069 管理员查看班级报告 classId:1', async () => {
-    //     const user = await app.login({ id: 3 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/evaluationReports/classReport?classId=1`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret.length === 2);
-    //     assert(
-    //         ret[0].teacherName === '什么老师' &&
-    //         ret[0].type === 1 &&
-    //         ret[0].commentCount === 1 &&
-    //         ret[0].sendCount === 1
-    //     );
-    //     assert(
-    //         ret[1].teacherName === '什么老师' &&
-    //         ret[1].type === 2 &&
-    //         ret[1].commentCount === 1 &&
-    //         ret[1].sendCount === 0
-    //     );
-    // });
-
-    // it('070 管理员查看班级报告 classId:2', async () => {
-    //     const user = await app.login({ id: 3 });
-    //     const token = user.token;
-
-    //     const ret = await app
-    //         .httpRequest()
-    //         .get(`/evaluationReports/classReport?classId=2`)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body.data);
-
-    //     assert(ret.length === 0);
-    // });
+    it('043 修改对学生的点评 不是自己写的点评 应该失败', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const report = await app
+            .httpRequest()
+            .put(`/evaluationReports/userReport/2`)
+            .send({
+                star: 1,
+                spatial: 2,
+                collaborative: 3,
+                creative: 4,
+                logical: 5,
+                compute: 2,
+                coordinate: 3,
+                comment: '这个记录已经修改了',
+                mediaUrl: [],
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(403)
+            .then(res => res.body);
+        assert(report.message === '没有权限');
+    });
+
+    it('044 修改对学生的点评 star参数错误 应该失败', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const report = await app
+            .httpRequest()
+            .put(`/evaluationReports/userReport/1`)
+            .send({
+                star: 0,
+                spatial: 2,
+                collaborative: 3,
+                creative: 4,
+                logical: 5,
+                compute: 2,
+                coordinate: 3,
+                comment: '这个记录已经修改了',
+                mediaUrl: [],
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(400)
+            .then(res => res.body);
+        assert(report.message === '评星数量错误');
+    });
+
+    it('045 修改对学生的点评 comment参数错误 应该失败', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const report = await app
+            .httpRequest()
+            .put(`/evaluationReports/userReport/1`)
+            .send({
+                star: 1,
+                spatial: 2,
+                collaborative: 3,
+                creative: 4,
+                logical: 5,
+                compute: 2,
+                coordinate: 3,
+                comment: '',
+                mediaUrl: [],
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(400)
+            .then(res => res.body);
+        assert(report.message === '文字评价长度错误');
+    });
+
+    it('046 修改对学生的点评 mediaUrl参数错误 应该失败', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const report = await app
+            .httpRequest()
+            .put(`/evaluationReports/userReport/1`)
+            .send({
+                star: 1,
+                spatial: 2,
+                collaborative: 3,
+                creative: 4,
+                logical: 5,
+                compute: 2,
+                coordinate: 3,
+                comment: '这个记录已经修改了',
+                mediaUrl: '',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(400)
+            .then(res => res.body);
+        assert(report.message === '媒体文件路径格式错误');
+    });
+
+    it('047 修改对学生的点评 应该成功', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const report = await app
+            .httpRequest()
+            .put(`/evaluationReports/userReport/1`)
+            .send({
+                star: 1,
+                spatial: 2,
+                collaborative: 3,
+                creative: 4,
+                logical: 5,
+                compute: 2,
+                coordinate: 3,
+                comment: '这个记录已经修改了',
+                mediaUrl: [],
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+        assert(report === 'OK');
+
+        // 后置操作，检查记录是否真的修改
+        const re = await app.model.EvaluationUserReport.findOne({
+            where: { id: 1 },
+        });
+        assert(
+            re.comment === '这个记录已经修改了' &&
+            re.star === 1 &&
+            re.spatial === 2 &&
+            re.collaborative === 3 &&
+            re.creative === 4 &&
+            re.logical === 5
+        );
+    });
+
+    it('048 发送短信验证码 应该成功', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        const ret = await app
+            .httpRequest()
+            .post(`/users/sendSms`)
+            .send({
+                cellphone: '18603042568',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret === 'OK');
+    });
+
+    it('049 发送短信验证码 重复发送 应该失败', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        const ret = await app
+            .httpRequest()
+            .post(`/users/sendSms`)
+            .send({
+                cellphone: '18603042568',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret === 'OK');
+
+        const ret2 = await app
+            .httpRequest()
+            .post(`/users/sendSms`)
+            .send({
+                cellphone: '18603042568',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(400)
+            .then(res => res.body);
+
+        assert(ret2.message === '请勿重复发送');
+    });
+
+    it('050 校验短信验证码 应该成功', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        await app
+            .httpRequest()
+            .post(`/users/sendSms`)
+            .send({
+                cellphone: '18603042568',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        const code = await app.redis.get(`verifCode:18603042568`);
+        const ret = await app
+            .httpRequest()
+            .post(`/users/verifyCode`)
+            .send({
+                cellphone: '18603042568',
+                verifCode: code,
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret === true);
+    });
+
+    it('051 校验短信验证码 验证码错误 应该返回false', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        await app
+            .httpRequest()
+            .post(`/users/sendSms`)
+            .send({
+                cellphone: '18603042568',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        const ret = await app
+            .httpRequest()
+            .post(`/users/verifyCode`)
+            .send({
+                cellphone: '18603042568',
+                verifCode: '123457',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret === false);
+    });
+
+    it('052 修改keepwork头像 在机构中的realname', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        app.mockService('keepwork', 'update', () => 0);
+
+        const ret = await app
+            .httpRequest()
+            .put(`/users/userInfo`)
+            .send({
+                portrait: 'http://pics1.baidu.com',
+                realname: '修改了的名字',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret === 'OK');
+
+        const member = await app.model.LessonOrganizationClassMember.findOne({
+            where: { memberId: 2, organizationId: 1 },
+        });
+        assert(member.realname === '修改了的名字');
+    });
+
+    it('053 修改keepwork头像 在机构中的realname 头像错误 应该成功', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        app.mockService('keepwork', 'update', () => 0);
+
+        const ret = await app
+            .httpRequest()
+            .put(`/users/userInfo`)
+            .send({
+                portrait: '',
+                realname: '修改了的名字?',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body);
+    });
+
+    it('054 修改keepwork头像 在机构中的realname 名字错误 应该失败', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        const ret = await app
+            .httpRequest()
+            .put(`/users/userInfo`)
+            .send({
+                portrait: 'http://pics1.baidu.com',
+                realname: '',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(400)
+            .then(res => res.body);
+
+        assert(ret.message === '名字长度错误');
+    });
+
+    it('055 修改keepwork头像 在机构中的realname和家长手机号 应该成功', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        // 前置操作
+        app.mockService('keepwork', 'update', () => 0);
+        await app
+            .httpRequest()
+            .post(`/users/sendSms`)
+            .send({
+                cellphone: '18603042568',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        const ret = await app
+            .httpRequest()
+            .put(`/users/userInfo`)
+            .send({
+                portrait: 'http://pics1.alibaba.com',
+                realname: '又修改了的名字',
+                parentPhoneNum: '18603042568',
+                verifCode: '123456',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret === 'OK');
+
+        const member = await app.model.LessonOrganizationClassMember.findOne({
+            where: { memberId: 2, organizationId: 1 },
+        });
+        assert(member.realname === '又修改了的名字');
+        assert(member.parentPhoneNum === '18603042568');
+    });
+
+    it('056 修改keepwork头像 在机构中的realname和家长手机号 验证码错误 应该失败', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        // 前置操作
+        await app
+            .httpRequest()
+            .post(`/users/sendSms`)
+            .send({
+                cellphone: '18603042568',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        const ret = await app
+            .httpRequest()
+            .put(`/users/userInfo`)
+            .send({
+                portrait: 'http://pics1.alibaba.com',
+                realname: '又修改了的名字',
+                parentPhoneNum: '18603042568',
+                verifCode: '123457',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(400)
+            .then(res => res.body);
+
+        assert(ret.message === '验证码错误');
+    });
+
+    it('057 获取用户信息 自己获取自己的信息 应该成功', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        app.mockService('keepwork', 'getAllUserByCondition', () => {
+            return [{
+                portrait: 'http://pics1.alibaba.com'
+            }]
+        });
+
+        const ret = await app
+            .httpRequest()
+            .get(`/users/userInfo`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret.portrait === 'http://pics1.alibaba.com');
+    });
+
+    it('058 获取用户信息 老师获取自己学生的信息 应该成功', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        app.mockService('keepwork', 'getAllUserByCondition', () => {
+            return [{
+                portrait: 'http://pics1.alibaba.com'
+            }]
+        });
+
+        const ret = await app
+            .httpRequest()
+            .get(`/users/userInfo?studentId=2`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret.portrait === 'http://pics1.alibaba.com');
+        assert(ret.realname === '什么学生');
+    });
+
+    it('059 获取用户信息 老师获取不是自己的学生的信息 应该失败', async () => {
+        const user = await app.login({ id: 1 });
+        const token = user.token;
+
+        const ret = await app
+            .httpRequest()
+            .get(`/users/userInfo?studentId=5`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(403)
+            .then(res => res.body);
+
+        assert(ret.message === '没有权限');
+    });
+
+    it('060 修改家长手机号【第二步】 ', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        // 前置操作
+        await Promise.all([
+            app.redis.set(`verifCode:18603042568`, '123456'),
+            app.redis.set(`verifCode:13590450686`, '123123'),
+        ]);
+
+        const ret = await app
+            .httpRequest()
+            .put(`/users/parentPhoneNum`)
+            .send({
+                parentPhoneNum: '18603042568',
+                verifCode: '123456',
+                newParentPhoneNum: '13590450686',
+                newVerifCode: '123123',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret === 'OK');
+
+        // 检查是否真的修改成功
+        const member = await app.model.LessonOrganizationClassMember.findOne({
+            where: { memberId: 2, organizationId: 1 },
+        });
+        assert(member.parentPhoneNum === '13590450686');
+    });
+
+    it('061 修改家长手机号【第二步】 验证码错误1 应该失败', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        // 前置操作
+        await Promise.all([
+            app.redis.set(`verifCode:18603042568`, '123456'),
+            app.redis.set(`verifCode:13590450686`, '123123'),
+        ]);
+
+        const ret = await app
+            .httpRequest()
+            .put(`/users/parentPhoneNum`)
+            .send({
+                parentPhoneNum: '13590450686',
+                verifCode: '12598',
+                newParentPhoneNum: '18603042568',
+                newVerifCode: '123456',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(400)
+            .then(res => res.body);
+
+        assert(ret.message === '验证码错误');
+    });
+
+    it('062 修改家长手机号【第二步】 验证码错误2 应该失败', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        // 前置操作
+        await Promise.all([
+            app.redis.set(`verifCode:18603042568`, '123456'),
+            app.redis.set(`verifCode:13590450686`, '123123'),
+        ]);
+
+        const ret = await app
+            .httpRequest()
+            .put(`/users/parentPhoneNum`)
+            .send({
+                parentPhoneNum: '13590450686',
+                verifCode: '123123',
+                newParentPhoneNum: '18603042568',
+                newVerifCode: '123548',
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(400)
+            .then(res => res.body);
+
+        assert(ret.message === '验证码错误');
+
+        // 后置操作
+        await Promise.all([
+            app.redis.del(`verifCode:18603042568`),
+            app.redis.del(`verifCode:13590450686`),
+        ]);
+    });
+
+    it('063 我的评估报告-数据统计 userId:2', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 4,
+            reportId: rep.id,
+            star: 5,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const ret = await app
+            .httpRequest()
+            .get(`/evaluationReports/statistics?classId=1`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        const classmatesHistoryAvgStar =
+            ret.historyStarStatistics.classmatesHistoryAvgStar;
+        const userSumStar = ret.historyStarStatistics.userSumStar;
+        const userHistoryStar = ret.growthTrack.userHistoryStar;
+        const classmatesHistoryAvgStar2 =
+            ret.growthTrack.classmatesHistoryAvgStar2;
+
+        // 历次能力值统计
+        assert(
+            classmatesHistoryAvgStar.starAvg === '4.00' &&
+            classmatesHistoryAvgStar.spatialAvg === '4.00' &&
+            classmatesHistoryAvgStar.collaborativeAvg === '3.00' &&
+            classmatesHistoryAvgStar.creativeAvg === '3.00' &&
+            classmatesHistoryAvgStar.logicalAvg === '5.00' &&
+            classmatesHistoryAvgStar.computeAvg === '2.00' &&
+            classmatesHistoryAvgStar.coordinateAvg === '3.00'
+        );
+        assert(
+            userSumStar.starCount === '3' &&
+            userSumStar.spatialCount === '4' &&
+            userSumStar.collaborativeCount === '3' &&
+            userSumStar.creativeCount === '3' &&
+            userSumStar.logicalCount === '5' &&
+            userSumStar.computeCount === '2' &&
+            userSumStar.coordinateCount === '3'
+        );
+
+        // 历次成长轨迹
+        assert(
+            userHistoryStar[0].star === 3 &&
+            userHistoryStar[0].spatial === 4 &&
+            userHistoryStar[0].collaborative === 3 &&
+            userHistoryStar[0].creative === 3 &&
+            userHistoryStar[0].logical === 5 &&
+            userHistoryStar[0].compute === 2 &&
+            userHistoryStar[0].coordinate === 3
+        );
+        assert(
+            classmatesHistoryAvgStar2[0].starAvg === 4 &&
+            classmatesHistoryAvgStar2[0].spatialAvg === 4 &&
+            classmatesHistoryAvgStar2[0].collaborativeAvg === 3 &&
+            classmatesHistoryAvgStar2[0].creativeAvg === 3 &&
+            classmatesHistoryAvgStar2[0].logicalAvg === 5 &&
+            classmatesHistoryAvgStar2[0].computeAvg === 2 &&
+            classmatesHistoryAvgStar2[0].coordinateAvg === 3
+        );
+    });
+
+    it('064 我的评估报告-数据统计 userId:4', async () => {
+        const user = await app.login({ id: 4 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 4,
+            reportId: rep.id,
+            star: 5,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const ret = await app
+            .httpRequest()
+            .get(`/evaluationReports/statistics?classId=1`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        const classmatesHistoryAvgStar =
+            ret.historyStarStatistics.classmatesHistoryAvgStar;
+        const userSumStar = ret.historyStarStatistics.userSumStar;
+        const userHistoryStar = ret.growthTrack.userHistoryStar;
+        const classmatesHistoryAvgStar2 =
+            ret.growthTrack.classmatesHistoryAvgStar2;
+
+        // 历次能力值统计
+        assert(
+            classmatesHistoryAvgStar.starAvg === '4.00' &&
+            classmatesHistoryAvgStar.spatialAvg === '4.00' &&
+            classmatesHistoryAvgStar.collaborativeAvg === '3.00' &&
+            classmatesHistoryAvgStar.creativeAvg === '3.00' &&
+            classmatesHistoryAvgStar.logicalAvg === '5.00' &&
+            classmatesHistoryAvgStar.computeAvg === '2.00' &&
+            classmatesHistoryAvgStar.coordinateAvg === '3.00'
+        );
+        assert(
+            userSumStar.starCount === '5' &&
+            userSumStar.spatialCount === '4' &&
+            userSumStar.collaborativeCount === '3' &&
+            userSumStar.creativeCount === '3' &&
+            userSumStar.logicalCount === '5' &&
+            userSumStar.computeCount === '2' &&
+            userSumStar.coordinateCount === '3'
+        );
+
+        // 历次成长轨迹
+        assert(
+            userHistoryStar[0].star === 5 &&
+            userHistoryStar[0].spatial === 4 &&
+            userHistoryStar[0].collaborative === 3 &&
+            userHistoryStar[0].creative === 3 &&
+            userHistoryStar[0].logical === 5 &&
+            userHistoryStar[0].compute === 2 &&
+            userHistoryStar[0].coordinate === 3
+        );
+        assert(
+            classmatesHistoryAvgStar2[0].starAvg === 4 &&
+            classmatesHistoryAvgStar2[0].spatialAvg === 4 &&
+            classmatesHistoryAvgStar2[0].collaborativeAvg === 3 &&
+            classmatesHistoryAvgStar2[0].creativeAvg === 3 &&
+            classmatesHistoryAvgStar2[0].logicalAvg === 5 &&
+            classmatesHistoryAvgStar2[0].computeAvg === 2 &&
+            classmatesHistoryAvgStar2[0].coordinateAvg === 3
+        );
+    });
+
+    it('065 我的评估报告-历次点评列表 userId:2', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 4,
+            reportId: rep.id,
+            star: 5,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const ret = await app
+            .httpRequest()
+            .get(`/evaluationReports/evaluationCommentList?classId=1`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret.length === 1);
+        assert(
+            ret[0].reportName === '这是' &&
+            ret[0].type === 2 &&
+            ret[0].star === 3
+        );
+    });
+
+    it('066 我的评估报告-历次点评列表 userId:4', async () => {
+        const user = await app.login({ id: 4 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 4,
+            reportId: rep.id,
+            star: 5,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const ret = await app
+            .httpRequest()
+            .get(`/evaluationReports/evaluationCommentList?classId=1`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret.length === 1);
+        assert(
+            ret[0].reportName === '这是' &&
+            ret[0].type === 2 &&
+            ret[0].star === 5
+        );
+    });
+
+    it('067 发送报告给家长', async () => {
+        const user = await app.login({ id: 2 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 4,
+            reportId: rep.id,
+            star: 5,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const ret = await app
+            .httpRequest()
+            .post(`/evaluationReports/reportToParent`)
+            .send({
+                dataArr: [
+                    {
+                        baseUrl: 'www.baidu.com/',
+                        reportName: '这个名字修改了',
+                        studentId: 2,
+                        realname: '什么学生',
+                        orgName: '什么机构',
+                        star: 1,
+                        classId: 1,
+                        type: 1,
+                        userReportId: 2,
+                        parentPhoneNum: '18603042568',
+                    },
+                ],
+            })
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+        assert(ret.length === 0);
+
+        const userRepo = await app.model.EvaluationUserReport.findOne({
+            where: { id: 2 },
+        });
+        assert(userRepo.isSend === 1);
+    });
+
+    it('068 管理员查看报告', async () => {
+        const user = await app.login({ id: 3 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 4,
+            reportId: rep.id,
+            star: 5,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const ret = await app
+            .httpRequest()
+            .get(`/evaluationReports/orgClassReport`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret.length === 2);
+        assert(
+            ret[0].name === '什么班级' &&
+            ret[0].teacherNames === '什么老师' &&
+            ret[0].sendCount === 0 &&
+            ret[0].commentCount === 1
+        );
+
+        assert(
+            ret[1].name === '什么班级2' &&
+            ret[1].teacherNames === null &&
+            ret[1].sendCount === null &&
+            ret[1].commentCount === null
+        );
+    });
+
+    it('069 管理员查看班级报告 classId:1', async () => {
+        const user = await app.login({ id: 3 });
+        const token = user.token;
+
+        // 前置操作
+        const rep = await app.model.EvaluationReport.create({
+            userId: 1,
+            name: '这是',
+            type: 2,
+            classId: 1,
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 2,
+            reportId: rep.id,
+            star: 3,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+        await app.model.EvaluationUserReport.create({
+            userId: 4,
+            reportId: rep.id,
+            star: 5,
+            spatial: 4,
+            collaborative: 3,
+            creative: 3,
+            logical: 5,
+            compute: 2,
+            coordinate: 3,
+            comment: '',
+            mediaUrl: '',
+        });
+
+        const ret = await app
+            .httpRequest()
+            .get(`/evaluationReports/classReport?classId=1`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret.length === 1);
+        assert(
+            ret[0].teacherName === '什么老师' &&
+            ret[0].type === 2 &&
+            ret[0].commentCount === 1 &&
+            ret[0].sendCount === 0
+        );
+    });
+
+    it('070 管理员查看班级报告 classId:2', async () => {
+        const user = await app.login({ id: 3 });
+        const token = user.token;
+
+        const ret = await app
+            .httpRequest()
+            .get(`/evaluationReports/classReport?classId=2`)
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200)
+            .then(res => res.body.data);
+
+        assert(ret.length === 0);
+    });
 });

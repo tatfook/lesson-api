@@ -2,7 +2,6 @@ const { app, assert } = require('egg-mock/bootstrap');
 
 describe('test/controller/admins.test.js', () => {
     before(async () => {
-        await app.model.User.truncate();
     });
 
     it('POST|GET|PUT', async () => {

@@ -2,26 +2,15 @@ const md5 = require('blueimp-md5');
 const { app, assert } = require('egg-mock/bootstrap');
 
 describe('lesson organization class', () => {
-    before(async () => {
-        const ctx = app.mockContext();
-        await ctx.service.keepwork.truncate({ resources: 'users' });
-        await app.model.LessonOrganization.sync({ force: true });
-        await app.model.LessonOrganizationClassMember.sync({ force: true });
-        await app.model.LessonOrganizationClass.sync({ force: true });
+    beforeEach(async () => {
+        app.mockService('keepwork', 'getAllUserByCondition', () => { return [{ id: 1, username: 'u' }] });
+        app.mockService('keepwork', 'getUserDatas', () => { return { tokens: ['XXX'] } });
+        app.mockService('keepwork', 'setUserDatas', () => 0);
     });
 
     it('001 班级结业与恢复 删除班级 班级列表', async () => {
         const ctx = app.mockContext();
-        const user = await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'user009',
-            password: md5('123456'),
-        });
-        await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'user007',
-            password: md5('123456'),
-        });
+
         // 创建机构
         const organ = await app.model.LessonOrganization.create({
             name: 'org0000',
@@ -30,7 +19,7 @@ describe('lesson organization class', () => {
         // 创建班级成员
         await app.model.LessonOrganizationClassMember.create({
             organizationId: organ.id,
-            memberId: user.id,
+            memberId: 1,
             roleId: 64,
             classId: 0,
         });
@@ -104,11 +93,11 @@ describe('lesson organization class', () => {
         assert(class_.data.length === 2);
         assert(
             class_.data[0].name === 'clss008' ||
-                class_.data[0].name === 'newClassName'
+            class_.data[0].name === 'newClassName'
         );
         assert(
             class_.data[1].name === 'newClassName' ||
-                class_.data[1].name === 'clss008'
+            class_.data[1].name === 'clss008'
         );
 
         // 删除班级
@@ -134,6 +123,9 @@ describe('lesson organization class', () => {
             .expect(200)
             .then(res => res.body);
         assert(class_.data.length === 1);
+
+        app.mockService('keepwork', 'getAllProjectByCondition', () => []);
+        app.mockService('keepwork', 'getAllUserByCondition', () => []);
 
         await app
             .httpRequest()
@@ -196,12 +188,6 @@ describe('lesson organization class', () => {
     });
 
     it('002 获取机构学生', async () => {
-        const ctx = app.mockContext();
-        const user = await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'user001',
-            password: md5('123456'),
-        });
 
         const organ = await app.model.LessonOrganization.create({
             name: 'org1111',
@@ -231,7 +217,7 @@ describe('lesson organization class', () => {
         // 创建班级成员
         await app.model.LessonOrganizationClassMember.create({
             organizationId: organ.id,
-            memberId: user.id,
+            memberId: 1,
             roleId: 64,
             classId: 0,
         });
@@ -266,13 +252,13 @@ describe('lesson organization class', () => {
             .expect(200)
             .then(res => res.body.data.token)
             .catch(e => console.log(e));
-
+        console.log('-----token-----', token)
         // 获取学生0
         let students = await app
             .httpRequest()
             .get('/lessonOrganizationClassMembers/student')
             .set('Authorization', `Bearer ${token}`)
-            .expect(res => assert(res.statusCode == 200))
+            .expect(200)
             .then(res => res.body);
         assert(students.data.count === 2);
 
@@ -295,13 +281,6 @@ describe('lesson organization class', () => {
     });
 
     it('003 机构过期测试', async () => {
-        const ctx = app.mockContext();
-        const user = await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'jacky',
-            password: md5('123456'),
-        });
-
         const organ = await app.model.LessonOrganization.create({
             name: 'org666',
             count: 100,
@@ -315,7 +294,7 @@ describe('lesson organization class', () => {
 
         await app.model.LessonOrganizationClassMember.create({
             organizationId: organ.id,
-            memberId: user.id,
+            memberId: 1,
             roleId: 64,
             classId: 0,
         });
