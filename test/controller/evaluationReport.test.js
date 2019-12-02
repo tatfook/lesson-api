@@ -2,7 +2,6 @@ const { app, assert } = require('egg-mock/bootstrap');
 
 describe('test/controller/evaluationReport.test.js', () => {
     beforeEach(async () => {
-
         await app.redis.flushdb();
 
         const org = await app.factory.create('LessonOrganization', {
@@ -915,8 +914,8 @@ describe('test/controller/evaluationReport.test.js', () => {
 
         assert(
             report.length === 1 &&
-            report[0].reportName === '这个名字修改了' &&
-            report[0].type === 1
+                report[0].reportName === '这个名字修改了' &&
+                report[0].type === 1
         );
     });
 
@@ -1173,22 +1172,22 @@ describe('test/controller/evaluationReport.test.js', () => {
 
         assert(
             report.userRepo.star === 3 &&
-            report.userRepo.spatial === 4 &&
-            report.userRepo.collaborative === 3 &&
-            report.userRepo.creative === 3 &&
-            report.userRepo.logical === 5 &&
-            report.userRepo.compute === 2 &&
-            report.userRepo.coordinate === 3
+                report.userRepo.spatial === 4 &&
+                report.userRepo.collaborative === 3 &&
+                report.userRepo.creative === 3 &&
+                report.userRepo.logical === 5 &&
+                report.userRepo.compute === 2 &&
+                report.userRepo.coordinate === 3
         );
 
         assert(
             report.classmatesAvgStar.starAvg === '4.00' &&
-            report.classmatesAvgStar.spatialAvg === '4.00' &&
-            report.classmatesAvgStar.collaborativeAvg === '3.00' &&
-            report.classmatesAvgStar.creativeAvg === '3.00' &&
-            report.classmatesAvgStar.logicalAvg === '5.00' &&
-            report.classmatesAvgStar.computeAvg === '2.00' &&
-            report.classmatesAvgStar.coordinateAvg === '3.00'
+                report.classmatesAvgStar.spatialAvg === '4.00' &&
+                report.classmatesAvgStar.collaborativeAvg === '3.00' &&
+                report.classmatesAvgStar.creativeAvg === '3.00' &&
+                report.classmatesAvgStar.logicalAvg === '5.00' &&
+                report.classmatesAvgStar.computeAvg === '2.00' &&
+                report.classmatesAvgStar.coordinateAvg === '3.00'
         );
     });
 
@@ -1254,22 +1253,22 @@ describe('test/controller/evaluationReport.test.js', () => {
         // 本次能力值情况和班级平均值
         assert(
             report.userRepo.star === 5 &&
-            report.userRepo.spatial === 4 &&
-            report.userRepo.collaborative === 3 &&
-            report.userRepo.creative === 3 &&
-            report.userRepo.logical === 5 &&
-            report.userRepo.compute === 2 &&
-            report.userRepo.coordinate === 3
+                report.userRepo.spatial === 4 &&
+                report.userRepo.collaborative === 3 &&
+                report.userRepo.creative === 3 &&
+                report.userRepo.logical === 5 &&
+                report.userRepo.compute === 2 &&
+                report.userRepo.coordinate === 3
         );
 
         assert(
             report.classmatesAvgStar.starAvg === '4.00' &&
-            report.classmatesAvgStar.spatialAvg === '4.00' &&
-            report.classmatesAvgStar.collaborativeAvg === '3.00' &&
-            report.classmatesAvgStar.creativeAvg === '3.00' &&
-            report.classmatesAvgStar.logicalAvg === '5.00' &&
-            report.classmatesAvgStar.computeAvg === '2.00' &&
-            report.classmatesAvgStar.coordinateAvg === '3.00'
+                report.classmatesAvgStar.spatialAvg === '4.00' &&
+                report.classmatesAvgStar.collaborativeAvg === '3.00' &&
+                report.classmatesAvgStar.creativeAvg === '3.00' &&
+                report.classmatesAvgStar.logicalAvg === '5.00' &&
+                report.classmatesAvgStar.computeAvg === '2.00' &&
+                report.classmatesAvgStar.coordinateAvg === '3.00'
         );
 
         const userHistoryStar = report.growthTrack.userHistoryStar;
@@ -1279,7 +1278,7 @@ describe('test/controller/evaluationReport.test.js', () => {
         // 个人历次成长
         assert(
             userHistoryStar.length === 1 &&
-            classmatesHistoryAvgStar.length === 1
+                classmatesHistoryAvgStar.length === 1
         );
         assert(userHistoryStar[0].star === 3);
         assert(userHistoryStar[0].spatial === 4);
@@ -1528,11 +1527,11 @@ describe('test/controller/evaluationReport.test.js', () => {
         });
         assert(
             re.comment === '这个记录已经修改了' &&
-            re.star === 1 &&
-            re.spatial === 2 &&
-            re.collaborative === 3 &&
-            re.creative === 4 &&
-            re.logical === 5
+                re.star === 1 &&
+                re.spatial === 2 &&
+                re.collaborative === 3 &&
+                re.creative === 4 &&
+                re.logical === 5
         );
     });
 
@@ -1774,9 +1773,11 @@ describe('test/controller/evaluationReport.test.js', () => {
         const token = user.token;
 
         app.mockService('keepwork', 'getAllUserByCondition', () => {
-            return [{
-                portrait: 'http://pics1.alibaba.com'
-            }]
+            return [
+                {
+                    portrait: 'http://pics1.alibaba.com',
+                },
+            ];
         });
 
         const ret = await app
@@ -1794,9 +1795,11 @@ describe('test/controller/evaluationReport.test.js', () => {
         const token = user.token;
 
         app.mockService('keepwork', 'getAllUserByCondition', () => {
-            return [{
-                portrait: 'http://pics1.alibaba.com'
-            }]
+            return [
+                {
+                    portrait: 'http://pics1.alibaba.com',
+                },
+            ];
         });
 
         const ret = await app
@@ -1969,41 +1972,41 @@ describe('test/controller/evaluationReport.test.js', () => {
         // 历次能力值统计
         assert(
             classmatesHistoryAvgStar.starAvg === '4.00' &&
-            classmatesHistoryAvgStar.spatialAvg === '4.00' &&
-            classmatesHistoryAvgStar.collaborativeAvg === '3.00' &&
-            classmatesHistoryAvgStar.creativeAvg === '3.00' &&
-            classmatesHistoryAvgStar.logicalAvg === '5.00' &&
-            classmatesHistoryAvgStar.computeAvg === '2.00' &&
-            classmatesHistoryAvgStar.coordinateAvg === '3.00'
+                classmatesHistoryAvgStar.spatialAvg === '4.00' &&
+                classmatesHistoryAvgStar.collaborativeAvg === '3.00' &&
+                classmatesHistoryAvgStar.creativeAvg === '3.00' &&
+                classmatesHistoryAvgStar.logicalAvg === '5.00' &&
+                classmatesHistoryAvgStar.computeAvg === '2.00' &&
+                classmatesHistoryAvgStar.coordinateAvg === '3.00'
         );
         assert(
             userSumStar.starCount === '3' &&
-            userSumStar.spatialCount === '4' &&
-            userSumStar.collaborativeCount === '3' &&
-            userSumStar.creativeCount === '3' &&
-            userSumStar.logicalCount === '5' &&
-            userSumStar.computeCount === '2' &&
-            userSumStar.coordinateCount === '3'
+                userSumStar.spatialCount === '4' &&
+                userSumStar.collaborativeCount === '3' &&
+                userSumStar.creativeCount === '3' &&
+                userSumStar.logicalCount === '5' &&
+                userSumStar.computeCount === '2' &&
+                userSumStar.coordinateCount === '3'
         );
 
         // 历次成长轨迹
         assert(
             userHistoryStar[0].star === 3 &&
-            userHistoryStar[0].spatial === 4 &&
-            userHistoryStar[0].collaborative === 3 &&
-            userHistoryStar[0].creative === 3 &&
-            userHistoryStar[0].logical === 5 &&
-            userHistoryStar[0].compute === 2 &&
-            userHistoryStar[0].coordinate === 3
+                userHistoryStar[0].spatial === 4 &&
+                userHistoryStar[0].collaborative === 3 &&
+                userHistoryStar[0].creative === 3 &&
+                userHistoryStar[0].logical === 5 &&
+                userHistoryStar[0].compute === 2 &&
+                userHistoryStar[0].coordinate === 3
         );
         assert(
             classmatesHistoryAvgStar2[0].starAvg === 4 &&
-            classmatesHistoryAvgStar2[0].spatialAvg === 4 &&
-            classmatesHistoryAvgStar2[0].collaborativeAvg === 3 &&
-            classmatesHistoryAvgStar2[0].creativeAvg === 3 &&
-            classmatesHistoryAvgStar2[0].logicalAvg === 5 &&
-            classmatesHistoryAvgStar2[0].computeAvg === 2 &&
-            classmatesHistoryAvgStar2[0].coordinateAvg === 3
+                classmatesHistoryAvgStar2[0].spatialAvg === 4 &&
+                classmatesHistoryAvgStar2[0].collaborativeAvg === 3 &&
+                classmatesHistoryAvgStar2[0].creativeAvg === 3 &&
+                classmatesHistoryAvgStar2[0].logicalAvg === 5 &&
+                classmatesHistoryAvgStar2[0].computeAvg === 2 &&
+                classmatesHistoryAvgStar2[0].coordinateAvg === 3
         );
     });
 
@@ -2062,41 +2065,41 @@ describe('test/controller/evaluationReport.test.js', () => {
         // 历次能力值统计
         assert(
             classmatesHistoryAvgStar.starAvg === '4.00' &&
-            classmatesHistoryAvgStar.spatialAvg === '4.00' &&
-            classmatesHistoryAvgStar.collaborativeAvg === '3.00' &&
-            classmatesHistoryAvgStar.creativeAvg === '3.00' &&
-            classmatesHistoryAvgStar.logicalAvg === '5.00' &&
-            classmatesHistoryAvgStar.computeAvg === '2.00' &&
-            classmatesHistoryAvgStar.coordinateAvg === '3.00'
+                classmatesHistoryAvgStar.spatialAvg === '4.00' &&
+                classmatesHistoryAvgStar.collaborativeAvg === '3.00' &&
+                classmatesHistoryAvgStar.creativeAvg === '3.00' &&
+                classmatesHistoryAvgStar.logicalAvg === '5.00' &&
+                classmatesHistoryAvgStar.computeAvg === '2.00' &&
+                classmatesHistoryAvgStar.coordinateAvg === '3.00'
         );
         assert(
             userSumStar.starCount === '5' &&
-            userSumStar.spatialCount === '4' &&
-            userSumStar.collaborativeCount === '3' &&
-            userSumStar.creativeCount === '3' &&
-            userSumStar.logicalCount === '5' &&
-            userSumStar.computeCount === '2' &&
-            userSumStar.coordinateCount === '3'
+                userSumStar.spatialCount === '4' &&
+                userSumStar.collaborativeCount === '3' &&
+                userSumStar.creativeCount === '3' &&
+                userSumStar.logicalCount === '5' &&
+                userSumStar.computeCount === '2' &&
+                userSumStar.coordinateCount === '3'
         );
 
         // 历次成长轨迹
         assert(
             userHistoryStar[0].star === 5 &&
-            userHistoryStar[0].spatial === 4 &&
-            userHistoryStar[0].collaborative === 3 &&
-            userHistoryStar[0].creative === 3 &&
-            userHistoryStar[0].logical === 5 &&
-            userHistoryStar[0].compute === 2 &&
-            userHistoryStar[0].coordinate === 3
+                userHistoryStar[0].spatial === 4 &&
+                userHistoryStar[0].collaborative === 3 &&
+                userHistoryStar[0].creative === 3 &&
+                userHistoryStar[0].logical === 5 &&
+                userHistoryStar[0].compute === 2 &&
+                userHistoryStar[0].coordinate === 3
         );
         assert(
             classmatesHistoryAvgStar2[0].starAvg === 4 &&
-            classmatesHistoryAvgStar2[0].spatialAvg === 4 &&
-            classmatesHistoryAvgStar2[0].collaborativeAvg === 3 &&
-            classmatesHistoryAvgStar2[0].creativeAvg === 3 &&
-            classmatesHistoryAvgStar2[0].logicalAvg === 5 &&
-            classmatesHistoryAvgStar2[0].computeAvg === 2 &&
-            classmatesHistoryAvgStar2[0].coordinateAvg === 3
+                classmatesHistoryAvgStar2[0].spatialAvg === 4 &&
+                classmatesHistoryAvgStar2[0].collaborativeAvg === 3 &&
+                classmatesHistoryAvgStar2[0].creativeAvg === 3 &&
+                classmatesHistoryAvgStar2[0].logicalAvg === 5 &&
+                classmatesHistoryAvgStar2[0].computeAvg === 2 &&
+                classmatesHistoryAvgStar2[0].coordinateAvg === 3
         );
     });
 
@@ -2148,8 +2151,8 @@ describe('test/controller/evaluationReport.test.js', () => {
         assert(ret.length === 1);
         assert(
             ret[0].reportName === '这是' &&
-            ret[0].type === 2 &&
-            ret[0].star === 3
+                ret[0].type === 2 &&
+                ret[0].star === 3
         );
     });
 
@@ -2201,8 +2204,8 @@ describe('test/controller/evaluationReport.test.js', () => {
         assert(ret.length === 1);
         assert(
             ret[0].reportName === '这是' &&
-            ret[0].type === 2 &&
-            ret[0].star === 5
+                ret[0].type === 2 &&
+                ret[0].star === 5
         );
     });
 
@@ -2322,16 +2325,16 @@ describe('test/controller/evaluationReport.test.js', () => {
         assert(ret.length === 2);
         assert(
             ret[0].name === '什么班级' &&
-            ret[0].teacherNames === '什么老师' &&
-            ret[0].sendCount === 0 &&
-            ret[0].commentCount === 1
+                ret[0].teacherNames === '什么老师' &&
+                ret[0].sendCount === 0 &&
+                ret[0].commentCount === 1
         );
 
         assert(
             ret[1].name === '什么班级2' &&
-            ret[1].teacherNames === null &&
-            ret[1].sendCount === null &&
-            ret[1].commentCount === null
+                ret[1].teacherNames === null &&
+                ret[1].sendCount === null &&
+                ret[1].commentCount === null
         );
     });
 
@@ -2383,9 +2386,9 @@ describe('test/controller/evaluationReport.test.js', () => {
         assert(ret.length === 1);
         assert(
             ret[0].teacherName === '什么老师' &&
-            ret[0].type === 2 &&
-            ret[0].commentCount === 1 &&
-            ret[0].sendCount === 0
+                ret[0].type === 2 &&
+                ret[0].commentCount === 1 &&
+                ret[0].sendCount === 0
         );
     });
 

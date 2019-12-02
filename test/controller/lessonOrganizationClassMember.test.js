@@ -3,8 +3,12 @@ const { app, assert } = require('egg-mock/bootstrap');
 
 describe('机构学生', () => {
     beforeEach(async () => {
-        app.mockService('keepwork', 'getAllUserByCondition', () => { return [{ id: 1, username: 'u' }] });
-        app.mockService('keepwork', 'getUserDatas', () => { return { tokens: ['XXX'] } });
+        app.mockService('keepwork', 'getAllUserByCondition', () => {
+            return [{ id: 1, username: 'u' }];
+        });
+        app.mockService('keepwork', 'getUserDatas', () => {
+            return { tokens: ['XXX'] };
+        });
         app.mockService('keepwork', 'setUserDatas', () => 0);
         app.mockService('keepwork', 'updateUser', () => 0);
     });
@@ -105,8 +109,13 @@ describe('机构学生', () => {
         assert(students.data.count === 1);
 
         // // 移除班级成员
-        await app.httpRequest().delete(`/lessonOrganizationClassMembers/${students.data.rows[0].id}?roleId=1`)
-            .set("Authorization", `Bearer ${token}`).expect(200);
+        await app
+            .httpRequest()
+            .delete(
+                `/lessonOrganizationClassMembers/${students.data.rows[0].id}?roleId=1`
+            )
+            .set('Authorization', `Bearer ${token}`)
+            .expect(200);
 
         students = await app
             .httpRequest()

@@ -1,8 +1,7 @@
 const { app, assert } = require('egg-mock/bootstrap');
 
 describe('test/controller/admins.test.js', () => {
-    before(async () => {
-    });
+    before(async () => {});
 
     it('POST|GET|PUT', async () => {
         const token2 = await app.adminLogin().then(o => o.token);
