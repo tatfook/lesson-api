@@ -3,8 +3,12 @@ const { app, assert } = require('egg-mock/bootstrap');
 
 describe('lesson organization class', () => {
     beforeEach(async () => {
-        app.mockService('keepwork', 'getAllUserByCondition', () => { return [{ id: 1, username: 'u' }] });
-        app.mockService('keepwork', 'getUserDatas', () => { return { tokens: ['XXX'] } });
+        app.mockService('keepwork', 'getAllUserByCondition', () => {
+            return [{ id: 1, username: 'u' }];
+        });
+        app.mockService('keepwork', 'getUserDatas', () => {
+            return { tokens: ['XXX'] };
+        });
         app.mockService('keepwork', 'setUserDatas', () => 0);
     });
 
@@ -93,11 +97,11 @@ describe('lesson organization class', () => {
         assert(class_.data.length === 2);
         assert(
             class_.data[0].name === 'clss008' ||
-            class_.data[0].name === 'newClassName'
+                class_.data[0].name === 'newClassName'
         );
         assert(
             class_.data[1].name === 'newClassName' ||
-            class_.data[1].name === 'clss008'
+                class_.data[1].name === 'clss008'
         );
 
         // 删除班级
@@ -188,7 +192,6 @@ describe('lesson organization class', () => {
     });
 
     it('002 获取机构学生', async () => {
-
         const organ = await app.model.LessonOrganization.create({
             name: 'org1111',
             count: 100,
@@ -252,7 +255,7 @@ describe('lesson organization class', () => {
             .expect(200)
             .then(res => res.body.data.token)
             .catch(e => console.log(e));
-        console.log('-----token-----', token)
+        console.log('-----token-----', token);
         // 获取学生0
         let students = await app
             .httpRequest()

@@ -36,7 +36,8 @@ module.exports = app => {
                 defaultValue: 0,
             },
 
-            activateUserId: { // 激活了谁
+            activateUserId: {
+                // 激活了谁
                 type: BIGINT,
                 defaultValue: 0,
             },

@@ -2,9 +2,7 @@
 const { app, assert } = require('egg-mock/bootstrap');
 
 describe('机构表单', () => {
-    before(async () => {
-
-    });
+    before(async () => {});
 
     it('001 机构', async () => {
         const user = await app.login({ roleId: 64 });

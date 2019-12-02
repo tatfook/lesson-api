@@ -2,9 +2,7 @@ const md5 = require('blueimp-md5');
 const { app, mock, assert } = require('egg-mock/bootstrap');
 
 describe('机构激活码', () => {
-    before(async () => {
-
-    });
+    before(async () => {});
 
     it('001 机构激活码', async () => {
         const user = await app.login({ organizationId: 1, roleId: 67 });
@@ -103,7 +101,7 @@ describe('机构激活码', () => {
         assert(Activecode.data.count === 20);
 
         // 使用激活码
-        app.mockService('keepwork', 'updateUser', () => 0)
+        app.mockService('keepwork', 'updateUser', () => 0);
         let member = await app
             .httpRequest()
             .post('/lessonOrganizationActivateCodes/activate')
