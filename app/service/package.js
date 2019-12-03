@@ -140,6 +140,7 @@ class PackageService extends Service {
                 packageId: params.id,
             });
             await this.ctx.service.packageLesson.bulkCreate(records);
+            await this.ctx.service.lessonOrganizationPackage.updateLessonNo(params.id, records);
         }
         return result;
     }
