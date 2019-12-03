@@ -8,16 +8,16 @@ module.exports = app => {
 
     factory.define(tableName, app.model[tableName], {
         organizationId: app.factory.assoc('LessonOrganization', 'id'),
-        classId: app.factory.assoc('LessonOrganizationClassId', 'id'),
+        classId: app.factory.assoc('LessonOrganizationClass', 'id'),
         memberId: app.factory.chance('integer', {
             min: 1,
         }),
         roleId:
             roleIds[
-                app.factory.chance('integer', {
-                    min: 0,
-                    max: 6,
-                })
+            app.factory.chance('integer', {
+                min: 0,
+                max: 6,
+            })
             ],
         realname: app.factory.chance('word', { length: 6 }),
     });

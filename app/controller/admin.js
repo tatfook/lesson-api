@@ -15,7 +15,7 @@ class AdminsController extends Controller {
         this.resourceName = resourceName;
 
         if (!this.resource) {
-            return ctx.helper.fail({ ctx, status: 400, errMsg: Err.ARGS_ERR });
+            ctx.throw(400, Err.ARGS_ERR);
         }
 
         this.adminAuthenticated();
@@ -54,7 +54,6 @@ class AdminsController extends Controller {
     async resourcesQuery() {
         const { ctx } = this;
 
-        this.adminAuthenticated();
         this.parseParams();
 
         const query = this.validate();
@@ -96,6 +95,7 @@ class AdminsController extends Controller {
 
         this.formatQuery(query);
 
+        delete query.resources;
         const list = await this.resource.findAndCount({
             ...this.queryOptions,
             where: query,
