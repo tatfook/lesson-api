@@ -99,7 +99,7 @@ class LessonOrgPackageService extends Service {
                     pkgmap[o.packageId].lessonOrganizationClasses &&
                     o.lessonOrganizationClasses &&
                     pkgmap[o.packageId].lessonOrganizationClasses.end <
-                    o.lessonOrganizationClasses.end
+                        o.lessonOrganizationClasses.end
                 ) {
                     pkgmap[o.packageId].lessonOrganizationClasses =
                         o.lessonOrganizationClasses;
@@ -147,13 +147,18 @@ class LessonOrgPackageService extends Service {
 
     // 同步更新机构的课程包顺序
     async updateLessonNo(packageId, lessonNo) {
-        const orgPackages = await this.ctx.model.LessonOrganizationPackage.findAll({ where: { packageId } });
+        const orgPackages = await this.ctx.model.LessonOrganizationPackage.findAll(
+            { where: { packageId } }
+        );
 
         const taskArr = [];
         for (let i = 0; i < orgPackages.length; i++) {
             const lessons = orgPackages[i].get().lessons;
             for (let j = 0; j < lessons.length; j++) {
-                const index = _.findIndex(lessonNo, o => o.lessonId === lessons[j].lessonId);
+                const index = _.findIndex(
+                    lessonNo,
+                    o => o.lessonId === lessons[j].lessonId
+                );
                 if (index > -1) {
                     lessons[j] = {
                         lessonId: lessonNo[index].lessonId,
@@ -162,13 +167,16 @@ class LessonOrgPackageService extends Service {
                 }
             }
             taskArr.push(async function() {
-                return await this.ctx.model.LessonOrganizationPackage.update({
-                    lessons,
-                }, {
-                    where: {
-                        id: orgPackages[i].id,
+                return await this.ctx.model.LessonOrganizationPackage.update(
+                    {
+                        lessons,
                     },
-                });
+                    {
+                        where: {
+                            id: orgPackages[i].id,
+                        },
+                    }
+                );
             });
         }
 
