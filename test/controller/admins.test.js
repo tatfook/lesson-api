@@ -16,7 +16,7 @@ describe('test/controller/admins.test.js', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
                 .then(res => res.body.data);
-            assert(users.length === 1)
+            assert(users.length === 1);
         });
 
         it('002 带分号不行', async () => {
@@ -27,7 +27,7 @@ describe('test/controller/admins.test.js', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(400)
                 .then(res => res.body);
-            assert(users.message === 'SQL不合法')
+            assert(users.message === 'SQL不合法');
         });
 
         it('003 其他非select语句不行', async () => {
@@ -38,7 +38,7 @@ describe('test/controller/admins.test.js', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(400)
                 .then(res => res.body);
-            assert(users.message === 'SQL不合法')
+            assert(users.message === 'SQL不合法');
         });
     });
 
@@ -123,7 +123,7 @@ describe('test/controller/admins.test.js', () => {
                 .httpRequest()
                 .post('/admins/user')
                 .send({
-                    username: 'test2'
+                    username: 'test2',
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
@@ -138,14 +138,13 @@ describe('test/controller/admins.test.js', () => {
                 .httpRequest()
                 .post('/admins/user/bulk')
                 .send({
-                    datas: [{ username: 'abc' }]
+                    datas: [{ username: 'abc' }],
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
                 .then(res => res.body.data);
 
-            assert(ret.length === 1
-                && ret[0].username === 'abc');
+            assert(ret.length === 1 && ret[0].username === 'abc');
         });
     });
 
@@ -155,7 +154,7 @@ describe('test/controller/admins.test.js', () => {
                 .httpRequest()
                 .put('/admins/user/1')
                 .send({
-                    username: 'abc'
+                    username: 'abc',
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)

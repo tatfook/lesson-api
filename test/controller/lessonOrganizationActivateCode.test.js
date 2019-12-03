@@ -71,7 +71,7 @@ describe('机构激活码', () => {
     describe('获取激活码', async () => {
         beforeEach(async () => {
             await app.factory.create('LessonOrganizationActivateCode', {
-                organizationId: orgId
+                organizationId: orgId,
             });
         });
         it('001', async () => {
@@ -84,8 +84,7 @@ describe('机构激活码', () => {
                 .catch(e => console.log(e));
 
             assert(
-                Activecode.data.count === 1
-                && Activecode.data.rows.length === 1
+                Activecode.data.count === 1 && Activecode.data.rows.length === 1
             );
         });
     });
@@ -95,11 +94,16 @@ describe('机构激活码', () => {
         beforeEach(async () => {
             const cls = await app.factory.create('LessonOrganizationClass', {
                 organizationId: orgId,
-                end: '2900-10-01'
+                end: '2900-10-01',
             });
-            const code = await app.factory.create('LessonOrganizationActivateCode', {
-                organizationId: orgId, state: 0, classId: cls.id
-            });
+            const code = await app.factory.create(
+                'LessonOrganizationActivateCode',
+                {
+                    organizationId: orgId,
+                    state: 0,
+                    classId: cls.id,
+                }
+            );
             key = code.key;
 
             app.mockService('keepwork', 'updateUser', () => 0);
@@ -111,7 +115,7 @@ describe('机构激活码', () => {
                 .send({
                     key,
                     realname: 'abc',
-                    organizationId: orgId
+                    organizationId: orgId,
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
