@@ -3,25 +3,18 @@ const { app, assert } = require('egg-mock/bootstrap');
 
 describe('机构', () => {
     before(async () => {
-        const ctx = app.mockContext();
-        await ctx.service.keepwork.truncate({ resources: 'users' });
-
-        await app.model.LessonOrganizationActivateCode.sync({ force: true });
-        await app.model.LessonOrganizationClassMember.sync({ force: true });
-        await app.model.LessonOrganization.sync({ force: true });
-        await app.model.LessonOrganizationClass.sync({ force: true });
-        await app.model.LessonOrganizationPackage.sync({ force: true });
+        app.mockService('keepwork', 'getAllUserByCondition', () => {
+            return [{ id: 1, username: 'u' }];
+        });
+        app.mockService('keepwork', 'getUserDatas', () => {
+            return { tokens: ['XXX'] };
+        });
+        app.mockService('keepwork', 'setUserDatas', () => 0);
+        app.mockService('keepwork', 'updateUser', () => 0);
     });
 
     it('001 机构日志', async () => {
         // 构建用户
-
-        const ctx = app.mockContext();
-        const user = await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'user001',
-            password: md5('123456'),
-        });
 
         // const user = await app.factory.create("users", { username: "user001", password: md5("123456") });
         // await app.factory.createMany("users", 10, { password: md5("123456") });
@@ -36,7 +29,7 @@ describe('机构', () => {
         // 管理员创建
         await app.model.LessonOrganizationClassMember.create({
             organizationId: organ.id,
-            memberId: user.id,
+            memberId: 1,
             roleId: 64,
             classId: 0,
         });
@@ -64,7 +57,7 @@ describe('机构', () => {
             .then(res => res.body)
             .catch(e => console.log(e));
 
-        // 不允许老师管理学生
+        // // 不允许老师管理学生
         await app
             .httpRequest()
             .put('/lessonOrganizations/' + organ.id)
@@ -74,7 +67,7 @@ describe('机构', () => {
             .then(res => res.body)
             .catch(e => console.log(e));
 
-        // 创建班级
+        // // 创建班级
         const cls = await app
             .httpRequest()
             .post('/lessonOrganizationClasses')
@@ -103,7 +96,7 @@ describe('机构', () => {
             .then(res => res.body)
             .catch(e => console.log(e));
 
-        // 更新班级
+        // // 更新班级
         await app
             .httpRequest()
             .put('/lessonOrganizationClasses/' + cls.data.id)
@@ -113,14 +106,14 @@ describe('机构', () => {
             .then(res => res.body)
             .catch(e => console.log(e));
 
-        // 添加老师
+        // // 添加老师
         let member = await app
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
                 organizationId: organ.id,
                 classIds: [0],
-                memberId: 2,
+                memberId: 1,
                 realname: 'xiaoyao',
                 roleId: 2,
             })
@@ -128,14 +121,14 @@ describe('机构', () => {
             .expect(200)
             .then(res => res.body)
             .catch(e => console.log(e));
-        // 老师改名
+        // // 老师改名
         await app
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
                 organizationId: organ.id,
                 classIds: [0],
-                memberId: 2,
+                memberId: 1,
                 realname: 'xiaoyao1',
                 roleId: 2,
             })
@@ -144,14 +137,14 @@ describe('机构', () => {
             .then(res => res.body)
             .catch(e => console.log(e));
 
-        // 移除老师
+        // // 移除老师
         await app
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
                 organizationId: organ.id,
                 classIds: [],
-                memberId: 2,
+                memberId: 1,
                 realname: 'xiaoyao',
                 roleId: 2,
             })
@@ -160,7 +153,7 @@ describe('机构', () => {
             .then(res => res.body)
             .catch(e => console.log(e));
 
-        // 测试生成激活码
+        // // 测试生成激活码
         await app
             .httpRequest()
             .post('/lessonOrganizationActivateCodes')
@@ -170,14 +163,14 @@ describe('机构', () => {
             .then(res => res.body.data)
             .catch(e => console.log(e));
 
-        // 添加班级老师
+        // // 添加班级老师
         member = await app
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
                 organizationId: organ.id,
                 classIds: [0, cls.data.id],
-                memberId: 2,
+                memberId: 1,
                 realname: 'xiaoyao',
                 roleId: 2,
             })
@@ -185,14 +178,14 @@ describe('机构', () => {
             .expect(200)
             .then(res => res.body)
             .catch(e => console.log(e));
-        // 移除班级老师
+        // // 移除班级老师
         member = await app
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
                 organizationId: organ.id,
                 classIds: [0],
-                memberId: 2,
+                memberId: 1,
                 realname: 'xiaoyao',
                 roleId: 2,
             })
@@ -201,14 +194,14 @@ describe('机构', () => {
             .then(res => res.body)
             .catch(e => console.log(e));
 
-        // 添加班级学生
+        // // 添加班级学生
         member = await app
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
             .send({
                 organizationId: organ.id,
                 classIds: [cls.data.id, cls2.data.id],
-                memberId: 2,
+                memberId: 1,
                 realname: 'xiaoyao',
                 roleId: 1,
             })
@@ -216,7 +209,7 @@ describe('机构', () => {
             .expect(200)
             .then(res => res.body)
             .catch(e => console.log(e));
-        // 移除班级学生 并改名
+        // // 移除班级学生 并改名
         member = await app
             .httpRequest()
             .post('/lessonOrganizationClassMembers')
@@ -232,44 +225,44 @@ describe('机构', () => {
             .then(res => res.body)
             .catch(e => console.log(e));
 
-        // 改密码
-        await app
-            .httpRequest()
-            .post('/organizations/changepwd')
-            .send({
-                organizationId: organ.id,
-                classId: cls.data.id,
-                memberId: 2,
-                password: 'test123',
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body)
-            .catch(e => console.log(e));
+        // // 改密码
+        // await app
+        //     .httpRequest()
+        //     .post('/organizations/changepwd')
+        //     .send({
+        //         organizationId: organ.id,
+        //         classId: cls.data.id,
+        //         memberId: 2,
+        //         password: 'test123',
+        //     })
+        //     .set('Authorization', `Bearer ${token}`)
+        //     .expect(200)
+        //     .then(res => res.body)
+        //     .catch(e => console.log(e));
 
-        // 移除学生
-        member = await app
-            .httpRequest()
-            .post('/lessonOrganizationClassMembers')
-            .send({
-                organizationId: organ.id,
-                classIds: [],
-                memberId: 2,
-                realname: 'xiaoyao1',
-                roleId: 1,
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body)
-            .catch(e => console.log(e));
-        // 获取机构日志
-        const logs = await app
-            .httpRequest()
-            .post('/organizations/log')
-            .send({ organizationId: organ.id })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body)
-            .catch(e => console.log(e));
+        // // 移除学生
+        // member = await app
+        //     .httpRequest()
+        //     .post('/lessonOrganizationClassMembers')
+        //     .send({
+        //         organizationId: organ.id,
+        //         classIds: [],
+        //         memberId: 2,
+        //         realname: 'xiaoyao1',
+        //         roleId: 1,
+        //     })
+        //     .set('Authorization', `Bearer ${token}`)
+        //     .expect(200)
+        //     .then(res => res.body)
+        //     .catch(e => console.log(e));
+        // // 获取机构日志
+        // const logs = await app
+        //     .httpRequest()
+        //     .post('/organizations/log')
+        //     .send({ organizationId: organ.id })
+        //     .set('Authorization', `Bearer ${token}`)
+        //     .expect(200)
+        //     .then(res => res.body)
+        //     .catch(e => console.log(e));
     });
 });
