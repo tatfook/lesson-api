@@ -394,6 +394,21 @@ const LessonOrganization = class extends Controller {
 
         return ctx.helper.success({ ctx, status: 200, res: list });
     }
+
+    // 获取学生加入的全部机构
+    async getUserOrgInfo() {
+        const { ctx } = this;
+        const { userId } = this.authenticated();
+
+        const list = await ctx.service.lessonOrganization.getUserOrgInfo(userId, 1);
+
+        const retObj = {
+            showOrgId: list.length ? list[0].id : null,
+            allOrgs: list,
+        };
+
+        return ctx.helper.success({ ctx, status: 200, res: retObj });
+    }
 };
 
 module.exports = LessonOrganization;

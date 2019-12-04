@@ -449,6 +449,11 @@ class LessonOrgService extends Service {
         }
         return retArr;
     }
+
+    // 获取用户加入的全部机构
+    async getUserOrgInfo(userId, roleId) {
+        return await this.ctx.model.LessonOrganization.getUserOrgInfo(userId, roleId);
+    }
 }
 
 module.exports = LessonOrgService;
