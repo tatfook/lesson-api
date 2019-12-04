@@ -157,6 +157,10 @@ class Message extends Service {
             this.ctx.service.lessonOrganizationClassMember.getByCondition({
                 memberId: userId,
                 organizationId,
+                roleId: {
+                    $in: ~~_roleId === CLASS_MEMBER_ROLE_ADMIN ?
+                        [ '64', '65', '66', '67' ] : [ '2', '3', '66', '67' ],
+                },
             }),
         ]);
 
