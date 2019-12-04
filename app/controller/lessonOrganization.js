@@ -400,7 +400,10 @@ const LessonOrganization = class extends Controller {
         const { ctx } = this;
         const { userId } = this.authenticated();
 
-        const list = await ctx.service.lessonOrganization.getUserOrgInfo(userId, 1);
+        const list = await ctx.service.lessonOrganization.getUserOrgInfo(
+            userId,
+            1
+        );
 
         const retObj = {
             showOrgId: list.length ? list[0].id : null,
