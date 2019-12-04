@@ -144,44 +144,6 @@ class LessonOrgPackageService extends Service {
             packageArr
         );
     }
-
-    // 同步更新机构的课程包顺序
-    async updateLessonNo(packageId, lessonNo) {
-        const orgPackages = await this.ctx.model.LessonOrganizationPackage.findAll(
-            { where: { packageId } }
-        );
-
-        const taskArr = [];
-        for (let i = 0; i < orgPackages.length; i++) {
-            const lessons = orgPackages[i].get().lessons;
-            for (let j = 0; j < lessons.length; j++) {
-                const index = _.findIndex(
-                    lessonNo,
-                    o => o.lessonId === lessons[j].lessonId
-                );
-                if (index > -1) {
-                    lessons[j] = {
-                        lessonId: lessonNo[index].lessonId,
-                        lessonNo: lessonNo[index].lessonNo,
-                    };
-                }
-            }
-            taskArr.push(async function() {
-                return await this.ctx.model.LessonOrganizationPackage.update(
-                    {
-                        lessons,
-                    },
-                    {
-                        where: {
-                            id: orgPackages[i].id,
-                        },
-                    }
-                );
-            });
-        }
-
-        await Promise.all(taskArr.map(r => r.call(this)));
-    }
 }
 
 module.exports = LessonOrgPackageService;
