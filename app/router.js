@@ -157,10 +157,6 @@ module.exports = app => {
         lessonOrganization.getPackages
     );
     router.get(
-        `${prefix}lessonOrganizations/userOrgInfo`,
-        lessonOrganization.getUserOrgInfo
-    );
-    router.get(
         `${prefix}lessonOrganizations/getRealNameInOrg`,
         lessonOrganization.getRealNameInOrg
     );
