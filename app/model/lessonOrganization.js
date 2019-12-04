@@ -194,28 +194,6 @@ module.exports = app => {
         return list;
     };
 
-    // 获取userId以roleId身份在的全部机构
-    model.getUserOrgInfo = async (userId, roleId) => {
-        const sql = `
-        SELECT 
-            distinct o.*
-        FROM
-            lessonOrganizations o
-            LEFT JOIN 
-            lessonOrganizationClassMembers m ON m.organizationId = o.id
-        WHERE m.memberId = :userId AND m.roleId & :roleId
-        ORDER BY CONVERT( o.name USING GBK);
-        `;
-        const list = await app.model.query(sql, {
-            type: app.model.QueryTypes.SELECT,
-            replacements: {
-                userId,
-                roleId,
-            },
-        });
-        return list;
-    };
-
     model.associate = () => {
         app.model.LessonOrganization.belongsTo(app.model.User, {
             as: 'users',
