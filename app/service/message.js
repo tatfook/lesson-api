@@ -158,8 +158,10 @@ class Message extends Service {
                 memberId: userId,
                 organizationId,
                 roleId: {
-                    $in: ~~_roleId === CLASS_MEMBER_ROLE_ADMIN ?
-                        [ '64', '65', '66', '67' ] : [ '2', '3', '66', '67' ],
+                    $in:
+                        ~~_roleId === CLASS_MEMBER_ROLE_ADMIN
+                            ? [ '64', '65', '66', '67' ]
+                            : [ '2', '3', '66', '67' ],
                 },
             }),
         ]);
