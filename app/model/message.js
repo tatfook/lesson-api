@@ -2,7 +2,7 @@
 const _ = require('lodash');
 
 module.exports = app => {
-    const { BIGINT, INTEGER, JSON, STRING } = app.Sequelize;
+    const { BIGINT, INTEGER, JSON, STRING, TEXT } = app.Sequelize;
 
     const model = app.model.define(
         'messages',
@@ -60,6 +60,11 @@ module.exports = app => {
             operator: {
                 // 当前登录用户名
                 type: STRING,
+            },
+
+            receivers: {
+                // 发送给的用户名,逗号隔开【系统消息only】
+                type: TEXT,
             },
 
             senderName: {
