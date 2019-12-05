@@ -238,6 +238,7 @@ class LessonOrgService extends Service {
             userId,
             organizationId
         );
+
         if (!pkg) return this.ctx.throw(400, Err.ARGS_ERR);
 
         const pkginfo = await this.ctx.model.Package.findOne({
@@ -307,7 +308,7 @@ class LessonOrgService extends Service {
 
     // 获取机构各角色的人数,和人数上限
     async getMemberCountByRoleId(organizationId) {
-        const [ studentCount, teacherCount, organ ] = await Promise.all([
+        const [studentCount, teacherCount, organ] = await Promise.all([
             this.ctx.model.LessonOrganization.getMemberCount(
                 organizationId,
                 CLASS_MEMBER_ROLE_STUDENT
@@ -322,7 +323,7 @@ class LessonOrgService extends Service {
         return {
             studentCount,
             teacherCount,
-            upperLimit: organ.count,
+            upperLimit: organ ? organ.count : 0,
         };
     }
 
@@ -341,7 +342,7 @@ class LessonOrgService extends Service {
             });
         });
         const lessons = await this.ctx.model.Lesson.findAll({
-            attributes: [ 'id', 'lessonName' ],
+            attributes: ['id', 'lessonName'],
             where: { id: { $in: lessonIds } },
         });
 
@@ -389,8 +390,8 @@ class LessonOrgService extends Service {
         const list = await this.ctx.model.LessonOrganizationClass.findAll({
             where: { organizationId, end: { $gt: new Date() } },
             attributes: [
-                [ 'id', 'classId' ],
-                [ 'name', 'className' ],
+                ['id', 'classId'],
+                ['name', 'className'],
             ],
             include: [
                 {
