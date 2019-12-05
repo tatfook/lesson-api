@@ -56,7 +56,7 @@ describe('机构', () => {
                 .catch(e => console.log(e));
 
             const org = await app.model.LessonOrganization.findOne({
-                where: { id: organ.id }
+                where: { id: organ.id },
             }).then(o => o.toJSON());
 
             assert(moment(org.endDate).format('YYYY-MM-DD') === '2019-01-01');
@@ -74,7 +74,7 @@ describe('机构', () => {
                 .catch(e => console.log(e));
 
             const org = await app.model.LessonOrganization.findOne({
-                where: { id: organ.id }
+                where: { id: organ.id },
             }).then(o => o.toJSON());
         });
     });
@@ -84,7 +84,6 @@ describe('机构', () => {
     // it('001 机构', async () => {
 
     //     // 修改机构过期时间
-
 
     //     const token2 = await app.login().then(o => o.token);
     //     assert.ok(token2);

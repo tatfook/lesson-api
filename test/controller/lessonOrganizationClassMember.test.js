@@ -61,7 +61,9 @@ describe('机构学生', () => {
         it('001', async () => {
             let teachers = await app
                 .httpRequest()
-                .get(`/lessonOrganizationClassMembers/teacher?classId=${cls2.id}`)
+                .get(
+                    `/lessonOrganizationClassMembers/teacher?classId=${cls2.id}`
+                )
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
                 .then(res => res.body);
@@ -91,7 +93,9 @@ describe('机构学生', () => {
         it('001', async () => {
             let students = await app
                 .httpRequest()
-                .get(`/lessonOrganizationClassMembers/student?classId=${cls.id}`)
+                .get(
+                    `/lessonOrganizationClassMembers/student?classId=${cls.id}`
+                )
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
                 .then(res => res.body);
@@ -138,14 +142,15 @@ describe('机构学生', () => {
         it('001', async () => {
             await app
                 .httpRequest()
-                .delete(
-                    `/lessonOrganizationClassMembers/${member.id}?roleId=1`
-                )
+                .delete(`/lessonOrganizationClassMembers/${member.id}?roleId=1`)
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200);
 
             const list = await app.model.LessonOrganizationClassMember.findAll({
-                where: { id: member.id, roleId: { $in: ['1', '3', '65', '67'] } }
+                where: {
+                    id: member.id,
+                    roleId: { $in: ['1', '3', '65', '67'] },
+                },
             });
             assert(list.length === 0);
         });
