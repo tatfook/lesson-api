@@ -67,12 +67,14 @@ describe('机构表单', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     state: 1,
-                    title: '修改'
+                    title: '修改',
                 })
                 .expect(200)
                 .then(res => res.body);
 
-            const f = await app.model.LessonOrganizationForm.findOne({ where: { id: form.id } });
+            const f = await app.model.LessonOrganizationForm.findOne({
+                where: { id: form.id },
+            });
             assert(f.state === 1 && f.title === '修改');
         });
     });
@@ -127,7 +129,7 @@ describe('机构表单', () => {
             await app.model.LessonOrganizationFormSubmit.create({
                 organizationId: organ.id,
                 formId: form.id,
-                userId: 1
+                userId: 1,
             });
         });
         it('001', async () => {
@@ -162,23 +164,23 @@ describe('机构表单', () => {
             submit = await app.model.LessonOrganizationFormSubmit.create({
                 organizationId: organ.id,
                 formId: form.id,
-                userId: 1
+                userId: 1,
             });
         });
         it('001', async () => {
             await app
                 .httpRequest()
-                .put(
-                    `/lessonOrganizationForms/${form.id}/submit/${submit.id}`
-                )
+                .put(`/lessonOrganizationForms/${form.id}/submit/${submit.id}`)
                 .set('Authorization', `Bearer ${token}`)
                 .send({
-                    comment: '修改'
+                    comment: '修改',
                 })
                 .expect(200)
                 .then(res => res.body);
 
-            const sub = await app.model.LessonOrganizationFormSubmit.findOne({ where: { id: submit.id } });
+            const sub = await app.model.LessonOrganizationFormSubmit.findOne({
+                where: { id: submit.id },
+            });
             assert(sub.comment === '修改');
         });
     });
@@ -202,23 +204,23 @@ describe('机构表单', () => {
             submit = await app.model.LessonOrganizationFormSubmit.create({
                 organizationId: organ.id,
                 formId: form.id,
-                userId: 1
+                userId: 1,
             });
         });
         it('001', async () => {
             await app
                 .httpRequest()
-                .delete(
-                    `/lessonOrganizationForms/${submit.id}`
-                )
+                .delete(`/lessonOrganizationForms/${submit.id}`)
                 .set('Authorization', `Bearer ${token}`)
                 .send({
-                    comment: '修改'
+                    comment: '修改',
                 })
                 .expect(200)
                 .then(res => res.body);
 
-            const sub = await app.model.LessonOrganizationForm.findOne({ where: { id: submit.id } });
+            const sub = await app.model.LessonOrganizationForm.findOne({
+                where: { id: submit.id },
+            });
             assert(!sub);
         });
         it('002 普通人只能删除自己的', async () => {
@@ -227,17 +229,17 @@ describe('机构表单', () => {
 
             await app
                 .httpRequest()
-                .delete(
-                    `/lessonOrganizationForms/${submit.id}`
-                )
+                .delete(`/lessonOrganizationForms/${submit.id}`)
                 .set('Authorization', `Bearer ${token}`)
                 .send({
-                    comment: '修改'
+                    comment: '修改',
                 })
                 .expect(200)
                 .then(res => res.body);
 
-            const sub = await app.model.LessonOrganizationForm.findOne({ where: { id: submit.id } });
+            const sub = await app.model.LessonOrganizationForm.findOne({
+                where: { id: submit.id },
+            });
             assert(sub);
         });
     });

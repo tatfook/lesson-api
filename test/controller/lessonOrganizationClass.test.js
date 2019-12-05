@@ -75,13 +75,14 @@ describe('lesson organization class', () => {
     describe('获取班级列表', async () => {
         beforeEach(async () => {
             const cls = await app.factory.create('LessonOrganizationClass', {
-                organizationId: orgId, end: '2200-10-01'
+                organizationId: orgId,
+                end: '2200-10-01',
             });
             await app.factory.create('LessonOrganizationClassMember', {
                 classId: cls.id,
                 organizationId: orgId,
                 memberId: 1,
-                roleId: 64
+                roleId: 64,
             });
         });
         it('001', async () => {
@@ -108,7 +109,7 @@ describe('lesson organization class', () => {
         beforeEach(async () => {
             await app.factory.create('LessonOrganizationClass', {
                 end: '2019-01-01',
-                organizationId: 1
+                organizationId: 1,
             });
         });
         it('001', async () => {
@@ -133,13 +134,15 @@ describe('lesson organization class', () => {
                 .httpRequest()
                 .put('/lessonOrganizationClasses/' + id)
                 .send({
-                    name: '修改的名字'
+                    name: '修改的名字',
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
                 .then(res => res.body.data);
 
-            const ret = await app.model.LessonOrganizationClass.findOne({ where: { id } });
+            const ret = await app.model.LessonOrganizationClass.findOne({
+                where: { id },
+            });
             assert(ret.name === '修改的名字');
         });
     });
@@ -148,7 +151,7 @@ describe('lesson organization class', () => {
         let id;
         beforeEach(async () => {
             const cls = await app.factory.create('LessonOrganizationClass', {
-                organizationId: 1
+                organizationId: 1,
             });
             id = cls.id;
         });
@@ -161,7 +164,9 @@ describe('lesson organization class', () => {
                 .expect(200)
                 .then(res => res.body.data);
 
-            const ret = await app.model.LessonOrganizationClass.findOne({ where: { id } });
+            const ret = await app.model.LessonOrganizationClass.findOne({
+                where: { id },
+            });
             assert(!ret);
         });
     });
@@ -170,17 +175,17 @@ describe('lesson organization class', () => {
         let id;
         beforeEach(async () => {
             const cls = await app.factory.create('LessonOrganizationClass', {
-                organizationId: 1
+                organizationId: 1,
             });
             id = cls.id;
             await app.factory.create('LessonOrganizationClassMember', {
                 organizationId: 1,
                 classId: cls.id,
-                memberId: 1
+                memberId: 1,
             });
 
             app.mockService('keepwork', 'getAllProjectByCondition', () => {
-                return []
+                return [];
             });
         });
         it('001', async () => {
@@ -190,7 +195,7 @@ describe('lesson organization class', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
                 .then(res => res.body.data);
-            assert(ret.length === 1)
-        })
+            assert(ret.length === 1);
+        });
     });
 });
