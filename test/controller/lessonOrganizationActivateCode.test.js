@@ -87,6 +87,15 @@ describe('机构激活码', () => {
                 Activecode.data.count === 1 && Activecode.data.rows.length === 1
             );
         });
+        it('002 没有权限', async () => {
+            const user = await app.login({ organizationId: 1, roleId: 1 });
+            const token = user.token;
+            await app
+                .httpRequest()
+                .get('/lessonOrganizationActivateCodes?organizationId=' + orgId)
+                .set('Authorization', `Bearer ${token}`)
+                .expect(400);
+        });
     });
 
     describe('激活用户', async () => {
@@ -123,134 +132,4 @@ describe('机构激活码', () => {
                 .catch(e => console.log(e));
         });
     });
-
-    // it('001 机构激活码', async () => {
-    //     const user = await app.login({ organizationId: 1, roleId: 67 });
-    //     const token = user.token;
-
-    //     // 无效机构
-    //     const user2 = await app.login({ organizationId: 999 });
-    //     const token2 = user2.token;
-    //     await app
-    //         .httpRequest()
-    //         .post('/lessonOrganizationActivateCodes')
-    //         .send({
-    //             organizationId: 999,
-    //             count: 20,
-    //             classId: cls.id,
-    //         })
-    //         .set('Authorization', `Bearer ${token2}`)
-    //         .expect(403);
-
-    //     //  测试获取激活码
-    //     let Activecode = await app
-    //         .httpRequest()
-    //         .get('/lessonOrganizationActivateCodes?organizationId=' + organ.id)
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body)
-    //         .catch(e => console.log(e));
-
-    //     assert(
-    //         Activecode.data.count === 20 && Activecode.data.rows.length === 20
-    //     );
-
-    //     // 获取机构的激活码
-    //     Activecode = await app
-    //         .httpRequest()
-    //         .post('/lessonOrganizationActivateCodes/search')
-    //         .send({
-    //             state: 0,
-    //             classId: cls.id,
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body);
-    //     assert(Activecode.data.count === 20);
-
-    //     // 使用激活码
-    //     app.mockService('keepwork', 'updateUser', () => 0);
-    //     let member = await app
-    //         .httpRequest()
-    //         .post('/lessonOrganizationActivateCodes/activate')
-    //         .send({
-    //             key: Activecode.data.rows[0].key,
-    //             realname: 'a',
-    //             organizationId: organ.id,
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body);
-    //     assert(member);
-
-    //     // 一个码只能用一次
-    //     let ret = await app
-    //         .httpRequest()
-    //         .post('/lessonOrganizationActivateCodes/activate')
-    //         .send({
-    //             key: Activecode.data.rows[0].key,
-    //             realname: '',
-    //             organizationId: organ.id,
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-    //     // assert(ret.code === 2);
-
-    //     // // 应该少了一个
-    //     Activecode = await app
-    //         .httpRequest()
-    //         .post('/lessonOrganizationActivateCodes/search')
-    //         .send({
-    //             state: 0,
-    //             classId: cls.id,
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(200)
-    //         .then(res => res.body);
-    //     assert(Activecode.data.count === 19);
-
-    //     // 激活码不属于这个机构
-    //     ret = await app
-    //         .httpRequest()
-    //         .post('/lessonOrganizationActivateCodes/activate')
-    //         .send({
-    //             key: Activecode.data.rows[0].key,
-    //             realname: '',
-    //             organizationId: 999,
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-    //     // assert(ret.code === 7);
-
-    //     // // 已经是该班级学生
-    //     ret = await app
-    //         .httpRequest()
-    //         .post('/lessonOrganizationActivateCodes/activate')
-    //         .send({
-    //             key: Activecode.data.rows[0].key,
-    //             realname: '',
-    //             organizationId: organ.id,
-    //         })
-    //         .set('Authorization', `Bearer ${token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-    //     // assert(ret.code === 6);
-
-    //     // // 人数已达上限
-    //     const user2token = await app.login({ id: 2 }).then(res => res.token);
-    //     ret = await app
-    //         .httpRequest()
-    //         .post('/lessonOrganizationActivateCodes/activate')
-    //         .send({
-    //             key: Activecode.data.rows[0].key,
-    //             realname: '',
-    //             organizationId: organ.id,
-    //         })
-    //         .set('Authorization', `Bearer ${user2token}`)
-    //         .expect(400)
-    //         .then(res => res.body);
-    //     // assert(ret.code === 5);
-    // });
 });
