@@ -62,7 +62,8 @@ module.exports = app => {
                 type: STRING,
             },
 
-            receivers: { // 发送给的用户名,逗号隔开【系统消息only】
+            receivers: {
+                // 发送给的用户名,逗号隔开【系统消息only】
                 type: TEXT,
             },
 
