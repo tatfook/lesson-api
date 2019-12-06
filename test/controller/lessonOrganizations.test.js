@@ -321,7 +321,7 @@ describe('机构', () => {
                 .httpRequest()
                 .get(
                     '/lessonOrganizations/getOrgPackages?organizationId=' +
-                    organ.id
+                        organ.id
                 )
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
@@ -337,8 +337,8 @@ describe('机构', () => {
                 .httpRequest()
                 .get(
                     '/lessonOrganizations/checkUserInvalid?organizationId=' +
-                    organ.id +
-                    '&username=abc'
+                        organ.id +
+                        '&username=abc'
                 )
                 .set('Authorization', `Bearer ${token}`)
                 .expect(400);
@@ -348,9 +348,9 @@ describe('机构', () => {
                 .httpRequest()
                 .get(
                     '/lessonOrganizations/checkUserInvalid?organizationId=' +
-                    organ.id +
-                    '&username=' +
-                    user1.username
+                        organ.id +
+                        '&username=' +
+                        user1.username
                 )
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200);
@@ -386,7 +386,7 @@ describe('机构', () => {
                 .httpRequest()
                 .get(
                     '/lessonOrganizations/getMemberCountByRole?organizationId=' +
-                    organ.id
+                        organ.id
                 )
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
@@ -431,8 +431,8 @@ describe('机构', () => {
 
             assert(
                 detail.length === 1 &&
-                detail[0].teacherList.length === 1 &&
-                detail[0].studentList.length === 1
+                    detail[0].teacherList.length === 1 &&
+                    detail[0].studentList.length === 1
             );
         });
     });
