@@ -183,7 +183,7 @@ class PackageService extends Service {
             params
         );
 
-        const data = this.getByCondition({ id: packageId, userId });
+        const data = await this.getByCondition({ id: packageId, userId });
         if (!data) this.ctx.throw(400, Err.NOT_FOUND);
 
         const result = await this.ctx.model.Package.update(
