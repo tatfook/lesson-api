@@ -31,7 +31,7 @@ describe('/admins/subjects.test.js', () => {
                 .expect(200)
                 .then(res => res.body.data);
             assert(list.count === 1 && list.rows[0].subjectName === '数学');
-        })
+        });
     });
 
     describe('获取subjects详情', async () => {
@@ -47,7 +47,7 @@ describe('/admins/subjects.test.js', () => {
                 .expect(200)
                 .then(res => res.body.data);
             assert(sub.subjectName === '数学');
-        })
+        });
     });
 
     describe('删除subject', async () => {
@@ -63,6 +63,6 @@ describe('/admins/subjects.test.js', () => {
 
             const ret = await app.model.Subject.findOne({ where: { id: 1 } });
             assert(!ret);
-        })
+        });
     });
 });

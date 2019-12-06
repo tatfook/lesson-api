@@ -48,7 +48,7 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
         });
         it('001', async () => {
@@ -78,7 +78,7 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
         });
         it('001', async () => {
@@ -89,8 +89,7 @@ describe('test/controller/packages.test.js', () => {
                 .expect(200)
                 .then(res => res.body.data);
 
-            assert(pkg.count === 1
-                && pkg.rows[0].packageName === '哈哈');
+            assert(pkg.count === 1 && pkg.rows[0].packageName === '哈哈');
         });
         it('002', async () => {
             const token = await app.login({ id: 2 }).then(o => o.token);
@@ -110,7 +109,7 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
         });
         it('001', async () => {
@@ -130,7 +129,7 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
         });
         it('001', async () => {
@@ -138,8 +137,7 @@ describe('test/controller/packages.test.js', () => {
                 .httpRequest()
                 .put('/packages/1')
                 .send({
-                    packageName: "嘿嘿",
-
+                    packageName: '嘿嘿',
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
@@ -147,12 +145,12 @@ describe('test/controller/packages.test.js', () => {
 
             const p = await app.model.Package.findOne({
                 where: {
-                    id: 1
-                }
+                    id: 1,
+                },
             });
 
             assert(p.packageName === '嘿嘿');
-        })
+        });
     });
 
     describe('删除课程包', async () => {
@@ -160,7 +158,7 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
         });
 
@@ -172,7 +170,7 @@ describe('test/controller/packages.test.js', () => {
                 .expect(200);
 
             const ret = await app.model.Package.findOne({
-                where: { id: 1 }
+                where: { id: 1 },
             });
             assert(!ret);
         });
@@ -183,7 +181,7 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
         });
         it('001', async () => {
@@ -191,7 +189,7 @@ describe('test/controller/packages.test.js', () => {
                 .httpRequest()
                 .post('/packages/1/audit')
                 .send({
-                    state: 1
+                    state: 1,
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200);
@@ -204,7 +202,7 @@ describe('test/controller/packages.test.js', () => {
                 .httpRequest()
                 .post('/packages/999/audit')
                 .send({
-                    state: 1
+                    state: 1,
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(400);
@@ -216,20 +214,20 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
             await app.model.PackageSort.create({
                 packageId: 1,
-                hotNo: 1
+                hotNo: 1,
             });
             await app.model.Package.create({
                 packageName: '嘿嘿',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
             await app.model.PackageSort.create({
                 packageId: 2,
-                hotNo: 2
+                hotNo: 2,
             });
         });
         it('001', async () => {
@@ -237,7 +235,7 @@ describe('test/controller/packages.test.js', () => {
                 .httpRequest()
                 .get('/packages/hots')
                 .send({
-                    state: 1
+                    state: 1,
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
@@ -252,16 +250,16 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
             await app.model.Lesson.create({
                 lessonName: '课程名字',
-                userId: 1
+                userId: 1,
             });
             await app.model.PackageLesson.create({
                 packageId: 1,
                 lessonId: 1,
-                userId: 1
+                userId: 1,
             });
         });
         it('001', async () => {
@@ -271,8 +269,7 @@ describe('test/controller/packages.test.js', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
                 .then(o => o.body.data);
-            assert(list.length === 1
-                && list[0].lessonName === '课程名字');
+            assert(list.length === 1 && list[0].lessonName === '课程名字');
         });
     });
 
@@ -281,11 +278,11 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
             await app.model.Lesson.create({
                 lessonName: '课程名字',
-                userId: 1
+                userId: 1,
             });
         });
 
@@ -302,8 +299,8 @@ describe('test/controller/packages.test.js', () => {
                 where: {
                     packageId: 1,
                     lessonId: 1,
-                    userId: 1
-                }
+                    userId: 1,
+                },
             });
 
             assert(pl);
@@ -315,16 +312,16 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
             await app.model.Lesson.create({
                 lessonName: '课程名字',
-                userId: 1
+                userId: 1,
             });
             await app.model.PackageLesson.create({
                 packageId: 1,
                 lessonId: 1,
-                userId: 1
+                userId: 1,
             });
         });
         it('001', async () => {
@@ -343,8 +340,8 @@ describe('test/controller/packages.test.js', () => {
                 where: {
                     lessonId: 1,
                     packageId: 1,
-                    userId: 1
-                }
+                    userId: 1,
+                },
             });
             assert(pl.lessonNo === 2);
         });
@@ -355,16 +352,16 @@ describe('test/controller/packages.test.js', () => {
             await app.model.Package.create({
                 packageName: '哈哈',
                 userId: 1,
-                auditAt: '2200-10-01'
+                auditAt: '2200-10-01',
             });
             await app.model.Lesson.create({
                 lessonName: '课程名字',
-                userId: 1
+                userId: 1,
             });
             await app.model.PackageLesson.create({
                 packageId: 1,
                 lessonId: 1,
-                userId: 1
+                userId: 1,
             });
         });
 
@@ -380,8 +377,8 @@ describe('test/controller/packages.test.js', () => {
                 where: {
                     lessonId: 1,
                     packageId: 1,
-                    userId: 1
-                }
+                    userId: 1,
+                },
             });
             assert(!pl);
         });
