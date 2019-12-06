@@ -61,8 +61,9 @@ describe('test/controller/lessons.test.js', () => {
                 .expect(200)
                 .then(res => res.body.data);
 
-            assert(data.lessonName === lessonName
-                && data.packages.length === 0);
+            assert(
+                data.lessonName === lessonName && data.packages.length === 0
+            );
         });
         it('002 id错误', async () => {
             await app
@@ -97,7 +98,10 @@ describe('test/controller/lessons.test.js', () => {
 
     describe('获取lesson详情', async () => {
         beforeEach(async () => {
-            await app.factory.create('Lesson', { userId: 1, lessonName: 'lesson名字' });
+            await app.factory.create('Lesson', {
+                userId: 1,
+                lessonName: 'lesson名字',
+            });
         });
         it('001', async () => {
             const lesson = await app
@@ -135,7 +139,7 @@ describe('test/controller/lessons.test.js', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .send({
                     lessonName: '创建的lesson',
-                    url: '/this'
+                    url: '/this',
                 })
                 .expect(200)
                 .then(o => o.body.data);
@@ -154,7 +158,7 @@ describe('test/controller/lessons.test.js', () => {
                 .put(`/lessons/${less.id}`)
                 .set('Authorization', `Bearer ${token}`)
                 .send({
-                    lessonName: '更新的lesson'
+                    lessonName: '更新的lesson',
                 })
                 .expect(200)
                 .then(o => o.body.data);
@@ -218,13 +222,13 @@ describe('test/controller/lessons.test.js', () => {
                 .post(`/lessons/${less.id}/contents`)
                 .set('Authorization', `Bearer ${token}`)
                 .send({
-                    content: '发布的内容'
+                    content: '发布的内容',
                 })
                 .expect(200);
             const contents = await app.model.LessonContent.findAll();
             assert(contents.length === 1);
             assert(contents[0].content === '发布的内容');
-            assert(contents[0].version === 1)
+            assert(contents[0].version === 1);
         });
     });
 
@@ -236,13 +240,13 @@ describe('test/controller/lessons.test.js', () => {
                 userId: 1,
                 lessonId: less.id,
                 content: '发布的内容1',
-                version: 1
+                version: 1,
             });
             await app.model.LessonContent.create({
                 userId: 1,
                 lessonId: less.id,
                 content: '发布的内容2',
-                version: 2
+                version: 2,
             });
         });
         it('001', async () => {

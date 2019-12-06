@@ -8,7 +8,11 @@ describe('test/controller/users.test.js', () => {
 
     describe('获取当前用户', async () => {
         beforeEach(async () => {
-            app.mockService('keepwork', 'getAccountsAndRoles', () => [{}, {}, {}]);
+            app.mockService('keepwork', 'getAccountsAndRoles', () => [
+                {},
+                {},
+                {},
+            ]);
         });
         it('001', async () => {
             const data = await app
@@ -23,7 +27,11 @@ describe('test/controller/users.test.js', () => {
 
     describe('获取当前用户信息', async () => {
         beforeEach(async () => {
-            app.mockService('keepwork', 'getAccountsAndRoles', () => [{}, {}, {}]);
+            app.mockService('keepwork', 'getAccountsAndRoles', () => [
+                {},
+                {},
+                {},
+            ]);
         });
         it('001', async () => {
             const data = await app
@@ -63,7 +71,7 @@ describe('test/controller/users.test.js', () => {
                 .httpRequest()
                 .put('/users/1')
                 .send({
-                    nickname: 'nickname'
+                    nickname: 'nickname',
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
