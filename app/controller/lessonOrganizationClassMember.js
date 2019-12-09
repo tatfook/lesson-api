@@ -80,9 +80,6 @@ const LessonOrganizationClassMember = class extends Controller {
             res: 'OK',
         });
     }
-
-    // 禁止更新
-    async update() {}
 };
 
 module.exports = LessonOrganizationClassMember;

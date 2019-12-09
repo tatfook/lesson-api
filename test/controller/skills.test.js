@@ -1,88 +1,81 @@
 const { app, mock, assert } = require('egg-mock/bootstrap');
 
 describe('/admins/skills', () => {
+    let token;
     before(async () => {
-        const skills = app.model.Skill;
-        await skills.truncate();
+        token = await app.adminLogin().then(o => o.token);
     });
 
-    it('POST /admins/skill', async () => {
-        const token = await app.adminLogin().then(o => o.token);
-        assert.ok(token);
+    describe('创建skill', async () => {
+        it('001', async () => {
+            const skill = await app
+                .httpRequest()
+                .post('/admins/skill')
+                .send({
+                    skillName: '唱歌',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
 
-        let data = await app
-            .httpRequest()
-            .post('/admins/skill')
-            .send({
-                skillName: '唱歌',
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert(data.data.skillName, '唱歌');
-
-        data = await app
-            .httpRequest()
-            .post('/admins/skill')
-            .send({
-                skillName: '跳舞',
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert(data.data.skillName, '跳舞');
+            assert(skill.skillName === '唱歌');
+        });
     });
 
-    it('GET /admins/skill', async () => {
-        const token = await app.adminLogin().then(o => o.token);
-        assert.ok(token);
+    describe('获取skills列表', async () => {
+        beforeEach(async () => {
+            await app.model.Skill.create({ skillName: '唱歌' });
+        });
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .get('/admins/skill')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
 
-        let list = await app
-            .httpRequest()
-            .get('/admins/skill')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert.equal(list.data.count, 2);
-
-        list = await app
-            .httpRequest()
-            .get('/skills')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert.equal(list.data.length, 2);
+            assert(ret.rows[0].skillName === '唱歌');
+        });
     });
 
-    it('GET /admins/skill/1', async () => {
-        const token = await app.adminLogin().then(o => o.token);
-        assert.ok(token);
+    describe('更新skill', async () => {
+        beforeEach(async () => {
+            await app.model.Skill.create({ skillName: '唱歌' });
+        });
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .put('/admins/skill/1')
+                .send({
+                    skillName: '唱歌2',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
 
-        const skill = await app
-            .httpRequest()
-            .get('/admins/skill/1')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert.ok(skill);
-        assert.equal(skill.data.skillName, '唱歌');
+            const skill = await app.model.Skill.findOne({ where: { id: 1 } });
+            assert(skill.skillName === '唱歌2');
+        });
     });
 
-    it('DELETE /admins/skill/1', async () => {
-        const token = await app.adminLogin().then(o => o.token);
-        assert.ok(token);
+    describe('删除skill', async () => {
+        beforeEach(async () => {
+            await app.model.Skill.create({ skillName: '唱歌' });
+        });
 
-        const skill = await app
-            .httpRequest()
-            .delete('/admins/skill/1')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-        const list = await app
-            .httpRequest()
-            .get('/admins/skill')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert.equal(list.data.count, 1);
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .delete('/admins/skill/1')
+                .send({
+                    skillName: '唱歌2',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+
+            const skill = await app.model.Skill.findOne({ where: { id: 1 } });
+            assert(!skill);
+        });
     });
 });

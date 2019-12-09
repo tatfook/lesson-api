@@ -1,87 +1,178 @@
 const { app, assert } = require('egg-mock/bootstrap');
 
 describe('test/controller/admins.test.js', () => {
-    before(async () => {
-        await app.model.User.truncate();
+    let token;
+    beforeEach(async () => {
+        await app.factory.create('User', { username: 'test' });
+        token = await app.adminLogin().then(o => o.token);
     });
 
-    it('POST|GET|PUT', async () => {
-        const token2 = await app.adminLogin().then(o => o.token);
-        assert.ok(token2);
+    describe('执行select语句', async () => {
+        it('001 正确示范', async () => {
+            const users = await app
+                .httpRequest()
+                .post('/admins/query')
+                .send({ sql: 'select * from users' })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(users.length === 1);
+        });
 
-        await app.model.User.create({ username: 'test' });
+        it('002 带分号不行', async () => {
+            const users = await app
+                .httpRequest()
+                .post('/admins/query')
+                .send({ sql: 'select * from users;' })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(400)
+                .then(res => res.body);
+            assert(users.message === 'SQL不合法');
+        });
 
-        let users = await app
-            .httpRequest()
-            .get('/admins/user') // 获取全部资源
-            .set('Authorization', `Bearer ${token2}`)
-            .expect(200)
-            .then(res => res.body);
+        it('003 其他非select语句不行', async () => {
+            const users = await app
+                .httpRequest()
+                .post('/admins/query')
+                .send({ sql: 'delete from users' })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(400)
+                .then(res => res.body);
+            assert(users.message === 'SQL不合法');
+        });
+    });
 
-        assert(users.data.count === 1);
-        assert(users.data.rows[0].username === 'test');
+    describe('查询某个表', async () => {
+        it('001 正确示范', async () => {
+            const users = await app
+                .httpRequest()
+                .post('/admins/user/query')
+                .send({ where: { id: { $gt: 0 } } })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(users.count === 1);
+        });
 
-        users = await app
-            .httpRequest()
-            .get(`/admins/user/${users.data.rows[0].id}`) // 获取指定资源
-            .set('Authorization', `Bearer ${token2}`)
-            .expect(200)
-            .then(res => res.body);
+        it('002 model不存在', async () => {
+            const users = await app
+                .httpRequest()
+                .post('/admins/abc/query')
+                .send({ where: { id: { $gt: 0 } } })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(400)
+                .then(res => res.body.data);
+        });
+    });
 
-        assert(users.data.username === 'test');
+    describe('更新user的vip和t等级', async () => {
+        before(async () => {
+            await app.factory.create('LessonOrganizationClassMember');
+            app.mockService('keepwork', 'updateUser', () => 0);
+        });
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .get('/admins/task/once/vipTLevelUpdate')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(ret);
+        });
+    });
 
-        await app
-            .httpRequest()
-            .put(`/admins/user/${users.data.id}`)
-            .send({
-                // 修改资源
-                username: 'test3',
-            })
-            .set('Authorization', `Bearer ${token2}`)
-            .expect(200);
+    describe('search接口', async () => {
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .post('/admins/user/search')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(ret);
+        });
+    });
 
-        users = await app
-            .httpRequest()
-            .get(`/admins/user/${users.data.id}`) // 获取指定资源
-            .set('Authorization', `Bearer ${token2}`)
-            .expect(200)
-            .then(res => res.body);
+    describe('index接口', async () => {
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .get('/admins/user')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(ret.count === 1 && ret.rows[0].username === 'test');
+        });
+    });
 
-        assert(users.data.username === 'test3');
+    describe('show接口', async () => {
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .get('/admins/user/1')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(ret.username === 'test');
+        });
+    });
 
-        await app
-            .httpRequest()
-            .post('/admins/user')
-            .send({ username: 'test2' })
-            .set('Authorization', `Bearer ${token2}`) // 资源创建
-            .expect(200);
+    describe('create接口', async () => {
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .post('/admins/user')
+                .send({
+                    username: 'test2',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(ret.username === 'test2');
+        });
+    });
 
-        users = await app
-            .httpRequest()
-            .get('/admins/user') // 获取全部资源
-            .set('Authorization', `Bearer ${token2}`)
-            .expect(200)
-            .then(res => res.body);
+    describe('bulkCreate接口', async () => {
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .post('/admins/user/bulk')
+                .send({
+                    datas: [{ username: 'abc' }],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
 
-        assert(users.data.count === 2);
-        assert(users.data.rows[0].username === 'test3');
-        assert(users.data.rows[1].username === 'test2');
+            assert(ret.length === 1 && ret[0].username === 'abc');
+        });
+    });
 
-        await app
-            .httpRequest()
-            .delete(`/admins/user/${users.data.rows[0].id}`) // 删除资源
-            .set('Authorization', `Bearer ${token2}`)
-            .expect(200)
-            .then(res => res.body);
+    describe('update接口', async () => {
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .put('/admins/user/1')
+                .send({
+                    username: 'abc',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
 
-        users = await app
-            .httpRequest()
-            .get('/admins/user') // 获取全部资源
-            .set('Authorization', `Bearer ${token2}`)
-            .expect(200)
-            .then(res => res.body);
+            assert(ret.length === 1);
+        });
+    });
 
-        assert(users.data.count === 1);
-        assert(users.data.rows[0].username === 'test2');
+    describe('destroy接口', async () => {
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .delete('/admins/user/1')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(ret === 1);
+        });
     });
 });

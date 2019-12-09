@@ -12,20 +12,6 @@ const LessonOrganizationClass = class extends Controller {
         return 'LessonOrganizationClass';
     }
 
-    async show() {
-        const { id } = this.validate({ id: 'number' });
-
-        const organ = await this.ctx.service.lessonOrganization.getByCondition({
-            id,
-        });
-
-        return this.ctx.helper.success({
-            ctx: this.ctx,
-            status: 200,
-            res: organ,
-        });
-    }
-
     async history() {
         const { organizationId, roleId } = this.authenticated();
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {

@@ -238,6 +238,7 @@ class LessonOrgService extends Service {
             userId,
             organizationId
         );
+
         if (!pkg) return this.ctx.throw(400, Err.ARGS_ERR);
 
         const pkginfo = await this.ctx.model.Package.findOne({
@@ -322,7 +323,7 @@ class LessonOrgService extends Service {
         return {
             studentCount,
             teacherCount,
-            upperLimit: organ.count,
+            upperLimit: organ ? organ.count : 0,
         };
     }
 
