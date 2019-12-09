@@ -27,6 +27,7 @@ describe('test/service/userMessage.test.js', () => {
             const ctx = app.mockContext();
 
             mock(ctx.model.Message, 'mergeMessage', () => 0);
+            app.mockService('keepwork', 'getAllUserByCondition', () => []);
         });
 
         it('001', async () => {
