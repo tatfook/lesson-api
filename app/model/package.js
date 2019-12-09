@@ -111,7 +111,6 @@ module.exports = app => {
                 { auditAt: new Date() },
                 { where: { id: packageId } }
             ),
-            app.model.Subscribe.upsert({ userId, packageId }),
         ]);
     };
 
