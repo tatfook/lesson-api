@@ -6,7 +6,9 @@ const {
     CLASS_MEMBER_ROLE_ADMIN,
     CLASS_MEMBER_ROLE_STUDENT,
     CLASS_MEMBER_ROLE_TEACHER,
-    FIVE, SIX, SEVEN,
+    FIVE,
+    SIX,
+    SEVEN,
 } = require('../common/consts.js');
 
 const _ = require('lodash');
@@ -462,12 +464,18 @@ class LessonOrgService extends Service {
 
     // 检查设置的激活码上限是否合理
     async checkActivateCodeLimit(organizationId, { type5, type6, type7 }) {
-        const ret = await this.ctx.model.LessonOrganizationActivateCode.getCountByTypeAndState(organizationId);
+        const ret = await this.ctx.model.LessonOrganizationActivateCode.getCountByTypeAndState(
+            organizationId
+        );
         const map = new Map();
         for (let i = 0; i < ret.length; i++) {
             map.set(ret[i].type, (map.get(ret[i].type) || 0) + ret[i].count);
         }
-        if (map.get(FIVE) > type5 || map.get(SIX) > type6 || map.get(SEVEN) > type7) {
+        if (
+            map.get(FIVE) > type5 ||
+            map.get(SIX) > type6 ||
+            map.get(SEVEN) > type7
+        ) {
             this.ctx.throw(400, Err.ACTIVATE_CODE_LIMIT_ERR);
         }
     }
