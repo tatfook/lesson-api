@@ -249,10 +249,12 @@ module.exports = app => {
         `${prefix}lessonOrganizationActivateCodes/search`,
         lessonOrganizationActivateCode.index
     );
-    router.get(`${prefix}lessonOrganizationActivateCodes/usedStatus`,
+    router.get(
+        `${prefix}lessonOrganizationActivateCodes/usedStatus`,
         lessonOrganizationActivateCode.getUsedStatus
     );
-    router.put(`${prefix}lessonOrganizationActivateCodes/invalid`,
+    router.put(
+        `${prefix}lessonOrganizationActivateCodes/invalid`,
         lessonOrganizationActivateCode.setInvalid
     );
     router.resources(

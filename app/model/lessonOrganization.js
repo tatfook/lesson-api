@@ -81,7 +81,8 @@ module.exports = app => {
                 type: STRING,
                 defaultValue: '',
             },
-            activateCodeLimit: { // 正式邀请码上限
+            activateCodeLimit: {
+                // 正式邀请码上限
                 // {
                 // type5:XX,正式三个月
                 // type6:XX,正式六个月

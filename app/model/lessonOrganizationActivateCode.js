@@ -17,7 +17,8 @@ module.exports = app => {
                 defaultValue: 0,
             },
 
-            classIds: { // 班级id数组
+            classIds: {
+                // 班级id数组
                 // 班级Id
                 type: JSON,
                 defaultValue: [],
@@ -48,15 +49,18 @@ module.exports = app => {
                 defaultValue: 0,
             },
 
-            activateTime: { // 激活时间
+            activateTime: {
+                // 激活时间
                 type: DATE,
             },
 
-            username: { // 激活的username
+            username: {
+                // 激活的username
                 type: STRING,
             },
 
-            realname: { // 激活的realname
+            realname: {
+                // 激活的realname
                 type: STRING,
             },
 

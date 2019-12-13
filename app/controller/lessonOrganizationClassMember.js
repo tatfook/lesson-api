@@ -85,7 +85,12 @@ const LessonOrganizationClassMember = class extends Controller {
 
     // 试听转正式
     async toFormal() {
-        const { roleId, organizationId, userId, username } = this.authenticated();
+        const {
+            roleId,
+            organizationId,
+            userId,
+            username,
+        } = this.authenticated();
 
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
             this.ctx.throw(403, Err.AUTH_ERR);
@@ -106,7 +111,12 @@ const LessonOrganizationClassMember = class extends Controller {
 
     // 续费
     async recharge() {
-        const { roleId, organizationId, userId, username } = this.authenticated();
+        const {
+            roleId,
+            organizationId,
+            userId,
+            username,
+        } = this.authenticated();
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
             this.ctx.throw(403, Err.AUTH_ERR);
         }
@@ -131,7 +141,10 @@ const LessonOrganizationClassMember = class extends Controller {
         const { classId, type, username } = this.validate();
 
         const ret = await this.ctx.service.lessonOrganizationClassMember.historyStudents(
-            classId, type, username, organizationId
+            classId,
+            type,
+            username,
+            organizationId
         );
         return this.ctx.helper.success({
             ctx: this.ctx,
@@ -142,7 +155,12 @@ const LessonOrganizationClassMember = class extends Controller {
 
     // 重新激活用户
     async reactivate() {
-        const { organizationId, roleId, userId, username } = this.authenticated();
+        const {
+            organizationId,
+            roleId,
+            userId,
+            username,
+        } = this.authenticated();
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
             this.ctx.throw(403, Err.AUTH_ERR);
         }
@@ -150,7 +168,10 @@ const LessonOrganizationClassMember = class extends Controller {
         const { userIds, type, classIds } = this.validate();
 
         await this.ctx.service.lessonOrganizationClassMember.reactivate(
-            userIds, type, classIds, { organizationId, userId, username }
+            userIds,
+            type,
+            classIds,
+            { organizationId, userId, username }
         );
 
         return this.ctx.helper.success({

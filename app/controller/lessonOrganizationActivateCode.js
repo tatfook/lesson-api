@@ -11,7 +11,7 @@ const LessonOrganizationActivateCode = class extends Controller {
     }
 
     async create() {
-        const params = this.validate();// params:{classIds?,type,count,names?}
+        const params = this.validate(); // params:{classIds?,type,count,names?}
         const list = await this.ctx.service.lessonOrganizationActivateCode.createActivateCode(
             params,
             this.authenticated()
@@ -88,7 +88,9 @@ const LessonOrganizationActivateCode = class extends Controller {
     async getUsedStatus() {
         const { organizationId } = this.authenticated();
 
-        const ret = await this.ctx.service.lessonOrganizationActivateCode.getUsedStatus(organizationId);
+        const ret = await this.ctx.service.lessonOrganizationActivateCode.getUsedStatus(
+            organizationId
+        );
         return this.ctx.helper.success({
             ctx: this.ctx,
             status: 200,

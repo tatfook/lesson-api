@@ -22,7 +22,7 @@ class LessonOrgActivateCodeService extends Service {
         const type = params.type;
         const names = params.names || [];
         const count = params.count || names.length || 1;
-        const formalTypes = [ '5', '6', '7' ];// 正式邀请码类型
+        const formalTypes = [ '5', '6', '7' ]; // 正式邀请码类型
 
         // check auth
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
@@ -32,12 +32,14 @@ class LessonOrgActivateCodeService extends Service {
         // check class
         let classes = [];
         if (classIds && classIds.length) {
-            classes = await this.ctx.service.lessonOrganizationClass.findAllByCondition({
-                id: { $in: classIds },
-                organizationId,
-                status: 1,
-            });
-            if (classes.length !== classIds.length) return this.ctx.throw(400, Err.CLASS_NOT_EXIST);
+            classes = await this.ctx.service.lessonOrganizationClass.findAllByCondition(
+                {
+                    id: { $in: classIds },
+                    organizationId,
+                    status: 1,
+                }
+            );
+            if (classes.length !== classIds.length) { return this.ctx.throw(400, Err.CLASS_NOT_EXIST); }
         }
 
         // check org
@@ -50,7 +52,7 @@ class LessonOrgActivateCodeService extends Service {
         // check limit if need
         if (formalTypes.includes(type + '') && organ.activateCodeLimit) {
             const key = `type${type}`;
-            const limit = organ.activateCodeLimit[key];// 该机构这种激活码的上限
+            const limit = organ.activateCodeLimit[key]; // 该机构这种激活码的上限
             const historyCount = await this.getCountByCondition({
                 organizationId,
                 type,
@@ -69,7 +71,9 @@ class LessonOrgActivateCodeService extends Service {
                 organizationId,
                 classIds,
                 type,
-                key: `${classIds ? classIds.reduce((p, c) => p + c, '') : ''}${i}${new Date().getTime()}${_.random(TEN, NINTYNINE)}`,
+                key: `${
+                    classIds ? classIds.reduce((p, c) => p + c, '') : ''
+                }${i}${new Date().getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: names.length > i ? names[i] : '',
             });
         }
@@ -105,9 +109,13 @@ class LessonOrgActivateCodeService extends Service {
             }
         );
 
-        const classIds = _.uniq(ret.rows.reduce((p, c) => p.concat(c.classIds), []));
+        const classIds = _.uniq(
+            ret.rows.reduce((p, c) => p.concat(c.classIds), [])
+        );
 
-        const classes = await this.ctx.model.LessonOrganizationClass.findAll({ where: { id: { $in: classIds } } });
+        const classes = await this.ctx.model.LessonOrganizationClass.findAll({
+            where: { id: { $in: classIds } },
+        });
 
         ret.rows.forEach(r => {
             r = r.get();
@@ -115,7 +123,9 @@ class LessonOrgActivateCodeService extends Service {
             r.lessonOrganizationClasses = [];
             classIds.forEach(rr => {
                 const index = _.findIndex(classes, o => o.id === rr);
-                r.lessonOrganizationClasses.push(index > -1 ? classes[index] : {});
+                r.lessonOrganizationClasses.push(
+                    index > -1 ? classes[index] : {}
+                );
             });
             delete r.classIds;
         });
@@ -136,9 +146,11 @@ class LessonOrgActivateCodeService extends Service {
     }
 
     async getCountByCondition(condition) {
-        const count = await this.ctx.model.LessonOrganizationActivateCode.count({
-            where: condition,
-        });
+        const count = await this.ctx.model.LessonOrganizationActivateCode.count(
+            {
+                where: condition,
+            }
+        );
         return count;
     }
 
@@ -284,14 +296,18 @@ class LessonOrgActivateCodeService extends Service {
         });
 
         const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
-        const list = await this.ctx.model.LessonOrganizationActivateCode.getCountByTypeAndState(organizationId);
+        const list = await this.ctx.model.LessonOrganizationActivateCode.getCountByTypeAndState(
+            organizationId
+        );
         const retObj = {
-            remainder: { // 可生成数量
+            remainder: {
+                // 可生成数量
                 type5: 0,
                 type6: 0,
                 type7: 0,
             },
-            used: { // 已使用数量
+            used: {
+                // 已使用数量
                 type1: 0,
                 type2: 0,
                 type5: 0,
@@ -305,7 +321,8 @@ class LessonOrgActivateCodeService extends Service {
         const seven = 7;
         let [ type5Count, type6Count, type7Count ] = [ 0, 0, 0 ];
         for (let i = 0; i < list.length; i++) {
-            if (list[i].state === 1) { // 已使用
+            if (list[i].state === 1) {
+                // 已使用
                 retObj.used[`type${list[i].type}`] = list[i].count;
             }
             if (list[i].type === five) type5Count += list[i].count;
@@ -322,9 +339,12 @@ class LessonOrgActivateCodeService extends Service {
 
     // 激活码设为无效
     async setInvalid(ids) {
-        return await this.ctx.model.LessonOrganizationActivateCode.update({ state: 2 }, {
-            where: { id: { $in: ids } },
-        });
+        return await this.ctx.model.LessonOrganizationActivateCode.update(
+            { state: 2 },
+            {
+                where: { id: { $in: ids } },
+            }
+        );
     }
 }
 
