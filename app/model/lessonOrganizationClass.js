@@ -21,7 +21,8 @@ module.exports = app => {
                 type: STRING,
             },
 
-            status: { // 1.开启中，2.已关闭
+            status: {
+                // 1.开启中，2.已关闭
                 type: INTEGER,
                 defaultValue: 1,
             },

@@ -29,11 +29,13 @@ module.exports = app => {
                 type: BIGINT,
                 defaultValue: 0,
             },
-            type: { // 用户类型，1.试听，2.正式
+            type: {
+                // 用户类型，1.试听，2.正式
                 type: INTEGER,
                 defaultValue: 0,
             },
-            endTime: { // 到期时间
+            endTime: {
+                // 到期时间
                 type: DATE,
             },
             realname: {
@@ -186,11 +188,16 @@ module.exports = app => {
         return !!list.length;
     };
 
-    model.historyStudents = async function(classId, type, username, organizationId) {
+    model.historyStudents = async function(
+        classId,
+        type,
+        username,
+        organizationId
+    ) {
         let condition = '';
         if (classId) condition += ' and m.classId=:classId';
         if (type) condition += ' and m.type=:type';
-        if (username) condition += ` and (m.realname like '%${username}%' or u.username like '%${username}%')`;
+        if (username) { condition += ` and (m.realname like '%${username}%' or u.username like '%${username}%')`; }
 
         const sql1 = `
         SELECT 

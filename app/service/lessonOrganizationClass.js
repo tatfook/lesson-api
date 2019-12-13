@@ -274,11 +274,14 @@ class LessonOrgClassService extends Service {
 
     // 关闭班级
     async closeClass(classId) {
-        return await this.ctx.model.LessonOrganizationClass.update({
-            status: 2,
-        }, {
-            where: { id: classId },
-        });
+        return await this.ctx.model.LessonOrganizationClass.update(
+            {
+                status: 2,
+            },
+            {
+                where: { id: classId },
+            }
+        );
     }
 }
 
