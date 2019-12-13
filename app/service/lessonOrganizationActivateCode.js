@@ -39,7 +39,9 @@ class LessonOrgActivateCodeService extends Service {
                     status: 1,
                 }
             );
-            if (classes.length !== classIds.length) { return this.ctx.throw(400, Err.CLASS_NOT_EXIST); }
+            if (classes.length !== classIds.length) {
+                return this.ctx.throw(400, Err.CLASS_NOT_EXIST);
+            }
         }
 
         // check org
