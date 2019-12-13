@@ -247,6 +247,15 @@ module.exports = app => {
                 constraints: false,
             }
         );
+        app.model.LessonOrganization.hasMany(
+            app.model.LessonOrganizationActivateCode,
+            {
+                as: 'lessonOrganizationActivateCode',
+                foreignKey: 'organizationId',
+                sourceKey: 'id',
+                constraints: false,
+            }
+        );
     };
 
     return model;

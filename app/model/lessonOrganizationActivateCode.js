@@ -104,5 +104,17 @@ module.exports = app => {
         return list;
     };
 
+    model.associate = () => {
+        app.model.LessonOrganizationActivateCode.belongsTo(
+            app.model.LessonOrganization,
+            {
+                as: 'lessonOrganizations',
+                foreignKey: 'organizationId',
+                targetKey: 'id',
+                constraints: false,
+            }
+        );
+    };
+
     return model;
 };
