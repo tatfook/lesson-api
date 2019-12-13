@@ -31,17 +31,14 @@ class LessonOrgClassService extends Service {
     }
 
     async historyClass(queryOptions, organizationId) {
-        const curtime = new Date();
         const [ count, rows ] = await Promise.all([
             this.ctx.model.LessonOrganizationClass.count({
-                where: { organizationId, end: { $lte: curtime } },
+                where: { organizationId, status: 1 },
             }),
             this.findAllByCondition(
                 {
                     organizationId,
-                    end: {
-                        $lte: curtime,
-                    },
+                    status: 1,
                 },
                 [
                     {
@@ -273,6 +270,15 @@ class LessonOrgClassService extends Service {
             m.users = users.filter(o => o.id === m.memberId);
         });
         return members;
+    }
+
+    // 关闭班级
+    async closeClass(classId) {
+        return await this.ctx.model.LessonOrganizationClass.update({
+            status: 2,
+        }, {
+            where: { id: classId },
+        });
     }
 }
 

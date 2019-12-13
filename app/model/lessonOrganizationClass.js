@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-    const { BIGINT, STRING, DATE } = app.Sequelize;
+    const { BIGINT, INTEGER, STRING, DATE } = app.Sequelize;
 
     const model = app.model.define(
         'lessonOrganizationClasses',
@@ -21,20 +21,10 @@ module.exports = app => {
                 type: STRING,
             },
 
-            begin: {
-                type: DATE,
-                defaultValue() {
-                    return new Date();
-                },
+            status: { // 1.开启中，2.已关闭
+                type: INTEGER,
+                defaultValue: 1,
             },
-
-            end: {
-                type: DATE,
-                defaultValue() {
-                    return new Date();
-                },
-            },
-
             createdAt: {
                 type: DATE,
             },
@@ -62,7 +52,7 @@ module.exports = app => {
 		SELECT DISTINCT c.* FROM lessonOrganizationClasses c
 		LEFT JOIN lessonOrganizationClassMembers m on m.classId = c.id
 		where m.organizationId = :organizationId and m.roleId & :roleId
-		and m.memberId= :memberId and c.end >=now() 
+		and m.memberId= :memberId and c.status=1
 		`;
 
         const list = await app.model.query(sql, {
@@ -78,16 +68,6 @@ module.exports = app => {
     };
 
     model.associate = () => {
-        app.model.LessonOrganizationClass.hasMany(
-            app.model.LessonOrganizationActivateCode,
-            {
-                as: 'lessonOrganizationActivateCodes',
-                foreignKey: 'classId',
-                sourceKey: 'id',
-                constraints: false,
-            }
-        );
-
         app.model.LessonOrganizationClass.hasMany(
             app.model.LessonOrganizationPackage,
             {
