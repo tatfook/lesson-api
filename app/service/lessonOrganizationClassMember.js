@@ -579,7 +579,9 @@ class LessonOrgClassMemberService extends Service {
         classIds,
         { organizationId, userId, username }
     ) {
-        if (!formalTypes.includes(type + '')) { this.ctx.throw(400, Err.STU_TYPE_ERR); }
+        if (!formalTypes.includes(type + '')) {
+            this.ctx.throw(400, Err.STU_TYPE_ERR);
+        }
         const [ members, classes, org, historyCount ] = await Promise.all([
             // 检查这些学生是不是在这个机构试听
             this.ctx.model.LessonOrganizationClassMember.findAll({
@@ -614,8 +616,12 @@ class LessonOrgClassMemberService extends Service {
                 }
             ),
         ]);
-        if (members.length < userIds.length) { this.ctx.throw(400, Err.MEMBER_NOT_EXISTS); }
-        if (classes.length !== classIds.length) { this.ctx.throw(400, Err.CLASSID_ERR); }
+        if (members.length < userIds.length) {
+            this.ctx.throw(400, Err.MEMBER_NOT_EXISTS);
+        }
+        if (classes.length !== classIds.length) {
+            this.ctx.throw(400, Err.CLASSID_ERR);
+        }
 
         // 激活码上限检查
         const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
@@ -624,7 +630,9 @@ class LessonOrgClassMemberService extends Service {
             6: type6,
             7: type7,
         };
-        if (historyCount + userIds.length > map[type]) { this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED); }
+        if (historyCount + userIds.length > map[type]) {
+            this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED);
+        }
 
         // 激活码数据,状态是已激活
         const datas = [];
@@ -747,7 +755,9 @@ class LessonOrgClassMemberService extends Service {
         classIds,
         { organizationId, userId, username }
     ) {
-        if (!formalTypes.includes(type + '')) { this.ctx.throw(400, Err.STU_TYPE_ERR); }
+        if (!formalTypes.includes(type + '')) {
+            this.ctx.throw(400, Err.STU_TYPE_ERR);
+        }
         const currTime = new Date();
         const [ members, classes, org, historyCount ] = await Promise.all([
             // 检查这些学生是不是在这个机构正式学生
@@ -784,8 +794,12 @@ class LessonOrgClassMemberService extends Service {
                 }
             ),
         ]);
-        if (members.length < userIds.length) { this.ctx.throw(400, Err.MEMBER_NOT_EXISTS); }
-        if (classes.length !== classIds.length) { this.ctx.throw(400, Err.CLASSID_ERR); }
+        if (members.length < userIds.length) {
+            this.ctx.throw(400, Err.MEMBER_NOT_EXISTS);
+        }
+        if (classes.length !== classIds.length) {
+            this.ctx.throw(400, Err.CLASSID_ERR);
+        }
 
         // 激活码上限检查
         const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
@@ -794,7 +808,9 @@ class LessonOrgClassMemberService extends Service {
             6: type6,
             7: type7,
         };
-        if (historyCount + userIds.length > map[type]) { this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED); }
+        if (historyCount + userIds.length > map[type]) {
+            this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED);
+        }
 
         // 激活码数据,状态是已激活
         const datas = [];
@@ -918,7 +934,9 @@ class LessonOrgClassMemberService extends Service {
         classIds,
         { organizationId, userId, username }
     ) {
-        if (!allCodeTypes.includes(type + '')) { this.ctx.throw(400, Err.STU_TYPE_ERR); }
+        if (!allCodeTypes.includes(type + '')) {
+            this.ctx.throw(400, Err.STU_TYPE_ERR);
+        }
 
         const currTime = new Date();
         const [ members, classes, org, historyCount ] = await Promise.all([
@@ -955,8 +973,12 @@ class LessonOrgClassMemberService extends Service {
                 }
             ),
         ]);
-        if (members.length < userIds.length) { this.ctx.throw(400, Err.MEMBER_NOT_EXISTS); }
-        if (classes.length !== classIds.length) { this.ctx.throw(400, Err.CLASSID_ERR); }
+        if (members.length < userIds.length) {
+            this.ctx.throw(400, Err.MEMBER_NOT_EXISTS);
+        }
+        if (classes.length !== classIds.length) {
+            this.ctx.throw(400, Err.CLASSID_ERR);
+        }
 
         // 激活码上限检查
         const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
