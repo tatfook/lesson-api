@@ -64,4 +64,6 @@ module.exports = {
     BASEURL_ERR: 'baseUrl错误',
     MSG_TYPE_ERR: '消息类型错误',
     MSG_TEXT_ERR: '消息内容长度错误',
+    ACTIVATE_CODE_UPPERLIMITED: '已经超出激活码数量上限',
+    STU_TYPE_ERR: '正式学生类型错误',
 };

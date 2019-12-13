@@ -11,54 +11,65 @@ const Err = require('../common/err');
 class LessonOrgActivateCodeService extends Service {
     /**
      * 创建激活码
-     * @param {*} params {count,classId,names,organizationId?}
+     * @param {*} params {count,classIds?,names?,type}
      * @param {*} authParams {userId, organizationId, roleId, username}
      */
     async createActivateCode(params, authParams) {
-        let { userId, organizationId, roleId, username } = authParams;
-        if (params.organizationId && params.organizationId !== organizationId) {
-            organizationId = params.organizationId;
-            roleId = await this.ctx.service.organization.getRoleId(
-                organizationId,
-                userId
-            );
-        }
-
+        const { userId, organizationId, roleId, username } = authParams;
         const TEN = 10;
         const NINTYNINE = 99;
-        const classId = params.classId;
+        const classIds = params.classIds;
+        const type = params.type;
         const names = params.names || [];
         const count = params.count || names.length || 1;
+        const formalTypes = [ '5', '6', '7' ];// 正式邀请码类型
 
-        const cls = await this.ctx.service.lessonOrganizationClass.getByCondition(
-            {
-                id: classId,
-            }
-        );
-        if (!cls) return this.ctx.throw(400, Err.CLASS_NOT_EXIST);
-
+        // check auth
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
             return this.ctx.throw(403, Err.AUTH_ERR);
         }
 
+        // check class
+        let classes = [];
+        if (classIds && classIds.length) {
+            classes = await this.ctx.service.lessonOrganizationClass.findAllByCondition({
+                id: { $in: classIds },
+                organizationId,
+                status: 1,
+            });
+            if (classes.length !== classIds.length) return this.ctx.throw(400, Err.CLASS_NOT_EXIST);
+        }
+
+        // check org
         const organ = await this.ctx.service.lessonOrganization.getByCondition({
             id: organizationId,
             endDate: { $gte: new Date() },
         });
         if (!organ) this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
 
+        // check limit if need
+        if (formalTypes.includes(type + '') && organ.activateCodeLimit) {
+            const key = `type${type}`;
+            const limit = organ.activateCodeLimit[key];// 该机构这种激活码的上限
+            const historyCount = await this.getCountByCondition({
+                organizationId,
+                type,
+                state: {
+                    $in: [ '0', '1' ],
+                },
+            });
+            if (historyCount + count > limit) {
+                this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED);
+            }
+        }
+
         const datas = [];
         for (let i = 0; i < count; i++) {
             datas.push({
                 organizationId,
-                classId,
-                key:
-                    classId +
-                    '' +
-                    i +
-                    '' +
-                    new Date().getTime() +
-                    _.random(TEN, NINTYNINE),
+                classIds,
+                type,
+                key: `${classIds ? classIds.reduce((p, c) => p + c, '') : ''}${i}${new Date().getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: names.length > i ? names[i] : '',
             });
         }
@@ -67,9 +78,11 @@ class LessonOrgActivateCodeService extends Service {
             datas
         );
 
-        this.ctx.service.lessonOrganizationLog.classLog({
+        // 把这些班级name聚合一起再记录log
+        const name = classes.reduce((p, c) => `${p},${c.name}`, '') || '';
+        await this.ctx.service.lessonOrganizationLog.classLog({
             organizationId,
-            cls,
+            cls: { name: name.slice(1) },
             action: 'activateCode',
             count,
             handleId: userId,
@@ -80,19 +93,32 @@ class LessonOrgActivateCodeService extends Service {
     }
 
     /**
-     *
+     * 激活码列表
      * @param {*} queryOptions 分页排序等参数 必选
      * @param {*} condition 查询条件 必选
-     * @param {*} include 连表 可选
      */
-    async findAllActivateCodeAndCount(queryOptions, condition, include) {
+    async findAllActivateCodeAndCount(queryOptions, condition) {
         const ret = await this.ctx.model.LessonOrganizationActivateCode.findAndCountAll(
             {
                 ...queryOptions,
                 where: condition,
-                include,
             }
         );
+
+        const classIds = _.uniq(ret.rows.reduce((p, c) => p.concat(c.classIds), []));
+
+        const classes = await this.ctx.model.LessonOrganizationClass.findAll({ where: { id: { $in: classIds } } });
+
+        ret.rows.forEach(r => {
+            r = r.get();
+            const classIds = r.classIds;
+            r.lessonOrganizationClasses = [];
+            classIds.forEach(rr => {
+                const index = _.findIndex(classes, o => o.id === rr);
+                r.lessonOrganizationClasses.push(index > -1 ? classes[index] : {});
+            });
+            delete r.classIds;
+        });
         return ret;
     }
 
@@ -107,6 +133,13 @@ class LessonOrgActivateCodeService extends Service {
         if (data) data = data.get({ plain: true });
 
         return data;
+    }
+
+    async getCountByCondition(condition) {
+        const count = await this.ctx.model.LessonOrganizationActivateCode.count({
+            where: condition,
+        });
+        return count;
     }
 
     /**
@@ -242,6 +275,56 @@ class LessonOrgActivateCodeService extends Service {
             userId
         );
         return Object.assign(member, { roleId, realname });
+    }
+
+    // 激活码使用情况
+    async getUsedStatus(organizationId) {
+        const org = await this.ctx.service.lessonOrganization.getByCondition({
+            id: organizationId,
+        });
+
+        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
+        const list = await this.ctx.model.LessonOrganizationActivateCode.getCountByTypeAndState(organizationId);
+        const retObj = {
+            remainder: { // 可生成数量
+                type5: 0,
+                type6: 0,
+                type7: 0,
+            },
+            used: { // 已使用数量
+                type1: 0,
+                type2: 0,
+                type5: 0,
+                type6: 0,
+                type7: 0,
+            },
+        };
+
+        const five = 5;
+        const six = 6;
+        const seven = 7;
+        let [ type5Count, type6Count, type7Count ] = [ 0, 0, 0 ];
+        for (let i = 0; i < list.length; i++) {
+            if (list[i].state === 1) { // 已使用
+                retObj.used[`type${list[i].type}`] = list[i].count;
+            }
+            if (list[i].type === five) type5Count += list[i].count;
+            if (list[i].type === six) type6Count += list[i].count;
+            if (list[i].type === seven) type7Count += list[i].count;
+        }
+
+        retObj.remainder.type5 = type5 - type5Count;
+        retObj.remainder.type6 = type6 - type6Count;
+        retObj.remainder.type7 = type7 - type7Count;
+
+        return retObj;
+    }
+
+    // 激活码设为无效
+    async setInvalid(ids) {
+        return await this.ctx.model.LessonOrganizationActivateCode.update({ state: 2 }, {
+            where: { id: { $in: ids } },
+        });
     }
 }
 
