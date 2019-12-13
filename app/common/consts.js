@@ -70,5 +70,6 @@ module.exports = {
     THREE: 3,
     SIX: 6,
     FIVE: 5,
+    SEVEN: 7,
     FIFTEEN: 15,
 };
