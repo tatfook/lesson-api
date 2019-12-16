@@ -88,6 +88,24 @@ const LessonOrganizationActivateCode = class extends Controller {
         });
     }
 
+    // 学生使用激活码
+    async studentRecharge() {
+        const { userId, username, organizationId } = this.authenticated();
+        const { key, realname } = this.validate();
+        await this.ctx.service.lessonOrganizationActivateCode.studentRecharge(
+            {
+                key,
+                realname,
+            },
+            { userId, username, organizationId }
+        );
+
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+        });
+    }
+
     // 激活码使用情况
     async getUsedStatus() {
         const { organizationId } = this.authenticated();
