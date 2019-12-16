@@ -99,14 +99,13 @@ const LessonOrganization = class extends Controller {
         if (!organizationId) organizationId = organ.id;
 
         // 找到这个人在机构中的members
-        const curtime = new Date();
         let members = await ctx.service.lessonOrganizationClassMember.getAllAndExtraByCondition(
             [
                 {
                     as: 'lessonOrganizationClasses',
                     model: this.model.LessonOrganizationClass,
                     where: {
-                        end: { $gte: curtime },
+                        status: 1,
                     },
                     required: false,
                 },
