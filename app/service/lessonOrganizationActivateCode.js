@@ -297,8 +297,7 @@ class LessonOrgActivateCodeService extends Service {
         const org = await this.ctx.service.lessonOrganization.getByCondition({
             id: organizationId,
         });
-
-        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
+        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit || {};
         const list = await this.ctx.model.LessonOrganizationActivateCode.getCountByTypeAndState(
             organizationId
         );
@@ -324,7 +323,7 @@ class LessonOrgActivateCodeService extends Service {
         const seven = 7;
         let [ type5Count, type6Count, type7Count ] = [ 0, 0, 0 ];
         for (let i = 0; i < list.length; i++) {
-            if (list[i].state === 1) {
+            if (list[i].state === 1 && list[i].type) {
                 // 已使用
                 retObj.used[`type${list[i].type}`] = list[i].count;
             }
