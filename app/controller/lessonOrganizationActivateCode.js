@@ -111,7 +111,10 @@ const LessonOrganizationActivateCode = class extends Controller {
             this.ctx.throw(403, Err.AUTH_ERR);
         }
 
-        await this.ctx.validate(this.validateRules.setInvalid, this.getParams());
+        await this.ctx.validate(
+            this.validateRules.setInvalid,
+            this.getParams()
+        );
 
         await this.ctx.service.lessonOrganizationActivateCode.setInvalid(ids);
         return this.ctx.helper.success({
