@@ -92,9 +92,13 @@ const LessonOrganizationActivateCode = class extends Controller {
     async studentRecharge() {
         const { userId, username, organizationId } = this.authenticated();
         const { key, realname } = this.validate();
-        await this.ctx.service.lessonOrganizationActivateCode.studentRecharge({
-            key, realname,
-        }, { userId, username, organizationId });
+        await this.ctx.service.lessonOrganizationActivateCode.studentRecharge(
+            {
+                key,
+                realname,
+            },
+            { userId, username, organizationId }
+        );
 
         return this.ctx.helper.success({
             ctx: this.ctx,

@@ -3,7 +3,6 @@
 const Service = require('../common/service.js');
 const {
     CLASS_MEMBER_ROLE_ADMIN,
-    CLASS_MEMBER_ROLE_STUDENT,
     FIVE,
     TWO,
     ONE,
@@ -270,14 +269,16 @@ class LessonOrgActivateCodeService extends Service {
                     realname,
                 };
                 if (checkFlag) obj.parentPhoneNum = parentPhoneNum;
-                obj.roleId = 1 | (
-                    _.find(
-                        ms,
-                        m =>
-                            m.classId === data.classIds[i] &&
-                            m.memberId === userId
-                    ) || { roleId: 0 }
-                ).roleId;
+                obj.roleId =
+                    1 |
+                    (
+                        _.find(
+                            ms,
+                            m =>
+                                m.classId === data.classIds[i] &&
+                                m.memberId === userId
+                        ) || { roleId: 0 }
+                    ).roleId;
                 members.push(obj);
             }
         } else {
@@ -316,13 +317,16 @@ class LessonOrgActivateCodeService extends Service {
                 { transaction }
             );
 
-            await this.ctx.model.LessonOrganizationActivateCode.update({
-                activateTime: new Date(),
-                activateUserId: userId,
-                state: 1,
-                username,
-                realname,
-            }, { where: { key }, transaction });
+            await this.ctx.model.LessonOrganizationActivateCode.update(
+                {
+                    activateTime: new Date(),
+                    activateUserId: userId,
+                    state: 1,
+                    username,
+                    realname,
+                },
+                { where: { key }, transaction }
+            );
 
             await transaction.commit();
         } catch (e) {
@@ -356,27 +360,45 @@ class LessonOrgActivateCodeService extends Service {
                     endTime: { $gt: currTime },
                 },
             }),
-            this.ctx.model.LessonOrganizationActivateCode.findOne({ where: { key } }),
+            this.ctx.model.LessonOrganizationActivateCode.findOne({
+                where: { key },
+            }),
         ]);
 
-        if (!members || !members.length) this.ctx.throw(400, Err.MEMBER_NOT_EXISTS);
-        if (!activeCode || activeCode.state !== 0) this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
-        if (activeCode.organizationId !== organizationId) this.ctx.throw(400, Err.ACTIVATE_CODE_NOT_MATCH_ORGAN);
-        if (activeCode.type < FIVE) this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
+        if (!members || !members.length) {
+            this.ctx.throw(400, Err.MEMBER_NOT_EXISTS);
+        }
+        if (!activeCode || activeCode.state !== 0) {
+            this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
+        }
+        if (activeCode.organizationId !== organizationId) {
+            this.ctx.throw(400, Err.ACTIVATE_CODE_NOT_MATCH_ORGAN);
+        }
+        if (activeCode.type < FIVE) {
+            this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
+        }
 
         // 检查机构
-        const org = await this.ctx.model.LessonOrganization.findOne({ where: { id: activeCode.organizationId } });
-        if (!org || new Date(org.endDate) > currTime) this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+        const org = await this.ctx.model.LessonOrganization.findOne({
+            where: { id: activeCode.organizationId },
+        });
+        if (!org || new Date(org.endDate) > currTime) {
+            this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+        }
 
         const newMembers = [];
         if (activeCode.classIds.length) {
-            const classes = await this.ctx.model.LessonOrganizationClass.findAll({
-                where: {
-                    id: { $in: activeCode.classIds },
-                    status: 1,
-                },
-            });
-            if (classes.length !== activeCode.classIds.length) this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
+            const classes = await this.ctx.model.LessonOrganizationClass.findAll(
+                {
+                    where: {
+                        id: { $in: activeCode.classIds },
+                        status: 1,
+                    },
+                }
+            );
+            if (classes.length !== activeCode.classIds.length) {
+                this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
+            }
 
             for (let i = 0; i < activeCode.classIds.length; i++) {
                 const obj = {
@@ -389,14 +411,16 @@ class LessonOrgActivateCodeService extends Service {
                     parentPhoneNum: members[0].parentPhoneNum,
                 };
 
-                obj.roleId = 1 | (
-                    _.find(
-                        members,
-                        m =>
-                            m.classId === activeCode.classIds[i] &&
-                            m.memberId === userId
-                    ) || { roleId: 0 }
-                ).roleId;
+                obj.roleId =
+                    1 |
+                    (
+                        _.find(
+                            members,
+                            m =>
+                                m.classId === activeCode.classIds[i] &&
+                                m.memberId === userId
+                        ) || { roleId: 0 }
+                    ).roleId;
                 newMembers.push(obj);
             }
         } else {
@@ -427,13 +451,16 @@ class LessonOrgActivateCodeService extends Service {
                 { transaction }
             );
 
-            await this.ctx.model.LessonOrganizationActivateCode.update({
-                activateTime: new Date(),
-                activateUserId: userId,
-                state: 1,
-                username,
-                realname,
-            }, { where: { key }, transaction });
+            await this.ctx.model.LessonOrganizationActivateCode.update(
+                {
+                    activateTime: new Date(),
+                    activateUserId: userId,
+                    state: 1,
+                    username,
+                    realname,
+                },
+                { where: { key }, transaction }
+            );
 
             await transaction.commit();
         } catch (e) {
