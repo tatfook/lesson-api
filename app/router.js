@@ -243,6 +243,10 @@ module.exports = app => {
         controller.lessonOrganizationActivateCode;
     router.post(
         `${prefix}lessonOrganizationActivateCodes/activate`,
+        lessonOrganizationActivateCode.studentRecharge
+    );
+    router.post(
+        `${prefix}lessonOrganizationActivateCodes/stuRecharge`,
         lessonOrganizationActivateCode.activate
     );
     router.post(

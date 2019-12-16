@@ -4,9 +4,40 @@ const Service = require('../common/service.js');
 const {
     CLASS_MEMBER_ROLE_ADMIN,
     CLASS_MEMBER_ROLE_STUDENT,
+    FIVE,
+    TWO,
+    ONE,
+    THREE,
+    SIX,
+    FIFTEEN,
 } = require('../common/consts.js');
 const _ = require('lodash');
 const Err = require('../common/err');
+const moment = require('moment');
+
+// 各个类型激活码的过期时间
+const endTimeMap = {
+    1: time =>
+        moment(time)
+            .add(ONE, 'month')
+            .format('YYYY-MM-DD'),
+    2: time =>
+        moment(time)
+            .add(TWO, 'month')
+            .format('YYYY-MM-DD'),
+    5: time =>
+        moment(time)
+            .add(THREE, 'month')
+            .format('YYYY-MM-DD'),
+    6: time =>
+        moment(time)
+            .add(SIX, 'month')
+            .format('YYYY-MM-DD'),
+    7: time =>
+        moment(time)
+            .add(FIFTEEN, 'month')
+            .format('YYYY-MM-DD'),
+};
 
 class LessonOrgActivateCodeService extends Service {
     /**
@@ -171,7 +202,7 @@ class LessonOrgActivateCodeService extends Service {
     }
 
     /**
-     * 使用激活码
+     * 学生使用激活码激活
      * @param {*} params {key, realname, organizationId,parentPhoneNum?,verifCode? }
      * @param {*} authParams {userId, username}
      */
@@ -226,70 +257,189 @@ class LessonOrgActivateCodeService extends Service {
                 memberId: userId,
             }
         );
-        const isClassStudent = _.find(
-            ms,
-            o =>
-                o.classId === data.classId &&
-                o.roleId & CLASS_MEMBER_ROLE_STUDENT
-        );
-        if (isClassStudent) return this.ctx.throw(400, Err.ALREADY_IN_CLASS);
 
-        const isStudent = _.find(ms, o => o.roleId & CLASS_MEMBER_ROLE_STUDENT);
-        if (!isStudent) {
-            const usedCount = await this.ctx.service.lessonOrganization.getOrganMemberCount(
-                data.organizationId
-            );
-            if (organ.count <= usedCount) {
-                return this.ctx.throw(400, Err.MEMBERS_UPPER_LIMIT);
-            }
-        }
-
-        let member = _.find(ms, o => o.classId === data.classId);
-        const roleId = member
-            ? member.roleId | CLASS_MEMBER_ROLE_STUDENT
-            : CLASS_MEMBER_ROLE_STUDENT;
-        if (member) {
-            await this.ctx.service.lessonOrganizationClassMember.updateByCondition(
-                {
-                    roleId,
-                    realname,
-                    parentPhoneNum: checkFlag ? parentPhoneNum : undefined,
-                },
-                { id: member.id }
-            );
-        } else {
-            member = await this.ctx.service.lessonOrganizationClassMember.create(
-                {
-                    organizationId: data.organizationId,
-                    classId: data.classId,
+        const members = [];
+        if (data.classIds.length) {
+            for (let i = 0; i < data.classIds.length; i++) {
+                const obj = {
+                    organizationId,
+                    classId: data.classIds[i],
                     memberId: userId,
-                    roleId,
+                    type: data.type >= FIVE ? TWO : 1,
+                    endTime: endTimeMap[data.type](),
                     realname,
-                    parentPhoneNum: checkFlag ? parentPhoneNum : undefined,
-                }
-            );
+                };
+                if (checkFlag) obj.parentPhoneNum = parentPhoneNum;
+                obj.roleId = 1 | (
+                    _.find(
+                        ms,
+                        m =>
+                            m.classId === data.classIds[i] &&
+                            m.memberId === userId
+                    ) || { roleId: 0 }
+                ).roleId;
+                members.push(obj);
+            }
+        } else {
+            const obj = {
+                organizationId,
+                classId: 0,
+                memberId: userId,
+                type: data.type >= FIVE ? TWO : 1,
+                endTime: endTimeMap[data.type](),
+                realname,
+            };
+            if (checkFlag) obj.parentPhoneNum = parentPhoneNum;
+            obj.roleId =
+                1 |
+                (
+                    _.find(ms, m => m.memberId === userId) || {
+                        roleId: 0,
+                    }
+                ).roleId;
+            members.push(obj);
         }
 
-        await this.ctx.service.lessonOrganizationClassMember.updateByCondition(
-            { realname },
-            { organizationId, memberId: userId }
-        );
+        // 事务操作
+        let member;
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            await this.ctx.model.LessonOrganizationClassMember.destroy({
+                where: {
+                    id: { $in: ms.map(r => r.id) },
+                },
+                transaction,
+            });
+            member = await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
+                members,
+                { transaction }
+            );
 
-        await this.updateByCondition(
-            {
+            await this.ctx.model.LessonOrganizationActivateCode.update({
                 activateTime: new Date(),
                 activateUserId: userId,
                 state: 1,
                 username,
                 realname,
-            },
-            { key }
-        );
+            }, { where: { key }, transaction });
+
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
+        }
+
         // 更新用户vip和t信息
         await this.ctx.service.lessonOrganizationClassMember.updateUserVipAndTLevel(
             userId
         );
-        return Object.assign(member, { roleId, realname });
+        return member;
+    }
+
+    /**
+     * 学生续费
+     * @param {*} params {key, realname}
+     * @param {*} authParams {userId, username,organizationId}
+     */
+    async studentRecharge(params, authParams) {
+        const { userId, username, organizationId } = authParams;
+        const { key, realname } = params;
+        const currTime = new Date();
+        const [ members, activeCode ] = await Promise.all([
+            // 检查这学生是不是在这个机构学生
+            this.ctx.model.LessonOrganizationClassMember.findAll({
+                where: {
+                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    memberId: userId,
+                    organizationId,
+                    endTime: { $gt: currTime },
+                },
+            }),
+            this.ctx.model.LessonOrganizationActivateCode.findOne({ where: { key } }),
+        ]);
+
+        if (!members || !members.length) this.ctx.throw(400, Err.MEMBER_NOT_EXISTS);
+        if (!activeCode || activeCode.state !== 0) this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
+        if (activeCode.organizationId !== organizationId) this.ctx.throw(400, Err.ACTIVATE_CODE_NOT_MATCH_ORGAN);
+        if (activeCode.type < FIVE) this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
+
+        // 检查机构
+        const org = await this.ctx.model.LessonOrganization.findOne({ where: { id: activeCode.organizationId } });
+        if (!org || new Date(org.endDate) > currTime) this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+
+        const newMembers = [];
+        if (activeCode.classIds.length) {
+            const classes = await this.ctx.model.LessonOrganizationClass.findAll({
+                where: {
+                    id: { $in: activeCode.classIds },
+                    status: 1,
+                },
+            });
+            if (classes.length !== activeCode.classIds.length) this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
+
+            for (let i = 0; i < activeCode.classIds.length; i++) {
+                const obj = {
+                    organizationId,
+                    classId: activeCode.classIds[i],
+                    memberId: userId,
+                    type: activeCode.type >= FIVE ? TWO : 1,
+                    endTime: endTimeMap[activeCode.type](members[0].endTime),
+                    realname,
+                    parentPhoneNum: members[0].parentPhoneNum,
+                };
+
+                obj.roleId = 1 | (
+                    _.find(
+                        members,
+                        m =>
+                            m.classId === activeCode.classIds[i] &&
+                            m.memberId === userId
+                    ) || { roleId: 0 }
+                ).roleId;
+                newMembers.push(obj);
+            }
+        } else {
+            const obj = {
+                organizationId,
+                classId: 0,
+                memberId: userId,
+                type: activeCode.type >= FIVE ? TWO : 1,
+                endTime: endTimeMap[activeCode.type](members[0].endTime),
+                realname,
+                parentPhoneNum: members[0].parentPhoneNum,
+            };
+            newMembers.push(obj);
+        }
+
+        // 事务操作
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            await this.ctx.model.LessonOrganizationClassMember.destroy({
+                where: {
+                    id: { $in: members.map(r => r.id) },
+                },
+                transaction,
+            });
+            await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
+                newMembers,
+                { transaction }
+            );
+
+            await this.ctx.model.LessonOrganizationActivateCode.update({
+                activateTime: new Date(),
+                activateUserId: userId,
+                state: 1,
+                username,
+                realname,
+            }, { where: { key }, transaction });
+
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
+        }
     }
 
     // 激活码使用情况
