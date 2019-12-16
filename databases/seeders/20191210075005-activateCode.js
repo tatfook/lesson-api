@@ -44,10 +44,12 @@ module.exports = {
                 { type: Sequelize.QueryTypes.UPDATE, transaction }
             );
 
-
-            await queryInterface.sequelize.query(`
+            await queryInterface.sequelize.query(
+                `
             update lessonOrganizations set activateCodeLimit = \'{\"type5\":0,\"type6\":0,\"type7\":0}\'
-            `, { type: Sequelize.QueryTypes.UPDATE, transaction })
+            `,
+                { type: Sequelize.QueryTypes.UPDATE, transaction }
+            );
 
             await transaction.commit();
         } catch (e) {
