@@ -11,17 +11,10 @@ const LessonOrganizationActivateCode = class extends Controller {
     }
 
     async create() {
-        const {
-            userId,
-            organizationId,
-            roleId,
-            username,
-        } = this.authenticated();
-        const params = this.validate({ count: 'number', classId: 'number' });
-
+        const params = this.validate(); // params:{classIds?,type,count,names?}
         const list = await this.ctx.service.lessonOrganizationActivateCode.createActivateCode(
             params,
-            { userId, organizationId, roleId, username }
+            this.authenticated()
         );
 
         return this.ctx.helper.success({
@@ -52,13 +45,7 @@ const LessonOrganizationActivateCode = class extends Controller {
 
         const data = await this.ctx.service.lessonOrganizationActivateCode.findAllActivateCodeAndCount(
             this.queryOptions,
-            where,
-            [
-                {
-                    as: 'lessonOrganizationClasses',
-                    model: this.model.LessonOrganizationClass,
-                },
-            ]
+            where
         );
 
         return this.ctx.helper.success({
@@ -94,6 +81,36 @@ const LessonOrganizationActivateCode = class extends Controller {
             ctx: this.ctx,
             status: 200,
             res: data,
+        });
+    }
+
+    // 激活码使用情况
+    async getUsedStatus() {
+        const { organizationId } = this.authenticated();
+
+        const ret = await this.ctx.service.lessonOrganizationActivateCode.getUsedStatus(
+            organizationId
+        );
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+            res: ret,
+        });
+    }
+
+    // 设为无效
+    async setInvalid() {
+        const { roleId } = this.authenticated();
+        const { ids } = this.validate();
+
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
+            this.ctx.throw(403, Err.AUTH_ERR);
+        }
+
+        await this.ctx.service.lessonOrganizationActivateCode.setInvalid(ids);
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
         });
     }
 };

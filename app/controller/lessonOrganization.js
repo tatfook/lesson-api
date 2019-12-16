@@ -213,6 +213,13 @@ const LessonOrganization = class extends Controller {
             id,
         });
         if (!organ) return ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+        // 检查正式激活码上限
+        const { type5 = 0, type6 = 0, type7 = 0 } = params.activateCodeLimit;
+        await ctx.service.lessonOrganization.checkActivateCodeLimit(id, {
+            type5,
+            type6,
+            type7,
+        });
 
         if (this.ctx.state.admin && this.ctx.state.admin.userId) {
             await ctx.service.lessonOrganization.updateOrganization(

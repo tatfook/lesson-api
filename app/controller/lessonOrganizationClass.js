@@ -1,11 +1,8 @@
 'use strict';
 
 const Controller = require('./baseController.js');
-
 const { CLASS_MEMBER_ROLE_ADMIN } = require('../common/consts.js');
-
 const Err = require('../common/err');
-const moment = require('moment');
 
 const LessonOrganizationClass = class extends Controller {
     get modelName() {
@@ -38,7 +35,7 @@ const LessonOrganizationClass = class extends Controller {
             list = await this.ctx.service.lessonOrganizationClass.findAllByCondition(
                 {
                     organizationId,
-                    end: { $gt: moment().format('YYYY-MM-DD HH:mm:ss') },
+                    status: 1,
                 }
             );
         } else {
@@ -141,6 +138,23 @@ const LessonOrganizationClass = class extends Controller {
             ctx: this.ctx,
             status: 200,
             res: members,
+        });
+    }
+
+    // 关闭班级
+    async closeClass() {
+        const { roleId } = this.authenticated();
+        const { classId } = this.validate();
+
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
+            return this.ctx.throw(403, Err.AUTH_ERR);
+        }
+
+        await this.ctx.service.lessonOrganizationClass.closeClass(classId);
+
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
         });
     }
 };

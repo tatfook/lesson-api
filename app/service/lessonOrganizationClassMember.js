@@ -5,9 +5,44 @@ const {
     CLASS_MEMBER_ROLE_TEACHER,
     CLASS_MEMBER_ROLE_STUDENT,
     CLASS_MEMBER_ROLE_ADMIN,
+    ONE,
+    TWO,
+    THREE,
+    FIVE,
+    SIX,
+    TEN,
+    FIFTEEN,
+    NINTYNINE,
 } = require('../common/consts.js');
 const Err = require('../common/err');
 const _ = require('lodash');
+const moment = require('moment');
+const formalTypes = [ '5', '6', '7' ]; // 正式邀请码类型
+const allCodeTypes = [ '1', '2', '5', '6', '7' ]; // 全部邀请码类型
+
+// 各个类型激活码的过期时间
+const endTimeMap = {
+    1: time =>
+        moment(time)
+            .add(ONE, 'month')
+            .format('YYYY-MM-DD'),
+    2: time =>
+        moment(time)
+            .add(TWO, 'month')
+            .format('YYYY-MM-DD'),
+    5: time =>
+        moment(time)
+            .add(THREE, 'month')
+            .format('YYYY-MM-DD'),
+    6: time =>
+        moment(time)
+            .add(SIX, 'month')
+            .format('YYYY-MM-DD'),
+    7: time =>
+        moment(time)
+            .add(FIFTEEN, 'month')
+            .format('YYYY-MM-DD'),
+};
 
 class LessonOrgClassMemberService extends Service {
     /**
@@ -165,8 +200,6 @@ class LessonOrgClassMemberService extends Service {
         const memberIds = members.map(o => o.memberId);
         if (memberIds.length === 0) return { count: 0, rows: [] };
 
-        const curtime = new Date();
-
         const [ list, users ] = await Promise.all([
             this.model.LessonOrganizationClassMember.findAll({
                 include: [
@@ -174,7 +207,7 @@ class LessonOrgClassMemberService extends Service {
                         as: 'lessonOrganizationClasses',
                         model: this.model.LessonOrganizationClass,
                         where: {
-                            end: { $gte: curtime },
+                            status: 1,
                         },
                         required: false,
                     },
@@ -299,8 +332,7 @@ class LessonOrgClassMemberService extends Service {
             if (
                 o.roleId === CLASS_MEMBER_ROLE_STUDENT &&
                 o.lessonOrganizationClasses &&
-                new Date(o.lessonOrganizationClasses.end).getTime() <
-                    new Date().getTime()
+                o.lessonOrganizationClasses.status === 1
             ) {
                 return false;
             }
@@ -329,21 +361,6 @@ class LessonOrgClassMemberService extends Service {
             id: organizationId,
         });
         if (!organ) return this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
-
-        // 检查人数是否达到上限
-        const organCount = organ.count;
-        const isStudent = !!_.find(
-            oldmembers,
-            o => o.roleId & CLASS_MEMBER_ROLE_STUDENT
-        );
-        if (!isStudent && params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
-            const usedCount = await this.ctx.service.lessonOrganization.getOrganMemberCount(
-                organizationId
-            );
-            if (usedCount >= organCount && classIds.length > 0) {
-                return this.ctx.throw(400, Err.MEMBERS_UPPER_LIMIT);
-            }
-        }
 
         await this.ctx.service.lessonOrganizationLog.studentLog({
             ...params,
@@ -553,6 +570,561 @@ class LessonOrgClassMemberService extends Service {
             delete updateParam.tLevel;
         }
         await this.ctx.service.keepwork.updateUser(userId, updateParam);
+    }
+
+    // 试听转正式
+    async toFormal(
+        userIds,
+        type,
+        classIds,
+        { organizationId, userId, username }
+    ) {
+        if (!formalTypes.includes(type + '')) {
+            this.ctx.throw(400, Err.STU_TYPE_ERR);
+        }
+        const [ members, classes, org, historyCount ] = await Promise.all([
+            // 检查这些学生是不是在这个机构试听
+            this.ctx.model.LessonOrganizationClassMember.findAll({
+                where: {
+                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    memberId: { $in: userIds },
+                    organizationId,
+                    type: 1,
+                },
+            }),
+            // 检查班级
+            this.ctx.model.LessonOrganizationClass.findAll({
+                where: {
+                    id: { $in: classIds },
+                    organizationId,
+                    status: 1,
+                },
+            }),
+            // 获取机构
+            this.ctx.service.lessonOrganization.getByCondition({
+                id: organizationId,
+                endDate: { $gte: new Date() },
+            }),
+            // 已经用了多少这个类型的激活码
+            this.ctx.service.lessonOrganizationActivateCode.getCountByCondition(
+                {
+                    organizationId,
+                    type,
+                    state: {
+                        $in: [ '0', '1' ],
+                    },
+                }
+            ),
+        ]);
+        if (members.length < userIds.length) {
+            this.ctx.throw(400, Err.MEMBER_NOT_EXISTS);
+        }
+        if (classes.length !== classIds.length) {
+            this.ctx.throw(400, Err.CLASSID_ERR);
+        }
+
+        // 激活码上限检查
+        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
+        const map = {
+            5: type5,
+            6: type6,
+            7: type7,
+        };
+        if (historyCount + userIds.length > map[type]) {
+            this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED);
+        }
+
+        // 激活码数据,状态是已激活
+        const datas = [];
+        const currTime = new Date();
+        for (let i = 0; i < userIds.length; i++) {
+            datas.push({
+                organizationId,
+                classIds,
+                type,
+                state: 1,
+                activateUserId: userIds[i],
+                activateTime: currTime,
+                key: `${
+                    classIds ? classIds.reduce((p, c) => p + c, '') : ''
+                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                name: '',
+            });
+        }
+
+        // 事务操作
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            // 创建激活码
+            await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(
+                datas,
+                { transaction }
+            );
+
+            // 创建成员
+            const objs = [];
+            for (let i = 0; i < userIds.length; i++) {
+                const index = _.findIndex(
+                    members,
+                    o => o.memberId === userIds[i]
+                );
+                let realname;
+                let parentPhoneNum;
+                if (index > -1) {
+                    realname = members[index].realname;
+                    parentPhoneNum = members[index].parentPhoneNum;
+                }
+                if (classIds.length) {
+                    for (let j = 0; j < classIds.length; j++) {
+                        const obj = {
+                            organizationId,
+                            classId: classIds[j],
+                            memberId: userIds[i],
+                            type: 2,
+                            endTime: endTimeMap[type](),
+                            realname,
+                            parentPhoneNum,
+                        };
+                        // 这儿给他合并一下身份，以免丢失teacher或admin身份
+                        obj.roleId =
+                            1 |
+                            (
+                                _.find(
+                                    members,
+                                    m =>
+                                        m.classId === classIds[j] &&
+                                        m.memberId === userIds[i]
+                                ) || { roleId: 0 }
+                            ).roleId;
+
+                        objs.push(obj);
+                    }
+                } else {
+                    const obj = {
+                        organizationId,
+                        classId: 0,
+                        memberId: userIds[i],
+                        type: 2,
+                        endTime: endTimeMap[type](),
+                        realname,
+                        parentPhoneNum,
+                    };
+                    obj.roleId =
+                        1 |
+                        (
+                            _.find(members, m => m.memberId === userIds[i]) || {
+                                roleId: 0,
+                            }
+                        ).roleId;
+                    objs.push(obj);
+                }
+            }
+
+            // 把之前的试用身份都删了，然后再创建
+            await this.ctx.model.LessonOrganizationClassMember.destroy({
+                where: {
+                    id: { $in: members.map(r => r.id) },
+                },
+                transaction,
+            });
+            await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
+                objs,
+                { transaction }
+            );
+
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
+        }
+
+        await this.activateCodeLog(
+            classes,
+            organizationId,
+            userIds,
+            userId,
+            username
+        );
+    }
+
+    // 续费
+    async recharge(
+        userIds,
+        type,
+        classIds,
+        { organizationId, userId, username }
+    ) {
+        if (!formalTypes.includes(type + '')) {
+            this.ctx.throw(400, Err.STU_TYPE_ERR);
+        }
+        const currTime = new Date();
+        const [ members, classes, org, historyCount ] = await Promise.all([
+            // 检查这些学生是不是在这个机构正式学生
+            this.ctx.model.LessonOrganizationClassMember.findAll({
+                where: {
+                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    memberId: { $in: userIds },
+                    organizationId,
+                    type: 2,
+                    endTime: { $gt: currTime },
+                },
+            }),
+            // 检查班级
+            this.ctx.model.LessonOrganizationClass.findAll({
+                where: {
+                    id: { $in: classIds },
+                    organizationId,
+                    status: 1,
+                },
+            }),
+            // 获取机构
+            this.ctx.service.lessonOrganization.getByCondition({
+                id: organizationId,
+                endDate: { $gte: currTime },
+            }),
+            // 已经用了多少这个类型的激活码
+            this.ctx.service.lessonOrganizationActivateCode.getCountByCondition(
+                {
+                    organizationId,
+                    type,
+                    state: {
+                        $in: [ '0', '1' ],
+                    },
+                }
+            ),
+        ]);
+        if (members.length < userIds.length) {
+            this.ctx.throw(400, Err.MEMBER_NOT_EXISTS);
+        }
+        if (classes.length !== classIds.length) {
+            this.ctx.throw(400, Err.CLASSID_ERR);
+        }
+
+        // 激活码上限检查
+        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
+        const map = {
+            5: type5,
+            6: type6,
+            7: type7,
+        };
+        if (historyCount + userIds.length > map[type]) {
+            this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED);
+        }
+
+        // 激活码数据,状态是已激活
+        const datas = [];
+        for (let i = 0; i < userIds.length; i++) {
+            datas.push({
+                organizationId,
+                classIds,
+                type,
+                state: 1,
+                activateUserId: userIds[i],
+                activateTime: currTime,
+                key: `${
+                    classIds ? classIds.reduce((p, c) => p + c, '') : ''
+                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                name: '',
+            });
+        }
+
+        // 事务操作
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            // 创建激活码
+            await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(
+                datas,
+                { transaction }
+            );
+
+            // 创建成员
+            const objs = [];
+            for (let i = 0; i < userIds.length; i++) {
+                const index = _.findIndex(
+                    members,
+                    o => o.memberId === userIds[i]
+                );
+                let realname;
+                let parentPhoneNum;
+                let oldEndTime;
+                if (index > -1) {
+                    realname = members[index].realname;
+                    parentPhoneNum = members[index].parentPhoneNum;
+                    oldEndTime = members[index].endTime;
+                }
+                if (classIds.length) {
+                    for (let j = 0; j < classIds.length; j++) {
+                        const obj = {
+                            organizationId,
+                            classId: classIds[j],
+                            memberId: userIds[i],
+                            type: 2,
+                            endTime: endTimeMap[type](oldEndTime),
+                            realname,
+                            parentPhoneNum,
+                        };
+                        // 这儿给他合并一下身份，以免丢失teacher或admin身份
+                        obj.roleId =
+                            1 |
+                            (
+                                _.find(
+                                    members,
+                                    m =>
+                                        m.classId === classIds[j] &&
+                                        m.memberId === userIds[i]
+                                ) || { roleId: 0 }
+                            ).roleId;
+
+                        objs.push(obj);
+                    }
+                } else {
+                    const obj = {
+                        organizationId,
+                        classId: 0,
+                        memberId: userIds[i],
+                        type: 2,
+                        endTime: endTimeMap[type](oldEndTime),
+                        realname,
+                        parentPhoneNum,
+                    };
+                    obj.roleId =
+                        1 |
+                        (
+                            _.find(members, m => m.memberId === userIds[i]) || {
+                                roleId: 0,
+                            }
+                        ).roleId;
+                    objs.push(obj);
+                }
+            }
+
+            // 把之前的都删了，然后再创建
+            await this.ctx.model.LessonOrganizationClassMember.destroy({
+                where: {
+                    id: { $in: members.map(r => r.id) },
+                },
+                transaction,
+            });
+            await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
+                objs,
+                { transaction }
+            );
+
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
+        }
+
+        await this.activateCodeLog(
+            classes,
+            organizationId,
+            userIds,
+            userId,
+            username
+        );
+    }
+
+    // 重新激活学生
+    async reactivate(
+        userIds,
+        type,
+        classIds,
+        { organizationId, userId, username }
+    ) {
+        if (!allCodeTypes.includes(type + '')) {
+            this.ctx.throw(400, Err.STU_TYPE_ERR);
+        }
+
+        const currTime = new Date();
+        const [ members, classes, org, historyCount ] = await Promise.all([
+            // 检查这些学生是不是过期了
+            this.ctx.model.LessonOrganizationClassMember.findAll({
+                where: {
+                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    memberId: { $in: userIds },
+                    organizationId,
+                    endTime: { $lt: currTime },
+                },
+            }),
+            // 检查班级
+            this.ctx.model.LessonOrganizationClass.findAll({
+                where: {
+                    id: { $in: classIds },
+                    organizationId,
+                    status: 1,
+                },
+            }),
+            // 获取机构
+            this.ctx.service.lessonOrganization.getByCondition({
+                id: organizationId,
+                endDate: { $gte: currTime },
+            }),
+            // 已经用了多少这个类型的激活码
+            this.ctx.service.lessonOrganizationActivateCode.getCountByCondition(
+                {
+                    organizationId,
+                    type,
+                    state: {
+                        $in: [ '0', '1' ],
+                    },
+                }
+            ),
+        ]);
+        if (members.length < userIds.length) {
+            this.ctx.throw(400, Err.MEMBER_NOT_EXISTS);
+        }
+        if (classes.length !== classIds.length) {
+            this.ctx.throw(400, Err.CLASSID_ERR);
+        }
+
+        // 激活码上限检查
+        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
+        const map = {
+            5: type5,
+            6: type6,
+            7: type7,
+        };
+        if (map[type] && historyCount + userIds.length > map[type]) {
+            this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED);
+        }
+
+        // 激活码数据,状态是已激活
+        const datas = [];
+        for (let i = 0; i < userIds.length; i++) {
+            datas.push({
+                organizationId,
+                classIds,
+                type,
+                state: 1,
+                activateUserId: userIds[i],
+                activateTime: currTime,
+                key: `${
+                    classIds ? classIds.reduce((p, c) => p + c, '') : ''
+                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                name: '',
+            });
+        }
+
+        // 事务操作
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            // 创建激活码
+            await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(
+                datas,
+                { transaction }
+            );
+
+            // 创建成员
+            const objs = [];
+            for (let i = 0; i < userIds.length; i++) {
+                const index = _.findIndex(
+                    members,
+                    o => o.memberId === userIds[i]
+                );
+                let realname;
+                let parentPhoneNum;
+                if (index > -1) {
+                    realname = members[index].realname;
+                    parentPhoneNum = members[index].parentPhoneNum;
+                }
+                if (classIds.length) {
+                    for (let j = 0; j < classIds.length; j++) {
+                        const obj = {
+                            organizationId,
+                            classId: classIds[j],
+                            memberId: userIds[i],
+                            type: type >= FIVE ? TWO : 1,
+                            endTime: endTimeMap[type](),
+                            realname,
+                            parentPhoneNum,
+                        };
+                        // 这儿给他合并一下身份，以免丢失teacher或admin身份
+                        obj.roleId =
+                            1 |
+                            (
+                                _.find(
+                                    members,
+                                    m =>
+                                        m.classId === classIds[j] &&
+                                        m.memberId === userIds[i]
+                                ) || { roleId: 0 }
+                            ).roleId;
+
+                        objs.push(obj);
+                    }
+                } else {
+                    const obj = {
+                        organizationId,
+                        classId: 0,
+                        memberId: userIds[i],
+                        type: type >= FIVE ? TWO : 1,
+                        endTime: endTimeMap[type](),
+                        realname,
+                        parentPhoneNum,
+                    };
+                    obj.roleId =
+                        1 |
+                        (
+                            _.find(members, m => m.memberId === userIds[i]) || {
+                                roleId: 0,
+                            }
+                        ).roleId;
+                    objs.push(obj);
+                }
+            }
+            // 把之前的都删了，然后再创建
+            await this.ctx.model.LessonOrganizationClassMember.destroy({
+                where: {
+                    id: { $in: members.map(r => r.id) },
+                },
+                transaction,
+            });
+            await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
+                objs,
+                { transaction }
+            );
+
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
+        }
+
+        await this.activateCodeLog(
+            classes,
+            organizationId,
+            userIds,
+            userId,
+            username
+        );
+    }
+
+    // 激活码log
+    async activateCodeLog(classes, organizationId, userIds, userId, username) {
+        const name = classes.reduce((p, c) => `${p},${c.name}`, '') || '';
+        await this.ctx.service.lessonOrganizationLog.classLog({
+            organizationId,
+            cls: { name: name.slice(1) },
+            action: 'activateCode',
+            count: userIds.length,
+            handleId: userId,
+            username,
+        });
+    }
+
+    // 历史学生
+    async historyStudents(classId, type, username, organizationId) {
+        const ret = await this.ctx.model.LessonOrganizationClassMember.historyStudents(
+            classId,
+            type,
+            username,
+            organizationId
+        );
+        return { count: ret[1][0].count, rows: ret[0] };
     }
 }
 

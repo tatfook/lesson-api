@@ -190,6 +190,10 @@ module.exports = app => {
         lessonOrganizationClass.latestProject
     );
     router.put(
+        `${prefix}lessonOrganizationClasses/end`,
+        lessonOrganizationClass.closeClass
+    );
+    router.put(
         `${prefix}lessonOrganizationClasses/:id`,
         lessonOrganizationClass.update
     );
@@ -213,6 +217,22 @@ module.exports = app => {
         `${prefix}lessonOrganizationClassMembers/bulk`,
         lessonOrganizationClassMember.bulkCreate
     );
+    router.post(
+        `${prefix}lessonOrganizationClassMembers/formal`,
+        lessonOrganizationClassMember.toFormal
+    );
+    router.post(
+        `${prefix}lessonOrganizationClassMembers/recharge`,
+        lessonOrganizationClassMember.recharge
+    );
+    router.get(
+        `${prefix}lessonOrganizationClassMembers/historyStudents`,
+        lessonOrganizationClassMember.historyStudents
+    );
+    router.post(
+        `${prefix}lessonOrganizationClassMembers/reactivate`,
+        lessonOrganizationClassMember.reactivate
+    );
     router.resources(
         `${prefix}lessonOrganizationClassMembers`,
         lessonOrganizationClassMember
@@ -228,6 +248,14 @@ module.exports = app => {
     router.post(
         `${prefix}lessonOrganizationActivateCodes/search`,
         lessonOrganizationActivateCode.index
+    );
+    router.get(
+        `${prefix}lessonOrganizationActivateCodes/usedStatus`,
+        lessonOrganizationActivateCode.getUsedStatus
+    );
+    router.put(
+        `${prefix}lessonOrganizationActivateCodes/invalid`,
+        lessonOrganizationActivateCode.setInvalid
     );
     router.resources(
         `${prefix}lessonOrganizationActivateCodes`,
