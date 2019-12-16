@@ -194,7 +194,6 @@ class LessonOrgActivateCodeService extends Service {
             checkFlag = true;
         }
 
-        const curtime = new Date().getTime();
         const data = await this.getByCondition({ key, state: 0 });
         if (!data) return this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
 
@@ -203,15 +202,17 @@ class LessonOrgActivateCodeService extends Service {
         }
         organizationId = data.organizationId;
 
-        const cls = await this.ctx.service.lessonOrganizationClass.getByCondition(
-            {
-                id: data.classId,
+        if (data.classIds.length) {
+            const classes = await this.ctx.service.lessonOrganizationClass.getByCondition(
+                {
+                    id: { $in: data.classIds },
+                    status: 1,
+                }
+            );
+            if (classes.length !== data.classIds.length) {
+                return this.ctx.throw(400, Err.CLASS_IS_FINISH);
             }
-        );
-        if (!cls) return this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
-
-        const end = new Date(cls.end).getTime();
-        if (curtime > end) return this.ctx.throw(400, Err.CLASS_IS_FINISH);
+        }
 
         const organ = await this.ctx.service.lessonOrganization.getByCondition({
             id: data.organizationId,
@@ -296,8 +297,7 @@ class LessonOrgActivateCodeService extends Service {
         const org = await this.ctx.service.lessonOrganization.getByCondition({
             id: organizationId,
         });
-
-        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
+        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit || {};
         const list = await this.ctx.model.LessonOrganizationActivateCode.getCountByTypeAndState(
             organizationId
         );
@@ -323,7 +323,7 @@ class LessonOrgActivateCodeService extends Service {
         const seven = 7;
         let [ type5Count, type6Count, type7Count ] = [ 0, 0, 0 ];
         for (let i = 0; i < list.length; i++) {
-            if (list[i].state === 1) {
+            if (list[i].state === 1 && list[i].type) {
                 // 已使用
                 retObj.used[`type${list[i].type}`] = list[i].count;
             }
