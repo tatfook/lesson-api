@@ -135,14 +135,13 @@ class LessonOrgClassMemberService extends Service {
         const memberIds = members.map(o => o.memberId);
         if (memberIds.length === 0) return [];
 
-        const curtime = new Date();
         const list = await this.model.LessonOrganizationClassMember.findAll({
             include: [
                 {
                     as: 'lessonOrganizationClasses',
                     model: this.model.LessonOrganizationClass,
                     where: {
-                        end: { $gte: curtime },
+                        status: 1,
                     },
                     required: false,
                 },

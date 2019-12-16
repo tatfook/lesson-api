@@ -194,7 +194,6 @@ class LessonOrgActivateCodeService extends Service {
             checkFlag = true;
         }
 
-        const curtime = new Date().getTime();
         const data = await this.getByCondition({ key, state: 0 });
         if (!data) return this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
 
@@ -203,15 +202,17 @@ class LessonOrgActivateCodeService extends Service {
         }
         organizationId = data.organizationId;
 
-        const cls = await this.ctx.service.lessonOrganizationClass.getByCondition(
-            {
-                id: data.classId,
+        if (data.classIds.length) {
+            const classes = await this.ctx.service.lessonOrganizationClass.getByCondition(
+                {
+                    id: { $in: data.classIds },
+                    status: 1,
+                }
+            );
+            if (classes.length !== data.classIds.length) {
+                return this.ctx.throw(400, Err.CLASS_IS_FINISH);
             }
-        );
-        if (!cls) return this.ctx.throw(400, Err.INVALID_ACTIVATE_CODE);
-
-        const end = new Date(cls.end).getTime();
-        if (curtime > end) return this.ctx.throw(400, Err.CLASS_IS_FINISH);
+        }
 
         const organ = await this.ctx.service.lessonOrganization.getByCondition({
             id: data.organizationId,
