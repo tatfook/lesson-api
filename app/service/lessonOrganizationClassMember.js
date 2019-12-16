@@ -422,7 +422,7 @@ class LessonOrgClassMemberService extends Service {
             {
                 where: {
                     memberId: params.memberId,
-                    organizationId: oldmembers[0].organizationId,
+                    organizationId,
                 },
             }
         );
