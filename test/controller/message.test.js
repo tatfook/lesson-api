@@ -41,7 +41,7 @@ describe('test/controller/message.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(ret.message === '消息类型错误');
     });
 
@@ -63,7 +63,7 @@ describe('test/controller/message.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(ret.message === '消息内容长度错误');
     });
 
@@ -85,7 +85,7 @@ describe('test/controller/message.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(ret.message === '参数错误');
     });
 

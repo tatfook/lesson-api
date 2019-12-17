@@ -233,7 +233,7 @@ class LessonOrgActivateCodeService extends Service {
         organizationId = data.organizationId;
 
         if (data.classIds.length) {
-            const classes = await this.ctx.service.lessonOrganizationClass.getByCondition(
+            const classes = await this.ctx.service.lessonOrganizationClass.findAllByCondition(
                 {
                     id: { $in: data.classIds },
                     status: 1,

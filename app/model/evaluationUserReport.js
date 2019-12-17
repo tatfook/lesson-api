@@ -418,9 +418,7 @@ module.exports = app => {
 		  		lessonOrganizationClasses c
                   left join lessonOrganizationClassMembers m 
                   on m.classId = c.id and m.roleId & 2 and m.organizationId = c.organizationId
-			where c.organizationId = :organizationId and c.end > '${moment().format(
-        'YYYY-MM-DD HH:mm:ss'
-    )}'
+			where c.organizationId = :organizationId and c.status=1
 			group by c.id
 		) a
 		left join(

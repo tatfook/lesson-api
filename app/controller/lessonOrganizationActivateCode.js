@@ -88,7 +88,7 @@ const LessonOrganizationActivateCode = class extends Controller {
         });
     }
 
-    // 学生使用激活码
+    // 学生续费
     async studentRecharge() {
         const { userId, username, organizationId } = this.authenticated();
         const { key, realname } = this.validate();

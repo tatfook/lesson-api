@@ -26,7 +26,7 @@ describe('test/controller/admins.test.js', () => {
                 .send({ sql: 'select * from users;' })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(400)
-                .then(res => res.body);
+                .then(res => JSON.parse(res.text));
             assert(users.message === 'SQL不合法');
         });
 
@@ -37,7 +37,7 @@ describe('test/controller/admins.test.js', () => {
                 .send({ sql: 'delete from users' })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(400)
-                .then(res => res.body);
+                .then(res => JSON.parse(res.text));
             assert(users.message === 'SQL不合法');
         });
     });
@@ -55,7 +55,7 @@ describe('test/controller/admins.test.js', () => {
         });
 
         it('002 model不存在', async () => {
-            const users = await app
+            await app
                 .httpRequest()
                 .post('/admins/abc/query')
                 .send({ where: { id: { $gt: 0 } } })
