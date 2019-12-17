@@ -9,12 +9,12 @@ describe('test/service/evaluationReport.test.js', () => {
         await app.model.LessonOrganizationClass.create({
             organizationId: 1,
             name: '什么班级',
-            end: '2029-10-21 00:00:00',
+            status: 1
         });
         await app.model.LessonOrganizationClass.create({
             organizationId: 1,
             name: '什么班级2',
-            end: '2029-10-21 00:00:00',
+            status: 1
         });
         await app.model.LessonOrganizationClassMember.create({
             organizationId: 1,
@@ -275,12 +275,12 @@ describe('test/service/evaluationReport.test.js', () => {
         );
         assert(
             ret.starAvg === '1.00' &&
-                ret.spatialAvg === '1.00' &&
-                ret.collaborativeAvg === '1.00' &&
-                ret.creativeAvg === '1.00' &&
-                ret.logicalAvg === '1.00' &&
-                ret.computeAvg === '1.00' &&
-                ret.coordinateAvg === '1.00'
+            ret.spatialAvg === '1.00' &&
+            ret.collaborativeAvg === '1.00' &&
+            ret.creativeAvg === '1.00' &&
+            ret.logicalAvg === '1.00' &&
+            ret.computeAvg === '1.00' &&
+            ret.coordinateAvg === '1.00'
         );
     });
 
@@ -309,12 +309,12 @@ describe('test/service/evaluationReport.test.js', () => {
         );
         assert(
             ret.starAvg === '5.00' &&
-                ret.spatialAvg === '2.00' &&
-                ret.collaborativeAvg === '3.00' &&
-                ret.creativeAvg === '3.00' &&
-                ret.logicalAvg === '5.00' &&
-                ret.computeAvg === '2.00' &&
-                ret.coordinateAvg === '3.00'
+            ret.spatialAvg === '2.00' &&
+            ret.collaborativeAvg === '3.00' &&
+            ret.creativeAvg === '3.00' &&
+            ret.logicalAvg === '5.00' &&
+            ret.computeAvg === '2.00' &&
+            ret.coordinateAvg === '3.00'
         );
     });
 
@@ -344,12 +344,12 @@ describe('test/service/evaluationReport.test.js', () => {
         );
         assert(
             ret.starAvg === '5.00' &&
-                ret.spatialAvg === '2.00' &&
-                ret.collaborativeAvg === '3.00' &&
-                ret.creativeAvg === '3.00' &&
-                ret.logicalAvg === '5.00' &&
-                ret.computeAvg === '2.00' &&
-                ret.coordinateAvg === '3.00'
+            ret.spatialAvg === '2.00' &&
+            ret.collaborativeAvg === '3.00' &&
+            ret.creativeAvg === '3.00' &&
+            ret.logicalAvg === '5.00' &&
+            ret.computeAvg === '2.00' &&
+            ret.coordinateAvg === '3.00'
         );
     });
 
@@ -391,12 +391,12 @@ describe('test/service/evaluationReport.test.js', () => {
         );
         assert(
             ret.starAvg === '4.00' &&
-                ret.spatialAvg === '3.00' &&
-                ret.collaborativeAvg === '3.00' &&
-                ret.creativeAvg === '3.00' &&
-                ret.logicalAvg === '5.00' &&
-                ret.computeAvg === '2.00' &&
-                ret.coordinateAvg === '3.00'
+            ret.spatialAvg === '3.00' &&
+            ret.collaborativeAvg === '3.00' &&
+            ret.creativeAvg === '3.00' &&
+            ret.logicalAvg === '5.00' &&
+            ret.computeAvg === '2.00' &&
+            ret.coordinateAvg === '3.00'
         );
     });
 
@@ -423,12 +423,12 @@ describe('test/service/evaluationReport.test.js', () => {
         });
         assert(
             ret.starCount === '3' &&
-                ret.spatialCount === '4' &&
-                ret.collaborativeCount === '3' &&
-                ret.creativeCount === '3' &&
-                ret.logicalCount === '5' &&
-                ret.computeCount === '2' &&
-                ret.coordinateCount === '3'
+            ret.spatialCount === '4' &&
+            ret.collaborativeCount === '3' &&
+            ret.creativeCount === '3' &&
+            ret.logicalCount === '5' &&
+            ret.computeCount === '2' &&
+            ret.coordinateCount === '3'
         );
     });
 
@@ -457,12 +457,12 @@ describe('test/service/evaluationReport.test.js', () => {
         assert(ret.length === 1);
         assert(
             ret[0].star === 3 &&
-                ret[0].spatial === 4 &&
-                ret[0].collaborative === 3 &&
-                ret[0].creative === 3 &&
-                ret[0].logical === 5 &&
-                ret[0].compute === 2 &&
-                ret[0].coordinate === 3
+            ret[0].spatial === 4 &&
+            ret[0].collaborative === 3 &&
+            ret[0].creative === 3 &&
+            ret[0].logical === 5 &&
+            ret[0].compute === 2 &&
+            ret[0].coordinate === 3
         );
     });
 
@@ -489,12 +489,12 @@ describe('test/service/evaluationReport.test.js', () => {
         assert(ret.length === 1);
         assert(
             ret[0].starAvg === '3.00' &&
-                ret[0].spatialAvg === '4.00' &&
-                ret[0].collaborativeAvg === '3.00' &&
-                ret[0].creativeAvg === '3.00' &&
-                ret[0].logicalAvg === '5.00' &&
-                ret[0].computeAvg === '2.00' &&
-                ret[0].coordinateAvg === '3.00'
+            ret[0].spatialAvg === '4.00' &&
+            ret[0].collaborativeAvg === '3.00' &&
+            ret[0].creativeAvg === '3.00' &&
+            ret[0].logicalAvg === '5.00' &&
+            ret[0].computeAvg === '2.00' &&
+            ret[0].coordinateAvg === '3.00'
         );
     });
 
@@ -532,27 +532,27 @@ describe('test/service/evaluationReport.test.js', () => {
 
         assert(
             userRepo.star === 3 &&
-                userRepo.spatial === 4 &&
-                userRepo.collaborative === 3 &&
-                userRepo.creative === 3 &&
-                userRepo.logical === 5 &&
-                userRepo.compute === 2 &&
-                userRepo.coordinate === 3
+            userRepo.spatial === 4 &&
+            userRepo.collaborative === 3 &&
+            userRepo.creative === 3 &&
+            userRepo.logical === 5 &&
+            userRepo.compute === 2 &&
+            userRepo.coordinate === 3
         );
 
         assert(
             classmatesAvgStar.starAvg === '3.00' &&
-                classmatesAvgStar.spatialAvg === '4.00' &&
-                classmatesAvgStar.collaborativeAvg === '3.00' &&
-                classmatesAvgStar.creativeAvg === '3.00' &&
-                classmatesAvgStar.logicalAvg === '5.00' &&
-                classmatesAvgStar.computeAvg === '2.00' &&
-                classmatesAvgStar.coordinateAvg === '3.00'
+            classmatesAvgStar.spatialAvg === '4.00' &&
+            classmatesAvgStar.collaborativeAvg === '3.00' &&
+            classmatesAvgStar.creativeAvg === '3.00' &&
+            classmatesAvgStar.logicalAvg === '5.00' &&
+            classmatesAvgStar.computeAvg === '2.00' &&
+            classmatesAvgStar.coordinateAvg === '3.00'
         );
 
         assert(
             historyStarStatistics.classmatesHistoryAvgStar.length === 0 &&
-                historyStarStatistics.userSumStar.length === 0
+            historyStarStatistics.userSumStar.length === 0
         );
 
         assert(growthTrack.userHistoryStar.length === 0);
@@ -610,8 +610,8 @@ describe('test/service/evaluationReport.test.js', () => {
 
         assert(
             ret.length === 1 &&
-                ret[0].reportName === '报告名字' &&
-                ret[0].star === 3
+            ret[0].reportName === '报告名字' &&
+            ret[0].star === 3
         );
     });
 
@@ -633,11 +633,11 @@ describe('test/service/evaluationReport.test.js', () => {
         const ret = await ctx.service.evaluationReport.adminGetReport(1);
         assert(
             ret.length === 2 &&
-                ret[0].classId === 1 &&
-                ret[0].name === '什么班级' &&
-                ret[0].teacherNames === '什么老师' &&
-                ret[0].sendCount === 0 &&
-                ret[0].commentCount === 1
+            ret[0].classId === 1 &&
+            ret[0].name === '什么班级' &&
+            ret[0].teacherNames === '什么老师' &&
+            ret[0].sendCount === 0 &&
+            ret[0].commentCount === 1
         );
     });
 
@@ -648,11 +648,11 @@ describe('test/service/evaluationReport.test.js', () => {
         assert(ret.length === 1);
         assert(
             ret[0].userId === 1 &&
-                ret[0].type === 1 &&
-                ret[0].teacherName === '什么老师' &&
-                ret[0].className === '什么班级' &&
-                ret[0].commentCount === 0 &&
-                ret[0].sendCount === 0
+            ret[0].type === 1 &&
+            ret[0].teacherName === '什么老师' &&
+            ret[0].className === '什么班级' &&
+            ret[0].commentCount === 0 &&
+            ret[0].sendCount === 0
         );
     });
 });

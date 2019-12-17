@@ -26,15 +26,13 @@ describe('机构学生', () => {
         cls = await app.model.LessonOrganizationClass.create({
             name: 'clss000',
             organizationId: organ.id,
-            begin: new Date(),
-            end: new Date().getTime() + 1000 * 60 * 60 * 24,
+            status: 1
         }).then(o => o.toJSON());
 
         cls2 = await app.model.LessonOrganizationClass.create({
             name: 'clss001',
             organizationId: organ.id,
-            begin: new Date(),
-            end: new Date().getTime() + 1000 * 60 * 60 * 24,
+            status: 1
         }).then(o => o.toJSON());
 
         // 添加为管理员

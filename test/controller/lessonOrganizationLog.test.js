@@ -17,7 +17,6 @@ describe('机构', () => {
         // 创建机构
         organ = await app.model.LessonOrganization.create({
             name: 'org0000',
-            count: 1,
             endDate: '2119-01-01',
         }).then(o => o.toJSON());
 
@@ -68,8 +67,6 @@ describe('机构', () => {
             .send({
                 organizationId: organ.id,
                 name: 'class000',
-                begin: new Date(),
-                end: new Date().getTime() + 1000 * 60 * 60 * 24,
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(200)
@@ -82,8 +79,6 @@ describe('机构', () => {
             .send({
                 organizationId: organ.id,
                 name: 'class001',
-                begin: new Date(),
-                end: new Date().getTime() + 1000 * 60 * 60 * 24,
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(200)
@@ -94,7 +89,7 @@ describe('机构', () => {
         await app
             .httpRequest()
             .put('/lessonOrganizationClasses/' + cls.data.id)
-            .send({ name: 'class0000', end: '2110-01-01', packages: [] })
+            .send({ name: 'class0000', packages: [] })
             .set('Authorization', `Bearer ${token}`)
             .expect(200)
             .then(res => res.body)
