@@ -21,8 +21,7 @@ describe('机构激活码', () => {
         let cls = await app.model.LessonOrganizationClass.create({
             name: 'clss000',
             organizationId: organ.id,
-            begin: new Date(),
-            end: new Date().getTime() + 1000 * 60 * 60 * 24,
+            status: 1,
         }).then(o => o.toJSON());
         assert(cls.id);
         classId = cls.id;
@@ -43,28 +42,28 @@ describe('机构激活码', () => {
                 .httpRequest()
                 .post('/lessonOrganizationActivateCodes')
                 .send({
-                    organizationId: orgId,
                     count: 20,
-                    classId,
+                    classIds: [classId],
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
                 .then(res => res.body.data)
                 .catch(e => console.log(e));
-            assert(ret.length === 20);
+            assert(ret.length === 20 && ret[0].classIds.length === 1);
         });
-
-        it('002 无效机构 应该失败', async () => {
-            await app
+        it('002', async () => {
+            const ret = await app
                 .httpRequest()
                 .post('/lessonOrganizationActivateCodes')
                 .send({
-                    organizationId: 999,
                     count: 20,
-                    classId,
+                    classIds: [],
                 })
                 .set('Authorization', `Bearer ${token}`)
-                .expect(403);
+                .expect(200)
+                .then(res => res.body.data)
+                .catch(e => console.log(e));
+            assert(ret.length === 20 && ret[0].classIds.length === 0);
         });
     });
 
@@ -98,19 +97,20 @@ describe('机构激活码', () => {
         });
     });
 
-    describe('激活用户', async () => {
+    describe('学生使用激活码', async () => {
         let key;
         beforeEach(async () => {
             const cls = await app.factory.create('LessonOrganizationClass', {
                 organizationId: orgId,
-                end: '2900-10-01',
+                status: 1,
             });
             const code = await app.factory.create(
                 'LessonOrganizationActivateCode',
                 {
                     organizationId: orgId,
                     state: 0,
-                    classId: cls.id,
+                    classIds: [cls.id],
+                    type: 5,
                 }
             );
             key = code.key;
@@ -132,4 +132,13 @@ describe('机构激活码', () => {
                 .catch(e => console.log(e));
         });
     });
+
+    // describe('激活码使用情况', async () => {
+    //     beforeEach(async () => {
+
+    //     });
+    //     it('001', async () => {
+
+    //     });
+    // });
 });

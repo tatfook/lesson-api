@@ -9,12 +9,12 @@ describe('test/service/evaluationReport.test.js', () => {
         await app.model.LessonOrganizationClass.create({
             organizationId: 1,
             name: '什么班级',
-            end: '2029-10-21 00:00:00',
+            status: 1,
         });
         await app.model.LessonOrganizationClass.create({
             organizationId: 1,
             name: '什么班级2',
-            end: '2029-10-21 00:00:00',
+            status: 1,
         });
         await app.model.LessonOrganizationClassMember.create({
             organizationId: 1,
