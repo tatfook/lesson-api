@@ -21,7 +21,7 @@ describe('机构激活码', () => {
         let cls = await app.model.LessonOrganizationClass.create({
             name: 'clss000',
             organizationId: organ.id,
-            status: 1
+            status: 1,
         }).then(o => o.toJSON());
         assert(cls.id);
         classId = cls.id;
@@ -102,7 +102,7 @@ describe('机构激活码', () => {
         beforeEach(async () => {
             const cls = await app.factory.create('LessonOrganizationClass', {
                 organizationId: orgId,
-                status: 1
+                status: 1,
             });
             const code = await app.factory.create(
                 'LessonOrganizationActivateCode',
@@ -110,7 +110,7 @@ describe('机构激活码', () => {
                     organizationId: orgId,
                     state: 0,
                     classIds: [cls.id],
-                    type: 5
+                    type: 5,
                 }
             );
             key = code.key;
