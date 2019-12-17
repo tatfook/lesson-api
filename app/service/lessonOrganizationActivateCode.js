@@ -382,7 +382,7 @@ class LessonOrgActivateCodeService extends Service {
         const org = await this.ctx.model.LessonOrganization.findOne({
             where: { id: activeCode.organizationId },
         });
-        if (!org || new Date(org.endDate) > currTime) {
+        if (!org || new Date(org.endDate) < currTime) {
             this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
         }
 
@@ -427,6 +427,7 @@ class LessonOrgActivateCodeService extends Service {
             const obj = {
                 organizationId,
                 classId: 0,
+                roleId: 1,
                 memberId: userId,
                 type: activeCode.type >= FIVE ? TWO : 1,
                 endTime: endTimeMap[activeCode.type](members[0].endTime),
