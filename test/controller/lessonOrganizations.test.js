@@ -18,7 +18,7 @@ describe('机构', () => {
         cls = await app.model.LessonOrganizationClass.create({
             name: 'clss000',
             organizationId: organ.id,
-            status: 1
+            status: 1,
         }).then(o => o.toJSON());
 
         // 创建班级成员
