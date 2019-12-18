@@ -626,7 +626,7 @@ class LessonOrgClassMemberService extends Service {
         }
 
         // 激活码上限检查
-        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit;
+        const { type5 = 0, type6 = 0, type7 = 0 } = org.activateCodeLimit || {};
         const map = {
             5: type5,
             6: type6,
