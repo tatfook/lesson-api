@@ -5,7 +5,10 @@ node_modules
 npm-debug.log
 
 coverage
-config/config.*.js
+config/plugin.js
+config/config.local.js
+config/config.prod.js
+config/config.unittest.js
 
 .vscode
 logs/
