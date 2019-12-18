@@ -3,6 +3,7 @@
 const Service = require('../common/service.js');
 const {
     CLASS_MEMBER_ROLE_ADMIN,
+    CLASS_MEMBER_ROLE_TEACHER,
     FIVE,
     TWO,
     ONE,
@@ -52,7 +53,7 @@ class LessonOrgActivateCodeService extends Service {
         const type = params.type;
         const names = params.names || [];
         const count = params.count || names.length || 1;
-        const formalTypes = [ '5', '6', '7' ]; // 正式邀请码类型
+        const formalTypes = ['5', '6', '7']; // 正式邀请码类型
 
         // check auth
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
@@ -89,7 +90,7 @@ class LessonOrgActivateCodeService extends Service {
                 organizationId,
                 type,
                 state: {
-                    $in: [ '0', '1' ],
+                    $in: ['0', '1'],
                 },
             });
             if (historyCount + count > limit) {
@@ -103,9 +104,7 @@ class LessonOrgActivateCodeService extends Service {
                 organizationId,
                 classIds,
                 type,
-                key: `${
-                    classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${new Date().getTime()}${_.random(TEN, NINTYNINE)}`,
+                key: `${classIds ? classIds.reduce((p, c) => p + c, '') : ''}${i}${new Date().getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: names.length > i ? names[i] : '',
             });
         }
@@ -254,9 +253,14 @@ class LessonOrgActivateCodeService extends Service {
             {
                 organizationId: data.organizationId,
                 memberId: userId,
+                roleId: {
+                    $in: ['1', '3', '65', '67'],
+                },
             }
         );
 
+        const type = data.type >= FIVE ? TWO : 1;
+        const endTime = endTimeMap[data.type]();
         const members = [];
         if (data.classIds.length) {
             for (let i = 0; i < data.classIds.length; i++) {
@@ -264,8 +268,8 @@ class LessonOrgActivateCodeService extends Service {
                     organizationId,
                     classId: data.classIds[i],
                     memberId: userId,
-                    type: data.type >= FIVE ? TWO : 1,
-                    endTime: endTimeMap[data.type](),
+                    type,
+                    endTime,
                     realname,
                 };
                 if (checkFlag) obj.parentPhoneNum = parentPhoneNum;
@@ -282,23 +286,41 @@ class LessonOrgActivateCodeService extends Service {
                 members.push(obj);
             }
         } else {
-            const obj = {
-                organizationId,
-                classId: 0,
-                memberId: userId,
-                type: data.type >= FIVE ? TWO : 1,
-                endTime: endTimeMap[data.type](),
-                realname,
-            };
-            if (checkFlag) obj.parentPhoneNum = parentPhoneNum;
-            obj.roleId =
-                1 |
-                (
-                    _.find(ms, m => m.memberId === userId) || {
-                        roleId: 0,
-                    }
-                ).roleId;
-            members.push(obj);
+            const adminAndTeachers = _.filter(ms, m => (m.roleId & CLASS_MEMBER_ROLE_ADMIN) || (m.roleId & CLASS_MEMBER_ROLE_TEACHER));
+            let flag = false;
+            for (let i = 0; i < adminAndTeachers.length; i++) {
+                const element = adminAndTeachers[i];
+                const classId = element.classId;
+                const obj = {
+                    organizationId,
+                    classId,
+                    memberId: userId,
+                    type,
+                    endTime,
+                    realname,
+                };
+                if (checkFlag) obj.parentPhoneNum = parentPhoneNum;
+                if (classId === 0) {
+                    flag = true;
+                    obj.roleId = 1 | element.roleId;
+                } else {
+                    obj.roleId = element.roleId;
+                }
+                members.push(obj);
+            }
+            if (!flag) {
+                const obj = {
+                    organizationId,
+                    classId: 0,
+                    memberId: userId,
+                    type,
+                    endTime,
+                    realname,
+                    roleId: 1,
+                };
+                if (checkFlag) obj.parentPhoneNum = parentPhoneNum;
+                members.push(obj);
+            }
         }
 
         // 事务操作
@@ -350,11 +372,11 @@ class LessonOrgActivateCodeService extends Service {
         const { userId, username, organizationId } = authParams;
         const { key, realname } = params;
         const currTime = new Date();
-        const [ members, activeCode ] = await Promise.all([
+        const [members, activeCode] = await Promise.all([
             // 检查这学生是不是在这个机构学生
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    roleId: { $in: ['1', '3', '65', '67'] },
                     memberId: userId,
                     organizationId,
                     endTime: { $gt: currTime },
@@ -386,6 +408,9 @@ class LessonOrgActivateCodeService extends Service {
             this.ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
         }
 
+        const type = 2;
+        const endTime = endTimeMap[activeCode.type](members[0].endTime);
+        const parentPhoneNum = members[0].parentPhoneNum;
         const newMembers = [];
         if (activeCode.classIds.length) {
             const classes = await this.ctx.model.LessonOrganizationClass.findAll(
@@ -405,10 +430,10 @@ class LessonOrgActivateCodeService extends Service {
                     organizationId,
                     classId: activeCode.classIds[i],
                     memberId: userId,
-                    type: activeCode.type >= FIVE ? TWO : 1,
-                    endTime: endTimeMap[activeCode.type](members[0].endTime),
+                    type,
+                    endTime,
                     realname,
-                    parentPhoneNum: members[0].parentPhoneNum,
+                    parentPhoneNum,
                 };
 
                 obj.roleId =
@@ -424,17 +449,49 @@ class LessonOrgActivateCodeService extends Service {
                 newMembers.push(obj);
             }
         } else {
-            const obj = {
-                organizationId,
-                classId: 0,
-                roleId: 1,
-                memberId: userId,
-                type: activeCode.type >= FIVE ? TWO : 1,
-                endTime: endTimeMap[activeCode.type](members[0].endTime),
-                realname,
-                parentPhoneNum: members[0].parentPhoneNum,
-            };
-            newMembers.push(obj);
+            const adminAndTeachers = _.filter(members, m => (m.roleId & CLASS_MEMBER_ROLE_ADMIN) || (m.roleId & CLASS_MEMBER_ROLE_TEACHER));
+            let flag = false;
+            for (let i = 0; i < adminAndTeachers.length; i++) {
+                const element = adminAndTeachers[i];
+                const classId = element.classId;
+                if (classId === 0) {
+                    flag = true;
+                    const obj = {
+                        organizationId,
+                        classId,
+                        memberId: userId,
+                        type,
+                        endTime,
+                        realname,
+                        parentPhoneNum,
+                    };
+                    obj.roleId = 1 | element.roleId;
+                    newMembers.push(obj);
+                } else {
+                    newMembers.push({
+                        organizationId,
+                        classId,
+                        memberId: userId,
+                        type,
+                        endTime,
+                        realname,
+                        parentPhoneNum,
+                        roleId: element.roleId,
+                    });
+                }
+            }
+            if (!flag) {
+                newMembers.push({
+                    organizationId,
+                    classId: 0,
+                    memberId: userId,
+                    type,
+                    endTime,
+                    realname,
+                    parentPhoneNum,
+                    roleId: 1,
+                });
+            }
         }
 
         // 事务操作
@@ -499,7 +556,7 @@ class LessonOrgActivateCodeService extends Service {
         const five = 5;
         const six = 6;
         const seven = 7;
-        let [ type5Count, type6Count, type7Count ] = [ 0, 0, 0 ];
+        let [type5Count, type6Count, type7Count] = [0, 0, 0];
         for (let i = 0; i < list.length; i++) {
             if (list[i].state === 1 && list[i].type) {
                 // 已使用
