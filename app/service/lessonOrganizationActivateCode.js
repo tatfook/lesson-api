@@ -53,7 +53,7 @@ class LessonOrgActivateCodeService extends Service {
         const type = params.type;
         const names = params.names || [];
         const count = params.count || names.length || 1;
-        const formalTypes = ['5', '6', '7']; // 正式邀请码类型
+        const formalTypes = [ '5', '6', '7' ]; // 正式邀请码类型
 
         // check auth
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
@@ -90,7 +90,7 @@ class LessonOrgActivateCodeService extends Service {
                 organizationId,
                 type,
                 state: {
-                    $in: ['0', '1'],
+                    $in: [ '0', '1' ],
                 },
             });
             if (historyCount + count > limit) {
@@ -104,7 +104,9 @@ class LessonOrgActivateCodeService extends Service {
                 organizationId,
                 classIds,
                 type,
-                key: `${classIds ? classIds.reduce((p, c) => p + c, '') : ''}${i}${new Date().getTime()}${_.random(TEN, NINTYNINE)}`,
+                key: `${
+                    classIds ? classIds.reduce((p, c) => p + c, '') : ''
+                }${i}${new Date().getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: names.length > i ? names[i] : '',
             });
         }
@@ -254,7 +256,7 @@ class LessonOrgActivateCodeService extends Service {
                 organizationId: data.organizationId,
                 memberId: userId,
                 roleId: {
-                    $in: ['1', '3', '65', '67'],
+                    $in: [ '1', '3', '65', '67' ],
                 },
             }
         );
@@ -286,7 +288,12 @@ class LessonOrgActivateCodeService extends Service {
                 members.push(obj);
             }
         } else {
-            const adminAndTeachers = _.filter(ms, m => (m.roleId & CLASS_MEMBER_ROLE_ADMIN) || (m.roleId & CLASS_MEMBER_ROLE_TEACHER));
+            const adminAndTeachers = _.filter(
+                ms,
+                m =>
+                    m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
+                    m.roleId & CLASS_MEMBER_ROLE_TEACHER
+            );
             let flag = false;
             for (let i = 0; i < adminAndTeachers.length; i++) {
                 const element = adminAndTeachers[i];
@@ -372,11 +379,11 @@ class LessonOrgActivateCodeService extends Service {
         const { userId, username, organizationId } = authParams;
         const { key, realname } = params;
         const currTime = new Date();
-        const [members, activeCode] = await Promise.all([
+        const [ members, activeCode ] = await Promise.all([
             // 检查这学生是不是在这个机构学生
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: ['1', '3', '65', '67'] },
+                    roleId: { $in: [ '1', '3', '65', '67' ] },
                     memberId: userId,
                     organizationId,
                     endTime: { $gt: currTime },
@@ -449,7 +456,12 @@ class LessonOrgActivateCodeService extends Service {
                 newMembers.push(obj);
             }
         } else {
-            const adminAndTeachers = _.filter(members, m => (m.roleId & CLASS_MEMBER_ROLE_ADMIN) || (m.roleId & CLASS_MEMBER_ROLE_TEACHER));
+            const adminAndTeachers = _.filter(
+                members,
+                m =>
+                    m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
+                    m.roleId & CLASS_MEMBER_ROLE_TEACHER
+            );
             let flag = false;
             for (let i = 0; i < adminAndTeachers.length; i++) {
                 const element = adminAndTeachers[i];
@@ -556,7 +568,7 @@ class LessonOrgActivateCodeService extends Service {
         const five = 5;
         const six = 6;
         const seven = 7;
-        let [type5Count, type6Count, type7Count] = [0, 0, 0];
+        let [ type5Count, type6Count, type7Count ] = [ 0, 0, 0 ];
         for (let i = 0; i < list.length; i++) {
             if (list[i].state === 1 && list[i].type) {
                 // 已使用

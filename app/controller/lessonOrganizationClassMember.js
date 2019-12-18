@@ -27,7 +27,9 @@ const LessonOrganizationClassMember = class extends Controller {
         const { ctx } = this;
         const { organizationId } = this.authenticated();
 
-        const { classId, type, username } = this.validate({ classId: 'number_optional' });
+        const { classId, type, username } = this.validate({
+            classId: 'number_optional',
+        });
 
         const data = await this.ctx.service.lessonOrganizationClassMember.getStudents(
             organizationId,

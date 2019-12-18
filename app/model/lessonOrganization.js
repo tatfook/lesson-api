@@ -127,7 +127,9 @@ module.exports = app => {
         const sql = `select count(*) as count from (
 			select * from lessonOrganizationClassMembers as locm 
 			where locm.organizationId = ${organizationId} 
-			and roleId & ${roleId} and classId ${classId === undefined ? '>= 0' : '= ' + classId}  and (
+			and roleId & ${roleId} and classId ${
+    classId === undefined ? '>= 0' : '= ' + classId
+}  and (
 				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and status =1)
 				) group by memberId) as t`;
         const list = await app.model.query(sql, {
@@ -141,7 +143,9 @@ module.exports = app => {
         const sql = `select count(*) as count from (
 			select * from lessonOrganizationClassMembers as locm 
 			where locm.organizationId = ${organizationId} 
-			and roleId & ${roleId} and classId ${classId === undefined ? '>= 0' : '= ' + classId}  and (
+			and roleId & ${roleId} and classId ${
+    classId === undefined ? '>= 0' : '= ' + classId
+}  and (
 				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId )
 				) group by memberId) as t`;
         const list = await app.model.query(sql, {
@@ -154,7 +158,7 @@ module.exports = app => {
         let condition = '';
         if (type) condition += ' and m.type = :type';
         if (classId) condition += ' and m.classId = :classId';
-        if (username) condition += ` and (m.realname like '%${username}%' or u.username like '%${username}%')`;
+        if (username) { condition += ` and (m.realname like '%${username}%' or u.username like '%${username}%')`; }
 
         const sql = `
         select 
