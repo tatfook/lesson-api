@@ -7,7 +7,7 @@ exports.cors = {
     origin: '*',
 };
 
-exports.middleware = ['authenticated', 'pagination'];
+exports.middleware = [ 'authenticated', 'pagination' ];
 
 exports.security = {
     xframe: {

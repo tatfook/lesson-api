@@ -17,8 +17,8 @@ const {
 const Err = require('../common/err');
 const _ = require('lodash');
 const moment = require('moment');
-const formalTypes = ['5', '6', '7']; // 正式邀请码类型
-const allCodeTypes = ['1', '2', '5', '6', '7']; // 全部邀请码类型
+const formalTypes = [ '5', '6', '7' ]; // 正式邀请码类型
+const allCodeTypes = [ '1', '2', '5', '6', '7' ]; // 全部邀请码类型
 
 // 各个类型激活码的过期时间
 const endTimeMap = {
@@ -202,7 +202,7 @@ class LessonOrgClassMemberService extends Service {
         const memberIds = members.map(o => o.memberId);
         if (memberIds.length === 0) return { count: 0, rows: [] };
 
-        const [list, users] = await Promise.all([
+        const [ list, users ] = await Promise.all([
             this.model.LessonOrganizationClassMember.findAll({
                 include: [
                     {
@@ -318,7 +318,7 @@ class LessonOrgClassMemberService extends Service {
 
         let oldmembers = await this.ctx.model.LessonOrganizationClassMember.findAll(
             {
-                order: [['id', 'desc']],
+                order: [[ 'id', 'desc' ]],
                 include: [
                     {
                         as: 'lessonOrganizationClasses',
@@ -497,7 +497,7 @@ class LessonOrgClassMemberService extends Service {
         if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
             await this.ctx.service.evaluationReport.checkEvaluationStatus(
                 member.memberId,
-                [member.classId]
+                [ member.classId ]
             );
         }
 
@@ -515,8 +515,8 @@ class LessonOrgClassMemberService extends Service {
             organizationId,
             handleId: userId,
             username,
-            oldmembers: [member],
-            classIds: [-1],
+            oldmembers: [ member ],
+            classIds: [ -1 ],
             roleId:
                 memberRoleId & CLASS_MEMBER_ROLE_TEACHER
                     ? CLASS_MEMBER_ROLE_TEACHER
@@ -584,11 +584,11 @@ class LessonOrgClassMemberService extends Service {
         if (!formalTypes.includes(type + '')) {
             this.ctx.throw(400, Err.STU_TYPE_ERR);
         }
-        const [members, classes, org, historyCount] = await Promise.all([
+        const [ members, classes, org, historyCount ] = await Promise.all([
             // 检查这些学生是不是在这个机构试听
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: ['1', '3', '65', '67'] },
+                    roleId: { $in: [ '1', '3', '65', '67' ] },
                     memberId: { $in: userIds },
                     organizationId,
                     type: 1,
@@ -613,7 +613,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: ['0', '1'],
+                        $in: [ '0', '1' ],
                     },
                 }
             ),
@@ -649,7 +649,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -793,11 +793,11 @@ class LessonOrgClassMemberService extends Service {
             this.ctx.throw(400, Err.STU_TYPE_ERR);
         }
         const currTime = new Date();
-        const [members, classes, org, historyCount] = await Promise.all([
+        const [ members, classes, org, historyCount ] = await Promise.all([
             // 检查这些学生是不是在这个机构正式学生
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: ['1', '3', '65', '67'] },
+                    roleId: { $in: [ '1', '3', '65', '67' ] },
                     memberId: { $in: userIds },
                     organizationId,
                     type: 2,
@@ -823,7 +823,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: ['0', '1'],
+                        $in: [ '0', '1' ],
                     },
                 }
             ),
@@ -858,7 +858,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -1006,11 +1006,11 @@ class LessonOrgClassMemberService extends Service {
         }
 
         const currTime = new Date();
-        const [members, classes, org, historyCount] = await Promise.all([
+        const [ members, classes, org, historyCount ] = await Promise.all([
             // 检查这些学生是不是过期了
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: ['1', '3', '65', '67'] },
+                    roleId: { $in: [ '1', '3', '65', '67' ] },
                     memberId: { $in: userIds },
                     organizationId,
                     endTime: { $lt: currTime },
@@ -1035,7 +1035,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: ['0', '1'],
+                        $in: [ '0', '1' ],
                     },
                 }
             ),
@@ -1070,7 +1070,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }

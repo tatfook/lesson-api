@@ -20,7 +20,7 @@ describe('机构学生', () => {
         organ = await app.model.LessonOrganization.create({
             name: 'org0000',
             endDate: '2220-01-01',
-            activateCodeLimit: { type5: 5, type6: 6, type7: 7 }
+            activateCodeLimit: { type5: 5, type6: 6, type7: 7 },
         }).then(o => o.toJSON());
 
         // 创建班级
@@ -88,7 +88,7 @@ describe('机构学生', () => {
                 roleId: 1,
                 memberId: 2,
             });
-            await app.model.User.create({ id: 2, username: "" });
+            await app.model.User.create({ id: 2, username: '' });
         });
         it('001', async () => {
             let students = await app
