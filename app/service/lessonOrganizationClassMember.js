@@ -17,8 +17,8 @@ const {
 const Err = require('../common/err');
 const _ = require('lodash');
 const moment = require('moment');
-const formalTypes = [ '5', '6', '7' ]; // 正式邀请码类型
-const allCodeTypes = [ '1', '2', '5', '6', '7' ]; // 全部邀请码类型
+const formalTypes = ['5', '6', '7']; // 正式邀请码类型
+const allCodeTypes = ['1', '2', '5', '6', '7']; // 全部邀请码类型
 
 // 各个类型激活码的过期时间
 const endTimeMap = {
@@ -189,17 +189,20 @@ class LessonOrgClassMemberService extends Service {
      * 获取学生列表
      * @param {*} organizationId organizationId
      * @param {*} classId classId
+     * @param {*} type 用户类型，1.试听，2.正式
+     * @param {*} username 用户名
      */
-    async getStudents(organizationId, classId) {
-        const members = await this.ctx.service.lessonOrganization.getMembers(
+    async getStudents(organizationId, classId, type, username) {
+        const members = await this.ctx.service.lessonOrganization.getStudentIds(
             organizationId,
-            1,
-            classId
+            classId,
+            type,
+            username
         );
         const memberIds = members.map(o => o.memberId);
         if (memberIds.length === 0) return { count: 0, rows: [] };
 
-        const [ list, users ] = await Promise.all([
+        const [list, users] = await Promise.all([
             this.model.LessonOrganizationClassMember.findAll({
                 include: [
                     {
@@ -214,7 +217,7 @@ class LessonOrgClassMemberService extends Service {
                 where: {
                     organizationId,
                     memberId: { $in: memberIds },
-                    classId: classId ? classId : { $gt: 0 },
+                    classId: classId ? classId : { $gte: 0 },
                 },
             }),
 
@@ -315,7 +318,7 @@ class LessonOrgClassMemberService extends Service {
 
         let oldmembers = await this.ctx.model.LessonOrganizationClassMember.findAll(
             {
-                order: [[ 'id', 'desc' ]],
+                order: [['id', 'desc']],
                 include: [
                     {
                         as: 'lessonOrganizationClasses',
@@ -494,7 +497,7 @@ class LessonOrgClassMemberService extends Service {
         if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
             await this.ctx.service.evaluationReport.checkEvaluationStatus(
                 member.memberId,
-                [ member.classId ]
+                [member.classId]
             );
         }
 
@@ -512,8 +515,8 @@ class LessonOrgClassMemberService extends Service {
             organizationId,
             handleId: userId,
             username,
-            oldmembers: [ member ],
-            classIds: [ -1 ],
+            oldmembers: [member],
+            classIds: [-1],
             roleId:
                 memberRoleId & CLASS_MEMBER_ROLE_TEACHER
                     ? CLASS_MEMBER_ROLE_TEACHER
@@ -581,11 +584,11 @@ class LessonOrgClassMemberService extends Service {
         if (!formalTypes.includes(type + '')) {
             this.ctx.throw(400, Err.STU_TYPE_ERR);
         }
-        const [ members, classes, org, historyCount ] = await Promise.all([
+        const [members, classes, org, historyCount] = await Promise.all([
             // 检查这些学生是不是在这个机构试听
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    roleId: { $in: ['1', '3', '65', '67'] },
                     memberId: { $in: userIds },
                     organizationId,
                     type: 1,
@@ -610,7 +613,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: [ '0', '1' ],
+                        $in: ['0', '1'],
                     },
                 }
             ),
@@ -646,7 +649,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -661,6 +664,7 @@ class LessonOrgClassMemberService extends Service {
                 { transaction }
             );
 
+            const endTime = endTimeMap[type]();
             // 创建成员
             const objs = [];
             for (let i = 0; i < userIds.length; i++) {
@@ -681,7 +685,7 @@ class LessonOrgClassMemberService extends Service {
                             classId: classIds[j],
                             memberId: userIds[i],
                             type: 2,
-                            endTime: endTimeMap[type](),
+                            endTime,
                             realname,
                             parentPhoneNum,
                         };
@@ -700,23 +704,49 @@ class LessonOrgClassMemberService extends Service {
                         objs.push(obj);
                     }
                 } else {
-                    const obj = {
-                        organizationId,
-                        classId: 0,
-                        memberId: userIds[i],
-                        type: 2,
-                        endTime: endTimeMap[type](),
-                        realname,
-                        parentPhoneNum,
-                    };
-                    obj.roleId =
-                        1 |
-                        (
-                            _.find(members, m => m.memberId === userIds[i]) || {
-                                roleId: 0,
-                            }
-                        ).roleId;
-                    objs.push(obj);
+                    const adminAndTeachers = _.filter(members, m => (m.roleId & CLASS_MEMBER_ROLE_ADMIN) || (m.roleId & CLASS_MEMBER_ROLE_TEACHER));
+                    let flag = false;
+                    for (let i = 0; i < adminAndTeachers.length; i++) {
+                        const element = adminAndTeachers[i];
+                        const classId = element.classId;
+                        if (classId === 0) {
+                            flag = true;
+                            const obj = {
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: 2,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                            };
+                            obj.roleId = 1 | element.roleId;
+                            objs.push(obj);
+                        } else {
+                            objs.push({
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: 2,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                                roleId: element.roleId,
+                            });
+                        }
+                    }
+                    if (!flag) {
+                        objs.push({
+                            organizationId,
+                            classId: 0,
+                            memberId: userId,
+                            type: 2,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId: 1,
+                        });
+                    }
                 }
             }
 
@@ -758,11 +788,11 @@ class LessonOrgClassMemberService extends Service {
             this.ctx.throw(400, Err.STU_TYPE_ERR);
         }
         const currTime = new Date();
-        const [ members, classes, org, historyCount ] = await Promise.all([
+        const [members, classes, org, historyCount] = await Promise.all([
             // 检查这些学生是不是在这个机构正式学生
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    roleId: { $in: ['1', '3', '65', '67'] },
                     memberId: { $in: userIds },
                     organizationId,
                     type: 2,
@@ -788,7 +818,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: [ '0', '1' ],
+                        $in: ['0', '1'],
                     },
                 }
             ),
@@ -823,7 +853,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -853,6 +883,8 @@ class LessonOrgClassMemberService extends Service {
                     parentPhoneNum = members[index].parentPhoneNum;
                     oldEndTime = members[index].endTime;
                 }
+                const endTime = endTimeMap[type](oldEndTime);
+
                 if (classIds.length) {
                     for (let j = 0; j < classIds.length; j++) {
                         const obj = {
@@ -860,7 +892,7 @@ class LessonOrgClassMemberService extends Service {
                             classId: classIds[j],
                             memberId: userIds[i],
                             type: 2,
-                            endTime: endTimeMap[type](oldEndTime),
+                            endTime,
                             realname,
                             parentPhoneNum,
                         };
@@ -879,23 +911,49 @@ class LessonOrgClassMemberService extends Service {
                         objs.push(obj);
                     }
                 } else {
-                    const obj = {
-                        organizationId,
-                        classId: 0,
-                        memberId: userIds[i],
-                        type: 2,
-                        endTime: endTimeMap[type](oldEndTime),
-                        realname,
-                        parentPhoneNum,
-                    };
-                    obj.roleId =
-                        1 |
-                        (
-                            _.find(members, m => m.memberId === userIds[i]) || {
-                                roleId: 0,
-                            }
-                        ).roleId;
-                    objs.push(obj);
+                    const adminAndTeachers = _.filter(members, m => (m.roleId & CLASS_MEMBER_ROLE_ADMIN) || (m.roleId & CLASS_MEMBER_ROLE_TEACHER));
+                    let flag = false;
+                    for (let i = 0; i < adminAndTeachers.length; i++) {
+                        const element = adminAndTeachers[i];
+                        const classId = element.classId;
+                        if (classId === 0) {
+                            flag = true;
+                            const obj = {
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: 2,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                            };
+                            obj.roleId = 1 | element.roleId;
+                            objs.push(obj);
+                        } else {
+                            objs.push({
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: 2,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                                roleId: element.roleId,
+                            });
+                        }
+                    }
+                    if (!flag) {
+                        objs.push({
+                            organizationId,
+                            classId: 0,
+                            memberId: userId,
+                            type: 2,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId: 1,
+                        });
+                    }
                 }
             }
 
@@ -938,11 +996,11 @@ class LessonOrgClassMemberService extends Service {
         }
 
         const currTime = new Date();
-        const [ members, classes, org, historyCount ] = await Promise.all([
+        const [members, classes, org, historyCount] = await Promise.all([
             // 检查这些学生是不是过期了
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    roleId: { $in: ['1', '3', '65', '67'] },
                     memberId: { $in: userIds },
                     organizationId,
                     endTime: { $lt: currTime },
@@ -967,7 +1025,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: [ '0', '1' ],
+                        $in: ['0', '1'],
                     },
                 }
             ),
@@ -1002,7 +1060,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -1017,6 +1075,7 @@ class LessonOrgClassMemberService extends Service {
                 { transaction }
             );
 
+            const endTime = endTimeMap[type]();
             // 创建成员
             const objs = [];
             for (let i = 0; i < userIds.length; i++) {
@@ -1037,7 +1096,7 @@ class LessonOrgClassMemberService extends Service {
                             classId: classIds[j],
                             memberId: userIds[i],
                             type: type >= FIVE ? TWO : 1,
-                            endTime: endTimeMap[type](),
+                            endTime,
                             realname,
                             parentPhoneNum,
                         };
@@ -1056,23 +1115,49 @@ class LessonOrgClassMemberService extends Service {
                         objs.push(obj);
                     }
                 } else {
-                    const obj = {
-                        organizationId,
-                        classId: 0,
-                        memberId: userIds[i],
-                        type: type >= FIVE ? TWO : 1,
-                        endTime: endTimeMap[type](),
-                        realname,
-                        parentPhoneNum,
-                    };
-                    obj.roleId =
-                        1 |
-                        (
-                            _.find(members, m => m.memberId === userIds[i]) || {
-                                roleId: 0,
-                            }
-                        ).roleId;
-                    objs.push(obj);
+                    const adminAndTeachers = _.filter(members, m => (m.roleId & CLASS_MEMBER_ROLE_ADMIN) || (m.roleId & CLASS_MEMBER_ROLE_TEACHER));
+                    let flag = false;
+                    for (let i = 0; i < adminAndTeachers.length; i++) {
+                        const element = adminAndTeachers[i];
+                        const classId = element.classId;
+                        if (classId === 0) {
+                            flag = true;
+                            const obj = {
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: type >= FIVE ? TWO : 1,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                            };
+                            obj.roleId = 1 | element.roleId;
+                            objs.push(obj);
+                        } else {
+                            objs.push({
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: type >= FIVE ? TWO : 1,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                                roleId: element.roleId,
+                            });
+                        }
+                    }
+                    if (!flag) {
+                        objs.push({
+                            organizationId,
+                            classId: 0,
+                            memberId: userId,
+                            type: type >= FIVE ? TWO : 1,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId: 1,
+                        });
+                    }
                 }
             }
             // 把之前的都删了，然后再创建
