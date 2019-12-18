@@ -158,7 +158,9 @@ module.exports = app => {
         let condition = '';
         if (type) condition += ' and m.type = :type';
         if (classId) condition += ' and m.classId = :classId';
-        if (username) { condition += ` and (m.realname like '%${username}%' or u.username like '%${username}%')`; }
+        if (username) {
+            condition += ` and (m.realname like '%${username}%' or u.username like '%${username}%')`;
+        }
 
         const sql = `
         select 
