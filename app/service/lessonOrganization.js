@@ -298,14 +298,16 @@ class LessonOrgService extends Service {
     /**
      *
      * @param {*} organizationId organizationId
-     * @param {*} roleId roleId
      * @param {*} classId classId
+     * @param {*} type type 用户类型，1.试听，2.正式
+     * @param {*} username username
      */
-    async getMembers(organizationId, roleId, classId) {
-        return await this.ctx.model.LessonOrganization.getMembers(
+    async getStudentIds(organizationId, classId, type, username) {
+        return await this.ctx.model.LessonOrganization.getStudentIds(
             organizationId,
-            roleId,
-            classId
+            classId,
+            type,
+            username
         );
     }
 

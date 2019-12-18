@@ -135,6 +135,36 @@ describe('机构激活码', () => {
         });
     });
 
+    describe('试听转正式', async () => {
+        beforeEach('', async () => {
+            const cls = await app.factory.create('LessonOrganizationClass', {
+                organizationId: orgId,
+                status: 1,
+            });
+            await app.model.LessonOrganizationClassMember.create({
+                organizationId: orgId,
+                memberId: 1,
+                roleId: 1,
+                classId: cls.id,
+                endTime: '2200-01-01',
+                type: 1,
+            });
+        });
+        it.only('001', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationActivateCodes/formal')
+                .send({
+                    userIds: [1],
+                    type: 5,
+                    classIds: [1],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
+        });
+    });
+
     describe('学生续费', async () => {
         let key;
         beforeEach('', async () => {

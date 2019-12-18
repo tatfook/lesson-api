@@ -189,12 +189,15 @@ class LessonOrgClassMemberService extends Service {
      * 获取学生列表
      * @param {*} organizationId organizationId
      * @param {*} classId classId
+     * @param {*} type 用户类型，1.试听，2.正式
+     * @param {*} username 用户名
      */
-    async getStudents(organizationId, classId) {
-        const members = await this.ctx.service.lessonOrganization.getMembers(
+    async getStudents(organizationId, classId, type, username) {
+        const members = await this.ctx.service.lessonOrganization.getStudentIds(
             organizationId,
-            1,
-            classId
+            classId,
+            type,
+            username
         );
         const memberIds = members.map(o => o.memberId);
         if (memberIds.length === 0) return { count: 0, rows: [] };
@@ -214,7 +217,7 @@ class LessonOrgClassMemberService extends Service {
                 where: {
                     organizationId,
                     memberId: { $in: memberIds },
-                    classId: classId ? classId : { $gt: 0 },
+                    classId: classId ? classId : { $gte: 0 },
                 },
             }),
 
@@ -661,6 +664,7 @@ class LessonOrgClassMemberService extends Service {
                 { transaction }
             );
 
+            const endTime = endTimeMap[type]();
             // 创建成员
             const objs = [];
             for (let i = 0; i < userIds.length; i++) {
@@ -681,7 +685,7 @@ class LessonOrgClassMemberService extends Service {
                             classId: classIds[j],
                             memberId: userIds[i],
                             type: 2,
-                            endTime: endTimeMap[type](),
+                            endTime,
                             realname,
                             parentPhoneNum,
                         };
@@ -700,23 +704,54 @@ class LessonOrgClassMemberService extends Service {
                         objs.push(obj);
                     }
                 } else {
-                    const obj = {
-                        organizationId,
-                        classId: 0,
-                        memberId: userIds[i],
-                        type: 2,
-                        endTime: endTimeMap[type](),
-                        realname,
-                        parentPhoneNum,
-                    };
-                    obj.roleId =
-                        1 |
-                        (
-                            _.find(members, m => m.memberId === userIds[i]) || {
-                                roleId: 0,
-                            }
-                        ).roleId;
-                    objs.push(obj);
+                    const adminAndTeachers = _.filter(
+                        members,
+                        m =>
+                            m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
+                            m.roleId & CLASS_MEMBER_ROLE_TEACHER
+                    );
+                    let flag = false;
+                    for (let i = 0; i < adminAndTeachers.length; i++) {
+                        const element = adminAndTeachers[i];
+                        const classId = element.classId;
+                        if (classId === 0) {
+                            flag = true;
+                            const obj = {
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: 2,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                            };
+                            obj.roleId = 1 | element.roleId;
+                            objs.push(obj);
+                        } else {
+                            objs.push({
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: 2,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                                roleId: element.roleId,
+                            });
+                        }
+                    }
+                    if (!flag) {
+                        objs.push({
+                            organizationId,
+                            classId: 0,
+                            memberId: userId,
+                            type: 2,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId: 1,
+                        });
+                    }
                 }
             }
 
@@ -853,6 +888,8 @@ class LessonOrgClassMemberService extends Service {
                     parentPhoneNum = members[index].parentPhoneNum;
                     oldEndTime = members[index].endTime;
                 }
+                const endTime = endTimeMap[type](oldEndTime);
+
                 if (classIds.length) {
                     for (let j = 0; j < classIds.length; j++) {
                         const obj = {
@@ -860,7 +897,7 @@ class LessonOrgClassMemberService extends Service {
                             classId: classIds[j],
                             memberId: userIds[i],
                             type: 2,
-                            endTime: endTimeMap[type](oldEndTime),
+                            endTime,
                             realname,
                             parentPhoneNum,
                         };
@@ -879,23 +916,54 @@ class LessonOrgClassMemberService extends Service {
                         objs.push(obj);
                     }
                 } else {
-                    const obj = {
-                        organizationId,
-                        classId: 0,
-                        memberId: userIds[i],
-                        type: 2,
-                        endTime: endTimeMap[type](oldEndTime),
-                        realname,
-                        parentPhoneNum,
-                    };
-                    obj.roleId =
-                        1 |
-                        (
-                            _.find(members, m => m.memberId === userIds[i]) || {
-                                roleId: 0,
-                            }
-                        ).roleId;
-                    objs.push(obj);
+                    const adminAndTeachers = _.filter(
+                        members,
+                        m =>
+                            m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
+                            m.roleId & CLASS_MEMBER_ROLE_TEACHER
+                    );
+                    let flag = false;
+                    for (let i = 0; i < adminAndTeachers.length; i++) {
+                        const element = adminAndTeachers[i];
+                        const classId = element.classId;
+                        if (classId === 0) {
+                            flag = true;
+                            const obj = {
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: 2,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                            };
+                            obj.roleId = 1 | element.roleId;
+                            objs.push(obj);
+                        } else {
+                            objs.push({
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: 2,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                                roleId: element.roleId,
+                            });
+                        }
+                    }
+                    if (!flag) {
+                        objs.push({
+                            organizationId,
+                            classId: 0,
+                            memberId: userId,
+                            type: 2,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId: 1,
+                        });
+                    }
                 }
             }
 
@@ -1017,6 +1085,7 @@ class LessonOrgClassMemberService extends Service {
                 { transaction }
             );
 
+            const endTime = endTimeMap[type]();
             // 创建成员
             const objs = [];
             for (let i = 0; i < userIds.length; i++) {
@@ -1037,7 +1106,7 @@ class LessonOrgClassMemberService extends Service {
                             classId: classIds[j],
                             memberId: userIds[i],
                             type: type >= FIVE ? TWO : 1,
-                            endTime: endTimeMap[type](),
+                            endTime,
                             realname,
                             parentPhoneNum,
                         };
@@ -1056,23 +1125,54 @@ class LessonOrgClassMemberService extends Service {
                         objs.push(obj);
                     }
                 } else {
-                    const obj = {
-                        organizationId,
-                        classId: 0,
-                        memberId: userIds[i],
-                        type: type >= FIVE ? TWO : 1,
-                        endTime: endTimeMap[type](),
-                        realname,
-                        parentPhoneNum,
-                    };
-                    obj.roleId =
-                        1 |
-                        (
-                            _.find(members, m => m.memberId === userIds[i]) || {
-                                roleId: 0,
-                            }
-                        ).roleId;
-                    objs.push(obj);
+                    const adminAndTeachers = _.filter(
+                        members,
+                        m =>
+                            m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
+                            m.roleId & CLASS_MEMBER_ROLE_TEACHER
+                    );
+                    let flag = false;
+                    for (let i = 0; i < adminAndTeachers.length; i++) {
+                        const element = adminAndTeachers[i];
+                        const classId = element.classId;
+                        if (classId === 0) {
+                            flag = true;
+                            const obj = {
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: type >= FIVE ? TWO : 1,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                            };
+                            obj.roleId = 1 | element.roleId;
+                            objs.push(obj);
+                        } else {
+                            objs.push({
+                                organizationId,
+                                classId,
+                                memberId: userId,
+                                type: type >= FIVE ? TWO : 1,
+                                endTime,
+                                realname,
+                                parentPhoneNum,
+                                roleId: element.roleId,
+                            });
+                        }
+                    }
+                    if (!flag) {
+                        objs.push({
+                            organizationId,
+                            classId: 0,
+                            memberId: userId,
+                            type: type >= FIVE ? TWO : 1,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId: 1,
+                        });
+                    }
                 }
             }
             // 把之前的都删了，然后再创建

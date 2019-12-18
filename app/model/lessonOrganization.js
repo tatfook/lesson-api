@@ -154,15 +154,30 @@ module.exports = app => {
         return list[0].count || 0;
     };
 
-    model.getMembers = async (organizationId, roleId, classId) => {
-        const sql = `select * from lessonOrganizationClassMembers as locm where locm.organizationId = ${organizationId} and 
-		roleId & ${roleId} and classId ${
-    classId === undefined ? '>= 0' : '= ' + classId
-}  and (
-			classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and status =1)
-			) group by memberId`;
+    model.getStudentIds = async (organizationId, classId, type, username) => {
+        let condition = '';
+        if (type) condition += ' and m.type = :type';
+        if (classId) condition += ' and m.classId = :classId';
+        if (username) {
+            condition += ` and (m.realname like '%${username}%' or u.username like '%${username}%')`;
+        }
+
+        const sql = `
+        select 
+            memberId 
+        from 
+            lessonOrganizationClassMembers m 
+            join users u on m.memberId = u.id
+        where m.roleId & 1 and m.organizationId = :organizationId ${condition} 
+		group by m.memberId`;
         const list = await app.model.query(sql, {
             type: app.model.QueryTypes.SELECT,
+            replacements: {
+                organizationId,
+                classId,
+                type,
+                username,
+            },
         });
         return list;
     };
