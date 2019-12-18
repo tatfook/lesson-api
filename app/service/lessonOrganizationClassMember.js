@@ -752,6 +752,14 @@ class LessonOrgClassMemberService extends Service {
                             roleId: 1,
                         });
                     }
+                    const old = await this.ctx.service.lessonOrganizationClassMember.getByCondition(
+                        {
+                            organizationId,
+                            memberId: userId,
+                            classId: 0,
+                        }
+                    );
+                    if (old) members.push(old);
                 }
             }
 
@@ -964,6 +972,14 @@ class LessonOrgClassMemberService extends Service {
                             roleId: 1,
                         });
                     }
+                    const old = await this.ctx.service.lessonOrganizationClassMember.getByCondition(
+                        {
+                            organizationId,
+                            memberId: userId,
+                            classId: 0,
+                        }
+                    );
+                    if (old) members.push(old);
                 }
             }
 
@@ -1173,6 +1189,14 @@ class LessonOrgClassMemberService extends Service {
                             roleId: 1,
                         });
                     }
+                    const old = await this.ctx.service.lessonOrganizationClassMember.getByCondition(
+                        {
+                            organizationId,
+                            memberId: userId,
+                            classId: 0,
+                        }
+                    );
+                    if (old) members.push(old);
                 }
             }
             // 把之前的都删了，然后再创建

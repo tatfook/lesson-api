@@ -328,6 +328,14 @@ class LessonOrgActivateCodeService extends Service {
                 if (checkFlag) obj.parentPhoneNum = parentPhoneNum;
                 members.push(obj);
             }
+            const old = await this.ctx.service.lessonOrganizationClassMember.getByCondition(
+                {
+                    organizationId: data.organizationId,
+                    memberId: userId,
+                    classId: 0,
+                }
+            );
+            if (old) ms.push(old);
         }
 
         // 事务操作
@@ -504,6 +512,14 @@ class LessonOrgActivateCodeService extends Service {
                     roleId: 1,
                 });
             }
+            const old = await this.ctx.service.lessonOrganizationClassMember.getByCondition(
+                {
+                    organizationId,
+                    memberId: userId,
+                    classId: 0,
+                }
+            );
+            if (old) members.push(old);
         }
 
         // 事务操作
