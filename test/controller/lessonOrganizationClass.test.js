@@ -216,7 +216,9 @@ describe('lesson organization class', () => {
                 .expect(200)
                 .then(res => res.body.data);
 
-            const cls = await app.model.LessonOrganizationClass.findOne({ where: { id } });
+            const cls = await app.model.LessonOrganizationClass.findOne({
+                where: { id },
+            });
             assert(cls.status === 2);
         });
     });
