@@ -66,7 +66,9 @@ module.exports = {
             for (let i = 0; i < classes.length; i++) {
                 await queryInterface.sequelize.query(
                     `
-                update lessonOrganizationClasses set \`status\` = ${classes[i].end > currTime ? 1 : 2} where id = ${classes[i].id}
+                update lessonOrganizationClasses set \`status\` = ${
+                    classes[i].end > currTime ? 1 : 2
+                } where id = ${classes[i].id}
                 `,
                     { type: Sequelize.QueryTypes.UPDATE, transaction }
                 );
