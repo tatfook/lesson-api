@@ -59,7 +59,7 @@ class BaseController extends Controller {
                 throw new Error(`非法的校验方法${k}！`);
             }
             const rule = rules[k];
-            const [ errmsg, param ] = [ rule.errmsg, rule.param ];
+            const [errmsg, param] = [rule.errmsg, rule.param];
             if (Array.isArray(param)) {
                 if (!method.call(null, str, ...param)) {
                     return { error: errmsg };
@@ -123,7 +123,7 @@ class BaseController extends Controller {
             query[newkey][Op[op]] = val;
         }
 
-        const replaceOp = function(data) {
+        const replaceOp = function (data) {
             if (!_.isObject(data)) return;
             _.each(data, (val, key) => {
                 if (_.isString(key)) {
