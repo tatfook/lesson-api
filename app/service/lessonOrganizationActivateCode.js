@@ -54,7 +54,7 @@ class LessonOrgActivateCodeService extends Service {
         const type = params.type;
         const names = params.names || [];
         const count = params.count || names.length || 1;
-        const formalTypes = [ '5', '6', '7' ]; // 正式邀请码类型
+        const formalTypes = ['5', '6', '7']; // 正式邀请码类型
 
         // check auth
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
@@ -91,7 +91,7 @@ class LessonOrgActivateCodeService extends Service {
                 organizationId,
                 type,
                 state: {
-                    $in: [ '0', '1' ],
+                    $in: ['0', '1'],
                 },
             });
             if (historyCount + count > limit) {
@@ -107,7 +107,7 @@ class LessonOrgActivateCodeService extends Service {
                 type,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${new Date().getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${new Date().getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: names.length > i ? names[i] : '',
             });
         }
@@ -344,7 +344,6 @@ class LessonOrgActivateCodeService extends Service {
         }
 
         // 事务操作
-        let member;
         let transaction;
         try {
             transaction = await this.ctx.model.transaction();
@@ -354,7 +353,7 @@ class LessonOrgActivateCodeService extends Service {
                 },
                 transaction,
             });
-            member = await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
+            await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
                 members,
                 { transaction }
             );
@@ -380,7 +379,7 @@ class LessonOrgActivateCodeService extends Service {
         await this.ctx.service.lessonOrganizationClassMember.updateUserVipAndTLevel(
             userId
         );
-        return member;
+        return data.classIds;
     }
 
     /**
@@ -392,7 +391,7 @@ class LessonOrgActivateCodeService extends Service {
         const { userId, username, organizationId } = authParams;
         const { key, realname } = params;
         const currTime = new Date();
-        const [ members, activeCode ] = await Promise.all([
+        const [members, activeCode] = await Promise.all([
             //
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
@@ -594,7 +593,7 @@ class LessonOrgActivateCodeService extends Service {
         const five = 5;
         const six = 6;
         const seven = 7;
-        let [ type5Count, type6Count, type7Count ] = [ 0, 0, 0 ];
+        let [type5Count, type6Count, type7Count] = [0, 0, 0];
         for (let i = 0; i < list.length; i++) {
             if (list[i].state === 1 && list[i].type) {
                 // 已使用
