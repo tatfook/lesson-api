@@ -585,13 +585,13 @@ class LessonOrgClassMemberService extends Service {
             this.ctx.throw(400, Err.STU_TYPE_ERR);
         }
         const [ members, classes, org, historyCount ] = await Promise.all([
-            // 检查这些学生是不是在这个机构试听
+            //
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    // roleId: { $in: ['1', '3', '65', '67'] },
                     memberId: { $in: userIds },
                     organizationId,
-                    type: 1,
+                    // type: 1,
                 },
             }),
             // 检查班级
@@ -703,6 +703,21 @@ class LessonOrgClassMemberService extends Service {
 
                         objs.push(obj);
                     }
+                    // 保留这个人在其他班级的教师和管理员身份
+                    const otherClassMs = _.filter(
+                        members,
+                        o =>
+                            !classIds.includes(o.classId) &&
+                            o.memberId === userIds[i]
+                    );
+                    otherClassMs.forEach(r => {
+                        r.roleId = r.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
+                        r.type = 2;
+                        r.endTime = endTime;
+                        r.realname = realname;
+                        r.parentPhoneNum = parentPhoneNum;
+                    });
+                    objs.push(...otherClassMs);
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
@@ -752,14 +767,6 @@ class LessonOrgClassMemberService extends Service {
                             roleId: 1,
                         });
                     }
-                    const old = await this.ctx.service.lessonOrganizationClassMember.getByCondition(
-                        {
-                            organizationId,
-                            memberId: userId,
-                            classId: 0,
-                        }
-                    );
-                    if (old) members.push(old);
                 }
             }
 
@@ -805,11 +812,11 @@ class LessonOrgClassMemberService extends Service {
             // 检查这些学生是不是在这个机构正式学生
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    //   roleId: { $in: ['1', '3', '65', '67'] },
                     memberId: { $in: userIds },
                     organizationId,
-                    type: 2,
-                    endTime: { $gt: currTime },
+                    //  type: 2,
+                    // endTime: { $gt: currTime },
                 },
             }),
             // 检查班级
@@ -923,6 +930,21 @@ class LessonOrgClassMemberService extends Service {
 
                         objs.push(obj);
                     }
+                    // 保留这个人在其他班级的教师和管理员身份
+                    const otherClassMs = _.filter(
+                        members,
+                        o =>
+                            !classIds.includes(o.classId) &&
+                            o.memberId === userIds[i]
+                    );
+                    otherClassMs.forEach(r => {
+                        r.roleId = r.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
+                        r.type = 2;
+                        r.endTime = endTime;
+                        r.realname = realname;
+                        r.parentPhoneNum = parentPhoneNum;
+                    });
+                    objs.push(...otherClassMs);
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
@@ -972,14 +994,6 @@ class LessonOrgClassMemberService extends Service {
                             roleId: 1,
                         });
                     }
-                    const old = await this.ctx.service.lessonOrganizationClassMember.getByCondition(
-                        {
-                            organizationId,
-                            memberId: userId,
-                            classId: 0,
-                        }
-                    );
-                    if (old) members.push(old);
                 }
             }
 
@@ -1026,10 +1040,10 @@ class LessonOrgClassMemberService extends Service {
             // 检查这些学生是不是过期了
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
-                    roleId: { $in: [ '1', '3', '65', '67' ] },
+                    //  roleId: { $in: ['1', '3', '65', '67'] },
                     memberId: { $in: userIds },
                     organizationId,
-                    endTime: { $lt: currTime },
+                    // endTime: { $lt: currTime },
                 },
             }),
             // 检查班级
@@ -1140,6 +1154,21 @@ class LessonOrgClassMemberService extends Service {
 
                         objs.push(obj);
                     }
+                    // 保留这个人在其他班级的教师和管理员身份
+                    const otherClassMs = _.filter(
+                        members,
+                        o =>
+                            !classIds.includes(o.classId) &&
+                            o.memberId === userIds[i]
+                    );
+                    otherClassMs.forEach(r => {
+                        r.roleId = r.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
+                        r.type = type >= FIVE ? TWO : 1;
+                        r.endTime = endTime;
+                        r.realname = realname;
+                        r.parentPhoneNum = parentPhoneNum;
+                    });
+                    objs.push(...otherClassMs);
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
@@ -1189,14 +1218,6 @@ class LessonOrgClassMemberService extends Service {
                             roleId: 1,
                         });
                     }
-                    const old = await this.ctx.service.lessonOrganizationClassMember.getByCondition(
-                        {
-                            organizationId,
-                            memberId: userId,
-                            classId: 0,
-                        }
-                    );
-                    if (old) members.push(old);
                 }
             }
             // 把之前的都删了，然后再创建
