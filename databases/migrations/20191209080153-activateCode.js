@@ -66,16 +66,6 @@ module.exports = {
                 queryInterface.removeColumn('lessonOrganizations', 'count', {
                     transaction: t,
                 }),
-                queryInterface.removeColumn(
-                    'lessonOrganizationClasses',
-                    'begin',
-                    { transaction: t }
-                ),
-                queryInterface.removeColumn(
-                    'lessonOrganizationClasses',
-                    'end',
-                    { transaction: t }
-                ),
             ]);
         });
     },
@@ -89,24 +79,6 @@ module.exports = {
                     {
                         type: Sequelize.INTEGER,
                         comment: '学生人数上限',
-                    },
-                    { transaction: t }
-                ),
-                queryInterface.addColumn(
-                    'lessonOrganizationClasses',
-                    'begin',
-                    {
-                        type: Sequelize.DATE,
-                        comment: '班级开始时间',
-                    },
-                    { transaction: t }
-                ),
-                queryInterface.addColumn(
-                    'lessonOrganizationClasses',
-                    'end',
-                    {
-                        type: Sequelize.DATE,
-                        comment: '班级结束时间',
                     },
                     { transaction: t }
                 ),

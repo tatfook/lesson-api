@@ -6,7 +6,7 @@ module.exports = app => {
 
     factory.define(tableName, app.model[tableName], {
         organizationId: app.factory.assoc('LessonOrganization', 'id'),
-        classId: app.factory.assoc('LessonOrganizationClass', 'id'),
+        classIds: [app.factory.assoc('LessonOrganizationClass', 'id')],
         key: factory.chance('string', {
             length: 5,
         }),
