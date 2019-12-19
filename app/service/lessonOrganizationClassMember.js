@@ -751,7 +751,8 @@ class LessonOrgClassMemberService extends Service {
                                 endTime,
                                 realname,
                                 parentPhoneNum,
-                                roleId: element.roleId,
+                                roleId:
+                                    element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
                             });
                         }
                     }
@@ -978,7 +979,8 @@ class LessonOrgClassMemberService extends Service {
                                 endTime,
                                 realname,
                                 parentPhoneNum,
-                                roleId: element.roleId,
+                                roleId:
+                                    element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
                             });
                         }
                     }
@@ -1202,7 +1204,8 @@ class LessonOrgClassMemberService extends Service {
                                 endTime,
                                 realname,
                                 parentPhoneNum,
-                                roleId: element.roleId,
+                                roleId:
+                                    element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
                             });
                         }
                     }

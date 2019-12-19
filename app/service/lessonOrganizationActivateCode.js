@@ -324,7 +324,7 @@ class LessonOrgActivateCodeService extends Service {
                     flag = true;
                     obj.roleId = 1 | element.roleId;
                 } else {
-                    obj.roleId = element.roleId;
+                    obj.roleId = element.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
                 }
                 members.push(obj);
             }
@@ -344,7 +344,6 @@ class LessonOrgActivateCodeService extends Service {
         }
 
         // 事务操作
-        let member;
         let transaction;
         try {
             transaction = await this.ctx.model.transaction();
@@ -354,7 +353,7 @@ class LessonOrgActivateCodeService extends Service {
                 },
                 transaction,
             });
-            member = await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
+            await this.ctx.model.LessonOrganizationClassMember.bulkCreate(
                 members,
                 { transaction }
             );
@@ -380,7 +379,7 @@ class LessonOrgActivateCodeService extends Service {
         await this.ctx.service.lessonOrganizationClassMember.updateUserVipAndTLevel(
             userId
         );
-        return member;
+        return data.classIds;
     }
 
     /**
@@ -514,7 +513,7 @@ class LessonOrgActivateCodeService extends Service {
                         endTime,
                         realname,
                         parentPhoneNum,
-                        roleId: element.roleId,
+                        roleId: element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
                     });
                 }
             }
