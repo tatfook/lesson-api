@@ -51,12 +51,12 @@ class User extends Service {
 
     // 获取keepwork头像，在机构中的realname,家长手机号，到期时间，以及vip和tLevel
     async getPortraitRealNameParentNum(userId, organizationId) {
-        const [users, member] = await Promise.all([
+        const [ users, member ] = await Promise.all([
             this.ctx.service.keepwork.getAllUserByCondition({ id: userId }),
             this.ctx.service.lessonOrganizationClassMember.getByCondition({
                 organizationId,
                 memberId: userId,
-                roleId: { $in: ['1', '3', '65', '67'] },
+                roleId: { $in: [ '1', '3', '65', '67' ] },
             }),
         ]);
 
