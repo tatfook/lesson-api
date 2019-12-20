@@ -19,7 +19,7 @@ const LessonOrganization = class extends Controller {
         const { userId, username } = this.authenticated();
         const { organizationId } = this.validate({ organizationId: 'number' });
 
-        const [ members, org ] = await Promise.all([
+        const [members, org] = await Promise.all([
             ctx.service.lessonOrganizationClassMember.getAllByCondition({
                 organizationId,
                 memberId: userId,
@@ -213,13 +213,14 @@ const LessonOrganization = class extends Controller {
         });
         if (!organ) return ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
         // 检查正式激活码上限
-        const { type5 = 0, type6 = 0, type7 = 0 } =
-            params.activateCodeLimit || {};
-        await ctx.service.lessonOrganization.checkActivateCodeLimit(id, {
-            type5,
-            type6,
-            type7,
-        });
+        if (params.activateCodeLimit) {
+            const { type5 = 0, type6 = 0, type7 = 0 } = params.activateCodeLimit;
+            await ctx.service.lessonOrganization.checkActivateCodeLimit(id, {
+                type5,
+                type6,
+                type7,
+            });
+        }
 
         if (this.ctx.state.admin && this.ctx.state.admin.userId) {
             await ctx.service.lessonOrganization.updateOrganization(
