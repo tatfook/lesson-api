@@ -249,13 +249,32 @@ describe('test/service/lessonOrganizationActivateCode.test.js', async () => {
             );
             key = code.key;
             organizationId = code.organizationId;
+            app.mockService(
+                'lessonOrganizationClassMember',
+                'updateUserVipAndTLevel',
+                () => 0
+            );
         });
-        it.only('001', async () => {
+        it('001 ', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationActivateCode.useActivateCode(
+                {
+                    key,
+                    realname: '',
+                    organizationId,
+                },
+                {
+                    userId: 1,
+                    username: '',
+                }
+            );
+        });
+        it('002 无效激活码', async () => {
             const ctx = app.mockContext();
             try {
                 await ctx.service.lessonOrganizationActivateCode.useActivateCode(
                     {
-                        key,
+                        key: 'key',
                         realname: '',
                         organizationId,
                     },
@@ -265,8 +284,33 @@ describe('test/service/lessonOrganizationActivateCode.test.js', async () => {
                     }
                 );
             } catch (e) {
-                console.log(e);
+                assert(e.message === '无效激活码');
             }
         });
+
+        it('003 加上家长手机号', async () => {
+            const ctx = app.mockContext();
+
+            await app.redis.set('verifCode:13590450686', '123456');
+            await ctx.service.lessonOrganizationActivateCode.useActivateCode(
+                {
+                    key,
+                    realname: '',
+                    organizationId,
+                    parentPhoneNum: '13590450686',
+                    verifCode: '123456',
+                },
+                {
+                    userId: 1,
+                    username: '',
+                }
+            );
+            const member = await app.model.LessonOrganizationClassMember.findOne(
+                { where: { memberId: 1 } }
+            );
+            assert(member.parentPhoneNum === '13590450686');
+        });
+
+        it('004', async () => {});
     });
 });
