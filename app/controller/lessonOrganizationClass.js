@@ -28,14 +28,21 @@ const LessonOrganizationClass = class extends Controller {
 
     async index() {
         const { userId, organizationId } = this.authenticated();
-        const { roleId, status = [ONE, TWO] } = this.validate({ roleId: 'number_optional' });
+        const { roleId, status = [ ONE, TWO ] } = this.validate({
+            roleId: 'number_optional',
+        });
 
         let list;
         if (!roleId) {
             list = await this.ctx.service.lessonOrganizationClass.findAllByCondition(
                 {
                     organizationId,
-                    status: { $in: typeof status === 'object' ? status : JSON.parse(status) },
+                    status: {
+                        $in:
+                            typeof status === 'object'
+                                ? status
+                                : JSON.parse(status),
+                    },
                 }
             );
         } else {
