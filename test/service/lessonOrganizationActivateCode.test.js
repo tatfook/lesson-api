@@ -237,7 +237,36 @@ describe('test/service/lessonOrganizationActivateCode.test.js', async () => {
     });
 
     describe('useActivateCode 学生使用激活码激活', async () => {
-        beforeEach(async () => {});
-        it('001', async () => {});
+        let key;
+        let organizationId;
+        beforeEach(async () => {
+            const code = await app.factory.create(
+                'LessonOrganizationActivateCode',
+                {
+                    type: 1,
+                    state: 0,
+                }
+            );
+            key = code.key;
+            organizationId = code.organizationId;
+        });
+        it.only('001', async () => {
+            const ctx = app.mockContext();
+            try {
+                await ctx.service.lessonOrganizationActivateCode.useActivateCode(
+                    {
+                        key,
+                        realname: '',
+                        organizationId,
+                    },
+                    {
+                        userId: 1,
+                        username: '',
+                    }
+                );
+            } catch (e) {
+                console.log(e);
+            }
+        });
     });
 });

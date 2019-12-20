@@ -232,10 +232,7 @@ class LessonOrgClassMemberService extends Service {
 
         _.each(list, o => {
             o = o.get();
-            if (
-                !(o.roleId & CLASS_MEMBER_ROLE_STUDENT) ||
-                !o.lessonOrganizationClasses
-            ) {
+            if (!(o.roleId & CLASS_MEMBER_ROLE_STUDENT)) {
                 return;
             }
             if (!map[o.memberId]) {
@@ -316,7 +313,7 @@ class LessonOrgClassMemberService extends Service {
             }
         }
 
-        let oldmembers = await this.ctx.model.LessonOrganizationClassMember.findAll(
+        const oldmembers = await this.ctx.model.LessonOrganizationClassMember.findAll(
             {
                 order: [[ 'id', 'desc' ]],
                 include: [
@@ -330,7 +327,7 @@ class LessonOrgClassMemberService extends Service {
             }
         ).then(list => list.map(o => o.toJSON()));
 
-        oldmembers = _.filter(oldmembers, o => {
+        const oldStumembers = _.filter(oldmembers, o => {
             if (
                 o.roleId === CLASS_MEMBER_ROLE_STUDENT &&
                 o.lessonOrganizationClasses &&
@@ -341,11 +338,11 @@ class LessonOrgClassMemberService extends Service {
             return true;
         });
 
-        const ids = _.map(oldmembers, o => o.id);
+        const ids = _.map(oldStumembers, o => o.id);
 
         if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
             const oldClassIds = _.filter(
-                oldmembers,
+                oldStumembers,
                 o => o.roleId & CLASS_MEMBER_ROLE_STUDENT
             ).map(r => r.classId);
             const delClassIds = _.difference(oldClassIds, classIds);
@@ -369,31 +366,77 @@ class LessonOrgClassMemberService extends Service {
             handleId: userId,
             username,
             classIds,
-            oldmembers,
+            oldmembers: oldStumembers,
             organizationId,
         });
 
-        // 合并其它身份
-        const datas = _.map(classIds, classId => ({
-            ...params,
-            classId,
-            roleId:
-                params.roleId |
-                (
-                    _.find(oldmembers, m => m.classId === ~~classId) || {
-                        roleId: 0,
-                    }
-                ).roleId,
-        }));
-
-        // 删除要创建的
+        let datas = [];
         if (classIds.length) {
+            // 合并其它身份
+            datas = _.map(classIds, classId => ({
+                ...params,
+                classId,
+                roleId:
+                    params.roleId |
+                    (
+                        _.find(oldStumembers, m => m.classId === ~~classId) || {
+                            roleId: 0,
+                        }
+                    ).roleId,
+            }));
+            // 删除要创建的
             await this.destroyByCondition({
                 organizationId,
                 memberId: params.memberId,
                 classId: { $in: classIds },
             });
+        } else {
+            const adminAndTeachers = _.filter(
+                oldmembers,
+                m =>
+                    m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
+                    m.roleId & CLASS_MEMBER_ROLE_TEACHER
+            );
+            let flag = false;
+            for (let i = 0; i < adminAndTeachers.length; i++) {
+                const element = adminAndTeachers[i];
+                const classId = element.classId;
+                if (classId === 0) {
+                    flag = true;
+                }
+                const obj = {
+                    ...params,
+                    classId,
+                    roleId: element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
+                };
+                datas.push(obj);
+            }
+            if (!flag) {
+                datas.push({
+                    ...params,
+                    classId: 0,
+                    roleId:
+                        params.roleId |
+                        (
+                            _.find(oldmembers, m => m.classId === 0) || {
+                                roleId: 0,
+                            }
+                        ).roleId,
+                });
+            }
+            await this.destroyByCondition({
+                organizationId,
+                memberId: params.memberId,
+            });
         }
+
+        // if (classIds.length) {
+        //     await this.destroyByCondition({
+        //         organizationId,
+        //         memberId: params.memberId,
+        //         classId: { $in: classIds },
+        //     });
+        // }
         // 取消全部班级此身份
         if (ids.length) {
             await this.model.query(
@@ -431,6 +474,14 @@ class LessonOrgClassMemberService extends Service {
                 },
                 { where: { id: { $in: ids } } }
             );
+            await this.ctx.service.lessonOrganizationActivateCode.updateByCondition(
+                { realname: params.realname },
+                {
+                    organizationId,
+                    activateUserId: params.memberId,
+                    state: 1,
+                }
+            );
         }
 
         // 此处update已和前端沟通过了，不修改parentPhoneNum则传旧值，修改则传新值，清空则传空串
@@ -446,17 +497,6 @@ class LessonOrgClassMemberService extends Service {
             }
         );
 
-        if (params.realname && classIds.length) {
-            await this.ctx.service.lessonOrganizationActivateCode.updateByCondition(
-                { realname: params.realname },
-                {
-                    organizationId,
-                    activateUserId: params.memberId,
-                    state: 1,
-                    classId: { $in: classIds },
-                }
-            );
-        }
         // 更新用户vip和t信息
         await this.updateUserVipAndTLevel(params.memberId);
         return members;
