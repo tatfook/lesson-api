@@ -567,6 +567,7 @@ class LessonOrgActivateCodeService extends Service {
             await transaction.rollback();
             this.ctx.throw(500, Err.DB_ERR);
         }
+        return activeCode.classIds;
     }
 
     // 激活码使用情况
