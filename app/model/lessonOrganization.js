@@ -155,7 +155,7 @@ module.exports = app => {
     };
 
     model.getStudentIds = async (organizationId, classId, type, username) => {
-        let condition = '';
+        let condition = ' and m.endTime>now()';
         if (type) condition += ' and m.type = :type';
         if (classId) condition += ' and m.classId = :classId';
         if (username) {

@@ -293,13 +293,14 @@ class LessonOrgActivateCodeService extends Service {
                 o => !data.classIds.includes(o.classId)
             );
             otherClassMs.forEach(r => {
+                r = r.get();
                 r.roleId = r.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
                 r.type = type;
                 r.endTime = endTime;
                 r.realname = realname;
                 if (checkFlag) r.parentPhoneNum = parentPhoneNum;
+                members.push(r);
             });
-            members.push(...otherClassMs);
         } else {
             const adminAndTeachers = _.filter(
                 ms,
@@ -470,11 +471,12 @@ class LessonOrgActivateCodeService extends Service {
                 o => !activeCode.classIds.includes(o.classId)
             );
             otherClassMs.forEach(r => {
+                r = r.get();
                 r.roleId = r.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
                 r.type = type;
                 r.realname = realname;
+                newMembers.push(r);
             });
-            newMembers.push(...otherClassMs);
         } else {
             const adminAndTeachers = _.filter(
                 members,

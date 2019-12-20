@@ -758,13 +758,14 @@ class LessonOrgClassMemberService extends Service {
                             o.memberId === userIds[i]
                     );
                     otherClassMs.forEach(r => {
+                        r = r.get();
                         r.roleId = r.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
                         r.type = 2;
                         r.endTime = endTime;
                         r.realname = realname;
                         r.parentPhoneNum = parentPhoneNum;
+                        objs.push(r);
                     });
-                    objs.push(...otherClassMs);
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
@@ -986,13 +987,14 @@ class LessonOrgClassMemberService extends Service {
                             o.memberId === userIds[i]
                     );
                     otherClassMs.forEach(r => {
+                        r = r.get();
                         r.roleId = r.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
                         r.type = 2;
                         r.endTime = endTime;
                         r.realname = realname;
                         r.parentPhoneNum = parentPhoneNum;
+                        objs.push(r);
                     });
-                    objs.push(...otherClassMs);
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
@@ -1211,13 +1213,14 @@ class LessonOrgClassMemberService extends Service {
                             o.memberId === userIds[i]
                     );
                     otherClassMs.forEach(r => {
+                        r = r.get();
                         r.roleId = r.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
                         r.type = type >= FIVE ? TWO : 1;
                         r.endTime = endTime;
                         r.realname = realname;
                         r.parentPhoneNum = parentPhoneNum;
+                        objs.push(r);
                     });
-                    objs.push(...otherClassMs);
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
