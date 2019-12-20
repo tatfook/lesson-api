@@ -390,7 +390,7 @@ class LessonOrgClassMemberService extends Service {
                 memberId: params.memberId,
                 classId: { $in: classIds },
             });
-        } else {
+        } else if (params.roleId === 1) {
             const adminAndTeachers = _.filter(
                 oldmembers,
                 m =>
