@@ -379,7 +379,7 @@ class LessonOrgClassMemberService extends Service {
                 roleId:
                     params.roleId |
                     (
-                        _.find(oldStumembers, m => m.classId === ~~classId) || {
+                        _.find(oldmembers, m => m.classId === ~~classId) || {
                             roleId: 0,
                         }
                     ).roleId,
