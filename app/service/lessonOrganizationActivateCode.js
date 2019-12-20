@@ -428,8 +428,7 @@ class LessonOrgActivateCodeService extends Service {
         }
 
         const type = 2;
-        const endTime = endTimeMap[activeCode.type](members[0].endTime);
-        const parentPhoneNum = members[0].parentPhoneNum;
+
         const newMembers = [];
         if (activeCode.classIds.length) {
             const classes = await this.ctx.model.LessonOrganizationClass.findAll(
@@ -450,9 +449,7 @@ class LessonOrgActivateCodeService extends Service {
                     classId: activeCode.classIds[i],
                     memberId: userId,
                     type,
-                    endTime,
                     realname,
-                    parentPhoneNum,
                 };
 
                 obj.roleId =
@@ -475,9 +472,7 @@ class LessonOrgActivateCodeService extends Service {
             otherClassMs.forEach(r => {
                 r.roleId = r.roleId & ~CLASS_MEMBER_ROLE_STUDENT;
                 r.type = type;
-                r.endTime = endTime;
                 r.realname = realname;
-                r.parentPhoneNum = parentPhoneNum;
             });
             newMembers.push(...otherClassMs);
         } else {
@@ -498,9 +493,7 @@ class LessonOrgActivateCodeService extends Service {
                         classId,
                         memberId: userId,
                         type,
-                        endTime,
                         realname,
-                        parentPhoneNum,
                     };
                     obj.roleId = 1 | element.roleId;
                     newMembers.push(obj);
@@ -510,9 +503,7 @@ class LessonOrgActivateCodeService extends Service {
                         classId,
                         memberId: userId,
                         type,
-                        endTime,
                         realname,
-                        parentPhoneNum,
                         roleId: element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
                     });
                 }
@@ -523,12 +514,24 @@ class LessonOrgActivateCodeService extends Service {
                     classId: 0,
                     memberId: userId,
                     type,
-                    endTime,
                     realname,
-                    parentPhoneNum,
                     roleId: 1,
                 });
             }
+        }
+
+        if (members.length) {
+            // 不要丢失到期时间，家长手机号
+            const endTime = endTimeMap[activeCode.type](
+                (_.find(members, o => o.endTime) || {}).endTime
+            );
+            const parentPhoneNum = (
+                _.find(members, o => o.parentPhoneNum) || {}
+            ).parentPhoneNum;
+            newMembers.forEach(r => {
+                r.endTime = endTime;
+                r.parentPhoneNum = parentPhoneNum;
+            });
         }
 
         // 事务操作
