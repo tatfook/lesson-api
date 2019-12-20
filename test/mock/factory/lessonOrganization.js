@@ -6,5 +6,6 @@ module.exports = app => {
         name: factory.chance('string', {
             length: 5,
         }),
+        endDate: '2220-01-01',
     });
 };
