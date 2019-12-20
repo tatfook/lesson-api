@@ -203,7 +203,7 @@ module.exports = app => {
 
         const sql1 = `
         SELECT 
-            m.memberId
+            m.memberId,
             m.realname,
             u.username,
             m.type,

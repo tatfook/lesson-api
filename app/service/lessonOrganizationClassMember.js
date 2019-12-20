@@ -432,11 +432,15 @@ class LessonOrgClassMemberService extends Service {
 
         if (oldmembers.length) {
             // 不要丢失用户类型，到期时间，家长手机号
-            const old = oldmembers[0];
+            const type = (_.find(oldmembers, o => o.type) || {}).type;
+            const endTime = (_.find(oldmembers, o => o.endTime) || {}).endTime;
+            const parentPhoneNum = (
+                _.find(oldmembers, o => o.parentPhoneNum) || {}
+            ).parentPhoneNum;
             datas.forEach(r => {
-                r.type = old.type;
-                r.endTime = old.endTime;
-                r.parentPhoneNum = old.parentPhoneNum;
+                r.type = type;
+                r.endTime = endTime;
+                r.parentPhoneNum = parentPhoneNum;
             });
         }
 
