@@ -17,8 +17,8 @@ const {
 const Err = require('../common/err');
 const _ = require('lodash');
 const moment = require('moment');
-const formalTypes = [ '5', '6', '7' ]; // 正式邀请码类型
-const allCodeTypes = [ '1', '2', '5', '6', '7' ]; // 全部邀请码类型
+const formalTypes = ['5', '6', '7']; // 正式邀请码类型
+const allCodeTypes = ['1', '2', '5', '6', '7']; // 全部邀请码类型
 
 // 各个类型激活码的过期时间
 const endTimeMap = {
@@ -202,7 +202,7 @@ class LessonOrgClassMemberService extends Service {
         const memberIds = members.map(o => o.memberId);
         if (memberIds.length === 0) return { count: 0, rows: [] };
 
-        const [ list, users ] = await Promise.all([
+        const [list, users] = await Promise.all([
             this.model.LessonOrganizationClassMember.findAll({
                 include: [
                     {
@@ -233,8 +233,7 @@ class LessonOrgClassMemberService extends Service {
         _.each(list, o => {
             o = o.get();
             if (
-                !(o.roleId & CLASS_MEMBER_ROLE_STUDENT) ||
-                !o.lessonOrganizationClasses
+                !(o.roleId & CLASS_MEMBER_ROLE_STUDENT)
             ) {
                 return;
             }
@@ -316,9 +315,9 @@ class LessonOrgClassMemberService extends Service {
             }
         }
 
-        let oldmembers = await this.ctx.model.LessonOrganizationClassMember.findAll(
+        const oldmembers = await this.ctx.model.LessonOrganizationClassMember.findAll(
             {
-                order: [[ 'id', 'desc' ]],
+                order: [['id', 'desc']],
                 include: [
                     {
                         as: 'lessonOrganizationClasses',
@@ -330,7 +329,7 @@ class LessonOrgClassMemberService extends Service {
             }
         ).then(list => list.map(o => o.toJSON()));
 
-        oldmembers = _.filter(oldmembers, o => {
+        const oldStumembers = _.filter(oldmembers, o => {
             if (
                 o.roleId === CLASS_MEMBER_ROLE_STUDENT &&
                 o.lessonOrganizationClasses &&
@@ -341,11 +340,11 @@ class LessonOrgClassMemberService extends Service {
             return true;
         });
 
-        const ids = _.map(oldmembers, o => o.id);
+        const ids = _.map(oldStumembers, o => o.id);
 
         if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
             const oldClassIds = _.filter(
-                oldmembers,
+                oldStumembers,
                 o => o.roleId & CLASS_MEMBER_ROLE_STUDENT
             ).map(r => r.classId);
             const delClassIds = _.difference(oldClassIds, classIds);
@@ -369,31 +368,73 @@ class LessonOrgClassMemberService extends Service {
             handleId: userId,
             username,
             classIds,
-            oldmembers,
+            oldStumembers,
             organizationId,
         });
 
-        // 合并其它身份
-        const datas = _.map(classIds, classId => ({
-            ...params,
-            classId,
-            roleId:
-                params.roleId |
-                (
-                    _.find(oldmembers, m => m.classId === ~~classId) || {
-                        roleId: 0,
-                    }
-                ).roleId,
-        }));
-
-        // 删除要创建的
+        let datas = [];
         if (classIds.length) {
+            // 合并其它身份
+            datas = _.map(classIds, classId => ({
+                ...params,
+                classId,
+                roleId:
+                    params.roleId |
+                    (
+                        _.find(oldStumembers, m => m.classId === ~~classId) || {
+                            roleId: 0,
+                        }
+                    ).roleId,
+            }));
+            // 删除要创建的
             await this.destroyByCondition({
                 organizationId,
                 memberId: params.memberId,
                 classId: { $in: classIds },
             });
+        } else {
+            const adminAndTeachers = _.filter(
+                oldmembers,
+                m =>
+                    m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
+                    m.roleId & CLASS_MEMBER_ROLE_TEACHER
+            );
+            let flag = false;
+            for (let i = 0; i < adminAndTeachers.length; i++) {
+                const element = adminAndTeachers[i];
+                const classId = element.classId;
+                if (classId === 0) {
+                    flag = true;
+                }
+                const obj = {
+                    ...params,
+                    classId,
+                    roleId: element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
+                };
+                datas.push(obj);
+            }
+            if (!flag) {
+                datas.push({
+                    ...params,
+                    classId: 0,
+                    roleId: params.roleId | (_.find(oldmembers, m => m.classId === 0) || {
+                        roleId: 0,
+                    }).roleId,
+                });
+            }
+            await this.destroyByCondition({
+                organizationId,
+                memberId: params.memberId,
+            });
         }
+
+        // if (classIds.length) {
+        //     await this.destroyByCondition({
+        //         organizationId,
+        //         memberId: params.memberId,
+        //         classId: { $in: classIds },
+        //     });
+        // }
         // 取消全部班级此身份
         if (ids.length) {
             await this.model.query(
@@ -497,7 +538,7 @@ class LessonOrgClassMemberService extends Service {
         if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
             await this.ctx.service.evaluationReport.checkEvaluationStatus(
                 member.memberId,
-                [ member.classId ]
+                [member.classId]
             );
         }
 
@@ -515,8 +556,8 @@ class LessonOrgClassMemberService extends Service {
             organizationId,
             handleId: userId,
             username,
-            oldmembers: [ member ],
-            classIds: [ -1 ],
+            oldmembers: [member],
+            classIds: [-1],
             roleId:
                 memberRoleId & CLASS_MEMBER_ROLE_TEACHER
                     ? CLASS_MEMBER_ROLE_TEACHER
@@ -584,7 +625,7 @@ class LessonOrgClassMemberService extends Service {
         if (!formalTypes.includes(type + '')) {
             this.ctx.throw(400, Err.STU_TYPE_ERR);
         }
-        const [ members, classes, org, historyCount ] = await Promise.all([
+        const [members, classes, org, historyCount] = await Promise.all([
             //
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
@@ -613,7 +654,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: [ '0', '1' ],
+                        $in: ['0', '1'],
                     },
                 }
             ),
@@ -649,7 +690,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -809,7 +850,7 @@ class LessonOrgClassMemberService extends Service {
             this.ctx.throw(400, Err.STU_TYPE_ERR);
         }
         const currTime = new Date();
-        const [ members, classes, org, historyCount ] = await Promise.all([
+        const [members, classes, org, historyCount] = await Promise.all([
             // 检查这些学生是不是在这个机构正式学生
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
@@ -839,7 +880,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: [ '0', '1' ],
+                        $in: ['0', '1'],
                     },
                 }
             ),
@@ -874,7 +915,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -1038,7 +1079,7 @@ class LessonOrgClassMemberService extends Service {
         }
 
         const currTime = new Date();
-        const [ members, classes, org, historyCount ] = await Promise.all([
+        const [members, classes, org, historyCount] = await Promise.all([
             // 检查这些学生是不是过期了
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
@@ -1067,7 +1108,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: [ '0', '1' ],
+                        $in: ['0', '1'],
                     },
                 }
             ),
@@ -1102,7 +1143,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
