@@ -56,6 +56,7 @@ class User extends Service {
             this.ctx.service.lessonOrganizationClassMember.getByCondition({
                 organizationId,
                 memberId: userId,
+                roleId: { $in: [ '1', '3', '65', '67' ] },
             }),
         ]);
 
