@@ -144,13 +144,15 @@ const LessonOrganizationClassMember = class extends Controller {
 
         const { classId, type, username } = this.validate();
 
-        const ret = await this.ctx.service.lessonOrganizationClassMember.historyStudents({
-            classId,
-            type,
-            username,
-            organizationId,
-            queryOptions: this.queryOptions,
-        });
+        const ret = await this.ctx.service.lessonOrganizationClassMember.historyStudents(
+            {
+                classId,
+                type,
+                username,
+                organizationId,
+                queryOptions: this.queryOptions,
+            }
+        );
         return this.ctx.helper.success({
             ctx: this.ctx,
             status: 200,
