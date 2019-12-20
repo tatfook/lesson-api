@@ -75,13 +75,13 @@ module.exports = app => {
                 {
                     name: 'organizationId-classId-memberId',
                     unique: true,
-                    fields: ['organizationId', 'classId', 'memberId'],
+                    fields: [ 'organizationId', 'classId', 'memberId' ],
                 },
             ],
         }
     );
 
-    model.getAllClassIds = async function ({
+    model.getAllClassIds = async function({
         memberId,
         roleId,
         organizationId,
@@ -105,7 +105,7 @@ module.exports = app => {
     };
 
     // 获取这个机构的全部用户id,去重
-    model.getUserIdsByOrganizationId = async function (
+    model.getUserIdsByOrganizationId = async function(
         organizationId,
         classIds,
         userIds
@@ -132,7 +132,7 @@ module.exports = app => {
     };
 
     // 获取这个机构的学生用户,分角色
-    model.getMembersAndRoleId = async function (
+    model.getMembersAndRoleId = async function(
         organizationId,
         classIds,
         userIds
@@ -160,7 +160,7 @@ module.exports = app => {
     };
 
     // 检查师生身份
-    model.checkTeacherRoleSql = async function (
+    model.checkTeacherRoleSql = async function(
         teacherId,
         organizationId,
         studentId
@@ -188,7 +188,7 @@ module.exports = app => {
         return !!list.length;
     };
 
-    model.historyStudents = async function (
+    model.historyStudents = async function(
         classId,
         type,
         username,
