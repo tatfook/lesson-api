@@ -430,13 +430,16 @@ class LessonOrgClassMemberService extends Service {
             });
         }
 
-        // if (classIds.length) {
-        //     await this.destroyByCondition({
-        //         organizationId,
-        //         memberId: params.memberId,
-        //         classId: { $in: classIds },
-        //     });
-        // }
+        if (oldmembers.length) {
+            // 不要丢失用户类型，到期时间，家长手机号
+            const old = oldmembers[0];
+            datas.forEach(r => {
+                r.type = old.type;
+                r.endTime = old.endTime;
+                r.parentPhoneNum = old.parentPhoneNum;
+            });
+        }
+
         // 取消全部班级此身份
         if (ids.length) {
             await this.model.query(

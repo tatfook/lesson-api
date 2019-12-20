@@ -84,6 +84,16 @@ module.exports = {
                 { transaction }
             );
 
+            await queryInterface.sequelize.query(
+                `
+                update lessonOrganizationClassMembers m 
+                set m.endTime = (
+                    select endDate from lessonOrganizations where id = m.organizationId
+                ) where id >0;
+            `,
+                { type: Sequelize.QueryTypes.UPDATE, transaction }
+            );
+
             await transaction.commit();
         } catch (e) {
             await transaction.rollback();
