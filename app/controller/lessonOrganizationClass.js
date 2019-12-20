@@ -1,7 +1,7 @@
 'use strict';
 
 const Controller = require('./baseController.js');
-const { CLASS_MEMBER_ROLE_ADMIN } = require('../common/consts.js');
+const { CLASS_MEMBER_ROLE_ADMIN, ONE, TWO } = require('../common/consts.js');
 const Err = require('../common/err');
 
 const LessonOrganizationClass = class extends Controller {
@@ -28,14 +28,21 @@ const LessonOrganizationClass = class extends Controller {
 
     async index() {
         const { userId, organizationId } = this.authenticated();
-        const { roleId } = this.validate({ roleId: 'number_optional' });
+        const { roleId, status = [ ONE, TWO ] } = this.validate({
+            roleId: 'number_optional',
+        });
 
         let list;
         if (!roleId) {
             list = await this.ctx.service.lessonOrganizationClass.findAllByCondition(
                 {
                     organizationId,
-                    status: 1,
+                    status: {
+                        $in:
+                            typeof status === 'object'
+                                ? status
+                                : JSON.parse(status),
+                    },
                 }
             );
         } else {
