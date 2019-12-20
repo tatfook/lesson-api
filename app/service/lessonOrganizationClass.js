@@ -33,7 +33,7 @@ class LessonOrgClassService extends Service {
     async historyClass(queryOptions, organizationId) {
         const [ count, rows ] = await Promise.all([
             this.ctx.model.LessonOrganizationClass.count({
-                where: { organizationId, status: 1 },
+                where: { organizationId, status: 2 },
             }),
             this.ctx.model.LessonOrganizationClass.findAll({
                 ...queryOptions,
