@@ -39,7 +39,7 @@ class LessonOrgClassService extends Service {
                 ...queryOptions,
                 where: {
                     organizationId,
-                    status: 1,
+                    status: 2,
                 },
                 include: [
                     {
