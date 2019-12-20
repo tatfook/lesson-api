@@ -35,18 +35,19 @@ class LessonOrgClassService extends Service {
             this.ctx.model.LessonOrganizationClass.count({
                 where: { organizationId, status: 1 },
             }),
-            this.findAllByCondition(
-                {
+            this.ctx.model.LessonOrganizationClass.findAll({
+                ...queryOptions,
+                where: {
                     organizationId,
                     status: 1,
                 },
-                [
+                include: [
                     {
                         as: 'lessonOrganizationClassMembers',
                         model: this.model.LessonOrganizationClassMember,
                     },
-                ]
-            ),
+                ],
+            }),
         ]);
 
         const userIds = rows
@@ -62,6 +63,7 @@ class LessonOrgClassService extends Service {
         });
 
         for (let i = 0; i < rows.length; i++) {
+            rows[i] = rows[i].get();
             const members = rows[i].lessonOrganizationClassMembers;
             for (let j = 0; j < members.length; j++) {
                 members[j] = members[j].get();
