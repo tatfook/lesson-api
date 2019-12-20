@@ -1311,12 +1311,21 @@ class LessonOrgClassMemberService extends Service {
     }
 
     // 历史学生
-    async historyStudents(classId, type, username, organizationId) {
+    async historyStudents({
+        classId,
+        type,
+        username,
+        organizationId,
+        queryOptions,
+    }) {
         const ret = await this.ctx.model.LessonOrganizationClassMember.historyStudents(
-            classId,
-            type,
-            username,
-            organizationId
+            {
+                classId,
+                type,
+                username,
+                organizationId,
+                queryOptions,
+            }
         );
         return { count: ret[1][0].count, rows: ret[0] };
     }

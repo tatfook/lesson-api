@@ -188,12 +188,13 @@ module.exports = app => {
         return !!list.length;
     };
 
-    model.historyStudents = async function(
+    model.historyStudents = async function({
         classId,
         type,
         username,
-        organizationId
-    ) {
+        organizationId,
+        queryOptions,
+    }) {
         let condition = '';
         if (classId) condition += ' and m.classId=:classId';
         if (type) condition += ' and m.type=:type';
@@ -215,7 +216,7 @@ module.exports = app => {
         LEFT JOIN lessonOrganizationClasses c ON m.classId = c.id
             AND c.organizationId = m.organizationId
         WHERE m.organizationId = :organizationId and m.roleId&1 and endTime<now() 
-        ${condition} GROUP BY m.memberId
+        ${condition} GROUP BY m.memberId limit ${queryOptions.offset},${queryOptions.limit}
         `;
 
         const sql2 = `
