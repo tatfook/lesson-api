@@ -31,7 +31,7 @@ class LessonOrgClassService extends Service {
     }
 
     async historyClass(queryOptions, organizationId) {
-        const [count, rows] = await Promise.all([
+        const [ count, rows ] = await Promise.all([
             this.ctx.model.LessonOrganizationClass.count({
                 where: { organizationId, status: 2 },
             }),
@@ -169,7 +169,7 @@ class LessonOrgClassService extends Service {
             new Date(cls.end).getTime() < new Date(params.end).getTime() &&
             new Date(params.end).getTime() > now
         ) {
-            const [organ, studentCount, clsStudentCount] = await Promise.all([
+            const [ organ, studentCount, clsStudentCount ] = await Promise.all([
                 this.ctx.service.lessonOrganization.getByCondition({
                     id: cls.organizationId,
                 }),
@@ -252,12 +252,12 @@ class LessonOrgClassService extends Service {
 
         const userIds = members.map(o => o.memberId);
 
-        const [projects, users] = await Promise.all([
+        const [ projects, users ] = await Promise.all([
             this.ctx.service.keepwork.getAllProjectByCondition(
                 {
                     userId: { $in: userIds },
                 },
-                [['updatedAt', 'desc']]
+                [[ 'updatedAt', 'desc' ]]
             ),
 
             this.ctx.service.keepwork.getAllUserByCondition({
