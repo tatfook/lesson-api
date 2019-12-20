@@ -173,31 +173,49 @@ class LessonOrgService extends Service {
      * @param {*} authParams authParams
      */
     async updateOrganization(params, organ, authParams) {
-        if (this.ctx.state.admin && this.ctx.state.admin.userId) {
-            await this.ctx.model.LessonOrganization.update(params, {
-                where: { id: organ.id },
-            });
-        } else {
-            const { userId, roleId = 0, username } = authParams;
-            if (roleId < CLASS_MEMBER_ROLE_ADMIN) {
-                return this.ctx.throw(403, Err.AUTH_ERR);
-            }
-            await this.ctx.model.LessonOrganization.update(params, {
-                where: { id: organ.id },
-            });
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            if (this.ctx.state.admin && this.ctx.state.admin.userId) {
+                await this.ctx.model.LessonOrganization.update(params, {
+                    where: { id: organ.id }, transaction,
+                });
+            } else {
+                const { userId, roleId = 0, username } = authParams;
+                if (roleId < CLASS_MEMBER_ROLE_ADMIN) {
+                    return this.ctx.throw(403, Err.AUTH_ERR);
+                }
+                await this.ctx.model.LessonOrganization.update(params, {
+                    where: { id: organ.id }, transaction,
+                });
 
-            if (params.privilege && organ.privilege !== params.privilege) {
-                await this.ctx.model.LessonOrganizationLog.create({
-                    organizationId: organ.id,
-                    type: '系统',
-                    description:
-                        params.privilege === 0
-                            ? '不允许任课教师管理学生信息'
-                            : '允许任课教师管理学生信息',
-                    handleId: userId,
-                    username,
+                if (params.privilege && organ.privilege !== params.privilege) {
+                    await this.ctx.model.LessonOrganizationLog.create({
+                        organizationId: organ.id,
+                        type: '系统',
+                        description:
+                            params.privilege === 0
+                                ? '不允许任课教师管理学生信息'
+                                : '允许任课教师管理学生信息',
+                        handleId: userId,
+                        username,
+                    });
+                }
+            }
+            if (new Date(params.endDate) < new Date()) { // 那么要结束机构的全部学生
+                await this.ctx.model.LessonOrganizationClassMember.update({
+                    endTime: params.endDate,
+                }, {
+                    where: {
+                        organizationId: organ.id,
+                    },
+                    transaction,
                 });
             }
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
         }
     }
 
@@ -313,7 +331,7 @@ class LessonOrgService extends Service {
 
     // 获取机构各角色的人数,和人数上限
     async getMemberCountByRoleId(organizationId) {
-        const [ studentCount, teacherCount, organ ] = await Promise.all([
+        const [studentCount, teacherCount, organ] = await Promise.all([
             this.ctx.model.LessonOrganization.getMemberCount(
                 organizationId,
                 CLASS_MEMBER_ROLE_STUDENT
@@ -347,7 +365,7 @@ class LessonOrgService extends Service {
             });
         });
         const lessons = await this.ctx.model.Lesson.findAll({
-            attributes: [ 'id', 'lessonName' ],
+            attributes: ['id', 'lessonName'],
             where: { id: { $in: lessonIds } },
         });
 
@@ -395,8 +413,8 @@ class LessonOrgService extends Service {
         const list = await this.ctx.model.LessonOrganizationClass.findAll({
             where: { organizationId, end: { $gt: new Date() } },
             attributes: [
-                [ 'id', 'classId' ],
-                [ 'name', 'className' ],
+                ['id', 'classId'],
+                ['name', 'className'],
             ],
             include: [
                 {
