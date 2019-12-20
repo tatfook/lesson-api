@@ -31,22 +31,23 @@ class LessonOrgClassService extends Service {
     }
 
     async historyClass(queryOptions, organizationId) {
-        const [ count, rows ] = await Promise.all([
+        const [count, rows] = await Promise.all([
             this.ctx.model.LessonOrganizationClass.count({
                 where: { organizationId, status: 1 },
             }),
-            this.findAllByCondition(
-                {
+            this.ctx.model.LessonOrganizationClass.findAll({
+                ...queryOptions,
+                where: {
                     organizationId,
                     status: 1,
                 },
-                [
+                include: [
                     {
                         as: 'lessonOrganizationClassMembers',
                         model: this.model.LessonOrganizationClassMember,
                     },
-                ]
-            ),
+                ],
+            }),
         ]);
 
         const userIds = rows
@@ -62,6 +63,7 @@ class LessonOrgClassService extends Service {
         });
 
         for (let i = 0; i < rows.length; i++) {
+            rows[i] = rows[i].get();
             const members = rows[i].lessonOrganizationClassMembers;
             for (let j = 0; j < members.length; j++) {
                 members[j] = members[j].get();
@@ -167,7 +169,7 @@ class LessonOrgClassService extends Service {
             new Date(cls.end).getTime() < new Date(params.end).getTime() &&
             new Date(params.end).getTime() > now
         ) {
-            const [ organ, studentCount, clsStudentCount ] = await Promise.all([
+            const [organ, studentCount, clsStudentCount] = await Promise.all([
                 this.ctx.service.lessonOrganization.getByCondition({
                     id: cls.organizationId,
                 }),
@@ -250,12 +252,12 @@ class LessonOrgClassService extends Service {
 
         const userIds = members.map(o => o.memberId);
 
-        const [ projects, users ] = await Promise.all([
+        const [projects, users] = await Promise.all([
             this.ctx.service.keepwork.getAllProjectByCondition(
                 {
                     userId: { $in: userIds },
                 },
-                [[ 'updatedAt', 'desc' ]]
+                [['updatedAt', 'desc']]
             ),
 
             this.ctx.service.keepwork.getAllUserByCondition({
