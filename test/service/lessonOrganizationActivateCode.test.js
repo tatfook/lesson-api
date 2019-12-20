@@ -240,10 +240,13 @@ describe('test/service/lessonOrganizationActivateCode.test.js', async () => {
         let key;
         let organizationId;
         beforeEach(async () => {
-            const code = await app.factory.create('LessonOrganizationActivateCode', {
-                type: 1,
-                state: 0
-            });
+            const code = await app.factory.create(
+                'LessonOrganizationActivateCode',
+                {
+                    type: 1,
+                    state: 0,
+                }
+            );
             key = code.key;
             organizationId = code.organizationId;
         });
@@ -258,7 +261,7 @@ describe('test/service/lessonOrganizationActivateCode.test.js', async () => {
                     },
                     {
                         userId: 1,
-                        username: ''
+                        username: '',
                     }
                 );
             } catch (e) {
