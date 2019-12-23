@@ -10,7 +10,7 @@ module.exports = app => {
         activateCodeLimit: {
             type5: 10,
             type6: 10,
-            type7: 10
-        }
+            type7: 10,
+        },
     });
 };
