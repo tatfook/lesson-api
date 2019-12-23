@@ -28,7 +28,7 @@ const LessonOrganizationClass = class extends Controller {
 
     async index() {
         const { userId, organizationId } = this.authenticated();
-        const { roleId, status = [ONE, TWO] } = this.validate({
+        const { roleId, status = [ ONE, TWO ] } = this.validate({
             roleId: 'number_optional',
         });
 
