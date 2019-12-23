@@ -47,7 +47,6 @@ module.exports = {
                     'type',
                     {
                         type: Sequelize.INTEGER,
-                        defaultValue: 2,
                         comment: '用户类型，1.试听，2.正式',
                     },
                     { transaction: t }

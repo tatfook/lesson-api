@@ -1,4 +1,4 @@
-const { app, assert } = require('egg-mock/bootstrap');
+const { app, mock, assert } = require('egg-mock/bootstrap');
 const _ = require('lodash');
 
 describe('test/service/lessonOrganizationActivateCode.test.js', async () => {
@@ -311,6 +311,296 @@ describe('test/service/lessonOrganizationActivateCode.test.js', async () => {
             assert(member.parentPhoneNum === '13590450686');
         });
 
-        it('004', async () => {});
+        it('004 激活码与机构不匹配', async () => {
+            const ctx = app.mockContext();
+            try {
+                await ctx.service.lessonOrganizationActivateCode.useActivateCode(
+                    {
+                        key,
+                        realname: '',
+                        organizationId: organizationId + 1,
+                    },
+                    {
+                        userId: 1,
+                        username: '',
+                    }
+                );
+            } catch (e) {
+                assert(e.message === '激活码不属于这个机构');
+            }
+        });
+
+        it('005 无效机构', async () => {
+            await app.model.LessonOrganization.update(
+                { endDate: '2200-01-01' },
+                { where: {} }
+            );
+
+            const ctx = app.mockContext();
+            try {
+                await ctx.service.lessonOrganizationActivateCode.useActivateCode(
+                    {
+                        key,
+                        realname: '',
+                        organizationId: organizationId,
+                    },
+                    {
+                        userId: 1,
+                        username: '',
+                    }
+                );
+            } catch (e) {
+                assert(e.message === '班级已经结束');
+            }
+        });
+
+        it('006 激活码没有分配班级', async () => {
+            await app.model.LessonOrganizationActivateCode.update(
+                { classIds: [] },
+                { where: {} }
+            );
+
+            const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationActivateCode.useActivateCode(
+                {
+                    key,
+                    realname: '',
+                    organizationId: organizationId,
+                },
+                {
+                    userId: 1,
+                    username: '',
+                }
+            );
+        });
+    });
+
+    describe('studentRecharge 学生续费', async () => {
+        let student;
+        let code;
+        beforeEach(async () => {
+            student = await app.factory.create(
+                'LessonOrganizationClassMember',
+                {
+                    type: 2,
+                    roleId: 1,
+                    endTime: '2200-01-01',
+                }
+            );
+            code = await app.factory.create('LessonOrganizationActivateCode', {
+                type: 5,
+                state: 0,
+                organizationId: student.organizationId,
+            });
+        });
+        it('001', async () => {
+            const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationActivateCode.studentRecharge(
+                {
+                    key: code.key,
+                    realname: '',
+                },
+                {
+                    userId: student.memberId,
+                    username: '',
+                    organizationId: student.organizationId,
+                }
+            );
+        });
+        it('002 班级成员不存在', async () => {
+            const ctx = app.mockContext();
+            try {
+                await ctx.service.lessonOrganizationActivateCode.studentRecharge(
+                    {
+                        key: code.key,
+                        realname: '',
+                    },
+                    {
+                        userId: 1,
+                        username: '',
+                        organizationId: student.organizationId,
+                    }
+                );
+            } catch (e) {
+                assert(e.message === '班级成员不存在');
+            }
+        });
+
+        it('003 无效激活码', async () => {
+            const ctx = app.mockContext();
+            try {
+                await ctx.service.lessonOrganizationActivateCode.studentRecharge(
+                    {
+                        key: 'key',
+                        realname: '',
+                    },
+                    {
+                        userId: student.memberId,
+                        username: '',
+                        organizationId: student.organizationId,
+                    }
+                );
+            } catch (e) {
+                assert(e.message === '无效激活码');
+            }
+        });
+        it('004 激活码不属于这个机构', async () => {
+            await app.model.LessonOrganizationActivateCode.update(
+                { organizationId: 999 },
+                { where: {} }
+            );
+            const ctx = app.mockContext();
+            try {
+                await ctx.service.lessonOrganizationActivateCode.studentRecharge(
+                    {
+                        key: code.key,
+                        realname: '',
+                    },
+                    {
+                        userId: student.memberId,
+                        username: '',
+                        organizationId: student.organizationId,
+                    }
+                );
+            } catch (e) {
+                assert(e.message === '激活码不属于这个机构');
+            }
+        });
+        it('005 用的试用激活码 应该报错', async () => {
+            await app.model.LessonOrganizationActivateCode.update(
+                { type: 1 },
+                { where: {} }
+            );
+            const ctx = app.mockContext();
+            try {
+                await ctx.service.lessonOrganizationActivateCode.studentRecharge(
+                    {
+                        key: code.key,
+                        realname: '',
+                    },
+                    {
+                        userId: student.memberId,
+                        username: '',
+                        organizationId: student.organizationId,
+                    }
+                );
+            } catch (e) {
+                assert(e.message === '无效激活码');
+            }
+        });
+
+        it('006 无效机构', async () => {
+            await app.model.LessonOrganization.update(
+                { endDate: '2009-01-01' },
+                { where: {} }
+            );
+            const ctx = app.mockContext();
+            try {
+                await ctx.service.lessonOrganizationActivateCode.studentRecharge(
+                    {
+                        key: code.key,
+                        realname: '',
+                    },
+                    {
+                        userId: student.memberId,
+                        username: '',
+                        organizationId: student.organizationId,
+                    }
+                );
+            } catch (e) {
+                assert(e.message === '机构不存在');
+            }
+        });
+
+        it('007 激活码没有分配班级', async () => {
+            await app.model.LessonOrganizationActivateCode.update(
+                { classIds: [] },
+                { where: {} }
+            );
+            const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationActivateCode.studentRecharge(
+                {
+                    key: code.key,
+                    realname: '',
+                },
+                {
+                    userId: student.memberId,
+                    username: '',
+                    organizationId: student.organizationId,
+                }
+            );
+        });
+    });
+
+    describe('getUsedStatus 激活码使用情况', async () => {
+        let student;
+        let code;
+        beforeEach(async () => {
+            student = await app.factory.create(
+                'LessonOrganizationClassMember',
+                {
+                    type: 2,
+                    roleId: 1,
+                    endTime: '2200-01-01',
+                }
+            );
+            code = await app.factory.create('LessonOrganizationActivateCode', {
+                type: 5,
+                state: 0,
+                organizationId: student.organizationId,
+            });
+        });
+
+        it('001', async () => {
+            const ctx = app.mockContext();
+
+            const ret = await ctx.service.lessonOrganizationActivateCode.getUsedStatus(
+                student.organizationId
+            );
+            assert(
+                ret.remainder.type5 === 9 &&
+                    ret.remainder.type6 === 10 &&
+                    ret.remainder.type7 === 10
+            );
+            assert(
+                ret.used.type5 === 0 &&
+                    ret.used.type6 === 0 &&
+                    ret.used.type7 === 0
+            );
+        });
+    });
+
+    describe('setInvalid 设为无效', async () => {
+        let student;
+        let code;
+        beforeEach(async () => {
+            student = await app.factory.create(
+                'LessonOrganizationClassMember',
+                {
+                    type: 2,
+                    roleId: 1,
+                    endTime: '2200-01-01',
+                }
+            );
+            code = await app.factory.create('LessonOrganizationActivateCode', {
+                type: 5,
+                state: 0,
+                organizationId: student.organizationId,
+            });
+        });
+
+        it('001', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationActivateCode.setInvalid([
+                code.id,
+            ]);
+            const ret = await ctx.model.LessonOrganizationActivateCode.findOne({
+                where: { id: code.id },
+            });
+            assert(ret.state === 2);
+        });
     });
 });

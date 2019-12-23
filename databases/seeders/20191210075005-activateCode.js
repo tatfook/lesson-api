@@ -87,7 +87,7 @@ module.exports = {
             await queryInterface.sequelize.query(
                 `
                 update lessonOrganizationClassMembers m 
-                set m.endTime = (
+                set type=2,m.endTime = (
                     select endDate from lessonOrganizations where id = m.organizationId
                 ) where id >0;
             `,
