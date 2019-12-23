@@ -41,7 +41,7 @@ const LessonOrganizationClass = class extends Controller {
                         $in:
                             typeof status === 'object'
                                 ? status
-                                : JSON.parse(status),
+                                : status.split(','),
                     },
                 }
             );
