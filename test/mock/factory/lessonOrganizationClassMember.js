@@ -14,10 +14,10 @@ module.exports = app => {
         }),
         roleId:
             roleIds[
-                app.factory.chance('integer', {
-                    min: 0,
-                    max: 6,
-                })
+            app.factory.chance('integer', {
+                min: 0,
+                max: 6,
+            })
             ],
         realname: app.factory.chance('word', { length: 6 }),
     });

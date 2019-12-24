@@ -9,5 +9,6 @@ module.exports = app => {
         name: factory.chance('string', {
             length: 5,
         }),
+        status: 1
     });
 };
