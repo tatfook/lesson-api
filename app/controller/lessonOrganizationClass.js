@@ -1,7 +1,7 @@
 'use strict';
 
 const Controller = require('./baseController.js');
-const { CLASS_MEMBER_ROLE_ADMIN, ONE, TWO } = require('../common/consts.js');
+const { CLASS_MEMBER_ROLE_ADMIN, ONE } = require('../common/consts.js');
 const Err = require('../common/err');
 
 const LessonOrganizationClass = class extends Controller {
@@ -28,7 +28,7 @@ const LessonOrganizationClass = class extends Controller {
 
     async index() {
         const { userId, organizationId } = this.authenticated();
-        const { roleId, status = [ ONE, TWO ] } = this.validate({
+        const { roleId, status = [ ONE ] } = this.validate({
             roleId: 'number_optional',
         });
 
