@@ -618,7 +618,7 @@ class LessonOrgActivateCodeService extends Service {
     }
 
     // 激活码设为无效
-    async setInvalid(ids) {
+    async setCodeInvalid(ids) {
         return await this.ctx.model.LessonOrganizationActivateCode.update(
             { state: 2 },
             {

@@ -130,9 +130,11 @@ const LessonOrganizationActivateCode = class extends Controller {
         }
 
         const { ids } = this.getParams();
-        await this.ctx.validate(this.validateRules.setInvalid, { ids });
+        await this.ctx.validate(this.validateRules.setInvalidRule, { ids });
 
-        await this.ctx.service.lessonOrganizationActivateCode.setInvalid(ids);
+        await this.ctx.service.lessonOrganizationActivateCode.setCodeInvalid(
+            ids
+        );
         return this.ctx.helper.success({
             ctx: this.ctx,
             status: 200,

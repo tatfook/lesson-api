@@ -23,6 +23,10 @@ exports.bodyParser = {
     formLimit: '1mb',
 };
 
+exports.ajv = {
+    keyword: 'validator',
+};
+
 exports.onerror = {
     all: (e, ctx) => {
         const message = e.stack || e.message || e.toString();
