@@ -7,7 +7,7 @@ exports.cors = {
     origin: '*',
 };
 
-exports.middleware = [ 'authenticated', 'pagination' ];
+exports.middleware = ['authenticated', 'pagination'];
 
 exports.security = {
     xframe: {
@@ -21,6 +21,10 @@ exports.security = {
 exports.bodyParser = {
     jsonLimit: '1mb',
     formLimit: '1mb',
+};
+
+exports.ajv = {
+    keyword: 'validator',
 };
 
 exports.onerror = {
