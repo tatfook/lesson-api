@@ -134,28 +134,34 @@ describe('test/service/lessonOrganization.test.js', async () => {
     describe('updateOrganization', async () => {
         let org;
         beforeEach(async () => {
-            org = await app.factory.create('LessonOrganization')
+            org = await app.factory.create('LessonOrganization');
         });
         it('001', async () => {
             const ctx = app.mockContext();
 
-            await ctx.service.lessonOrganization.updateOrganization({
-                name: 'name1',
-                endDate: '2009-12-12',
-                privilege: 1
-            },
-                org, { userId: 1, roleId: 64, username: '' });
+            await ctx.service.lessonOrganization.updateOrganization(
+                {
+                    name: 'name1',
+                    endDate: '2009-12-12',
+                    privilege: 1,
+                },
+                org,
+                { userId: 1, roleId: 64, username: '' }
+            );
         });
 
         it('002 dashbord管理员', async () => {
             const ctx = app.mockContext();
             ctx.state.admin = { userId: 1 };
-            await ctx.service.lessonOrganization.updateOrganization({
-                name: 'name1',
-                endDate: '2009-12-12',
-                privilege: 1
-            },
-                org, { userId: 1, roleId: 64, username: '' });
+            await ctx.service.lessonOrganization.updateOrganization(
+                {
+                    name: 'name1',
+                    endDate: '2009-12-12',
+                    privilege: 1,
+                },
+                org,
+                { userId: 1, roleId: 64, username: '' }
+            );
         });
     });
 
@@ -166,7 +172,13 @@ describe('test/service/lessonOrganization.test.js', async () => {
         });
         it('001', async () => {
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganization.getPackage(orgPkg.packageId, orgPkg.classId, null, null, orgPkg.organizationId);
+            const ret = await ctx.service.lessonOrganization.getPackage(
+                orgPkg.packageId,
+                orgPkg.classId,
+                null,
+                null,
+                orgPkg.organizationId
+            );
             assert(ret);
         });
         it('002', async () => {
@@ -174,10 +186,16 @@ describe('test/service/lessonOrganization.test.js', async () => {
                 organizationId: orgPkg.organizationId,
                 classId: orgPkg.classId,
                 memberId: 1,
-                roleId: 1
+                roleId: 1,
             });
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganization.getPackage(orgPkg.packageId, undefined, 1, 1, orgPkg.organizationId);
+            const ret = await ctx.service.lessonOrganization.getPackage(
+                orgPkg.packageId,
+                undefined,
+                1,
+                1,
+                orgPkg.organizationId
+            );
             assert(ret);
         });
     });
@@ -187,13 +205,19 @@ describe('test/service/lessonOrganization.test.js', async () => {
         beforeEach(async () => {
             orgPkg = await app.factory.create('LessonOrganizationPackage');
             app.mockService('lessonOrganization', 'getPackage', () => ({
-                lessons: [{ lessonId: 1 }]
+                lessons: [{ lessonId: 1 }],
             }));
         });
 
         it('001', async () => {
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganization.getPackageDetail(orgPkg.packageId, orgPkg.classId, 1, 1, orgPkg.organizationId);
+            const ret = await ctx.service.lessonOrganization.getPackageDetail(
+                orgPkg.packageId,
+                orgPkg.classId,
+                1,
+                1,
+                orgPkg.organizationId
+            );
             assert(ret);
         });
         it('002', async () => {
@@ -201,28 +225,44 @@ describe('test/service/lessonOrganization.test.js', async () => {
 
             try {
                 const ctx = app.mockContext();
-                const ret = await ctx.service.lessonOrganization.getPackageDetail(orgPkg.packageId, undefined, null, null, orgPkg.organizationId);
+                const ret = await ctx.service.lessonOrganization.getPackageDetail(
+                    orgPkg.packageId,
+                    undefined,
+                    null,
+                    null,
+                    orgPkg.organizationId
+                );
                 assert(ret);
             } catch (e) {
-                assert(e.message === '参数错误')
+                assert(e.message === '参数错误');
             }
         });
     });
 
     describe('getMemberCountByRoleId', async () => {
         it('001', async () => {
-            const member = await app.factory.create('LessonOrganizationClassMember', { roleId: 1 });
+            const member = await app.factory.create(
+                'LessonOrganizationClassMember',
+                { roleId: 1 }
+            );
 
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganization.getMemberCountByRoleId(member.organizationId);
+            const ret = await ctx.service.lessonOrganization.getMemberCountByRoleId(
+                member.organizationId
+            );
             assert(ret.studentCount === 1 && ret.teacherCount === 0);
         });
 
         it('002', async () => {
-            const member = await app.factory.create('LessonOrganizationClassMember', { roleId: 2 });
+            const member = await app.factory.create(
+                'LessonOrganizationClassMember',
+                { roleId: 2 }
+            );
 
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganization.getMemberCountByRoleId(member.organizationId);
+            const ret = await ctx.service.lessonOrganization.getMemberCountByRoleId(
+                member.organizationId
+            );
             assert(ret.studentCount === 0 && ret.teacherCount === 1);
         });
     });
@@ -234,7 +274,9 @@ describe('test/service/lessonOrganization.test.js', async () => {
         });
         it('001', async () => {
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganization.getOrgPackages(orgPkg.organizationId);
+            const ret = await ctx.service.lessonOrganization.getOrgPackages(
+                orgPkg.organizationId
+            );
             assert(ret.length === 1);
         });
     });
@@ -247,7 +289,10 @@ describe('test/service/lessonOrganization.test.js', async () => {
         it('001', async () => {
             const ctx = app.mockContext();
             try {
-                const ret = await ctx.service.lessonOrganization.checkUserInvalid('abc', 1);
+                const ret = await ctx.service.lessonOrganization.checkUserInvalid(
+                    'abc',
+                    1
+                );
             } catch (e) {
                 assert(e.message === '用户不存在');
             }
@@ -258,7 +303,11 @@ describe('test/service/lessonOrganization.test.js', async () => {
         });
 
         it('003', async () => {
-            await app.model.LessonOrganizationClassMember.create({ memberId: 1, organizationId: 1, roleId: 2 });
+            await app.model.LessonOrganizationClassMember.create({
+                memberId: 1,
+                organizationId: 1,
+                roleId: 2,
+            });
             const ctx = app.mockContext();
             try {
                 await ctx.service.lessonOrganization.checkUserInvalid('qzb', 1);
@@ -270,12 +319,23 @@ describe('test/service/lessonOrganization.test.js', async () => {
 
     describe('getClassAndMembers', async () => {
         beforeEach(async () => {
-            let ret = await app.model.LessonOrganizationClass.create({ organizationId: 1, status: 1 });
-            await app.factory.create('LessonOrganizationClassMember', { classId: ret.id, organizationId: 1, roleId: 1 });
+            let ret = await app.model.LessonOrganizationClass.create({
+                organizationId: 1,
+                status: 1,
+            });
+            await app.factory.create('LessonOrganizationClassMember', {
+                classId: ret.id,
+                organizationId: 1,
+                roleId: 1,
+            });
         });
         it('001', async () => {
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganization.getClassAndMembers(1, 1, 1);
+            const ret = await ctx.service.lessonOrganization.getClassAndMembers(
+                1,
+                1,
+                1
+            );
             assert(ret.length === 1 && ret[0].studentList.length === 1);
         });
     });
@@ -283,17 +343,25 @@ describe('test/service/lessonOrganization.test.js', async () => {
     describe('getUserOrgInfo', async () => {
         let member;
         beforeEach(async () => {
-            member = await app.factory.create('LessonOrganizationClassMember', { roleId: 1 });
+            member = await app.factory.create('LessonOrganizationClassMember', {
+                roleId: 1,
+            });
         });
         it('001', async () => {
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganization.getUserOrgInfo(member.memberId, 1);
+            const ret = await ctx.service.lessonOrganization.getUserOrgInfo(
+                member.memberId,
+                1
+            );
             assert(ret[0].id === member.organizationId);
         });
 
         it('002', async () => {
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganization.getUserOrgInfo(member.memberId, 2);
+            const ret = await ctx.service.lessonOrganization.getUserOrgInfo(
+                member.memberId,
+                2
+            );
             assert(ret.length === 0);
         });
     });
@@ -302,16 +370,26 @@ describe('test/service/lessonOrganization.test.js', async () => {
         let org;
         beforeEach(async () => {
             org = await app.factory.create('LessonOrganization');
-            await app.factory.createMany('LessonOrganizationActivateCode', 10, { organizationId: org.id, state: 0, type: 5 });
+            await app.factory.createMany('LessonOrganizationActivateCode', 10, {
+                organizationId: org.id,
+                state: 0,
+                type: 5,
+            });
         });
         it('001', async () => {
             const ctx = app.mockContext();
-            await ctx.service.lessonOrganization.checkActivateCodeLimit(org.id, { type5: 20, type6: 20, type7: 20 });
+            await ctx.service.lessonOrganization.checkActivateCodeLimit(
+                org.id,
+                { type5: 20, type6: 20, type7: 20 }
+            );
         });
         it('002', async () => {
             try {
                 const ctx = app.mockContext();
-                const ret = await ctx.service.lessonOrganization.checkActivateCodeLimit(org.id, { type5: 9, type6: 20, type7: 20 });
+                const ret = await ctx.service.lessonOrganization.checkActivateCodeLimit(
+                    org.id,
+                    { type5: 9, type6: 20, type7: 20 }
+                );
             } catch (e) {
                 assert(e.message === '激活码上限错误');
             }
