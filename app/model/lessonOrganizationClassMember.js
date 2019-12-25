@@ -19,7 +19,7 @@ module.exports = app => {
             },
 
             classId: {
-                // 0 -- 则为机构成员
+                // 0.则为机构成员,或者未加入班级的学生
                 type: BIGINT,
                 defaultValue: 0,
             },
@@ -29,7 +29,15 @@ module.exports = app => {
                 type: BIGINT,
                 defaultValue: 0,
             },
-
+            type: {
+                // 用户类型，1.试听，2.正式
+                type: INTEGER,
+                defaultValue: 0,
+            },
+            endTime: {
+                // 到期时间
+                type: DATE,
+            },
             realname: {
                 // 真实姓名
                 type: STRING,
@@ -178,6 +186,70 @@ module.exports = app => {
         });
 
         return !!list.length;
+    };
+
+    model.historyStudents = async function({
+        classId,
+        type,
+        username,
+        organizationId,
+        queryOptions,
+    }) {
+        let condition = '';
+        if (classId) condition += ' and m.classId=:classId';
+        if (type) condition += ' and m.type=:type';
+        if (username) {
+            condition += ` and (m.realname like '%${username}%' or u.username like '%${username}%')`;
+        }
+
+        const sql1 = `
+        SELECT 
+            m.memberId,
+            m.realname,
+            u.username,
+            m.type,
+            m.parentPhoneNum,
+            GROUP_CONCAT(c.name) classNames
+        FROM
+            lessonOrganizationClassMembers m
+        JOIN users u ON m.memberId = u.id
+        LEFT JOIN lessonOrganizationClasses c ON m.classId = c.id
+            AND c.organizationId = m.organizationId
+        WHERE m.organizationId = :organizationId and m.roleId&1 and endTime<now() 
+        ${condition} GROUP BY m.memberId limit ${queryOptions.offset},${queryOptions.limit}
+        `;
+
+        const sql2 = `
+        SELECT 
+            count(distinct memberId) count
+        FROM
+            lessonOrganizationClassMembers m
+        JOIN users u ON m.memberId = u.id
+        LEFT JOIN lessonOrganizationClasses c ON m.classId = c.id
+            AND c.organizationId = m.organizationId
+        WHERE m.organizationId = :organizationId and m.roleId&1 and endTime<now() 
+        ${condition} 
+        `;
+        return await Promise.all([
+            app.model.query(sql1, {
+                type: app.model.QueryTypes.SELECT,
+                replacements: {
+                    classId,
+                    type,
+                    username,
+                    organizationId,
+                },
+            }),
+            app.model.query(sql2, {
+                type: app.model.QueryTypes.SELECT,
+                replacements: {
+                    classId,
+                    type,
+                    username,
+                    organizationId,
+                },
+            }),
+        ]);
     };
 
     model.associate = () => {

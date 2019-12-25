@@ -19,22 +19,21 @@ describe('机构学生', () => {
         // 创建机构
         organ = await app.model.LessonOrganization.create({
             name: 'org0000',
-            count: 1,
+            endDate: '2220-01-01',
+            activateCodeLimit: { type5: 5, type6: 6, type7: 7 },
         }).then(o => o.toJSON());
 
         // 创建班级
         cls = await app.model.LessonOrganizationClass.create({
             name: 'clss000',
             organizationId: organ.id,
-            begin: new Date(),
-            end: new Date().getTime() + 1000 * 60 * 60 * 24,
+            status: 1,
         }).then(o => o.toJSON());
 
         cls2 = await app.model.LessonOrganizationClass.create({
             name: 'clss001',
             organizationId: organ.id,
-            begin: new Date(),
-            end: new Date().getTime() + 1000 * 60 * 60 * 24,
+            status: 1,
         }).then(o => o.toJSON());
 
         // 添加为管理员
@@ -89,6 +88,7 @@ describe('机构学生', () => {
                 roleId: 1,
                 memberId: 2,
             });
+            await app.model.User.create({ id: 2, username: '' });
         });
         it('001', async () => {
             let students = await app
@@ -153,6 +153,36 @@ describe('机构学生', () => {
                 },
             });
             assert(list.length === 0);
+        });
+    });
+
+    describe('试听转正式', async () => {
+        beforeEach('', async () => {
+            const cls = await app.factory.create('LessonOrganizationClass', {
+                organizationId: organ.id,
+                status: 1,
+            });
+            await app.model.LessonOrganizationClassMember.create({
+                organizationId: organ.id,
+                memberId: 1,
+                roleId: 1,
+                classId: cls.id,
+                endTime: '2200-01-01',
+                type: 1,
+            });
+        });
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/formal')
+                .send({
+                    userIds: [1],
+                    type: 5,
+                    classIds: [1],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
         });
     });
 });

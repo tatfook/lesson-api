@@ -31,25 +31,23 @@ class LessonOrgClassService extends Service {
     }
 
     async historyClass(queryOptions, organizationId) {
-        const curtime = new Date();
         const [ count, rows ] = await Promise.all([
             this.ctx.model.LessonOrganizationClass.count({
-                where: { organizationId, end: { $lte: curtime } },
+                where: { organizationId, status: 2 },
             }),
-            this.findAllByCondition(
-                {
+            this.ctx.model.LessonOrganizationClass.findAll({
+                ...queryOptions,
+                where: {
                     organizationId,
-                    end: {
-                        $lte: curtime,
-                    },
+                    status: 2,
                 },
-                [
+                include: [
                     {
                         as: 'lessonOrganizationClassMembers',
                         model: this.model.LessonOrganizationClassMember,
                     },
-                ]
-            ),
+                ],
+            }),
         ]);
 
         const userIds = rows
@@ -65,6 +63,7 @@ class LessonOrgClassService extends Service {
         });
 
         for (let i = 0; i < rows.length; i++) {
+            rows[i] = rows[i].get();
             const members = rows[i].lessonOrganizationClassMembers;
             for (let j = 0; j < members.length; j++) {
                 members[j] = members[j].get();
@@ -111,7 +110,7 @@ class LessonOrgClassService extends Service {
         const { roleId, organizationId, userId, username } = authParams;
 
         if (!organizationId) return this.ctx.throw(400, Err.ARGS_ERR);
-        if (roleId & (CLASS_MEMBER_ROLE_ADMIN === 0)) {
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
             return this.ctx.throw(403, Err.AUTH_ERR);
         }
 
@@ -154,7 +153,7 @@ class LessonOrgClassService extends Service {
     async updateClass(params, authParams) {
         const { roleId, organizationId, userId, username } = authParams;
         if (!organizationId) return this.ctx.throw(400, Err.ARGS_ERR);
-        if (roleId & (CLASS_MEMBER_ROLE_ADMIN === 0)) {
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
             return this.ctx.throw(403, Err.AUTH_ERR);
         }
 
@@ -162,32 +161,6 @@ class LessonOrgClassService extends Service {
 
         const cls = await this.getByCondition({ id: params.id });
         if (!cls) return this.ctx.throw(400, Err.CLASS_NOT_EXISTS);
-
-        // 针对过期班级做检查
-        const now = new Date().getTime();
-        if (
-            new Date(cls.end).getTime() < now &&
-            new Date(cls.end).getTime() < new Date(params.end).getTime() &&
-            new Date(params.end).getTime() > now
-        ) {
-            const [ organ, studentCount, clsStudentCount ] = await Promise.all([
-                this.ctx.service.lessonOrganization.getByCondition({
-                    id: cls.organizationId,
-                }),
-                this.ctx.service.lessonOrganization.getStudentCount(
-                    cls.organizationId
-                ),
-                this.ctx.model.LessonOrganization.memberCount(
-                    cls.organizationId,
-                    1,
-                    cls.id
-                ),
-            ]);
-
-            if (studentCount + clsStudentCount > organ.count) {
-                return this.ctx.throw(400, Err.MEMBERS_UPPER_LIMIT);
-            }
-        }
 
         await this.model.LessonOrganizationClass.update(params, {
             where: { id: params.id },
@@ -273,6 +246,18 @@ class LessonOrgClassService extends Service {
             m.users = users.filter(o => o.id === m.memberId);
         });
         return members;
+    }
+
+    // 关闭班级
+    async closeClass(classId) {
+        return await this.ctx.model.LessonOrganizationClass.update(
+            {
+                status: 2,
+            },
+            {
+                where: { id: classId },
+            }
+        );
     }
 }
 

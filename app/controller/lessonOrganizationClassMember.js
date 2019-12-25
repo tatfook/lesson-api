@@ -1,6 +1,8 @@
 'use strict';
 
 const Controller = require('./baseController.js');
+const { CLASS_MEMBER_ROLE_ADMIN } = require('../common/consts');
+const Err = require('../common/err');
 
 const LessonOrganizationClassMember = class extends Controller {
     get modelName() {
@@ -25,11 +27,15 @@ const LessonOrganizationClassMember = class extends Controller {
         const { ctx } = this;
         const { organizationId } = this.authenticated();
 
-        const { classId } = this.validate({ classId: 'number_optional' });
+        const { classId, type, username } = this.validate({
+            classId: 'number_optional',
+        });
 
         const data = await this.ctx.service.lessonOrganizationClassMember.getStudents(
             organizationId,
-            classId
+            classId,
+            type,
+            username
         );
 
         return ctx.helper.success({ ctx, status: 200, res: data });
@@ -78,6 +84,106 @@ const LessonOrganizationClassMember = class extends Controller {
             ctx: this.ctx,
             status: 200,
             res: 'OK',
+        });
+    }
+
+    // 试听转正式
+    async toFormal() {
+        const {
+            roleId,
+            organizationId,
+            userId,
+            username,
+        } = this.authenticated();
+
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
+            this.ctx.throw(403, Err.AUTH_ERR);
+        }
+
+        const { userIds, type, classIds } = this.validate();
+        await this.ctx.service.lessonOrganizationClassMember.toFormal(
+            userIds,
+            type,
+            classIds,
+            { organizationId, userId, username }
+        );
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+        });
+    }
+
+    // 续费
+    async recharge() {
+        const {
+            roleId,
+            organizationId,
+            userId,
+            username,
+        } = this.authenticated();
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
+            this.ctx.throw(403, Err.AUTH_ERR);
+        }
+
+        const { userIds, type, classIds } = this.validate();
+        await this.ctx.service.lessonOrganizationClassMember.recharge(
+            userIds,
+            type,
+            classIds,
+            { organizationId, userId, username }
+        );
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+        });
+    }
+
+    // 历史学生
+    async historyStudents() {
+        const { organizationId } = this.authenticated();
+
+        const { classId, type, username } = this.validate();
+
+        const ret = await this.ctx.service.lessonOrganizationClassMember.historyStudents(
+            {
+                classId,
+                type,
+                username,
+                organizationId,
+                queryOptions: this.queryOptions,
+            }
+        );
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+            res: ret,
+        });
+    }
+
+    // 重新激活用户
+    async reactivate() {
+        const {
+            organizationId,
+            roleId,
+            userId,
+            username,
+        } = this.authenticated();
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
+            this.ctx.throw(403, Err.AUTH_ERR);
+        }
+
+        const { userIds, type, classIds } = this.validate();
+
+        await this.ctx.service.lessonOrganizationClassMember.reactivate(
+            userIds,
+            type,
+            classIds,
+            { organizationId, userId, username }
+        );
+
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
         });
     }
 };

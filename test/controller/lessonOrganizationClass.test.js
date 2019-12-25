@@ -198,4 +198,28 @@ describe('lesson organization class', () => {
             assert(ret.length === 1);
         });
     });
+
+    describe('关闭班级', async () => {
+        let id;
+        beforeEach(async () => {
+            const cls = await app.factory.create('LessonOrganizationClass', {
+                organizationId: 1,
+            });
+            id = cls.id;
+        });
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .put('/lessonOrganizationClasses/end')
+                .send({ classId: id })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+
+            const cls = await app.model.LessonOrganizationClass.findOne({
+                where: { id },
+            });
+            assert(cls.status === 2);
+        });
+    });
 });

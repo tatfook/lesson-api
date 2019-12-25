@@ -62,4 +62,14 @@ module.exports = {
 
     ORG_MSG_TEMPLEID: '487513', // 机构消息模板id
     EVA_REPO_TEMPLETID: '479638', // 评估报告模板id
+
+    ONE: 1,
+    TWO: 2,
+    TEN: 10,
+    NINTYNINE: 99,
+    THREE: 3,
+    SIX: 6,
+    FIVE: 5,
+    SEVEN: 7,
+    FIFTEEN: 15,
 };

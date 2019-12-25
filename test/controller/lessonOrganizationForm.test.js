@@ -11,7 +11,6 @@ describe('机构表单', () => {
         // 创建机构
         organ = await app.model.LessonOrganization.create({
             name: 'org0000',
-            count: 1,
             endDate: new Date('2200-01-01'),
         }).then(o => o.toJSON());
         // 创建管理员

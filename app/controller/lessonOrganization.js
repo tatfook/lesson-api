@@ -99,14 +99,13 @@ const LessonOrganization = class extends Controller {
         if (!organizationId) organizationId = organ.id;
 
         // 找到这个人在机构中的members
-        const curtime = new Date();
         let members = await ctx.service.lessonOrganizationClassMember.getAllAndExtraByCondition(
             [
                 {
                     as: 'lessonOrganizationClasses',
                     model: this.model.LessonOrganizationClass,
                     where: {
-                        end: { $gte: curtime },
+                        status: 1,
                     },
                     required: false,
                 },
@@ -213,6 +212,19 @@ const LessonOrganization = class extends Controller {
             id,
         });
         if (!organ) return ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+        // 检查正式激活码上限
+        if (params.activateCodeLimit) {
+            const {
+                type5 = 0,
+                type6 = 0,
+                type7 = 0,
+            } = params.activateCodeLimit;
+            await ctx.service.lessonOrganization.checkActivateCodeLimit(id, {
+                type5,
+                type6,
+                type7,
+            });
+        }
 
         if (this.ctx.state.admin && this.ctx.state.admin.userId) {
             await ctx.service.lessonOrganization.updateOrganization(
@@ -248,13 +260,6 @@ const LessonOrganization = class extends Controller {
             await ctx.service.lessonOrganization.fixedClassPackage(
                 id,
                 params.packages
-            );
-        }
-
-        if (params.endDate) {
-            await ctx.service.lessonOrganizationClass.updateByCondition(
-                { end: params.endDate },
-                { organizationId: id, end: { $gt: params.endDate } }
             );
         }
 

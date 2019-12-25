@@ -10,18 +10,15 @@ const LessonOrganizationActivateCode = class extends Controller {
         return 'LessonOrganizationActivateCode';
     }
 
-    async create() {
-        const {
-            userId,
-            organizationId,
-            roleId,
-            username,
-        } = this.authenticated();
-        const params = this.validate({ count: 'number', classId: 'number' });
+    get validateRules() {
+        return this.app.validator.lessonOrganizationActivateCode;
+    }
 
+    async create() {
+        const params = this.validate(); // params:{classIds?,type,count,names?}
         const list = await this.ctx.service.lessonOrganizationActivateCode.createActivateCode(
             params,
-            { userId, organizationId, roleId, username }
+            this.authenticated()
         );
 
         return this.ctx.helper.success({
@@ -52,13 +49,7 @@ const LessonOrganizationActivateCode = class extends Controller {
 
         const data = await this.ctx.service.lessonOrganizationActivateCode.findAllActivateCodeAndCount(
             this.queryOptions,
-            where,
-            [
-                {
-                    as: 'lessonOrganizationClasses',
-                    model: this.model.LessonOrganizationClass,
-                },
-            ]
+            where
         );
 
         return this.ctx.helper.success({
@@ -94,6 +85,59 @@ const LessonOrganizationActivateCode = class extends Controller {
             ctx: this.ctx,
             status: 200,
             res: data,
+        });
+    }
+
+    // 学生续费
+    async studentRecharge() {
+        const { userId, username, organizationId } = this.authenticated();
+        const { key, realname } = this.validate();
+        const ret = await this.ctx.service.lessonOrganizationActivateCode.studentRecharge(
+            {
+                key,
+                realname,
+            },
+            { userId, username, organizationId }
+        );
+
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+            res: ret,
+        });
+    }
+
+    // 激活码使用情况
+    async getUsedStatus() {
+        const { organizationId } = this.authenticated();
+
+        const ret = await this.ctx.service.lessonOrganizationActivateCode.getUsedStatus(
+            organizationId
+        );
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+            res: ret,
+        });
+    }
+
+    // 设为无效
+    async setInvalid() {
+        const { roleId } = this.authenticated();
+
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
+            this.ctx.throw(403, Err.AUTH_ERR);
+        }
+
+        const { ids } = this.getParams();
+        await this.ctx.validate(this.validateRules.setInvalidRule, { ids });
+
+        await this.ctx.service.lessonOrganizationActivateCode.setCodeInvalid(
+            ids
+        );
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
         });
     }
 };

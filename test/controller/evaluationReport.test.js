@@ -54,13 +54,6 @@ describe('test/controller/evaluationReport.test.js', () => {
         });
     });
 
-    // 睡几秒钟
-    async function sleep(seconds) {
-        return new Promise(resolve => {
-            setTimeout(() => resolve(), seconds * 1000);
-        });
-    }
-
     it('001 发起点评 应该成功', async () => {
         const user = await app.login({ id: 1 });
         const token = user.token;
@@ -110,7 +103,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '报告名称长度错误');
     });
@@ -129,7 +122,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '报告类型错误');
     });
@@ -148,7 +141,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '班级id错误');
     });
@@ -377,7 +370,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '你已经点评过这个学生啦');
     });
@@ -412,7 +405,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(403)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '用户在这个班级没有学生身份');
     });
@@ -447,7 +440,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(403)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '没有权限');
     });
@@ -474,7 +467,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '用户id错误');
     });
@@ -501,7 +494,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '报告id错误');
     });
@@ -528,7 +521,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '评星数量错误');
     });
@@ -555,7 +548,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '文字评价长度错误');
     });
@@ -582,7 +575,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '媒体文件路径格式错误');
     });
@@ -674,7 +667,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .get(`/evaluationReports/1?status=2`)
             .set('Authorization', `Bearer ${token}`)
             .expect(403)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '没有权限');
     });
@@ -696,7 +689,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .get(`/evaluationReports/2?status=2`)
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '报告id错误');
     });
@@ -827,7 +820,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .delete(`/evaluationReports/1`)
             .set('Authorization', `Bearer ${token}`)
             .expect(403)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '没有权限');
     });
@@ -849,7 +842,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .delete(`/evaluationReports/2`)
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '报告id错误');
     });
@@ -940,7 +933,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(403)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(report.message === '没有权限');
     });
 
@@ -965,7 +958,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(report.message === '报告id错误');
     });
 
@@ -999,7 +992,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .delete(`/evaluationReports/userReport/1`)
             .set('Authorization', `Bearer ${token}`)
             .expect(403)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(report.message === '没有权限');
     });
 
@@ -1033,7 +1026,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .delete(`/evaluationReports/userReport/2`)
             .set('Authorization', `Bearer ${token}`)
             .expect(403)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(report.message === '没有权限');
     });
 
@@ -1080,7 +1073,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .get(`/evaluationReports/userReport/2?studentId=0&classId=1&type=1`)
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '用户id错误');
     });
@@ -1094,7 +1087,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .get(`/evaluationReports/userReport/2?studentId=2&classId=0&type=1`)
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '班级id错误');
     });
@@ -1108,7 +1101,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .get(`/evaluationReports/userReport/2?studentId=2&classId=1&type=3`)
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(report.message === '报告类型错误');
     });
@@ -1338,7 +1331,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(403)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(report.message === '没有权限');
     });
 
@@ -1383,7 +1376,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(report.message === '评星数量错误');
     });
 
@@ -1428,7 +1421,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(report.message === '文字评价长度错误');
     });
 
@@ -1473,7 +1466,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(report.message === '媒体文件路径格式错误');
     });
 
@@ -1576,7 +1569,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(ret2.message === '请勿重复发送');
     });
@@ -1694,7 +1687,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(ret.message === '名字长度错误');
     });
@@ -1763,7 +1756,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(ret.message === '验证码错误');
     });
@@ -1822,7 +1815,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             .get(`/users/userInfo?studentId=5`)
             .set('Authorization', `Bearer ${token}`)
             .expect(403)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(ret.message === '没有权限');
     });
@@ -1880,7 +1873,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(ret.message === '验证码错误');
     });
@@ -1906,7 +1899,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
 
         assert(ret.message === '验证码错误');
 

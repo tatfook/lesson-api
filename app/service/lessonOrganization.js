@@ -6,6 +6,9 @@ const {
     CLASS_MEMBER_ROLE_ADMIN,
     CLASS_MEMBER_ROLE_STUDENT,
     CLASS_MEMBER_ROLE_TEACHER,
+    FIVE,
+    SIX,
+    SEVEN,
 } = require('../common/consts.js');
 
 const _ = require('lodash');
@@ -170,31 +173,55 @@ class LessonOrgService extends Service {
      * @param {*} authParams authParams
      */
     async updateOrganization(params, organ, authParams) {
-        if (this.ctx.state.admin && this.ctx.state.admin.userId) {
-            await this.ctx.model.LessonOrganization.update(params, {
-                where: { id: organ.id },
-            });
-        } else {
-            const { userId, roleId = 0, username } = authParams;
-            if (roleId < CLASS_MEMBER_ROLE_ADMIN) {
-                return this.ctx.throw(403, Err.AUTH_ERR);
-            }
-            await this.ctx.model.LessonOrganization.update(params, {
-                where: { id: organ.id },
-            });
-
-            if (params.privilege && organ.privilege !== params.privilege) {
-                await this.ctx.model.LessonOrganizationLog.create({
-                    organizationId: organ.id,
-                    type: '系统',
-                    description:
-                        params.privilege === 0
-                            ? '不允许任课教师管理学生信息'
-                            : '允许任课教师管理学生信息',
-                    handleId: userId,
-                    username,
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            if (this.ctx.state.admin && this.ctx.state.admin.userId) {
+                await this.ctx.model.LessonOrganization.update(params, {
+                    where: { id: organ.id },
+                    transaction,
                 });
+            } else {
+                const { userId, roleId = 0, username } = authParams;
+                if (roleId < CLASS_MEMBER_ROLE_ADMIN) {
+                    return this.ctx.throw(403, Err.AUTH_ERR);
+                }
+                await this.ctx.model.LessonOrganization.update(params, {
+                    where: { id: organ.id },
+                    transaction,
+                });
+
+                if (params.privilege && organ.privilege !== params.privilege) {
+                    await this.ctx.model.LessonOrganizationLog.create({
+                        organizationId: organ.id,
+                        type: '系统',
+                        description:
+                            params.privilege === 0
+                                ? '不允许任课教师管理学生信息'
+                                : '允许任课教师管理学生信息',
+                        handleId: userId,
+                        username,
+                    });
+                }
             }
+            if (new Date(params.endDate) < new Date()) {
+                // 那么要结束机构的全部学生
+                await this.ctx.model.LessonOrganizationClassMember.update(
+                    {
+                        endTime: params.endDate,
+                    },
+                    {
+                        where: {
+                            organizationId: organ.id,
+                        },
+                        transaction,
+                    }
+                );
+            }
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
         }
     }
 
@@ -295,14 +322,16 @@ class LessonOrgService extends Service {
     /**
      *
      * @param {*} organizationId organizationId
-     * @param {*} roleId roleId
      * @param {*} classId classId
+     * @param {*} type type 用户类型，1.试听，2.正式
+     * @param {*} username username
      */
-    async getMembers(organizationId, roleId, classId) {
-        return await this.ctx.model.LessonOrganization.getMembers(
+    async getStudentIds(organizationId, classId, type, username) {
+        return await this.ctx.model.LessonOrganization.getStudentIds(
             organizationId,
-            roleId,
-            classId
+            classId,
+            type,
+            username
         );
     }
 
@@ -388,7 +417,7 @@ class LessonOrgService extends Service {
     // 获取机构的所有班级，嵌套返回所有成员
     async getClassAndMembers(organizationId, roleId, userId) {
         const list = await this.ctx.model.LessonOrganizationClass.findAll({
-            where: { organizationId, end: { $gt: new Date() } },
+            where: { organizationId, status: 1 },
             attributes: [
                 [ 'id', 'classId' ],
                 [ 'name', 'className' ],
@@ -457,6 +486,24 @@ class LessonOrgService extends Service {
             userId,
             roleId
         );
+    }
+
+    // 检查设置的激活码上限是否合理
+    async checkActivateCodeLimit(organizationId, { type5, type6, type7 }) {
+        const ret = await this.ctx.model.LessonOrganizationActivateCode.getCountByTypeAndState(
+            organizationId
+        );
+        const map = new Map();
+        for (let i = 0; i < ret.length; i++) {
+            map.set(ret[i].type, (map.get(ret[i].type) || 0) + ret[i].count);
+        }
+        if (
+            map.get(FIVE) > type5 ||
+            map.get(SIX) > type6 ||
+            map.get(SEVEN) > type7
+        ) {
+            this.ctx.throw(400, Err.ACTIVATE_CODE_LIMIT_ERR);
+        }
     }
 }
 
