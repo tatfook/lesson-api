@@ -83,7 +83,7 @@ module.exports = app => {
         }
     );
 
-    model.getUserReportList = async function ({
+    model.getUserReportList = async function({
         reportId,
         status,
         isSend,
@@ -132,7 +132,7 @@ module.exports = app => {
         return list;
     };
 
-    model.getTeacherByUserReportId = async function (userReportId) {
+    model.getTeacherByUserReportId = async function(userReportId) {
         const sql = `
 		select 
 			r.userId teacherId,
@@ -153,7 +153,7 @@ module.exports = app => {
     };
 
     // 获取这个报告中已经点评了的学生id
-    model.getStudentIdsByReportId = async function (reportId) {
+    model.getStudentIdsByReportId = async function(reportId) {
         const sql = `
 		select 
 			ur.userId studentId
@@ -171,7 +171,7 @@ module.exports = app => {
     };
 
     //
-    model.getByUserIdAndClassIds = async function (studentId, classIds) {
+    model.getByUserIdAndClassIds = async function(studentId, classIds) {
         const sql = `
 		select
 			  ur.*,
@@ -193,7 +193,7 @@ module.exports = app => {
     };
 
     //
-    model.getReportAndOrgNameById = async function (userReportId) {
+    model.getReportAndOrgNameById = async function(userReportId) {
         const sql = `
 		select 
 			distinct
@@ -224,7 +224,7 @@ module.exports = app => {
     };
 
     // 获取本班同学本次点评的平均能力值
-    model.getClassmatesAvgStarById = async function (reportId) {
+    model.getClassmatesAvgStarById = async function(reportId) {
         const sql = `
 		SELECT
 			ROUND(AVG(ur2.star),2) starAvg,
@@ -250,7 +250,7 @@ module.exports = app => {
     };
 
     // 本班历次能力值总和的平均值
-    model.getClassmatesHistoryAvgStar = async function (classId) {
+    model.getClassmatesHistoryAvgStar = async function(classId) {
         const sql = `
 		SELECT
 			ROUND(SUM(star) /COUNT(DISTINCT userId),2) starAvg,
@@ -280,7 +280,7 @@ module.exports = app => {
     };
 
     // 获取学生在这个班历次能力值总和
-    model.getUserSumStar = async function (studentId, classId) {
+    model.getUserSumStar = async function(studentId, classId) {
         const sql = `
 		SELECT 
 			SUM(ur.star) starCount,
@@ -306,7 +306,7 @@ module.exports = app => {
     };
 
     // 获取学生在这个班的历次成长
-    model.getUserHistoryStar = async function (studentId, classId) {
+    model.getUserHistoryStar = async function(studentId, classId) {
         const sql = `
 		SELECT
 			ur.reportId,
@@ -334,7 +334,7 @@ module.exports = app => {
     };
 
     // 获取同学历次成长的平均值
-    model.getClassmatesHistoryAvgStarGroupByReportId = async function (classId) {
+    model.getClassmatesHistoryAvgStarGroupByReportId = async function(classId) {
         const sql = `
 		SELECT 
 			reportId,
@@ -366,7 +366,7 @@ module.exports = app => {
     };
 
     // 学生获得的历次点评列表
-    model.getEvaluationCommentListSql = async function (userId, classId) {
+    model.getEvaluationCommentListSql = async function(userId, classId) {
         const sql = `
 		SELECT
 			distinct
@@ -395,7 +395,7 @@ module.exports = app => {
     };
 
     // 机构的班级列表，以及它们的评估状态
-    model.getClassAndEvalStatus = async function (organizationId, days) {
+    model.getClassAndEvalStatus = async function(organizationId, days) {
         let cond = '';
         if (days) {
             cond += ` where r.createdAt>='${moment()
@@ -450,7 +450,7 @@ module.exports = app => {
     };
 
     // 班级各个老师的点评情况
-    model.getTeacherCommentStatistics = async function (classId, days) {
+    model.getTeacherCommentStatistics = async function(classId, days) {
         let cond = '';
         if (days) {
             cond += ` and r.createdAt>='${moment()
