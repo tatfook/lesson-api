@@ -7,7 +7,7 @@ exports.cors = {
     origin: '*',
 };
 
-exports.middleware = [ 'authenticated', 'pagination' ];
+exports.middleware = ['authenticated', 'pagination'];
 
 exports.security = {
     xframe: {
@@ -41,9 +41,7 @@ exports.onerror = {
             ctx.status = 422;
         } else if (e.status) {
             ctx.status = e.status;
-            ctx.body = JSON.stringify({
-                message: e.message,
-            });
+            ctx.body = e.message;
         }
 
         ctx.model.Log.create({ text: JSON.stringify(e) });
