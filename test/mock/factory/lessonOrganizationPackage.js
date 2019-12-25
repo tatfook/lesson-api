@@ -2,13 +2,12 @@
 
 module.exports = app => {
     const { factory } = app;
-    const tableName = 'LessonOrganizationClass';
+    const tableName = 'LessonOrganizationPackage';
 
     factory.define(tableName, app.model[tableName], {
         organizationId: app.factory.assoc('LessonOrganization', 'id'),
-        name: factory.chance('string', {
-            length: 5,
-        }),
-        status: 1,
+        classId: app.factory.assoc('LessonOrganizationClass', 'id'),
+        packageId: app.factory.assoc('Package', 'id'),
+        lessons: [],
     });
 };

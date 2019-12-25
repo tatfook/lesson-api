@@ -417,7 +417,7 @@ class LessonOrgService extends Service {
     // 获取机构的所有班级，嵌套返回所有成员
     async getClassAndMembers(organizationId, roleId, userId) {
         const list = await this.ctx.model.LessonOrganizationClass.findAll({
-            where: { organizationId, end: { $gt: new Date() } },
+            where: { organizationId, status: 1 },
             attributes: [
                 [ 'id', 'classId' ],
                 [ 'name', 'className' ],
