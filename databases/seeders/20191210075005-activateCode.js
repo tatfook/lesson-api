@@ -27,11 +27,11 @@ module.exports = {
                 );
             }
 
-            await queryInterface.removeColumn(
-                'lessonOrganizationActivateCodes',
-                'classId',
-                { transaction }
-            );
+            // await queryInterface.removeColumn(
+            //     'lessonOrganizationActivateCodes',
+            //     'classId',
+            //     { transaction }
+            // );
 
             // 把以前剩余的的激活码置为无效
             await queryInterface.sequelize.query(
