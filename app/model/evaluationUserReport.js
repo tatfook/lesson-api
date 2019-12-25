@@ -490,7 +490,13 @@ module.exports = app => {
 			  		IF(COUNT(ur.isSend = 1 OR NULL) > 0, 1, 0) send
 				  FROM
 			  		evaluationReports r
-			  		LEFT JOIN evaluationUserReports ur ON ur.reportId = r.id
+			  		LEFT JOIN (
+                        select
+                        ur.*
+                        from evaluationUserReports ur
+                        join lessonOrganizationClassMembers m on ur.userId= m.memberId and m.roleId&1
+                        where m.classId=:classId
+                    ) ur ON ur.reportId = r.id
 					WHERE r.classId = :classId ${cond} GROUP BY r.id
 				) c GROUP BY userId,type
 		) b ON a.userId = b.userId AND a.type = b.type
