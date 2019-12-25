@@ -57,7 +57,7 @@ module.exports = {
             select 
               id,
               begin,
-              end, 
+              end
             from lessonOrganizationClasses 
             `,
                 { type: Sequelize.QueryTypes.SELECT, transaction }
@@ -68,7 +68,7 @@ module.exports = {
                     `
                 update lessonOrganizationClasses set \`status\` = ${
                     classes[i].end > currTime ? 1 : 2
-                } where id = ${classes[i].id}
+                    } where id = ${classes[i].id}
                 `,
                     { type: Sequelize.QueryTypes.UPDATE, transaction }
                 );
