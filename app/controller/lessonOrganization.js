@@ -23,7 +23,7 @@ const LessonOrganization = class extends Controller {
         const { userId, username } = this.authenticated();
         const { organizationId } = this.validate({ organizationId: 'number' });
 
-        const [ members, org ] = await Promise.all([
+        const [members, org] = await Promise.all([
             ctx.service.lessonOrganizationClassMember.getAllByCondition({
                 organizationId,
                 memberId: userId,
@@ -425,7 +425,7 @@ const LessonOrganization = class extends Controller {
     // 批量获取机构正式邀请码的使用情况
     async activateCodeUseStatus() {
         const { ctx } = this;
-        this.authenticated();
+        this.adminAuthenticated();
 
         let { organizationIds } = this.getParams();
         organizationIds = organizationIds.split(',');
