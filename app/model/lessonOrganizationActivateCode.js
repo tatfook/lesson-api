@@ -84,7 +84,7 @@ module.exports = app => {
     );
 
     // 这个机构各个类型的激活码的已使用和已生成情况
-    model.getCountByTypeAndState = async function (organizationId) {
+    model.getCountByTypeAndState = async function(organizationId) {
         const sql = `
         select 
             type,
@@ -105,7 +105,7 @@ module.exports = app => {
     };
 
     // 机构正式邀请码使用情况
-    model.activateCodeUseStatus = async function (organizationIds) {
+    model.activateCodeUseStatus = async function(organizationIds) {
         const sql = `
         select 
             organizationId,

@@ -23,7 +23,7 @@ const LessonOrganization = class extends Controller {
         const { userId, username } = this.authenticated();
         const { organizationId } = this.validate({ organizationId: 'number' });
 
-        const [members, org] = await Promise.all([
+        const [ members, org ] = await Promise.all([
             ctx.service.lessonOrganizationClassMember.getAllByCondition({
                 organizationId,
                 memberId: userId,
@@ -429,9 +429,13 @@ const LessonOrganization = class extends Controller {
 
         let { organizationIds } = this.getParams();
         organizationIds = organizationIds.split(',');
-        await this.ctx.validate(this.validateRules.organizationIdsRule, { organizationIds });
+        await this.ctx.validate(this.validateRules.organizationIdsRule, {
+            organizationIds,
+        });
 
-        const list = await ctx.service.lessonOrganization.activateCodeUseStatus(organizationIds);
+        const list = await ctx.service.lessonOrganization.activateCodeUseStatus(
+            organizationIds
+        );
 
         return ctx.helper.success({ ctx, status: 200, res: list });
     }
