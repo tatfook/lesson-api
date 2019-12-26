@@ -711,7 +711,10 @@ class LessonOrgClassMemberService extends Service {
                 { transaction }
             );
 
-            const endTime = endTimeMap[type]();
+            const endTime = _.min([
+                endTimeMap[type](),
+                moment(org.endDate).format('YYYY-MM-DD'),
+            ]);
             // 创建成员
             const objs = [];
             for (let i = 0; i < userIds.length; i++) {
@@ -952,7 +955,10 @@ class LessonOrgClassMemberService extends Service {
                     parentPhoneNum = members[index].parentPhoneNum;
                     oldEndTime = members[index].endTime;
                 }
-                const endTime = endTimeMap[type](oldEndTime);
+                const endTime = _.min([
+                    endTimeMap[type](oldEndTime),
+                    moment(org.endDate).format('YYYY-MM-DD'),
+                ]);
 
                 if (classIds.length) {
                     for (let j = 0; j < classIds.length; j++) {
@@ -1166,7 +1172,10 @@ class LessonOrgClassMemberService extends Service {
                 { transaction }
             );
 
-            const endTime = endTimeMap[type]();
+            const endTime = _.min([
+                endTimeMap[type](),
+                moment(org.endDate).format('YYYY-MM-DD'),
+            ]);
             // 创建成员
             const objs = [];
             for (let i = 0; i < userIds.length; i++) {

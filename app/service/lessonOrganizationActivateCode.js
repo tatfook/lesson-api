@@ -261,7 +261,11 @@ class LessonOrgActivateCodeService extends Service {
         );
 
         const type = data.type >= FIVE ? TWO : 1;
-        const endTime = endTimeMap[data.type]();
+        const endTime = _.min([
+            endTimeMap[data.type](),
+            moment(organ.endDate).format('YYYY-MM-DD'),
+        ]);
+
         const members = [];
         if (data.classIds.length) {
             for (let i = 0; i < data.classIds.length; i++) {
@@ -524,9 +528,12 @@ class LessonOrgActivateCodeService extends Service {
 
         if (members.length) {
             // 不要丢失到期时间，家长手机号
-            const endTime = endTimeMap[activeCode.type](
-                (_.find(members, o => o.endTime) || {}).endTime
-            );
+            const endTime = _.min([
+                endTimeMap[activeCode.type](
+                    (_.find(members, o => o.endTime) || {}).endTime
+                ),
+                moment(org.endDate).format('YYYY-MM-DD'),
+            ]);
             const parentPhoneNum = (
                 _.find(members, o => o.parentPhoneNum) || {}
             ).parentPhoneNum;
