@@ -13,3 +13,5 @@ config/config.unittest.js
 .vscode
 logs/
 run/
+
+report.xml
