@@ -87,6 +87,7 @@ describe('机构学生', () => {
                 classId: cls.id,
                 roleId: 1,
                 memberId: 2,
+                endTime: '2200-01-01'
             });
             await app.model.User.create({ id: 2, username: '' });
         });
