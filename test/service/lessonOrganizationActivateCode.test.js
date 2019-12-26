@@ -562,13 +562,13 @@ describe('test/service/lessonOrganizationActivateCode.test.js', async () => {
             );
             assert(
                 ret.remainder.type5 === 9 &&
-                ret.remainder.type6 === 10 &&
-                ret.remainder.type7 === 10
+                    ret.remainder.type6 === 10 &&
+                    ret.remainder.type7 === 10
             );
             assert(
                 ret.used.type5 === 0 &&
-                ret.used.type6 === 0 &&
-                ret.used.type7 === 0
+                    ret.used.type6 === 0 &&
+                    ret.used.type7 === 0
             );
         });
     });
