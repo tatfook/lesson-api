@@ -23,7 +23,7 @@ const LessonOrganization = class extends Controller {
         const { userId, username } = this.authenticated();
         const { organizationId } = this.validate({ organizationId: 'number' });
 
-        const [members, org] = await Promise.all([
+        const [ members, org ] = await Promise.all([
             ctx.service.lessonOrganizationClassMember.getAllByCondition({
                 organizationId,
                 memberId: userId,
