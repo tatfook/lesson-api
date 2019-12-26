@@ -164,6 +164,10 @@ module.exports = app => {
         `${prefix}lessonOrganizations/getRealNameInOrg`,
         lessonOrganization.getRealNameInOrg
     );
+    router.get(
+        `${prefix}lessonOrganizations/activateCodeUseStatus`,
+        lessonOrganization.activateCodeUseStatus
+    );
     router.post(`${prefix}lessonOrganizations/login`, lessonOrganization.login);
     router.post(
         `${prefix}lessonOrganizations/search`,

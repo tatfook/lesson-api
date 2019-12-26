@@ -505,6 +505,13 @@ class LessonOrgService extends Service {
             this.ctx.throw(400, Err.ACTIVATE_CODE_LIMIT_ERR);
         }
     }
+
+    // 机构正式邀请码的使用情况
+    async activateCodeUseStatus(organizationIds) {
+        return await this.ctx.model.LessonOrganizationActivateCode.activateCodeUseStatus(
+            organizationIds
+        );
+    }
 }
 
 module.exports = LessonOrgService;

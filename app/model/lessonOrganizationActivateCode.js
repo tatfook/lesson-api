@@ -104,6 +104,26 @@ module.exports = app => {
         return list;
     };
 
+    // 机构正式邀请码使用情况
+    model.activateCodeUseStatus = async function(organizationIds) {
+        const sql = `
+        select 
+            organizationId,
+            type,
+            count(id) usedCount
+        from lessonOrganizationActivateCodes 
+        where organizationId in (:organizationIds) and type>=5 and state=1
+        group by organizationId,type
+        `;
+        const list = await app.model.query(sql, {
+            type: app.model.QueryTypes.SELECT,
+            replacements: {
+                organizationIds,
+            },
+        });
+        return list;
+    };
+
     model.associate = () => {
         app.model.LessonOrganizationActivateCode.belongsTo(
             app.model.LessonOrganization,

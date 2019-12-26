@@ -594,7 +594,7 @@ describe('test/service/lessonOrganizationActivateCode.test.js', async () => {
 
         it('001', async () => {
             const ctx = app.mockContext();
-            await ctx.service.lessonOrganizationActivateCode.setInvalid([
+            await ctx.service.lessonOrganizationActivateCode.setCodeInvalid([
                 code.id,
             ]);
             const ret = await ctx.model.LessonOrganizationActivateCode.findOne({
