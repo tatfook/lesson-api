@@ -14,12 +14,16 @@ const LessonOrganization = class extends Controller {
         return 'LessonOrganization';
     }
 
+    get validateRules() {
+        return this.app.validator.lessonOrganization;
+    }
+
     async token() {
         const { ctx } = this;
         const { userId, username } = this.authenticated();
         const { organizationId } = this.validate({ organizationId: 'number' });
 
-        const [ members, org ] = await Promise.all([
+        const [members, org] = await Promise.all([
             ctx.service.lessonOrganizationClassMember.getAllByCondition({
                 organizationId,
                 memberId: userId,
@@ -416,6 +420,20 @@ const LessonOrganization = class extends Controller {
         };
 
         return ctx.helper.success({ ctx, status: 200, res: retObj });
+    }
+
+    // 批量获取机构正式邀请码的使用情况
+    async activateCodeUseStatus() {
+        const { ctx } = this;
+        this.authenticated();
+
+        let { organizationIds } = this.getParams();
+        organizationIds = organizationIds.split(',');
+        await this.ctx.validate(this.validateRules.organizationIdsRule, { organizationIds });
+
+        const list = await ctx.service.lessonOrganization.activateCodeUseStatus(organizationIds);
+
+        return ctx.helper.success({ ctx, status: 200, res: list });
     }
 };
 
