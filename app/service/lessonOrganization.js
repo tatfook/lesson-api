@@ -337,7 +337,7 @@ class LessonOrgService extends Service {
 
     // 获取机构各角色的人数,和人数上限
     async getMemberCountByRoleId(organizationId) {
-        const [ studentCount, teacherCount, organ ] = await Promise.all([
+        const [studentCount, teacherCount, organ] = await Promise.all([
             this.ctx.model.LessonOrganization.getMemberCount(
                 organizationId,
                 CLASS_MEMBER_ROLE_STUDENT
@@ -371,7 +371,7 @@ class LessonOrgService extends Service {
             });
         });
         const lessons = await this.ctx.model.Lesson.findAll({
-            attributes: [ 'id', 'lessonName' ],
+            attributes: ['id', 'lessonName'],
             where: { id: { $in: lessonIds } },
         });
 
@@ -419,8 +419,8 @@ class LessonOrgService extends Service {
         const list = await this.ctx.model.LessonOrganizationClass.findAll({
             where: { organizationId, status: 1 },
             attributes: [
-                [ 'id', 'classId' ],
-                [ 'name', 'className' ],
+                ['id', 'classId'],
+                ['name', 'className'],
             ],
             include: [
                 {
@@ -504,6 +504,11 @@ class LessonOrgService extends Service {
         ) {
             this.ctx.throw(400, Err.ACTIVATE_CODE_LIMIT_ERR);
         }
+    }
+
+    // 机构正式邀请码的使用情况
+    async activateCodeUseStatus(organizationIds) {
+        return await this.ctx.model.LessonOrganizationActivateCode.activateCodeUseStatus(organizationIds);
     }
 }
 
