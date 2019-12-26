@@ -108,7 +108,7 @@ describe('lesson organization class', () => {
     describe('获取历史班级', async () => {
         beforeEach(async () => {
             await app.factory.create('LessonOrganizationClass', {
-                end: '2019-01-01',
+                status: 2,
                 organizationId: 1,
             });
         });
