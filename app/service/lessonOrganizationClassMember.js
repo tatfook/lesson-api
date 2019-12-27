@@ -723,42 +723,32 @@ class LessonOrgClassMemberService extends Service {
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
-                        m =>
-                            m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
-                            m.roleId & CLASS_MEMBER_ROLE_TEACHER
+                        m => m.roleId & ~1 && m.memberId === userIds[i]
                     );
-                    let flag = false;
-                    for (let i = 0; i < adminAndTeachers.length; i++) {
-                        const element = adminAndTeachers[i];
+                    for (let j = 0; j < adminAndTeachers.length; j++) {
+                        const element = adminAndTeachers[j].get();
                         const classId = element.classId;
-                        if (classId === 0) {
-                            flag = true;
-                            const obj = {
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: 2,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                            };
-                            obj.roleId = 1 | element.roleId;
-                            objs.push(obj);
-                        } else {
-                            objs.push({
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: 2,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                                roleId:
-                                    element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
-                            });
-                        }
+                        const obj = {
+                            organizationId,
+                            classId,
+                            memberId: userIds[i],
+                            type: 2,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId:
+                                classId === 0
+                                    ? 1 | element.roleId
+                                    : element.roleId &
+                                      ~CLASS_MEMBER_ROLE_STUDENT,
+                        };
+                        objs.push(obj);
                     }
-                    if (!flag) {
+                    const index = _.findIndex(
+                        objs,
+                        o => o.classId === 0 && o.memberId === userIds[i]
+                    );
+                    if (index === -1) {
                         objs.push({
                             organizationId,
                             classId: 0,
@@ -955,42 +945,33 @@ class LessonOrgClassMemberService extends Service {
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
-                        m =>
-                            m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
-                            m.roleId & CLASS_MEMBER_ROLE_TEACHER
+                        m => m.roleId & ~1 && m.memberId === userIds[i]
                     );
-                    let flag = false;
-                    for (let i = 0; i < adminAndTeachers.length; i++) {
-                        const element = adminAndTeachers[i];
+                    for (let j = 0; j < adminAndTeachers.length; j++) {
+                        const element = adminAndTeachers[j].get();
                         const classId = element.classId;
-                        if (classId === 0) {
-                            flag = true;
-                            const obj = {
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: 2,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                            };
-                            obj.roleId = 1 | element.roleId;
-                            objs.push(obj);
-                        } else {
-                            objs.push({
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: 2,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                                roleId:
-                                    element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
-                            });
-                        }
+                        const obj = {
+                            organizationId,
+                            classId,
+                            memberId: userIds[i],
+                            type: 2,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId:
+                                classId === 0
+                                    ? 1 | element.roleId
+                                    : element.roleId &
+                                      ~CLASS_MEMBER_ROLE_STUDENT,
+                        };
+
+                        objs.push(obj);
                     }
-                    if (!flag) {
+                    const index = _.findIndex(
+                        objs,
+                        o => o.classId === 0 && o.memberId === userIds[i]
+                    );
+                    if (index === -1) {
                         objs.push({
                             organizationId,
                             classId: 0,
@@ -1184,42 +1165,32 @@ class LessonOrgClassMemberService extends Service {
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
-                        m =>
-                            m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
-                            m.roleId & CLASS_MEMBER_ROLE_TEACHER
+                        m => m.roleId & ~1 && m.memberId === userIds[i]
                     );
-                    let flag = false;
-                    for (let i = 0; i < adminAndTeachers.length; i++) {
-                        const element = adminAndTeachers[i];
+                    for (let j = 0; j < adminAndTeachers.length; j++) {
+                        const element = adminAndTeachers[j].get();
                         const classId = element.classId;
-                        if (classId === 0) {
-                            flag = true;
-                            const obj = {
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: type >= FIVE ? TWO : 1,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                            };
-                            obj.roleId = 1 | element.roleId;
-                            objs.push(obj);
-                        } else {
-                            objs.push({
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: type >= FIVE ? TWO : 1,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                                roleId:
-                                    element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
-                            });
-                        }
+                        const obj = {
+                            organizationId,
+                            classId,
+                            memberId: userIds[i],
+                            type: type >= FIVE ? TWO : 1,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId:
+                                classId === 0
+                                    ? 1 | element.roleId
+                                    : element.roleId &
+                                      ~CLASS_MEMBER_ROLE_STUDENT,
+                        };
+                        objs.push(obj);
                     }
-                    if (!flag) {
+                    const index = _.findIndex(
+                        objs,
+                        o => o.classId === 0 && o.memberId === userIds[i]
+                    );
+                    if (index === -1) {
                         objs.push({
                             organizationId,
                             classId: 0,
