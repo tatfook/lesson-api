@@ -205,9 +205,9 @@ describe('机构激活码', () => {
                 .then(res => res.body.data);
             assert(
                 ret.remainder.type5 === 2 &&
-                ret.remainder.type6 === 3 &&
-                ret.remainder.type7 === 3 &&
-                ret.used.type5 === 1
+                    ret.remainder.type6 === 3 &&
+                    ret.remainder.type7 === 3 &&
+                    ret.used.type5 === 1
             );
         });
     });
