@@ -629,7 +629,10 @@ class LessonOrgActivateCodeService extends Service {
         return await this.ctx.model.LessonOrganizationActivateCode.update(
             { state: 2 },
             {
-                where: { id: { $in: ids } },
+                where: {
+                    id: { $in: ids },
+                    state: 0,
+                },
             }
         );
     }

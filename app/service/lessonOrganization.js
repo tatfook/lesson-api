@@ -383,15 +383,18 @@ class LessonOrgService extends Service {
                     lessons,
                     o => o.id === _lessons[j].lessonId
                 );
-                if (index > -1) {
-                    // _lessons[j] = lessons[index];
-                    _lessons[j] = {
-                        id: lessons[index].id,
-                        lessonName: lessons[index].lessonName,
-                        lessonNo: _lessons[j].lessonNo,
-                    };
-                }
+
+                // _lessons[j] = lessons[index];
+                _lessons[j] =
+                    index > -1
+                        ? {
+                            id: lessons[index].id,
+                            lessonName: lessons[index].lessonName,
+                            lessonNo: _lessons[j].lessonNo,
+                        }
+                        : null;
             }
+            orgPackages[i].lessons = _.filter(_lessons, o => o);
         }
 
         return orgPackages;
