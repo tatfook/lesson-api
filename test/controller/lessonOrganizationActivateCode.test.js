@@ -157,7 +157,7 @@ describe('机构激活码', () => {
                 memberId: 1,
                 roleId: 1,
                 classId: cls.id,
-                endTime: '2200-01-01',
+                endTime: '2022-01-01',
             });
         });
         it('001', async () => {
@@ -182,7 +182,7 @@ describe('机构激活码', () => {
                 }
             );
             assert(
-                moment(member.endTime).format('YYYY-MM-DD') === '2200-04-01'
+                moment(member.endTime).format('YYYY-MM-DD') === '2022-04-01'
             );
         });
     });
@@ -205,9 +205,9 @@ describe('机构激活码', () => {
                 .then(res => res.body.data);
             assert(
                 ret.remainder.type5 === 2 &&
-                    ret.remainder.type6 === 3 &&
-                    ret.remainder.type7 === 3 &&
-                    ret.used.type5 === 1
+                ret.remainder.type6 === 3 &&
+                ret.remainder.type7 === 3 &&
+                ret.used.type5 === 1
             );
         });
     });
