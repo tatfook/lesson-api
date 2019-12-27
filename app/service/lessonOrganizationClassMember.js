@@ -17,8 +17,8 @@ const {
 const Err = require('../common/err');
 const _ = require('lodash');
 const moment = require('moment');
-const formalTypes = [ '5', '6', '7' ]; // 正式邀请码类型
-const allCodeTypes = [ '1', '2', '5', '6', '7' ]; // 全部邀请码类型
+const formalTypes = ['5', '6', '7']; // 正式邀请码类型
+const allCodeTypes = ['1', '2', '5', '6', '7']; // 全部邀请码类型
 
 // 各个类型激活码的过期时间
 const endTimeMap = {
@@ -202,7 +202,7 @@ class LessonOrgClassMemberService extends Service {
         const memberIds = members.map(o => o.memberId);
         if (memberIds.length === 0) return { count: 0, rows: [] };
 
-        const [ list, users ] = await Promise.all([
+        const [list, users] = await Promise.all([
             this.model.LessonOrganizationClassMember.findAll({
                 include: [
                     {
@@ -495,7 +495,7 @@ class LessonOrgClassMemberService extends Service {
         if (~~params.roleId & CLASS_MEMBER_ROLE_STUDENT) {
             await this.ctx.service.evaluationReport.checkEvaluationStatus(
                 member.memberId,
-                [ member.classId ]
+                [member.classId]
             );
         }
 
@@ -513,8 +513,8 @@ class LessonOrgClassMemberService extends Service {
             organizationId,
             handleId: userId,
             username,
-            oldmembers: [ member ],
-            classIds: [ -1 ],
+            oldmembers: [member],
+            classIds: [-1],
             roleId:
                 memberRoleId & CLASS_MEMBER_ROLE_TEACHER
                     ? CLASS_MEMBER_ROLE_TEACHER
@@ -582,7 +582,7 @@ class LessonOrgClassMemberService extends Service {
         if (!formalTypes.includes(type + '')) {
             this.ctx.throw(400, Err.STU_TYPE_ERR);
         }
-        const [ members, classes, org, historyCount ] = await Promise.all([
+        const [members, classes, org, historyCount] = await Promise.all([
             //
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
@@ -611,7 +611,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: [ '0', '1' ],
+                        $in: ['0', '1'],
                     },
                 }
             ),
@@ -647,7 +647,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -723,42 +723,25 @@ class LessonOrgClassMemberService extends Service {
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
-                        m =>
-                            m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
-                            m.roleId & CLASS_MEMBER_ROLE_TEACHER
+                        m => m.roleId & ~1 && m.memberId === userIds[i]
                     );
-                    let flag = false;
-                    for (let i = 0; i < adminAndTeachers.length; i++) {
-                        const element = adminAndTeachers[i];
+                    for (let j = 0; j < adminAndTeachers.length; j++) {
+                        const element = adminAndTeachers[j].get();
                         const classId = element.classId;
-                        if (classId === 0) {
-                            flag = true;
-                            const obj = {
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: 2,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                            };
-                            obj.roleId = 1 | element.roleId;
-                            objs.push(obj);
-                        } else {
-                            objs.push({
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: 2,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                                roleId:
-                                    element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
-                            });
-                        }
+                        const obj = {
+                            organizationId,
+                            classId,
+                            memberId: userIds[i],
+                            type: 2,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId: classId === 0 ? (1 | element.roleId) : (element.roleId & ~CLASS_MEMBER_ROLE_STUDENT),
+                        };
+                        objs.push(obj);
                     }
-                    if (!flag) {
+                    const index = _.findIndex(objs, o => o.classId === 0 && o.memberId === userIds[i]);
+                    if (index === -1) {
                         objs.push({
                             organizationId,
                             classId: 0,
@@ -811,7 +794,7 @@ class LessonOrgClassMemberService extends Service {
             this.ctx.throw(400, Err.STU_TYPE_ERR);
         }
         const currTime = new Date();
-        const [ members, classes, org, historyCount ] = await Promise.all([
+        const [members, classes, org, historyCount] = await Promise.all([
             // 检查这些学生是不是在这个机构正式学生
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
@@ -841,7 +824,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: [ '0', '1' ],
+                        $in: ['0', '1'],
                     },
                 }
             ),
@@ -876,7 +859,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -955,42 +938,26 @@ class LessonOrgClassMemberService extends Service {
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
-                        m =>
-                            m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
-                            m.roleId & CLASS_MEMBER_ROLE_TEACHER
+                        m => (m.roleId & ~1) && m.memberId === userIds[i]
                     );
-                    let flag = false;
-                    for (let i = 0; i < adminAndTeachers.length; i++) {
-                        const element = adminAndTeachers[i];
+                    for (let j = 0; j < adminAndTeachers.length; j++) {
+                        const element = adminAndTeachers[j].get();
                         const classId = element.classId;
-                        if (classId === 0) {
-                            flag = true;
-                            const obj = {
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: 2,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                            };
-                            obj.roleId = 1 | element.roleId;
-                            objs.push(obj);
-                        } else {
-                            objs.push({
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: 2,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                                roleId:
-                                    element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
-                            });
-                        }
+                        const obj = {
+                            organizationId,
+                            classId,
+                            memberId: userIds[i],
+                            type: 2,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId: classId === 0 ? (1 | element.roleId) : (element.roleId & ~CLASS_MEMBER_ROLE_STUDENT),
+                        };
+
+                        objs.push(obj);
                     }
-                    if (!flag) {
+                    const index = _.findIndex(objs, o => o.classId === 0 && o.memberId === userIds[i]);
+                    if (index === -1) {
                         objs.push({
                             organizationId,
                             classId: 0,
@@ -1044,7 +1011,7 @@ class LessonOrgClassMemberService extends Service {
         }
 
         const currTime = new Date();
-        const [ members, classes, org, historyCount ] = await Promise.all([
+        const [members, classes, org, historyCount] = await Promise.all([
             // 检查这些学生是不是过期了
             this.ctx.model.LessonOrganizationClassMember.findAll({
                 where: {
@@ -1073,7 +1040,7 @@ class LessonOrgClassMemberService extends Service {
                     organizationId,
                     type,
                     state: {
-                        $in: [ '0', '1' ],
+                        $in: ['0', '1'],
                     },
                 }
             ),
@@ -1108,7 +1075,7 @@ class LessonOrgClassMemberService extends Service {
                 activateTime: currTime,
                 key: `${
                     classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
                 name: '',
             });
         }
@@ -1184,42 +1151,25 @@ class LessonOrgClassMemberService extends Service {
                 } else {
                     const adminAndTeachers = _.filter(
                         members,
-                        m =>
-                            m.roleId & CLASS_MEMBER_ROLE_ADMIN ||
-                            m.roleId & CLASS_MEMBER_ROLE_TEACHER
+                        m => m.roleId & ~1 && m.memberId === userIds[i]
                     );
-                    let flag = false;
-                    for (let i = 0; i < adminAndTeachers.length; i++) {
-                        const element = adminAndTeachers[i];
+                    for (let j = 0; j < adminAndTeachers.length; j++) {
+                        const element = adminAndTeachers[j].get();
                         const classId = element.classId;
-                        if (classId === 0) {
-                            flag = true;
-                            const obj = {
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: type >= FIVE ? TWO : 1,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                            };
-                            obj.roleId = 1 | element.roleId;
-                            objs.push(obj);
-                        } else {
-                            objs.push({
-                                organizationId,
-                                classId,
-                                memberId: userIds[i],
-                                type: type >= FIVE ? TWO : 1,
-                                endTime,
-                                realname,
-                                parentPhoneNum,
-                                roleId:
-                                    element.roleId & ~CLASS_MEMBER_ROLE_STUDENT,
-                            });
-                        }
+                        const obj = {
+                            organizationId,
+                            classId,
+                            memberId: userIds[i],
+                            type: type >= FIVE ? TWO : 1,
+                            endTime,
+                            realname,
+                            parentPhoneNum,
+                            roleId: classId === 0 ? (1 | element.roleId) : (element.roleId & ~CLASS_MEMBER_ROLE_STUDENT),
+                        };
+                        objs.push(obj);
                     }
-                    if (!flag) {
+                    const index = _.findIndex(objs, o => o.classId === 0 && o.memberId === userIds[i]);
+                    if (index === -1) {
                         objs.push({
                             organizationId,
                             classId: 0,
