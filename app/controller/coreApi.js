@@ -34,12 +34,17 @@ const CoreApi = class extends Controller {
         if (apiKey !== CoreApiKey) return this.ctx.throw(400, Err.AUTH_ERR);
 
         try {
-            condition = typeof condition === 'string' ? JSON.parse(condition) : condition;
+            condition =
+                typeof condition === 'string'
+                    ? JSON.parse(condition)
+                    : condition;
         } catch (e) {
             this.ctx.throw(400, Err.ARGS_ERR);
         }
 
-        const ret = await this.ctx.service.package.getAllByConditionAndLessonCount(condition);
+        const ret = await this.ctx.service.package.getAllByConditionAndLessonCount(
+            condition
+        );
         return this.ctx.helper.success({ ctx, status: 200, res: ret });
     }
 };

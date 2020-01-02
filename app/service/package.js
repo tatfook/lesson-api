@@ -178,7 +178,7 @@ class PackageService extends Service {
     async audit(params, userId, packageId) {
         this.ctx.validate(
             {
-                state: [PACKAGE_STATE_UNAUDIT, PACKAGE_STATE_AUDITING],
+                state: [ PACKAGE_STATE_UNAUDIT, PACKAGE_STATE_AUDITING ],
             },
             params
         );
@@ -215,7 +215,7 @@ class PackageService extends Service {
      * @param {*} lessonNo lessonNo
      */
     async addLesson(userId, packageId, lessonId, lessonNo) {
-        const [pkg, lesson] = await Promise.all([
+        const [ pkg, lesson ] = await Promise.all([
             this.ctx.model.Package.findOne({
                 where: { userId, id: packageId },
             }),
@@ -272,13 +272,22 @@ class PackageService extends Service {
 
     async getAllByConditionAndLessonCount(condition) {
         const ret = await this.ctx.model.Package.findAll({
-            attributes: ['id', 'packageName', 'intro', 'maxAge', 'minAge', 'coverUrl'],
+            attributes: [
+                'id',
+                'packageName',
+                'intro',
+                'maxAge',
+                'minAge',
+                'coverUrl',
+            ],
             where: condition,
-            include: [{
-                as: 'packageLessons',
-                model: this.ctx.model.PackageLesson,
-                require: false,
-            }],
+            include: [
+                {
+                    as: 'packageLessons',
+                    model: this.ctx.model.PackageLesson,
+                    require: false,
+                },
+            ],
         });
 
         return ret.map(r => {
