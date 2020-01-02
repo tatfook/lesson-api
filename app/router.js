@@ -118,6 +118,8 @@ module.exports = app => {
     // --------------------------apis for coreApi project-------------------------
     const coreApi = controller.coreApi;
     router.post(`${prefix}coreApi/registerMsg`, coreApi.createRegisterMsg);
+    router.post(`${prefix}coreApi/user`, coreApi.createUser);
+    router.get(`${prefix}coreApi/packages`, coreApi.getPackagesAndLessonCount);
     // --------------------------apis for coreApi project-------------------------
 
     // -----------------------------add from coreservice--------------------------------------------------------
