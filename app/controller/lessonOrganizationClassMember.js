@@ -186,6 +186,28 @@ const LessonOrganizationClassMember = class extends Controller {
             status: 200,
         });
     }
+
+    // 从机构中删除某个用户的某个身份
+    async clearRoleFromOrg() {
+        const { roleId, organizationId } = this.authenticated();
+
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
+            this.ctx.throw(403, Err.AUTH_ERR);
+        }
+
+        const { memberId, _roleId } = this.validate();
+
+        await this.ctx.service.lessonOrganizationClassMember.clearRoleFromOrg(
+            memberId,
+            _roleId,
+            organizationId
+        );
+
+        return this.ctx.helper.success({
+            ctx: this.ctx,
+            status: 200,
+        });
+    }
 };
 
 module.exports = LessonOrganizationClassMember;
