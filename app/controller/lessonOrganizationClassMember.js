@@ -189,10 +189,7 @@ const LessonOrganizationClassMember = class extends Controller {
 
     // 从机构中删除某个用户的某个身份
     async clearRoleFromOrg() {
-        const {
-            roleId,
-            organizationId,
-        } = this.authenticated();
+        const { roleId, organizationId } = this.authenticated();
 
         if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
             this.ctx.throw(403, Err.AUTH_ERR);
