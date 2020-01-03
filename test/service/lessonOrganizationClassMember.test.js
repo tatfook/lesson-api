@@ -61,7 +61,7 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
             );
             assert(
                 ret.length === f.length &&
-                _.every(ret, o => o.lessonOrganizationClasses)
+                    _.every(ret, o => o.lessonOrganizationClasses)
             );
         });
     });
@@ -239,13 +239,15 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
                 memberId: 1,
                 roleId: 67,
                 classId: 1,
-                organizationId: 1
+                organizationId: 1,
             });
         });
         it('001 删除学生', async () => {
             const ctx = app.mockContext();
             await ctx.service.lessonOrganizationClassMember.clearRoleFromOrg(
-                1, 1, 1
+                1,
+                1,
+                1
             );
 
             const ret = await ctx.model.LessonOrganizationClassMember.findOne();
@@ -255,7 +257,9 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
         it('002 教师', async () => {
             const ctx = app.mockContext();
             await ctx.service.lessonOrganizationClassMember.clearRoleFromOrg(
-                1, 2, 1
+                1,
+                2,
+                1
             );
 
             const ret = await ctx.model.LessonOrganizationClassMember.findOne();
@@ -265,11 +269,13 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
         it('003 删除学生和老师', async () => {
             const ctx = app.mockContext();
             await ctx.service.lessonOrganizationClassMember.clearRoleFromOrg(
-                1, 3, 1
+                1,
+                3,
+                1
             );
 
             const ret = await ctx.model.LessonOrganizationClassMember.findOne();
             assert(ret.roleId === 64);
-        })
+        });
     });
 });

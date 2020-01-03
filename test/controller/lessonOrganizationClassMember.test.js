@@ -190,7 +190,11 @@ describe('机构学生', () => {
     describe('从机构中删除某个用户的某个身份', async () => {
         let member;
         beforeEach(async () => {
-            app.mockService('lessonOrganizationClassMember', 'clearRoleFromOrg', () => 0)
+            app.mockService(
+                'lessonOrganizationClassMember',
+                'clearRoleFromOrg',
+                () => 0
+            );
         });
 
         it('001', async () => {
