@@ -352,7 +352,7 @@ class LessonOrgClassMemberService extends Service {
             );
         }
         otherClassMs.forEach(r => {
-            r = { ...params };
+            r = { ...params, classId: r.classId };
             r.roleId = r.roleId & ~params.roleId;
             datas.push(r);
         });
