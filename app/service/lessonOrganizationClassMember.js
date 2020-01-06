@@ -352,7 +352,6 @@ class LessonOrgClassMemberService extends Service {
             );
         }
         otherClassMs.forEach(r => {
-            r = { ...params, classId: r.classId };
             r.roleId = r.roleId & ~params.roleId;
             datas.push(r);
         });
@@ -522,6 +521,52 @@ class LessonOrgClassMemberService extends Service {
         });
         // 更新用户vip和t信息
         await this.updateUserVipAndTLevel(member.memberId);
+    }
+
+    /**
+     * 从机构中删除某个用户的某个身份
+     * @param {*} memberId 用户id
+     * @param {*} roleId 要移除的身份
+     * @param {*} organizationId 机构id
+     */
+    async clearRoleFromOrg(memberId, roleId, organizationId) {
+        let members = await this.ctx.model.LessonOrganizationClassMember.findAll(
+            {
+                where: {
+                    memberId,
+                    organizationId,
+                },
+            }
+        ).then(list => list.map(r => r.get()));
+
+        members = _.filter(members, o => o.roleId & roleId);
+
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            for (let i = 0; i < members.length; i++) {
+                if (members[i].roleId === ~~roleId) {
+                    await this.ctx.model.LessonOrganizationClassMember.destroy({
+                        where: { id: members[i].id },
+                        transaction,
+                    });
+                } else {
+                    await this.ctx.model.LessonOrganizationClassMember.update(
+                        {
+                            roleId: members[i].roleId & ~roleId,
+                        },
+                        {
+                            where: { id: members[i].id },
+                            transaction,
+                        }
+                    );
+                }
+            }
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
+        }
     }
 
     /**

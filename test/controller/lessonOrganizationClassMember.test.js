@@ -186,4 +186,40 @@ describe('机构学生', () => {
                 .then(res => res.body);
         });
     });
+
+    describe('从机构中删除某个用户的某个身份', async () => {
+        let member;
+        beforeEach(async () => {
+            app.mockService(
+                'lessonOrganizationClassMember',
+                'clearRoleFromOrg',
+                () => 0
+            );
+        });
+
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/clearRoleFromOrg')
+                .send({
+                    memberId: 1,
+                    _roleId: 1,
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200);
+        });
+        it('002 没有权限', async () => {
+            const token = await app.login({ roleId: 1 }).then(r => r.token);
+
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/clearRoleFromOrg')
+                .send({
+                    memberId: 1,
+                    _roleId: 1,
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(403);
+        });
+    });
 });
