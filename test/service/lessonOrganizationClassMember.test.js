@@ -1,5 +1,6 @@
 const { app, mock, assert } = require('egg-mock/bootstrap');
 const _ = require('lodash');
+const moment = require('moment')
 
 describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
     describe('getByCondition', async () => {
@@ -61,7 +62,7 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
             );
             assert(
                 ret.length === f.length &&
-                    _.every(ret, o => o.lessonOrganizationClasses)
+                _.every(ret, o => o.lessonOrganizationClasses)
             );
         });
     });
@@ -228,8 +229,180 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
     });
 
     describe('createMember', async () => {
+        let org;
+        let member;
+        let cls;
+        beforeEach(async () => {
+            org = await app.factory.create('LessonOrganization');
+            cls = await app.factory.create('LessonOrganizationClass', { organizationId: org.id });
+
+            member = await app.model.LessonOrganizationClassMember.create({
+                organizationId: org.id,
+                classId: cls.id,
+                memberId: 1,
+                roleId: 1
+            });
+
+            app.mockService('lessonOrganizationClassMember', 'updateUserVipAndTLevel', () => 0);
+            app.mockService('keepwork', 'getAllUserByCondition', () => [{ id: 1 }]);
+        });
         it('001', async () => {
             const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationClassMember.createMember({
+                memberId: member.memberId,
+                roleId: 1,
+                organizationId: 1,
+                realname: 'abc'
+            }, {
+                organizationId: 1, roleId: 64, userId: 1, username: ''
+            });
+        });
+
+        it('002 指定班级', async () => {
+            const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationClassMember.createMember({
+                memberId: member.memberId,
+                roleId: 1,
+                organizationId: 1,
+                classId: [cls.id, 2]
+            }, {
+                organizationId: 1, roleId: 64, userId: 1, username: ''
+            });
+        });
+
+        it('003 带memberName', async () => {
+            const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationClassMember.createMember({
+                memberName: 'abc',
+                roleId: 1,
+                organizationId: 1,
+                classId: [cls.id, 2]
+            }, {
+                organizationId: 1, roleId: 64, userId: 1, username: ''
+            });
+        });
+
+        it('004 带memberName， 添加老师', async () => {
+            const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationClassMember.createMember({
+                memberName: 'abc',
+                roleId: 2,
+                organizationId: 1,
+                classId: [cls.id, 2]
+            }, {
+                organizationId: 1, roleId: 64, userId: 1, username: ''
+            });
+        });
+
+        it('005 机构不存在', async () => {
+            const ctx = app.mockContext();
+            let catched
+            try {
+                await ctx.service.lessonOrganizationClassMember.createMember({
+                    memberName: 'abc',
+                    roleId: 2,
+                    organizationId: 2,
+                    classId: [cls.id, 2]
+                }, {
+                    organizationId: 2, roleId: 64, userId: 1, username: ''
+                });
+            } catch (e) {
+                catched = true;
+                assert(e.message === '机构不存在');
+            }
+            assert(catched);
+        });
+
+        it('006 没有权限', async () => {
+            const ctx = app.mockContext();
+            let catched
+            try {
+                await ctx.service.lessonOrganizationClassMember.createMember({
+                    memberName: 'abc',
+                    roleId: 2,
+                    organizationId: 1,
+                    classId: [cls.id, 2]
+                }, {
+                    organizationId: 1, roleId: 1, userId: 1, username: ''
+                });
+            } catch (e) {
+                catched = true;
+                assert(e.message === '没有权限');
+            }
+            assert(catched);
+        });
+    });
+
+    describe('destroyMember', async () => {
+        let org;
+        let cls;
+        let member;
+        beforeEach(async () => {
+            org = await app.factory.create('LessonOrganization');
+            cls = await app.factory.create('LessonOrganizationClass', { organizationId: org.id });
+
+            member = await app.model.LessonOrganizationClassMember.create({
+                organizationId: org.id,
+                classId: cls.id,
+                memberId: 1,
+                roleId: 3
+            });
+
+            app.mockService('lessonOrganizationClassMember', 'updateUserVipAndTLevel', () => 0);
+        });
+        it('001 删除学生', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationClassMember.destroyMember({
+                roleId: 1,
+            }, {
+                organizationId: org.id, roleId: 64, userId: 1, username: 'abc'
+            }, member.id);
+
+            const ret = await app.model.LessonOrganizationClassMember.findOne();
+            assert(ret.roleId === 2);
+        });
+
+        it('002 删除老师', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationClassMember.destroyMember({
+                roleId: 2,
+            }, {
+                organizationId: org.id, roleId: 64, userId: 1, username: 'abc'
+            }, member.id);
+
+            const ret = await app.model.LessonOrganizationClassMember.findOne();
+            assert(ret.roleId === 1);
+        });
+
+        it('003', async () => {
+            const ctx = app.mockContext();
+            try {
+                await ctx.service.lessonOrganizationClassMember.destroyMember({
+                    roleId: 2,
+                }, {
+                    organizationId: org.id, roleId: 1, userId: 1, username: 'abc'
+                }, member.id);
+            } catch (e) {
+                assert(e.message === '没有权限');
+            }
+        });
+
+        it('004 机构不存在', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.destroyMember({
+                    roleId: 2,
+                }, {
+                    organizationId: 999, roleId: 64, userId: 1, username: 'abc'
+                }, member.id);
+            } catch (e) {
+                assert(e.message === '机构不存在');
+            }
         });
     });
 
@@ -276,6 +449,317 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
 
             const ret = await ctx.model.LessonOrganizationClassMember.findOne();
             assert(ret.roleId === 64);
+        });
+    });
+
+    describe('updateUserVipAndTLevel', async () => {
+        let org;
+        let member;
+        let cls;
+        beforeEach(async () => {
+            org = await app.factory.create('LessonOrganization');
+            cls = await app.factory.create('LessonOrganizationClass', { organizationId: org.id });
+
+            member = await app.model.LessonOrganizationClassMember.create({
+                organizationId: org.id,
+                classId: cls.id,
+                memberId: 1,
+                roleId: 1
+            });
+            app.mockService('keepwork', 'updateUser', () => 0);
+        });
+        it('001', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationClassMember.updateUserVipAndTLevel(1);
+        });
+    });
+
+    describe('toFormal 试听转正式', async () => {
+        let org;
+        let member;
+        let cls;
+        beforeEach(async () => {
+            org = await app.factory.create('LessonOrganization');
+            cls = await app.factory.create('LessonOrganizationClass', { organizationId: org.id });
+
+            member = await app.model.LessonOrganizationClassMember.create({
+                organizationId: org.id,
+                classId: cls.id,
+                memberId: 1,
+                roleId: 1
+            });
+            app.mockService('keepwork', 'updateUser', () => 0);
+        });
+
+        it('001', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.toFormal([1], 1, [1], {});
+            } catch (e) {
+                assert(e.message === '正式学生类型错误');
+            }
+        });
+
+        it('002', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.toFormal([2], 5, [1], {
+                    organizationId: org.id,
+                    userId: 1,
+                    username: 'abc'
+                });
+            } catch (e) {
+                assert(e.message === '班级成员不存在');
+            }
+        });
+
+        it('003', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.toFormal([1], 5, [2], {
+                    organizationId: org.id,
+                    userId: 1,
+                    username: 'abc'
+                });
+            } catch (e) {
+                assert(e.message === '班级id错误');
+            }
+        });
+
+        it('004', async () => {
+            const ctx = app.mockContext();
+            await app.factory.createMany('LessonOrganizationActivateCode', 10, {
+                organizationId: org.id,
+                classIds: [cls.id]
+            });
+            try {
+                await ctx.service.lessonOrganizationClassMember.toFormal([1], 5, [1], {
+                    organizationId: org.id,
+                    userId: 1,
+                    username: 'abc'
+                });
+            } catch (e) {
+                assert(e.message === '已经超出激活码数量上限');
+            }
+        });
+
+        it('005', async () => {
+            const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationClassMember.toFormal([1], 5, [1], {
+                organizationId: org.id,
+                userId: 1,
+                username: 'abc'
+            });
+
+            const ret = await app.model.LessonOrganizationClassMember.findOne();
+            assert(ret.type === 2
+                && moment(ret.endTime).format('YYYY-MM-DD') === moment().add(3, 'month').format('YYYY-MM-DD'));
+
+        });
+    });
+
+    describe('recharge 续费', async () => {
+        let org;
+        let member;
+        let cls;
+        beforeEach(async () => {
+            org = await app.factory.create('LessonOrganization');
+            cls = await app.factory.create('LessonOrganizationClass', { organizationId: org.id });
+
+            member = await app.model.LessonOrganizationClassMember.create({
+                organizationId: org.id,
+                classId: cls.id,
+                memberId: 1,
+                roleId: 1,
+                endTime: '2200-01-01'
+            });
+            app.mockService('keepwork', 'updateUser', () => 0);
+        });
+
+        it('001', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.recharge([1], 1, [1], {});
+            } catch (e) {
+                assert(e.message === '正式学生类型错误');
+            }
+        });
+
+        it('002', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.recharge([2], 5, [1], {
+                    organizationId: org.id,
+                    userId: 1,
+                    username: 'abc'
+                });
+            } catch (e) {
+                assert(e.message === '班级成员不存在');
+            }
+        });
+
+        it('003', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.recharge([1], 5, [2], {
+                    organizationId: org.id,
+                    userId: 1,
+                    username: 'abc'
+                });
+            } catch (e) {
+                assert(e.message === '班级id错误');
+            }
+        });
+        it('004', async () => {
+            const ctx = app.mockContext();
+            await app.factory.createMany('LessonOrganizationActivateCode', 10, {
+                organizationId: org.id,
+                classIds: [cls.id]
+            });
+            try {
+                await ctx.service.lessonOrganizationClassMember.recharge([1], 5, [1], {
+                    organizationId: org.id,
+                    userId: 1,
+                    username: 'abc'
+                });
+            } catch (e) {
+                assert(e.message === '已经超出激活码数量上限');
+            }
+        });
+        it('005', async () => {
+            const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationClassMember.recharge([1], 5, [1], {
+                organizationId: org.id,
+                userId: 1,
+                username: 'abc'
+            });
+
+            const ret = await app.model.LessonOrganizationClassMember.findOne();
+            assert(ret.type === 2
+                && moment(ret.endTime).format('YYYY-MM-DD') === '2200-04-01');
+
+        });
+    });
+
+    describe('reactivate 重新激活学生', async () => {
+        let org;
+        let member;
+        let cls;
+        beforeEach(async () => {
+            org = await app.factory.create('LessonOrganization');
+            cls = await app.factory.create('LessonOrganizationClass', { organizationId: org.id });
+
+            member = await app.model.LessonOrganizationClassMember.create({
+                organizationId: org.id,
+                classId: cls.id,
+                memberId: 1,
+                roleId: 1,
+                endTime: '2200-01-01'
+            });
+            app.mockService('keepwork', 'updateUser', () => 0);
+        });
+
+        it('001', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.reactivate([1], 0, [1], {});
+            } catch (e) {
+                assert(e.message === '正式学生类型错误');
+            }
+        });
+
+        it('002', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.reactivate([2], 5, [1], {
+                    organizationId: org.id,
+                    userId: 1,
+                    username: 'abc'
+                });
+            } catch (e) {
+                assert(e.message === '班级成员不存在');
+            }
+        });
+
+        it('003', async () => {
+            const ctx = app.mockContext();
+
+            try {
+                await ctx.service.lessonOrganizationClassMember.reactivate([1], 5, [2], {
+                    organizationId: org.id,
+                    userId: 1,
+                    username: 'abc'
+                });
+            } catch (e) {
+                assert(e.message === '班级id错误');
+            }
+        });
+        it('004', async () => {
+            const ctx = app.mockContext();
+            await app.factory.createMany('LessonOrganizationActivateCode', 10, {
+                organizationId: org.id,
+                classIds: [cls.id]
+            });
+            try {
+                await ctx.service.lessonOrganizationClassMember.reactivate([1], 5, [1], {
+                    organizationId: org.id,
+                    userId: 1,
+                    username: 'abc'
+                });
+            } catch (e) {
+                assert(e.message === '已经超出激活码数量上限');
+            }
+        });
+
+        it('005', async () => {
+            const ctx = app.mockContext();
+
+            await ctx.service.lessonOrganizationClassMember.reactivate([1], 5, [1], {
+                organizationId: org.id,
+                userId: 1,
+                username: 'abc'
+            });
+
+            const ret = await app.model.LessonOrganizationClassMember.findOne();
+            assert(ret.type === 2
+                && moment(ret.endTime).format('YYYY-MM-DD') === moment().add(3, 'month').format('YYYY-MM-DD'));
+
+        });
+    });
+
+    describe('historyStudents', async () => {
+        let org;
+        let cls;
+        beforeEach(async () => {
+            org = await app.factory.create('LessonOrganization');
+            cls = await app.factory.create('LessonOrganizationClass', { organizationId: org.id });
+            await app.factory.createMany('LessonOrganizationClassMember', 10, {
+                endTime: '2008-01-01',
+                classId: cls.id,
+                organizationId: org.id,
+                roleId: 1
+            });
+        });
+        it('001', async () => {
+            const ctx = app.mockContext();
+
+            const ret = await ctx.service.lessonOrganizationClassMember.historyStudents({
+                classId: cls.id,
+                organizationId: org.id,
+                queryOptions: { offset: 0, limit: 10 }
+            });
+
+            assert(ret.count === 10);
         });
     });
 });
