@@ -232,4 +232,50 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
             const ctx = app.mockContext();
         });
     });
+
+    describe('clearRoleFromOrg', async () => {
+        beforeEach(async () => {
+            await app.factory.create('LessonOrganizationClassMember', {
+                memberId: 1,
+                roleId: 67,
+                classId: 1,
+                organizationId: 1,
+            });
+        });
+        it('001 删除学生', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationClassMember.clearRoleFromOrg(
+                1,
+                1,
+                1
+            );
+
+            const ret = await ctx.model.LessonOrganizationClassMember.findOne();
+            assert(ret.roleId === 66);
+        });
+
+        it('002 教师', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationClassMember.clearRoleFromOrg(
+                1,
+                2,
+                1
+            );
+
+            const ret = await ctx.model.LessonOrganizationClassMember.findOne();
+            assert(ret.roleId === 65);
+        });
+
+        it('003 删除学生和老师', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationClassMember.clearRoleFromOrg(
+                1,
+                3,
+                1
+            );
+
+            const ret = await ctx.model.LessonOrganizationClassMember.findOne();
+            assert(ret.roleId === 64);
+        });
+    });
 });
