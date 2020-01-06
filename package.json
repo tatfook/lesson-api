@@ -10,6 +10,7 @@
         "debug": "egg-bin debug",
         "cov": "egg-bin cov",
         "lint": "eslint . --fix",
+        "test-jenkins": "JUNIT_REPORT_PATH=report.xml egg-bin test --colors --reporter mocha-jenkins-reporter",
         "format": "prettier --write \"**/**/*.{js,json}\""
     },
     "author": "",
@@ -18,6 +19,7 @@
         "axios": "^0.18.0",
         "blueimp-md5": "^2.12.0",
         "egg": "^2.9.1",
+        "egg-ajv": "https://github.com/tatfook/egg-ajv/archive/v1.0.1.tar.gz",
         "egg-cors": "^2.1.0",
         "egg-redis": "^2.4.0",
         "egg-scripts": "^2.6.0",
@@ -42,6 +44,7 @@
         "eslint-config-egg": "^7.5.1",
         "factory-girl": "^5.0.4",
         "pre-commit": "^1.2.2",
+        "mocha-jenkins-reporter": "^0.4.2",
         "prettier": "^1.18.2",
         "sequelize-cli": "^5.5.0"
     },

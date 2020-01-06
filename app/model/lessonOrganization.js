@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = app => {
-    const { BIGINT, INTEGER, STRING, TEXT, DATE } = app.Sequelize;
+    const { BIGINT, INTEGER, STRING, TEXT, JSON, DATE } = app.Sequelize;
 
     const model = app.model.define(
         'lessonOrganizations',
@@ -55,12 +55,6 @@ module.exports = app => {
                 type: INTEGER,
             },
 
-            count: {
-                // 用户数量
-                type: INTEGER,
-                defaultValue: 0,
-            },
-
             privilege: {
                 // 权限  1 -- 允许教师添加学生  2 -- 允许教师移除学生
                 type: INTEGER,
@@ -87,6 +81,16 @@ module.exports = app => {
                 type: STRING,
                 defaultValue: '',
             },
+            activateCodeLimit: {
+                // 正式邀请码上限
+                // {
+                // type5:XX,正式三个月
+                // type6:XX,正式六个月
+                // type7:XX,正式一年(送三个月)
+                // }
+                type: JSON,
+                defaultValue: {},
+            },
             createdAt: {
                 type: DATE,
             },
@@ -110,7 +114,7 @@ module.exports = app => {
 			and roleId & 1 and (
 				classId = 0 or exists (
 					select * from lessonOrganizationClasses 
-					where id = classId and end > current_timestamp()
+					where id = classId and status =1
 					)
 			) group by memberId) as t`;
         const list = await app.model.query(sql, {
@@ -126,7 +130,7 @@ module.exports = app => {
 			and roleId & ${roleId} and classId ${
     classId === undefined ? '>= 0' : '= ' + classId
 }  and (
-				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and end > current_timestamp())
+				classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and status =1)
 				) group by memberId) as t`;
         const list = await app.model.query(sql, {
             type: app.model.QueryTypes.SELECT,
@@ -150,15 +154,30 @@ module.exports = app => {
         return list[0].count || 0;
     };
 
-    model.getMembers = async (organizationId, roleId, classId) => {
-        const sql = `select * from lessonOrganizationClassMembers as locm where locm.organizationId = ${organizationId} and 
-		roleId & ${roleId} and classId ${
-    classId === undefined ? '>= 0' : '= ' + classId
-}  and (
-			classId = 0 or exists (select * from lessonOrganizationClasses where id = classId and end > current_timestamp())
-			) group by memberId`;
+    model.getStudentIds = async (organizationId, classId, type, username) => {
+        let condition = ' and m.endTime>now()';
+        if (type) condition += ' and m.type = :type';
+        if (classId) condition += ' and m.classId = :classId';
+        if (username) {
+            condition += ` and (m.realname like '%${username}%' or u.username like '%${username}%')`;
+        }
+
+        const sql = `
+        select 
+            memberId 
+        from 
+            lessonOrganizationClassMembers m 
+            join users u on m.memberId = u.id
+        where m.roleId & 1 and m.organizationId = :organizationId ${condition} 
+		group by m.memberId`;
         const list = await app.model.query(sql, {
             type: app.model.QueryTypes.SELECT,
+            replacements: {
+                organizationId,
+                classId,
+                type,
+                username,
+            },
         });
         return list;
     };
@@ -238,6 +257,15 @@ module.exports = app => {
             app.model.LessonOrganizationClassMember,
             {
                 as: 'lessonOrganizationClassMembers',
+                foreignKey: 'organizationId',
+                sourceKey: 'id',
+                constraints: false,
+            }
+        );
+        app.model.LessonOrganization.hasMany(
+            app.model.LessonOrganizationActivateCode,
+            {
+                as: 'lessonOrganizationActivateCode',
                 foreignKey: 'organizationId',
                 sourceKey: 'id',
                 constraints: false,

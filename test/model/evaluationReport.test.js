@@ -1,13 +1,7 @@
 const { app, assert } = require('egg-mock/bootstrap');
 
 describe('test/model/evaluationReport.test.js', () => {
-    before(async () => {
-        await app.model.EvaluationReport.truncate();
-        await app.model.EvaluationUserReport.truncate();
-        await app.model.LessonOrganization.truncate();
-        await app.model.LessonOrganizationClass.truncate();
-        await app.model.LessonOrganizationClassMember.truncate();
-
+    beforeEach(async () => {
         // 创建机构，班级，老师，学生，管理员
         await app.model.LessonOrganization.create({ name: '什么机构' });
         await app.model.LessonOrganizationClass.create({
@@ -118,10 +112,20 @@ describe('test/model/evaluationReport.test.js', () => {
             reportId: 1,
             status: 1,
         });
-        assert(list.length === 1 && list[0].studentId === 4);
+        assert(
+            list.length === 2 &&
+                list[0].studentId === 2 &&
+                list[1].studentId === 4
+        );
     });
 
     it('005 getTeacherByUserReportId 获取老师id', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+        });
+
         const ret = await app.model.EvaluationUserReport.getTeacherByUserReportId(
             1
         );
@@ -129,6 +133,12 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('006 getStudentIdsByReportId 获取这个报告中已经点评了的学生id', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+        });
+
         const ret = await app.model.EvaluationUserReport.getStudentIdsByReportId(
             1
         );
@@ -136,6 +146,12 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('007 getByUserIdAndClassIds', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+        });
+
         const ret = await app.model.EvaluationUserReport.getByUserIdAndClassIds(
             2,
             [1]
@@ -144,6 +160,12 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('008 getReportAndOrgNameById ', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+        });
+
         const ret = await app.model.EvaluationUserReport.getReportAndOrgNameById(
             1
         );
@@ -155,6 +177,19 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('009 getClassmatesAvgStarById', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+            star: 2,
+            spatial: 3,
+            collaborative: 4,
+            creative: 1,
+            logical: 5,
+            compute: 1,
+            coordinate: 2,
+        });
+
         const ret = await app.model.EvaluationUserReport.getClassmatesAvgStarById(
             1
         );
@@ -170,6 +205,19 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('010 getClassmatesHistoryAvgStar', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+            star: 2,
+            spatial: 3,
+            collaborative: 4,
+            creative: 1,
+            logical: 5,
+            compute: 1,
+            coordinate: 2,
+        });
+
         const ret = await app.model.EvaluationUserReport.getClassmatesHistoryAvgStar(
             1
         );
@@ -185,6 +233,19 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('011 getUserSumStar', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+            star: 2,
+            spatial: 3,
+            collaborative: 4,
+            creative: 1,
+            logical: 5,
+            compute: 1,
+            coordinate: 2,
+        });
+
         const ret = await app.model.EvaluationUserReport.getUserSumStar(2, 1);
         assert(
             ret.starCount === '2' &&
@@ -198,6 +259,18 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('012 getUserHistoryStar', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+            star: 2,
+            spatial: 3,
+            collaborative: 4,
+            creative: 1,
+            logical: 5,
+            compute: 1,
+            coordinate: 2,
+        });
         const ret = await app.model.EvaluationUserReport.getUserHistoryStar(
             2,
             1
@@ -215,6 +288,19 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('013 getClassmatesHistoryAvgStarGroupByReportId', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+            star: 2,
+            spatial: 3,
+            collaborative: 4,
+            creative: 1,
+            logical: 5,
+            compute: 1,
+            coordinate: 2,
+        });
+
         const ret = await app.model.EvaluationUserReport.getClassmatesHistoryAvgStarGroupByReportId(
             1
         );
@@ -231,6 +317,18 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('014 getEvaluationCommentListSql', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+            star: 2,
+            spatial: 3,
+            collaborative: 4,
+            creative: 1,
+            logical: 5,
+            compute: 1,
+            coordinate: 2,
+        });
         const ret = await app.model.EvaluationUserReport.getEvaluationCommentListSql(
             2,
             1
@@ -244,6 +342,18 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('015 getClassAndEvalStatus', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+            star: 2,
+            spatial: 3,
+            collaborative: 4,
+            creative: 1,
+            logical: 5,
+            compute: 1,
+            coordinate: 2,
+        });
         const ret = await app.model.EvaluationUserReport.getClassAndEvalStatus(
             1
         );
@@ -253,6 +363,18 @@ describe('test/model/evaluationReport.test.js', () => {
     });
 
     it('016 getTeacherCommentStatistics', async () => {
+        // 前置操作
+        await app.model.EvaluationUserReport.create({
+            reportId: 1,
+            userId: 2,
+            star: 2,
+            spatial: 3,
+            collaborative: 4,
+            creative: 1,
+            logical: 5,
+            compute: 1,
+            coordinate: 2,
+        });
         const ret = await app.model.EvaluationUserReport.getTeacherCommentStatistics(
             1
         );

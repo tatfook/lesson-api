@@ -164,6 +164,10 @@ module.exports = app => {
         `${prefix}lessonOrganizations/getRealNameInOrg`,
         lessonOrganization.getRealNameInOrg
     );
+    router.get(
+        `${prefix}lessonOrganizations/activateCodeUseStatus`,
+        lessonOrganization.activateCodeUseStatus
+    );
     router.post(`${prefix}lessonOrganizations/login`, lessonOrganization.login);
     router.post(
         `${prefix}lessonOrganizations/search`,
@@ -190,6 +194,10 @@ module.exports = app => {
         lessonOrganizationClass.latestProject
     );
     router.put(
+        `${prefix}lessonOrganizationClasses/end`,
+        lessonOrganizationClass.closeClass
+    );
+    router.put(
         `${prefix}lessonOrganizationClasses/:id`,
         lessonOrganizationClass.update
     );
@@ -213,6 +221,26 @@ module.exports = app => {
         `${prefix}lessonOrganizationClassMembers/bulk`,
         lessonOrganizationClassMember.bulkCreate
     );
+    router.post(
+        `${prefix}lessonOrganizationClassMembers/formal`,
+        lessonOrganizationClassMember.toFormal
+    );
+    router.post(
+        `${prefix}lessonOrganizationClassMembers/recharge`,
+        lessonOrganizationClassMember.recharge
+    );
+    router.get(
+        `${prefix}lessonOrganizationClassMembers/historyStudents`,
+        lessonOrganizationClassMember.historyStudents
+    );
+    router.post(
+        `${prefix}lessonOrganizationClassMembers/reactivate`,
+        lessonOrganizationClassMember.reactivate
+    );
+    router.post(
+        `${prefix}lessonOrganizationClassMembers/clearRoleFromOrg`,
+        lessonOrganizationClassMember.clearRoleFromOrg
+    );
     router.resources(
         `${prefix}lessonOrganizationClassMembers`,
         lessonOrganizationClassMember
@@ -226,8 +254,20 @@ module.exports = app => {
         lessonOrganizationActivateCode.activate
     );
     router.post(
+        `${prefix}lessonOrganizationActivateCodes/stuRecharge`,
+        lessonOrganizationActivateCode.studentRecharge
+    );
+    router.post(
         `${prefix}lessonOrganizationActivateCodes/search`,
         lessonOrganizationActivateCode.index
+    );
+    router.get(
+        `${prefix}lessonOrganizationActivateCodes/usedStatus`,
+        lessonOrganizationActivateCode.getUsedStatus
+    );
+    router.put(
+        `${prefix}lessonOrganizationActivateCodes/invalid`,
+        lessonOrganizationActivateCode.setInvalid
     );
     router.resources(
         `${prefix}lessonOrganizationActivateCodes`,

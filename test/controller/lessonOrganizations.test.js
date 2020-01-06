@@ -1,46 +1,32 @@
 const md5 = require('blueimp-md5');
 const { app, assert } = require('egg-mock/bootstrap');
+const moment = require('moment');
 
 describe('机构', () => {
-    before(async () => {
-        const ctx = app.mockContext();
-        await ctx.service.keepwork.truncate({ resources: 'users' });
-
-        await app.model.LessonOrganizationActivateCode.truncate();
-        await app.model.LessonOrganizationClassMember.truncate();
-        await app.model.LessonOrganization.truncate();
-        await app.model.LessonOrganizationClass.truncate();
-        await app.model.LessonOrganizationPackage.truncate();
-    });
-
-    it('001 机构', async () => {
-        const ctx = app.mockContext();
-        const user = await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'qizhibiao1',
-            password: md5('123456'),
-        });
-
+    let organ;
+    let cls;
+    let token;
+    let user1;
+    beforeEach(async () => {
         // 创建机构
-        const organ = await app.model.LessonOrganization.create({
+        organ = await app.model.LessonOrganization.create({
             name: 'org0000',
-            count: 1,
+            loginUrl: '/thisisaloginurl',
         }).then(o => o.toJSON());
 
         // 创建班级
-        let cls = await app.model.LessonOrganizationClass.create({
+        cls = await app.model.LessonOrganizationClass.create({
             name: 'clss000',
             organizationId: organ.id,
-            begin: new Date(),
-            end: new Date().getTime() + 1000 * 60 * 60 * 24,
+            status: 1,
         }).then(o => o.toJSON());
 
         // 创建班级成员
-        //
         await app.model.LessonOrganizationClassMember.create({
             organizationId: organ.id,
-            memberId: user.id,
+            memberId: 1,
             roleId: 64,
+            realname: 'qzb',
             classId: 0,
         });
         await app.model.LessonOrganizationClassMember.create({
@@ -55,171 +41,409 @@ describe('机构', () => {
             roleId: 2,
             classId: cls.id,
         });
+        user1 = await app.factory.create('User', { id: 1 });
 
-        // 登录机构
-        const token = await app
-            .httpRequest()
-            .post('/lessonOrganizations/login')
-            .send({
-                organizationId: organ.id,
-                username: 'qizhibiao1',
-                password: '123456',
-            })
-            .expect(200)
-            .then(res => res.body.token)
-            .catch(e => console.log(e));
-
-        // 修改机构过期时间
-        await app
-            .httpRequest()
-            .put('/lessonOrganizations/' + organ.id)
-            .send({ endDate: '2019-01-01' })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body.data)
-            .catch(e => console.log(e));
-
-        const token2 = await app.login().then(o => o.token);
-        assert.ok(token2);
-
-        // 我的机构
-        let org = await app
-            .httpRequest()
-            .get('/lessonOrganizations')
-            .set('Authorization', `Bearer ${token2}`)
-            .expect(200)
-            .then(res => res.body);
-        assert(org.data.length === 1);
-
-        const adminToken = await app.adminLogin().then(o => o.token);
-
-        // 更改用户密码
-        const ret = await app
-            .httpRequest()
-            .post('/organizations/changepwd')
-            .send({
-                memberId: user.id,
-                password: '456789',
-                classId: cls.id,
-            })
-            .set('Authorization', `Bearer ${adminToken}`)
-            .expect(200);
-
-        assert(ret);
-
-        await app
-            .httpRequest()
-            .post('/lessonOrganizations/login')
-            .send({
-                organizationId: organ.id,
-                username: 'qizhibiao1',
-                password: '123456',
-            })
-            .expect(400)
-            .then(res => res.body.token)
-            .catch(e => console.log(e));
-
-        await app
-            .httpRequest()
-            .post('/lessonOrganizations/login')
-            .send({
-                organizationId: organ.id,
-                username: 'qizhibiao1',
-                password: '456789',
-            })
-            .expect(200)
-            .then(res => res.body.token)
-            .catch(e => console.log(e));
-    });
-
-    it('002 机构 创建机构 更新机构', async () => {
-        const adminToken = await app.adminLogin().then(o => o.token);
-        assert.ok(adminToken);
-
-        const ctx = app.mockContext();
-        await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            id: 490,
-            username: 'dev123',
-            password: md5('123456'),
-            roleId: 64,
+        const pkg = await app.model.Package.create({
+            userId: 1,
+            packageName: 'name',
+            auditAt: '2019-10-01',
+        });
+        await app.model.LessonOrganizationPackage.create({
+            organizationId: organ.id,
+            classId: cls.id,
+            packageId: pkg.id,
+            lessons: [{ lessonId: 1 }],
         });
 
-        // 创建机构
-        let organ = await app
-            .httpRequest()
-            .post('/lessonOrganizations')
-            .send({
-                name: 'organ002',
-                count: 1,
-                usernames: ['qizhibiao1'],
-                packages: [
-                    {
-                        packageId: 1,
-                        lessons: [{ lessonId: 1, lessonNo: 1 }],
-                    },
-                ],
-            })
-            .set('Authorization', `Bearer ${adminToken}`)
-            .expect(200)
-            .then(res => res.body);
-
-        // 更新机构
-        await app
-            .httpRequest()
-            .put(`/lessonOrganizations/${organ.data.id}`)
-            .send({
-                name: 'newname',
-                logo: 'https://www.baidu.com',
-                usernames: ['dev123'],
-            })
-            .set('Authorization', `Bearer ${adminToken}`)
-            .expect(200)
-            .then(res => res.body);
-
-        // 机构获取
-        organ = await app
-            .httpRequest()
-            .get(`/lessonOrganizations/${organ.data.id}`)
-            .set('Authorization', `Bearer ${adminToken}`)
-            .expect(200)
-            .then(res => res.body);
-
-        assert(
-            organ.data.name === 'newname' &&
-                organ.data.logo === 'https://www.baidu.com'
-        );
-
-        // 登录机构
-        const token = await app
-            .httpRequest()
-            .post('/lessonOrganizations/login')
-            .send({
-                organizationId: organ.data.id,
-                username: 'dev123',
-                password: '123456',
-            })
-            .expect(200)
-            .then(res => res.body)
-            .catch(e => console.log(e));
-
-        // 课程包列表
-        organ = await app
-            .httpRequest()
-            .get(`/lessonOrganizations/packages`)
-            .set('Authorization', `Bearer ${token.data.token}`)
-            .expect(200)
-            .then(res => res.body);
-
-        assert(organ.data.length === 1 && organ.data[0].packageId === 1);
-
-        // 课程详情
-        let detail = await app
-            .httpRequest()
-            .get('/lessonOrganizations/packageDetail?packageId=1&classId=0')
-            .set('Authorization', `Bearer ${token.data.token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert(detail.data.id && detail.data.packageId);
+        token = await app.login({ roleId: 64 }).then(o => o.token);
     });
+
+    // describe('登录机构', async () => {
+    //     beforeEach(async () => {
+    //         app.mockService('keepwork', 'getAllUserByCondition', () => {
+    //             return [
+    //                 {
+    //                     id: 1,
+    //                     username: 'qzb',
+    //                 },
+    //             ];
+    //         });
+    //     });
+    //     it('001', async () => {
+    //         await app
+    //             .httpRequest()
+    //             .post('/lessonOrganizations/login')
+    //             .send({
+    //                 organizationId: organ.id,
+    //                 username: 'qzb',
+    //                 password: '123456',
+    //             })
+    //             .expect(200)
+    //             .then(res => res.body.token)
+    //             .catch(e => console.log(e));
+    //     });
+    //     it('002 用户不存在', async () => {
+    //         app.mockService('keepwork', 'getAllUserByCondition', () => []);
+    //         await app
+    //             .httpRequest()
+    //             .post('/lessonOrganizations/login')
+    //             .send({
+    //                 organizationId: organ.id,
+    //                 username: 'qzb',
+    //                 password: '123456',
+    //             })
+    //             .expect(400);
+    //     });
+    //     it('003 机构不存在', async () => {
+    //         app.mockService('keepwork', 'getAllUserByCondition', () => []);
+    //         await app
+    //             .httpRequest()
+    //             .post('/lessonOrganizations/login')
+    //             .send({
+    //                 organizationId: 999,
+    //                 username: 'qzb',
+    //                 password: '123456',
+    //             })
+    //             .expect(400);
+    //     });
+    // });
+
+    // describe('刷新token', async () => {
+    //     beforeEach(async () => {
+    //         app.mockService('user', 'setToken', () => 0);
+    //     });
+    //     it('001', async () => {
+    //         const newToken = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/token')
+    //             .send({
+    //                 organizationId: organ.id,
+    //                 username: 'qzb',
+    //                 password: '123456',
+    //             })
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(o => o.body.data);
+    //         assert(newToken);
+    //     });
+    //     it('002', async () => {
+    //         await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/token')
+    //             .send({
+    //                 organizationId: 999,
+    //                 username: 'qzb',
+    //                 password: '123456',
+    //             })
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(400);
+    //     });
+    // });
+
+    describe('修改机构', async () => {
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .put('/lessonOrganizations/' + organ.id)
+                .send({
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data)
+                .catch(e => console.log(e));
+
+            const org = await app.model.LessonOrganization.findOne({
+                where: { id: organ.id },
+            }).then(o => o.toJSON());
+
+            assert(moment(org.endDate).format('YYYY-MM-DD') === '2019-01-01');
+        });
+
+        it('002 管理员修改', async () => {
+            const token = await app.adminLogin().then(o => o.token);
+            await app
+                .httpRequest()
+                .put('/lessonOrganizations/' + organ.id)
+                .send({ endDate: '2019-02-01' })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data)
+                .catch(e => console.log(e));
+
+            const org = await app.model.LessonOrganization.findOne({
+                where: { id: organ.id },
+            }).then(o => o.toJSON());
+
+            assert(moment(org.endDate).format('YYYY-MM-DD') === '2019-02-01');
+        });
+    });
+
+    // describe('获取用户机构', async () => {
+    //     let token;
+    //     beforeEach(async () => {
+    //         token = await app.login().then(o => o.token);
+    //         assert.ok(token);
+    //     });
+    //     it('001', async () => {
+    //         let org = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations')
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(res => res.body);
+    //         assert(org.data.length === 1);
+    //     });
+    // });
+
+    // describe('获取机构详情', async () => {
+    //     it('001', async () => {
+    //         let org = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/' + organ.id)
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(res => res.body.data);
+
+    //         assert(org.name === 'org0000');
+    //     });
+    //     it('002 机构不存在', async () => {
+    //         await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/' + 999)
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(404);
+    //     });
+    // });
+
+    // describe('用loginUrl获取机构', async () => {
+    //     it('001', async () => {
+    //         const org = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/getByUrl?url=' + organ.loginUrl)
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(r => r.body.data);
+
+    //         assert(
+    //             org.name === 'org0000' && org.loginUrl === '/thisisaloginurl'
+    //         );
+    //     });
+    //     it('002 url错误', async () => {
+    //         const org = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/getByUrl?url=abc')
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(404);
+    //     });
+    // });
+
+    // describe('用name获取机构', async () => {
+    //     it('001', async () => {
+    //         const org = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/getByName?name=' + organ.name)
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(r => r.body.data);
+
+    //         assert(
+    //             org.name === 'org0000' && org.loginUrl === '/thisisaloginurl'
+    //         );
+    //     });
+    //     it('002 name错误', async () => {
+    //         const org = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/getByName?name=abc')
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(404);
+    //     });
+    // });
+
+    // describe('创建机构', async () => {
+    //     let adminToken;
+    //     beforeEach(async () => {
+    //         adminToken = await app.adminLogin().then(o => o.token);
+    //         app.mockService('keepwork', 'getAllUserByCondition', () => [
+    //             { id: 1 },
+    //         ]);
+    //         app.mockService('keepwork', 'updateUser', () => 0);
+    //     });
+    //     it('001', async () => {
+    //         let organ = await app
+    //             .httpRequest()
+    //             .post('/lessonOrganizations')
+    //             .send({
+    //                 name: 'organ002',
+    //                 count: 1,
+    //                 usernames: ['qzb'],
+    //                 packages: [
+    //                     {
+    //                         packageId: 1,
+    //                         lessons: [{ lessonId: 1, lessonNo: 1 }],
+    //                     },
+    //                 ],
+    //             })
+    //             .set('Authorization', `Bearer ${adminToken}`)
+    //             .expect(200)
+    //             .then(res => res.body);
+    //     });
+    // });
+
+    // describe('查询课程包', async () => {
+    //     it('001', async () => {
+    //         const list = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/packages?classId=' + cls.id)
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(r => r.body.data);
+
+    //         assert(list.length === 1);
+    //     });
+    //     it('002', async () => {
+    //         const list = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/packages?')
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(r => r.body.data);
+
+    //         assert(list.length === 1);
+    //     });
+    // });
+
+    // describe('机构课程包', async () => {
+    //     it('001', async () => {
+    //         const list = await app
+    //             .httpRequest()
+    //             .get(
+    //                 '/lessonOrganizations/getOrgPackages?organizationId=' +
+    //                 organ.id
+    //             )
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(r => r.body.data);
+
+    //         assert(list.length === 1);
+    //     });
+    // });
+
+    // describe('checkUserInvalid', async () => {
+    //     it('001', async () => {
+    //         await app
+    //             .httpRequest()
+    //             .get(
+    //                 '/lessonOrganizations/checkUserInvalid?organizationId=' +
+    //                 organ.id +
+    //                 '&username=abc'
+    //             )
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(400);
+    //     });
+    //     it('002', async () => {
+    //         const list = await app
+    //             .httpRequest()
+    //             .get(
+    //                 '/lessonOrganizations/checkUserInvalid?organizationId=' +
+    //                 organ.id +
+    //                 '&username=' +
+    //                 user1.username
+    //             )
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200);
+    //     });
+    // });
+
+    // describe('getRealNameInOrg', async () => {
+    //     it('001', async () => {
+    //         const ret = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/getRealNameInOrg')
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(o => o.body.data);
+    //         assert(ret === 'qzb');
+    //     });
+
+    //     it('002', async () => {
+    //         const token = await app.login({ id: 2 }).then(o => o.token);
+    //         const ret = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/getRealNameInOrg')
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(o => o.body.data);
+    //         assert(!ret);
+    //     });
+    // });
+
+    // describe('获取机构各角色的人数', async () => {
+    //     it('001', async () => {
+    //         const ret = await app
+    //             .httpRequest()
+    //             .get(
+    //                 '/lessonOrganizations/getMemberCountByRole?organizationId=' +
+    //                 organ.id
+    //             )
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(o => o.body.data);
+    //         assert(ret.studentCount === 1 && ret.teacherCount === 1);
+    //     });
+    //     it('002', async () => {
+    //         const ret = await app
+    //             .httpRequest()
+    //             .get(
+    //                 '/lessonOrganizations/getMemberCountByRole?organizationId=999'
+    //             )
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(o => o.body.data);
+    //         assert(ret.studentCount === 0 && ret.teacherCount === 0);
+    //     });
+    // });
+
+    // describe('课程包详情页', async () => {
+    //     it('001', async () => {
+    //         let detail = await app
+    //             .httpRequest()
+    //             .get(
+    //                 '/lessonOrganizations/packageDetail?packageId=1&classId=1&roleId=1'
+    //             )
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(res => res.body);
+    //         assert(detail);
+    //     });
+    // });
+
+    // describe('获取机构的所有班级，嵌套返回所有成员', async () => {
+    //     it('001', async () => {
+    //         let detail = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/classAndMembers?_roleId=1')
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(res => res.body.data);
+
+    //         assert(
+    //             detail.length === 1 &&
+    //             detail[0].teacherList.length === 1 &&
+    //             detail[0].studentList.length === 1
+    //         );
+    //     });
+    // });
+
+    // describe('获取学生加入的全部机构', async () => {
+    //     it('001', async () => {
+    //         let list = await app
+    //             .httpRequest()
+    //             .get('/lessonOrganizations/userOrgInfo')
+    //             .set('Authorization', `Bearer ${token}`)
+    //             .expect(200)
+    //             .then(res => res.body.data);
+    //         assert(list.allOrgs.length === 1);
+    //     });
+    // });
 });

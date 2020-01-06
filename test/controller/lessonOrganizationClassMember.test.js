@@ -2,157 +2,224 @@ const md5 = require('blueimp-md5');
 const { app, assert } = require('egg-mock/bootstrap');
 
 describe('机构学生', () => {
-    before(async () => {
-        const ctx = app.mockContext();
-        await ctx.service.keepwork.truncate({ resources: 'users' });
-
-        await app.model.LessonOrganization.sync({ force: true });
-        await app.model.LessonOrganizationClass.sync({ force: true });
-        await app.model.LessonOrganizationClassMember.sync({ force: true });
-    });
-
-    it('001 机构学生添加', async () => {
-        const user = await app.adminLogin();
-        const token = user.token;
-
-        const ctx = app.mockContext();
-        const user2 = await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'user005',
-            password: md5('123456'),
+    let cls;
+    let cls2;
+    let token;
+    let organ;
+    beforeEach(async () => {
+        app.mockService('keepwork', 'getAllUserByCondition', () => {
+            return [{ id: 1, username: 'u' }];
         });
+        app.mockService('keepwork', 'getUserDatas', () => {
+            return { tokens: ['XXX'] };
+        });
+        app.mockService('keepwork', 'setUserDatas', () => 0);
+        app.mockService('keepwork', 'updateUser', () => 0);
 
         // 创建机构
-        const organ = await app.model.LessonOrganization.create({
+        organ = await app.model.LessonOrganization.create({
             name: 'org0000',
-            count: 1,
+            endDate: '2220-01-01',
+            activateCodeLimit: { type5: 5, type6: 6, type7: 7 },
         }).then(o => o.toJSON());
 
         // 创建班级
-        let cls = await app.model.LessonOrganizationClass.create({
+        cls = await app.model.LessonOrganizationClass.create({
             name: 'clss000',
             organizationId: organ.id,
-            begin: new Date(),
-            end: new Date().getTime() + 1000 * 60 * 60 * 24,
+            status: 1,
         }).then(o => o.toJSON());
 
-        let cls2 = await app.model.LessonOrganizationClass.create({
+        cls2 = await app.model.LessonOrganizationClass.create({
             name: 'clss001',
             organizationId: organ.id,
-            begin: new Date(),
-            end: new Date().getTime() + 1000 * 60 * 60 * 24,
+            status: 1,
         }).then(o => o.toJSON());
 
         // 添加为管理员
         await app.model.LessonOrganizationClassMember.create({
             organizationId: organ.id,
-            memberId: user.id,
+            memberId: 1,
             roleId: 64,
             classId: 0,
         });
 
-        // 测试接口添加学生
-        await app
-            .httpRequest()
-            .post('/lessonOrganizationClassMembers')
-            .send({
-                memberId: user2.id,
+        const user = await app.login({ roleId: 67 });
+        token = user.token;
+    });
+
+    describe('获取教师列表', async () => {
+        beforeEach(async () => {
+            await app.model.LessonOrganizationClassMember.create({
                 organizationId: organ.id,
-                classIds: [cls.id],
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body.data)
-            .catch(e => console.log(e));
-
-        await app
-            .httpRequest()
-            .post('/lessonOrganizationClassMembers')
-            .send({
-                memberId: user2.id,
-                organizationId: organ.id,
-                classIds: [0],
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body.data)
-            .catch(e => console.log(e));
-
-        await app
-            .httpRequest()
-            .post('/lessonOrganizationClassMembers')
-            .send({
-                memberId: user2.id,
-                organizationId: organ.id,
-                classIds: [cls.id, cls2.id],
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body.data)
-            .catch(e => console.log(e));
-
-        await app
-            .httpRequest()
-            .post('/lessonOrganizationClassMembers')
-            .send({
-                memberId: user2.id,
-                organizationId: organ.id,
-                classIds: [cls.id],
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body.data)
-            .catch(e => console.log(e));
-
-        // 学生
-        let students = await app
-            .httpRequest()
-            .get(`/lessonOrganizationClassMembers/student?classId=${cls.id}`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert(students.data.count === 1);
-
-        // 移除班级成员
-        // await app.httpRequest().delete(`/lessonOrganizationClassMembers/${students.rows[0].id}?roleId=1`)
-        // 	.set("Authorization", `Bearer ${token}`).expect(200);
-
-        students = await app
-            .httpRequest()
-            .get(`/lessonOrganizationClassMembers/student?classId=${cls2.id}`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert(students.data.count === 0);
-
-        // 教师
-        let teachers = await app
-            .httpRequest()
-            .get(`/lessonOrganizationClassMembers/teacher?classId=${cls2.id}`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert(teachers.data.length === 0);
-
-        const user3 = await ctx.service.keepwork.createRecord({
-            resources: 'users',
-            username: 'jacky',
-            password: md5('123456'),
+                classId: cls2.id,
+                roleId: 2,
+                memberId: 2,
+            });
+        });
+        it('001', async () => {
+            let teachers = await app
+                .httpRequest()
+                .get(
+                    `/lessonOrganizationClassMembers/teacher?classId=${cls2.id}`
+                )
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
+            assert(teachers.data.length === 1);
         });
 
-        await app.model.LessonOrganizationClassMember.create({
-            organizationId: organ.id,
-            classId: cls2.id,
-            roleId: 2,
-            memberId: user3.id,
+        it('002', async () => {
+            let teachers = await app
+                .httpRequest()
+                .get(`/lessonOrganizationClassMembers/teacher?classId=999`)
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
+            assert(teachers.data.length === 0);
+        });
+    });
+
+    describe('学生列表', async () => {
+        beforeEach(async () => {
+            await app.model.LessonOrganizationClassMember.create({
+                organizationId: organ.id,
+                classId: cls.id,
+                roleId: 1,
+                memberId: 2,
+                endTime: '2200-01-01',
+            });
+            await app.model.User.create({ id: 2, username: '' });
+        });
+        it('001', async () => {
+            let students = await app
+                .httpRequest()
+                .get(
+                    `/lessonOrganizationClassMembers/student?classId=${cls.id}`
+                )
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
+            assert(students.data.count === 1);
+        });
+        it('002', async () => {
+            let students = await app
+                .httpRequest()
+                .get(`/lessonOrganizationClassMembers/student?classId=999`)
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
+            assert(students.data.count === 0);
+        });
+    });
+
+    describe('创建成员', async () => {
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers')
+                .send({
+                    memberId: 1,
+                    organizationId: organ.id,
+                    classIds: [cls.id],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data)
+                .catch(e => console.log(e));
+        });
+    });
+
+    describe('删除成员', async () => {
+        let member;
+        beforeEach(async () => {
+            member = await app.model.LessonOrganizationClassMember.create({
+                organizationId: organ.id,
+                classId: cls.id,
+                roleId: 1,
+                memberId: 2,
+            });
+        });
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .delete(`/lessonOrganizationClassMembers/${member.id}?roleId=1`)
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200);
+
+            const list = await app.model.LessonOrganizationClassMember.findAll({
+                where: {
+                    id: member.id,
+                    roleId: { $in: ['1', '3', '65', '67'] },
+                },
+            });
+            assert(list.length === 0);
+        });
+    });
+
+    describe('试听转正式', async () => {
+        beforeEach('', async () => {
+            const cls = await app.factory.create('LessonOrganizationClass', {
+                organizationId: organ.id,
+                status: 1,
+            });
+            await app.model.LessonOrganizationClassMember.create({
+                organizationId: organ.id,
+                memberId: 1,
+                roleId: 1,
+                classId: cls.id,
+                endTime: '2200-01-01',
+                type: 1,
+            });
+        });
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/formal')
+                .send({
+                    userIds: [1],
+                    type: 5,
+                    classIds: [1],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
+        });
+    });
+
+    describe('从机构中删除某个用户的某个身份', async () => {
+        let member;
+        beforeEach(async () => {
+            app.mockService(
+                'lessonOrganizationClassMember',
+                'clearRoleFromOrg',
+                () => 0
+            );
         });
 
-        teachers = await app
-            .httpRequest()
-            .get(`/lessonOrganizationClassMembers/teacher?classId=${cls2.id}`)
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert(teachers.data.length === 1);
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/clearRoleFromOrg')
+                .send({
+                    memberId: 1,
+                    _roleId: 1,
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200);
+        });
+        it('002 没有权限', async () => {
+            const token = await app.login({ roleId: 1 }).then(r => r.token);
+
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/clearRoleFromOrg')
+                .send({
+                    memberId: 1,
+                    _roleId: 1,
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(403);
+        });
     });
 });

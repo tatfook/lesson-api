@@ -14,6 +14,10 @@ const LessonOrganization = class extends Controller {
         return 'LessonOrganization';
     }
 
+    get validateRules() {
+        return this.app.validator.lessonOrganization;
+    }
+
     async token() {
         const { ctx } = this;
         const { userId, username } = this.authenticated();
@@ -99,14 +103,13 @@ const LessonOrganization = class extends Controller {
         if (!organizationId) organizationId = organ.id;
 
         // 找到这个人在机构中的members
-        const curtime = new Date();
         let members = await ctx.service.lessonOrganizationClassMember.getAllAndExtraByCondition(
             [
                 {
                     as: 'lessonOrganizationClasses',
                     model: this.model.LessonOrganizationClass,
                     where: {
-                        end: { $gte: curtime },
+                        status: 1,
                     },
                     required: false,
                 },
@@ -213,6 +216,19 @@ const LessonOrganization = class extends Controller {
             id,
         });
         if (!organ) return ctx.throw(400, Err.ORGANIZATION_NOT_FOUND);
+        // 检查正式激活码上限
+        if (params.activateCodeLimit) {
+            const {
+                type5 = 0,
+                type6 = 0,
+                type7 = 0,
+            } = params.activateCodeLimit;
+            await ctx.service.lessonOrganization.checkActivateCodeLimit(id, {
+                type5,
+                type6,
+                type7,
+            });
+        }
 
         if (this.ctx.state.admin && this.ctx.state.admin.userId) {
             await ctx.service.lessonOrganization.updateOrganization(
@@ -248,13 +264,6 @@ const LessonOrganization = class extends Controller {
             await ctx.service.lessonOrganization.fixedClassPackage(
                 id,
                 params.packages
-            );
-        }
-
-        if (params.endDate) {
-            await ctx.service.lessonOrganizationClass.updateByCondition(
-                { end: params.endDate },
-                { organizationId: id, end: { $gt: params.endDate } }
             );
         }
 
@@ -411,6 +420,24 @@ const LessonOrganization = class extends Controller {
         };
 
         return ctx.helper.success({ ctx, status: 200, res: retObj });
+    }
+
+    // 批量获取机构正式邀请码的使用情况
+    async activateCodeUseStatus() {
+        const { ctx } = this;
+        this.adminAuthenticated();
+
+        let { organizationIds } = this.getParams();
+        organizationIds = organizationIds.split(',');
+        await this.ctx.validate(this.validateRules.organizationIdsRule, {
+            organizationIds,
+        });
+
+        const list = await ctx.service.lessonOrganization.activateCodeUseStatus(
+            organizationIds
+        );
+
+        return ctx.helper.success({ ctx, status: 200, res: list });
     }
 };
 

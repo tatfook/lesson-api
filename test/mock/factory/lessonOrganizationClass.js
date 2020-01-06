@@ -1,16 +1,14 @@
+'use strict';
+
 module.exports = app => {
     const { factory } = app;
-    const tableName = 'LessonOrganization';
+    const tableName = 'LessonOrganizationClass';
 
     factory.define(tableName, app.model[tableName], {
+        organizationId: app.factory.assoc('LessonOrganization', 'id'),
         name: factory.chance('string', {
             length: 5,
         }),
-        endDate: '2220-01-01',
-        activateCodeLimit: {
-            type5: 10,
-            type6: 10,
-            type7: 10,
-        },
+        status: 1,
     });
 };

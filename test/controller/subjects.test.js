@@ -1,84 +1,68 @@
 const { app, mock, assert } = require('egg-mock/bootstrap');
 
 describe('/admins/subjects.test.js', () => {
-    before(async () => {
-        const subjects = app.model.Subject;
-        await subjects.truncate();
+    let token;
+    beforeEach(async () => {
+        token = await app.adminLogin().then(o => o.token);
     });
 
-    it('POST /admins/subjects', async () => {
-        const token = await app.adminLogin().then(o => o.token);
-        assert.ok(token);
-
-        await app
-            .httpRequest()
-            .post('/admins/subject')
-            .send({
-                subjectName: '数学',
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-
-        await app
-            .httpRequest()
-            .post('/admins/subject')
-            .send({
-                subjectName: '英语',
-            })
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
+    describe('创建subjects', async () => {
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .post('/admins/subject')
+                .send({
+                    subjectName: '数学',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200);
+        });
     });
 
-    it('GET /admins/subjects', async () => {
-        const token = await app.adminLogin().then(o => o.token);
-        assert.ok(token);
-
-        let list = await app
-            .httpRequest()
-            .get('/admins/subject')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert.equal(list.data.count, 2);
-
-        list = await app
-            .httpRequest()
-            .get('/subjects')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert.equal(list.data.length, 2);
+    describe('获取subjects列表', async () => {
+        beforeEach(async () => {
+            await app.model.Subject.create({ subjectName: '数学' });
+        });
+        it('001', async () => {
+            let list = await app
+                .httpRequest()
+                .get('/admins/subject')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(list.count === 1 && list.rows[0].subjectName === '数学');
+        });
     });
 
-    it('GET /admins/subjects/1', async () => {
-        const token = await app.adminLogin().then(o => o.token);
-        assert.ok(token);
+    describe('获取subjects详情', async () => {
+        beforeEach(async () => {
+            await app.model.Subject.create({ subjectName: '数学' });
+        });
 
-        const subject = await app
-            .httpRequest()
-            .get('/admins/subject/1')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert.ok(subject);
-        assert.equal(subject.data.subjectName, '数学');
+        it('001', async () => {
+            let sub = await app
+                .httpRequest()
+                .get('/admins/subject/1')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body.data);
+            assert(sub.subjectName === '数学');
+        });
     });
 
-    it('DELETE /admins/subjects/1', async () => {
-        const token = await app.adminLogin().then(o => o.token);
-        assert.ok(token);
+    describe('删除subject', async () => {
+        beforeEach(async () => {
+            await app.model.Subject.create({ subjectName: '数学' });
+        });
+        it('001', async () => {
+            let sub = await app
+                .httpRequest()
+                .delete('/admins/subject/1')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200);
 
-        await app
-            .httpRequest()
-            .delete('/admins/subject/1')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200);
-        const list = await app
-            .httpRequest()
-            .get('/admins/subject')
-            .set('Authorization', `Bearer ${token}`)
-            .expect(200)
-            .then(res => res.body);
-        assert.equal(list.data.count, 1);
+            const ret = await app.model.Subject.findOne({ where: { id: 1 } });
+            assert(!ret);
+        });
     });
 });

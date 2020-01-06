@@ -19,3 +19,8 @@ exports.redis = {
     enable: true,
     package: 'egg-redis',
 };
+
+exports.ajv = {
+    enable: true,
+    package: 'egg-ajv',
+};

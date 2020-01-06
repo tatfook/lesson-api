@@ -13,9 +13,10 @@ describe('test/controller/message.test.js', () => {
             .httpRequest()
             .post('/messages')
             .send({
-                msg: { type: 3, text: '纯文本消息' },
+                msg: { type: 2, text: '纯文本消息' },
                 userIds: [{ userId: 1, roleId: 1 }],
                 sendSms: 0,
+                sendClassIds: [1, 2],
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(200)
@@ -40,7 +41,7 @@ describe('test/controller/message.test.js', () => {
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(ret.message === '消息类型错误');
     });
 
@@ -56,13 +57,13 @@ describe('test/controller/message.test.js', () => {
             .httpRequest()
             .post('/messages')
             .send({
-                msg: { type: 3, text: '' },
+                msg: { type: 2, text: '' },
                 userIds: [{ userId: 1, roleId: 1 }],
                 sendSms: 0,
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(ret.message === '消息内容长度错误');
     });
 
@@ -78,13 +79,13 @@ describe('test/controller/message.test.js', () => {
             .httpRequest()
             .post('/messages')
             .send({
-                msg: { type: 3, text: '纯本文' },
+                msg: { type: 2, text: '纯本文' },
                 userIds: [{ userId: 1, roleId: 1 }],
                 sendSms: 3,
             })
             .set('Authorization', `Bearer ${token}`)
             .expect(400)
-            .then(res => res.body);
+            .then(res => JSON.parse(res.text));
         assert(ret.message === '参数错误');
     });
 
