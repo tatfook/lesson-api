@@ -498,7 +498,7 @@ class LessonOrgClassMemberService extends Service {
             );
         }
 
-        if (!params.roleId || params.roleId === member.roleId) {
+        if (!params.roleId || ~~params.roleId === member.roleId) {
             await this.destroyByCondition({ id });
         } else {
             await this.updateByCondition(
@@ -1307,6 +1307,58 @@ class LessonOrgClassMemberService extends Service {
             }
         );
         return { count: ret[1][0].count, rows: ret[0] };
+    }
+
+    async clearRoleFromClass(memberId, roleId, classId, organizationId) {
+        const members = await this.getAllByCondition({
+            organizationId,
+            memberId,
+        });
+
+        const target = _.find(members, o => o.classId === classId);
+
+        target.roleId = target.roleId & ~roleId;
+
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            // 查看在其他的班级还有没有此身份,没有的话要加到classId为0的记录中
+            const otherClassExists = _.find(
+                members,
+                o => o.classId !== classId && o.roleId & roleId
+            );
+            if (!otherClassExists) {
+                await this.ctx.model.LessonOrganizationClassMember.create(
+                    {
+                        classId: 0,
+                        memberId,
+                        organizationId,
+                        realname: target.realname,
+                        roleId,
+                        type: target.type,
+                        parentPhoneNum: target.parentPhoneNum,
+                        endTime: target.endTime,
+                    },
+                    { transaction }
+                );
+            }
+
+            if (target.roleId === 0) {
+                await this.ctx.model.LessonOrganizationClassMember.destroy({
+                    where: { id: target.id },
+                    transaction,
+                });
+            } else {
+                await this.ctx.model.LessonOrganizationClassMember.update(
+                    { roleId: target.roleId },
+                    { where: { id: target.id }, transaction }
+                );
+            }
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
+        }
     }
 }
 

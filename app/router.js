@@ -241,6 +241,10 @@ module.exports = app => {
         `${prefix}lessonOrganizationClassMembers/clearRoleFromOrg`,
         lessonOrganizationClassMember.clearRoleFromOrg
     );
+    router.post(
+        `${prefix}lessonOrganizationClassMembers/clearRoleFromClass`,
+        lessonOrganizationClassMember.clearRoleFromClass
+    );
     router.resources(
         `${prefix}lessonOrganizationClassMembers`,
         lessonOrganizationClassMember

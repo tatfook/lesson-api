@@ -9,6 +9,10 @@ const LessonOrganizationClassMember = class extends Controller {
         return 'LessonOrganizationClassMember';
     }
 
+    get validateRules() {
+        return this.app.validator.lessonOrganizationClassMember;
+    }
+
     // 获取教师列表
     async teacher() {
         const { ctx } = this;
@@ -205,6 +209,35 @@ const LessonOrganizationClassMember = class extends Controller {
 
         return this.ctx.helper.success({
             ctx: this.ctx,
+            status: 200,
+        });
+    }
+
+    // 从班级中删除某个用户的某个身份,但不丢失在机构中的身份
+    async clearRoleFromClass() {
+        const ctx = this.ctx;
+        const { roleId, organizationId } = this.authenticated();
+        if (!(roleId & CLASS_MEMBER_ROLE_ADMIN)) {
+            this.ctx.throw(403, Err.AUTH_ERR);
+        }
+
+        const { memberId, _roleId, classId } = this.getParams();
+
+        await ctx.validate(this.validateRules.clearRoleFromClass, {
+            memberId,
+            _roleId,
+            classId,
+        });
+
+        await ctx.service.lessonOrganizationClassMember.clearRoleFromClass(
+            memberId,
+            _roleId,
+            classId,
+            organizationId
+        );
+
+        return ctx.helper.success({
+            ctx,
             status: 200,
         });
     }
