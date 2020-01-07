@@ -1328,13 +1328,19 @@ class LessonOrgClassMemberService extends Service {
                 o => o.classId !== classId && o.roleId & roleId
             );
             if (!otherClassExists) {
-                await this.ctx.model.LessonOrganizationClassMember.create(
+                await this.ctx.model.LessonOrganizationClassMember.upsert(
                     {
                         classId: 0,
                         memberId,
                         organizationId,
                         realname: target.realname,
-                        roleId,
+                        roleId:
+                            roleId |
+                            (
+                                _.find(members, o => o.classId === 0) || {
+                                    roleId: 0,
+                                }
+                            ).roleId,
                         type: target.type,
                         parentPhoneNum: target.parentPhoneNum,
                         endTime: target.endTime,

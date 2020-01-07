@@ -289,7 +289,7 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
             });
         });
 
-        it.only('001', async () => {
+        it('001', async () => {
             const ctx = app.mockContext();
             await ctx.service.lessonOrganizationClassMember.clearRoleFromClass(
                 1,
@@ -308,7 +308,7 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
             assert(ret);
         });
 
-        it.only('002', async () => {
+        it('002', async () => {
             const ctx = app.mockContext();
             await ctx.service.lessonOrganizationClassMember.clearRoleFromClass(
                 1,
@@ -327,11 +327,17 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
             assert(ret);
         });
 
-        it.only('003', async () => {
+        it('003', async () => {
             await app.factory.create('LessonOrganizationClassMember', {
                 memberId: 2,
                 roleId: 2,
                 classId: 2,
+                organizationId: 2,
+            });
+            await app.model.LessonOrganizationClassMember.create({
+                memberId: 2,
+                roleId: 1,
+                classId: 0,
                 organizationId: 2,
             });
 
@@ -346,7 +352,7 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
             const ret1 = await ctx.model.LessonOrganizationClassMember.findOne({
                 where: {
                     memberId: 2,
-                    roleId: 2,
+                    roleId: 3,
                     classId: 0,
                 },
             });
