@@ -1,5 +1,8 @@
 'use strict';
-const { CLASS_MEMBER_ROLE_STUDENT, CLASS_MEMBER_ROLE_TEACHER } = require('../../common/consts');
+const {
+    CLASS_MEMBER_ROLE_STUDENT,
+    CLASS_MEMBER_ROLE_TEACHER,
+} = require('../../common/consts');
 module.exports = {
     type: 'object',
     properties: {
@@ -9,7 +12,7 @@ module.exports = {
         },
         _roleId: {
             type: 'number',
-            enum: [CLASS_MEMBER_ROLE_STUDENT, CLASS_MEMBER_ROLE_TEACHER],
+            enum: [ CLASS_MEMBER_ROLE_STUDENT, CLASS_MEMBER_ROLE_TEACHER ],
         },
         classId: {
             type: 'number',
