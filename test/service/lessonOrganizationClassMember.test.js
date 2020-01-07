@@ -278,4 +278,94 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
             assert(ret.roleId === 64);
         });
     });
+
+    describe('clearRoleFromClass', async () => {
+        beforeEach(async () => {
+            await app.factory.create('LessonOrganizationClassMember', {
+                memberId: 1,
+                roleId: 67,
+                classId: 1,
+                organizationId: 1,
+            });
+        });
+
+        it('001', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationClassMember.clearRoleFromClass(
+                1,
+                1,
+                1,
+                1
+            );
+
+            const ret = await ctx.model.LessonOrganizationClassMember.findOne({
+                where: {
+                    memberId: 1,
+                    roleId: 1,
+                    classId: 0,
+                },
+            });
+            assert(ret);
+        });
+
+        it('002', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationClassMember.clearRoleFromClass(
+                1,
+                2,
+                1,
+                1
+            );
+
+            const ret = await ctx.model.LessonOrganizationClassMember.findOne({
+                where: {
+                    memberId: 1,
+                    roleId: 2,
+                    classId: 0,
+                },
+            });
+            assert(ret);
+        });
+
+        it('003', async () => {
+            await app.factory.create('LessonOrganizationClassMember', {
+                memberId: 2,
+                roleId: 2,
+                classId: 2,
+                organizationId: 2,
+            });
+            await app.model.LessonOrganizationClassMember.create({
+                memberId: 2,
+                roleId: 1,
+                classId: 0,
+                organizationId: 2,
+            });
+
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationClassMember.clearRoleFromClass(
+                2,
+                2,
+                2,
+                2
+            );
+
+            const ret1 = await ctx.model.LessonOrganizationClassMember.findOne({
+                where: {
+                    memberId: 2,
+                    roleId: 3,
+                    classId: 0,
+                },
+            });
+            assert(ret1);
+
+            const ret2 = await ctx.model.LessonOrganizationClassMember.findOne({
+                where: {
+                    memberId: 2,
+                    roleId: 2,
+                    classId: 2,
+                },
+            });
+            assert(!ret2);
+        });
+    });
 });
