@@ -61,7 +61,7 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
             );
             assert(
                 ret.length === f.length &&
-                _.every(ret, o => o.lessonOrganizationClasses)
+                    _.every(ret, o => o.lessonOrganizationClasses)
             );
         });
     });
@@ -339,7 +339,7 @@ describe('test/service/lesssonOrganizationClassMember.test.js', async () => {
                 roleId: 1,
                 classId: 0,
                 organizationId: 2,
-            })
+            });
 
             const ctx = app.mockContext();
             await ctx.service.lessonOrganizationClassMember.clearRoleFromClass(
