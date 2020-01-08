@@ -685,7 +685,7 @@ class LessonOrgClassMemberService extends Service {
         try {
             transaction = await this.ctx.model.transaction();
 
-            const activeCodes = [];// 创建的激活码数据
+            const activeCodes = []; // 创建的激活码数据
 
             const endTime = _.min([
                 endTimeMap[type](),
@@ -1127,7 +1127,7 @@ class LessonOrgClassMemberService extends Service {
         try {
             transaction = await this.ctx.model.transaction();
 
-            const activeCodes = [];// 要创建的激活码
+            const activeCodes = []; // 要创建的激活码
 
             const endTime = _.min([
                 endTimeMap[type](),
