@@ -147,9 +147,17 @@ class LessonOrgActivateCodeService extends Service {
             ret.rows.reduce((p, c) => p.concat(c.classIds), [])
         );
 
-        const classes = await this.ctx.model.LessonOrganizationClass.findAll({
-            where: { id: { $in: classIds } },
-        });
+        // 管理员操作的激活码，没有记录username
+        const userIds = _.filter(ret.rows, o => o.username === null).map(r => r.activateUserId);
+
+        const [ classes, users ] = await Promise.all([
+            this.ctx.model.LessonOrganizationClass.findAll({
+                where: { id: { $in: classIds } },
+            }),
+            this.ctx.model.User.findAll({
+                where: { id: { $in: userIds } },
+            }),
+        ]);
 
         ret.rows.forEach(r => {
             r = r.get();
@@ -161,6 +169,7 @@ class LessonOrgActivateCodeService extends Service {
                     index > -1 ? classes[index] : {}
                 );
             });
+            r.username = r.username || (_.find(users, o => o.id === r.activateUserId) || {}).username;
             delete r.classIds;
         });
         return ret;
