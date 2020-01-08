@@ -233,7 +233,7 @@ describe('机构学生', () => {
             );
         });
 
-        it.only('001', async () => {
+        it('001', async () => {
             await app
                 .httpRequest()
                 .post('/lessonOrganizationClassMembers/clearRoleFromClass')
@@ -246,7 +246,7 @@ describe('机构学生', () => {
                 .expect(200);
         });
 
-        it.only('002', async () => {
+        it('002', async () => {
             await app
                 .httpRequest()
                 .post('/lessonOrganizationClassMembers/clearRoleFromClass')
@@ -258,7 +258,7 @@ describe('机构学生', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(422);
         });
-        it.only('003', async () => {
+        it('003', async () => {
             await app
                 .httpRequest()
                 .post('/lessonOrganizationClassMembers/clearRoleFromClass')
@@ -270,7 +270,7 @@ describe('机构学生', () => {
                 .set('Authorization', `Bearer ${token}`)
                 .expect(422);
         });
-        it.only('004', async () => {
+        it('004', async () => {
             await app
                 .httpRequest()
                 .post('/lessonOrganizationClassMembers/clearRoleFromClass')
@@ -283,7 +283,7 @@ describe('机构学生', () => {
                 .expect(422);
         });
 
-        it.only('005', async () => {
+        it('005', async () => {
             const token = await app.login({ roleId: 1 }).then(r => r.token);
             await app
                 .httpRequest()
