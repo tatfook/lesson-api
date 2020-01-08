@@ -148,7 +148,9 @@ class LessonOrgActivateCodeService extends Service {
         );
 
         // 管理员操作的激活码，没有记录username
-        const userIds = _.filter(ret.rows, o => o.username === null).map(r => r.activateUserId);
+        const userIds = _.filter(ret.rows, o => o.username === null).map(
+            r => r.activateUserId
+        );
 
         const [ classes, users ] = await Promise.all([
             this.ctx.model.LessonOrganizationClass.findAll({
@@ -169,7 +171,9 @@ class LessonOrgActivateCodeService extends Service {
                     index > -1 ? classes[index] : {}
                 );
             });
-            r.username = r.username || (_.find(users, o => o.id === r.activateUserId) || {}).username;
+            r.username =
+                r.username ||
+                (_.find(users, o => o.id === r.activateUserId) || {}).username;
             delete r.classIds;
         });
         return ret;
