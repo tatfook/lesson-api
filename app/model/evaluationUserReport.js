@@ -91,7 +91,7 @@ module.exports = app => {
     }) {
         let cond = '';
         if (isSend) cond += ' and ur.isSend =:isSend';
-        if (realname) cond += " and m.realname like concat('%',:realname,'%')";
+        if (realname) cond += " and (m.realname like concat('%',:realname,'%') or u.username like concat('%',:realname,'%'))";
 
         // 已点评名单sql
         const sql1 = `SELECT
@@ -100,23 +100,27 @@ module.exports = app => {
 		ur.createdAt,
 		ur.isSend,
 		ur.star,
-		m.realname,
+        m.realname,
+        u.username,
 		m.parentPhoneNum
 	  FROM
 		evaluationUserReports ur
 		LEFT JOIN evaluationReports r ON r.id = ur.reportId
 		LEFT JOIN lessonOrganizationClassMembers m
-		  ON ur.userId = m.memberId and m.roleId & 1 and m.classId = r.classId
+          ON ur.userId = m.memberId and m.roleId & 1 and m.classId = r.classId
+        LEFT JOIN users u on u.id = m.memberId
 	  WHERE ur.reportId = :reportId and m.id is not null ${cond}`;
 
         // 未点评名单sql
         const sql2 = `SELECT
 		m.memberId studentId,
-		m.realname
+        m.realname,
+        u.username
 	  FROM
 		lessonOrganizationClassMembers m
 		LEFT JOIN evaluationReports r ON m.classId = r.classId
-		LEFT JOIN evaluationUserReports ur ON m.memberId= ur.userId AND ur.reportId=r.id
+        LEFT JOIN evaluationUserReports ur ON m.memberId= ur.userId AND ur.reportId=r.id
+        LEFT JOIN users u on u.id = m.memberId
 		WHERE r.id =:reportId AND ur.id IS NULL AND m.roleId &1`;
 
         const sql = ~~status === 1 ? sql2 : sql1;

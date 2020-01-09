@@ -4,6 +4,7 @@ const Service = require('../common/service.js');
 const Err = require('../common/err');
 const moment = require('moment');
 const { EVA_REPO_TEMPLETID } = require('../common/consts');
+const _ = require('lodash');
 
 class EvalReportService extends Service {
     // 发起点评
@@ -174,6 +175,13 @@ class EvalReportService extends Service {
                 realname,
             }
         );
+        // 获取个人的项目数
+        const userIds = list.map(r => r.studentId);
+        const projects = await this.ctx.service.keepwork.getProjectCountByUserIds(userIds);
+        list.forEach(r => {
+            r.projectCount = (_.find(projects, o => o.userId === r.studentId) || { project: 0 }).project;
+        });
+
         return list;
     }
 
