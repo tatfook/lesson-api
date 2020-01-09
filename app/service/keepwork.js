@@ -138,6 +138,17 @@ class KeepworkService extends Service {
         );
         return ret;
     }
+
+    // 查找这些用户的项目数
+    async getProjectCountByUserIds(userIds) {
+        return await this.ctx.helper.curl(
+            'get',
+            `${this.baseUrl}lessons/userProjectCount`,
+            { userIds, apiKey },
+            {},
+            true
+        );
+    }
 }
 
 module.exports = KeepworkService;

@@ -141,11 +141,25 @@ describe('机构', () => {
     // });
 
     describe('修改机构', async () => {
+        beforeEach(async () => {
+            app.mockService(
+                'lessonOrganization',
+                'createAdminForOrganization',
+                () => 0
+            );
+        });
         it('001', async () => {
             await app
                 .httpRequest()
                 .put('/lessonOrganizations/' + organ.id)
                 .send({
+                    name: 'whatever',
+                    loginUrl: 'whatever',
+                    startDate: '2008-01-01',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
                     endDate: '2019-01-01',
                 })
                 .set('Authorization', `Bearer ${token}`)
@@ -160,12 +174,139 @@ describe('机构', () => {
             assert(moment(org.endDate).format('YYYY-MM-DD') === '2019-01-01');
         });
 
-        it('002 管理员修改', async () => {
+        it('002 缺失name', async () => {
+            await app
+                .httpRequest()
+                .put('/lessonOrganizations/' + organ.id)
+                .send({
+                    loginUrl: 'whatever',
+                    startDate: '2008-01-01',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('003 缺失loginUrl', async () => {
+            await app
+                .httpRequest()
+                .put('/lessonOrganizations/' + organ.id)
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('004 缺失startDate', async () => {
+            await app
+                .httpRequest()
+                .put('/lessonOrganizations/' + organ.id)
+                .send({
+                    name: 'whatever',
+                    loginUrl: 'whatever',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('005 缺失endDate', async () => {
+            await app
+                .httpRequest()
+                .put('/lessonOrganizations/' + organ.id)
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    loginUrl: 'whatever',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('006 缺失type', async () => {
+            await app
+                .httpRequest()
+                .put('/lessonOrganizations/' + organ.id)
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    loginUrl: 'whatever',
+                    visibility: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('007 缺失visibility', async () => {
+            await app
+                .httpRequest()
+                .put('/lessonOrganizations/' + organ.id)
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    type: 1,
+                    loginUrl: 'whatever',
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('008 缺失activateCodeLimit', async () => {
+            await app
+                .httpRequest()
+                .put('/lessonOrganizations/' + organ.id)
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    type: 1,
+                    visibility: 1,
+                    loginUrl: 'whatever',
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+        it('009 管理员修改', async () => {
             const token = await app.adminLogin().then(o => o.token);
             await app
                 .httpRequest()
                 .put('/lessonOrganizations/' + organ.id)
-                .send({ endDate: '2019-02-01' })
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    type: 1,
+                    visibility: 1,
+                    loginUrl: 'whatever',
+                    usernames: ['what'],
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    endDate: '2019-02-01',
+                })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
                 .then(res => res.body.data)
@@ -260,35 +401,153 @@ describe('机构', () => {
     //     });
     // });
 
-    // describe('创建机构', async () => {
-    //     let adminToken;
-    //     beforeEach(async () => {
-    //         adminToken = await app.adminLogin().then(o => o.token);
-    //         app.mockService('keepwork', 'getAllUserByCondition', () => [
-    //             { id: 1 },
-    //         ]);
-    //         app.mockService('keepwork', 'updateUser', () => 0);
-    //     });
-    //     it('001', async () => {
-    //         let organ = await app
-    //             .httpRequest()
-    //             .post('/lessonOrganizations')
-    //             .send({
-    //                 name: 'organ002',
-    //                 count: 1,
-    //                 usernames: ['qzb'],
-    //                 packages: [
-    //                     {
-    //                         packageId: 1,
-    //                         lessons: [{ lessonId: 1, lessonNo: 1 }],
-    //                     },
-    //                 ],
-    //             })
-    //             .set('Authorization', `Bearer ${adminToken}`)
-    //             .expect(200)
-    //             .then(res => res.body);
-    //     });
-    // });
+    describe('创建机构', async () => {
+        let adminToken;
+        beforeEach(async () => {
+            adminToken = await app.adminLogin().then(o => o.token);
+            app.mockService('keepwork', 'getAllUserByCondition', () => [
+                { id: 1 },
+            ]);
+            app.mockService('keepwork', 'updateUser', () => 0);
+        });
+        it('001', async () => {
+            let organ = await app
+                .httpRequest()
+                .post('/lessonOrganizations')
+                .send({
+                    name: 'whatever',
+                    loginUrl: 'whatever',
+                    startDate: '2008-01-01',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${adminToken}`)
+                .expect(200)
+                .then(res => res.body);
+        });
+
+        it('002 缺失name', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizations')
+                .send({
+                    loginUrl: 'whatever',
+                    startDate: '2008-01-01',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('003 缺失loginUrl', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizations')
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('004 缺失startDate', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizations')
+                .send({
+                    name: 'whatever',
+                    loginUrl: 'whatever',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('005 缺失endDate', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizations')
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    loginUrl: 'whatever',
+                    visibility: 1,
+                    type: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('006 缺失type', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizations')
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    loginUrl: 'whatever',
+                    visibility: 1,
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('007 缺失visibility', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizations')
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    type: 1,
+                    loginUrl: 'whatever',
+                    activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('008 缺失activateCodeLimit', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizations')
+                .send({
+                    name: 'whatever',
+                    startDate: '2008-01-01',
+                    type: 1,
+                    visibility: 1,
+                    loginUrl: 'whatever',
+                    usernames: ['what'],
+                    endDate: '2019-01-01',
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+    });
 
     // describe('查询课程包', async () => {
     //     it('001', async () => {
