@@ -146,7 +146,8 @@ class KeepworkService extends Service {
             `${this.baseUrl}lessons/userProjectCount`,
             { userIds, apiKey },
             {},
-            true);
+            true
+        );
     }
 }
 

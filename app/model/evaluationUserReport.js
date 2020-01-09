@@ -91,7 +91,10 @@ module.exports = app => {
     }) {
         let cond = '';
         if (isSend) cond += ' and ur.isSend =:isSend';
-        if (realname) cond += " and (m.realname like concat('%',:realname,'%') or u.username like concat('%',:realname,'%'))";
+        if (realname) {
+            cond +=
+                " and (m.realname like concat('%',:realname,'%') or u.username like concat('%',:realname,'%'))";
+        }
 
         // 已点评名单sql
         const sql1 = `SELECT

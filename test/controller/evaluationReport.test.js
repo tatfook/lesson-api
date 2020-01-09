@@ -53,7 +53,7 @@ describe('test/controller/evaluationReport.test.js', () => {
             realname: '什么学生3',
         });
 
-        app.mockService('keepwork','getProjectCountByUserIds',()=>[{}]);
+        app.mockService('keepwork', 'getProjectCountByUserIds', () => [{}]);
     });
 
     it('001 发起点评 应该成功', async () => {

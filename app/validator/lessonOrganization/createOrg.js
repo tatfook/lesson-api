@@ -6,50 +6,46 @@ module.exports = {
         activateCodeLimit: {
             type: 'object',
             properties: {
-			  	type5: {
+                type5: {
                     type: 'number',
-			  	},
-			  	type6: {
+                },
+                type6: {
                     type: 'number',
-			  	},
-			  	type7: {
+                },
+                type7: {
                     type: 'number',
-			  	},
+                },
             },
-            required: [
-			  'type5',
-			  'type6',
-			  'type7',
-            ],
+            required: [ 'type5', 'type6', 'type7' ],
         },
-		  usernames: {
+        usernames: {
             type: 'array',
             items: {
-			  type: 'string',
+                type: 'string',
             },
-		  },
-		  name: {
+        },
+        name: {
             type: 'string',
-		  },
-		  loginUrl: {
+        },
+        loginUrl: {
             type: 'string',
-		  },
-		  startDate: {
+        },
+        startDate: {
             type: 'string',
-		  },
-		  endDate: {
+        },
+        endDate: {
             type: 'string',
-		  },
-		  visibility: {
+        },
+        visibility: {
             type: 'number',
-		  },
-		  privilege: {
+        },
+        privilege: {
             type: 'number',
-		  },
-		  type: {
+        },
+        type: {
             type: 'string',
             description: '1.试用  2.正式',
-		  },
+        },
     },
     required: [
         'type',

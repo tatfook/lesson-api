@@ -12,7 +12,7 @@ module.exports = {
                     defaultValue: 1,
                 },
                 { transaction: t }
-            )
+            );
         });
     },
 
@@ -20,7 +20,7 @@ module.exports = {
         return queryInterface.sequelize.transaction(async t => {
             queryInterface.removeColumn('lessonOrganizations', 'type', {
                 transaction: t,
-            })
+            });
         });
     },
 };

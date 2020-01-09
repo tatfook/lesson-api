@@ -1,86 +1,81 @@
-
 'use strict';
 
 module.exports = {
     type: 'object',
     properties: {
-	  id: {
+        id: {
             type: 'number',
-	  },
-	  name: {
+        },
+        name: {
             type: 'string',
-	  },
-	  logo: {
+        },
+        logo: {
             type: 'null',
-	  },
-	  email: {
+        },
+        email: {
             type: 'null',
-	  },
-	  cellphone: {
+        },
+        cellphone: {
             type: 'null',
-	  },
-	  loginUrl: {
+        },
+        loginUrl: {
             type: 'string',
-	  },
-	  startDate: {
+        },
+        startDate: {
             type: 'string',
-	  },
-	  endDate: {
+        },
+        endDate: {
             type: 'string',
-	  },
-	  location: {
+        },
+        location: {
             type: 'string',
-	  },
-	  visibility: {
+        },
+        visibility: {
             type: 'number',
-	  },
-	  type: {
+        },
+        type: {
             type: 'number',
             description: '1.试用 2.正式',
             minimum: 1,
             maximum: 2,
-	  },
-	  activateCodeLimit: {
+        },
+        activateCodeLimit: {
             type: 'object',
             properties: {
-		  type5: {
+                type5: {
                     type: 'number',
-		  },
-		  type6: {
+                },
+                type6: {
                     type: 'number',
-		  },
-		  type7: {
+                },
+                type7: {
                     type: 'number',
-		  },
+                },
             },
-            required: [
-		  'type5',
-		  'type6',
-		  'type7',
-            ],
-	  },
-	  usernames: {
+            required: [ 'type5', 'type6', 'type7' ],
+        },
+        usernames: {
             type: 'array',
             items: {
-		  type: 'string',
+                type: 'string',
             },
-	  },
-	  packages: {
+        },
+        packages: {
             type: 'array',
             items: {
-		  type: 'string',
+                type: 'string',
             },
-	  },
+        },
     },
     required: [
-	  'visibility',
-	  'startDate',
-	  'endDate',
-	  'id',
-	  'name',
-	  'loginUrl',
-	  'activateCodeLimit',
-	  'usernames',
-	  'type',
+        'visibility',
+        'startDate',
+        'endDate',
+        'id',
+        'name',
+        'loginUrl',
+        'activateCodeLimit',
+        'usernames',
+        'type',
     ],
 };

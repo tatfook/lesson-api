@@ -177,9 +177,15 @@ class EvalReportService extends Service {
         );
         // 获取个人的项目数
         const userIds = list.map(r => r.studentId);
-        const projects = await this.ctx.service.keepwork.getProjectCountByUserIds(userIds);
+        const projects = await this.ctx.service.keepwork.getProjectCountByUserIds(
+            userIds
+        );
         list.forEach(r => {
-            r.projectCount = (_.find(projects, o => o.userId === r.studentId) || { project: 0 }).project;
+            r.projectCount = (
+                _.find(projects, o => o.userId === r.studentId) || {
+                    project: 0,
+                }
+            ).project;
         });
 
         return list;
