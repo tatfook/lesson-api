@@ -10,13 +10,13 @@ module.exports = {
             type: 'string',
         },
         logo: {
-            type: 'null',
+            type: 'string',
         },
         email: {
-            type: 'null',
+            type: 'string',
         },
         cellphone: {
-            type: 'null',
+            type: 'string',
         },
         loginUrl: {
             type: 'string',
@@ -63,7 +63,25 @@ module.exports = {
         packages: {
             type: 'array',
             items: {
-                type: 'string',
+                type: 'object',
+                properties: {
+                    packageId: {
+                        type: 'number',
+                    },
+                    lessons: {
+                        type: 'object',
+                        properties: {
+                            lessonId: {
+                                type: 'number',
+                                minimum: 1,
+                            },
+                            lessonNo: {
+                                type: 'number',
+                                minimum: 1,
+                            },
+                        },
+                    },
+                },
             },
         },
     },
