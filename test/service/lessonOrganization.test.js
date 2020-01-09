@@ -396,41 +396,48 @@ describe('test/service/lessonOrganization.test.js', async () => {
         });
     });
 
-    describe('batchAddPackagesToOrg',async()=>{
-        beforeEach(async()=>{
-            const pkgs = [{
-                organizationId:1,
-                classId:0,
-                packageId:1
-            },
-            {
-                organizationId:2,
-                classId:0,
-                packageId:1
-            }];
+    describe('batchAddPackagesToOrg', async () => {
+        beforeEach(async () => {
+            const pkgs = [
+                {
+                    organizationId: 1,
+                    classId: 0,
+                    packageId: 1,
+                },
+                {
+                    organizationId: 2,
+                    classId: 0,
+                    packageId: 1,
+                },
+            ];
             await app.model.LessonOrganizationPackage.bulkCreate(pkgs);
         });
 
-        it('001',async()=>{
+        it('001', async () => {
             const ctx = app.mockContext();
             await ctx.service.lessonOrganization.batchAddPackagesToOrg(
-                [1,2],
-                [{
-                    packageId:1,
-                    lessons:[{
-                        lessonId:1,
-                        lessonNo:1
-                    }]
-                }]
+                [1, 2],
+                [
+                    {
+                        packageId: 1,
+                        lessons: [
+                            {
+                                lessonId: 1,
+                                lessonNo: 1,
+                            },
+                        ],
+                    },
+                ]
             );
-            const ret =  await app.model.LessonOrganizationPackage.findOne({
-                where:{
-                    organizationId:1,
-                    classId:0,
-                    packageId:1
-                }});
+            const ret = await app.model.LessonOrganizationPackage.findOne({
+                where: {
+                    organizationId: 1,
+                    classId: 0,
+                    packageId: 1,
+                },
+            });
 
-               assert(ret.get().lessons.length ===1);
+            assert(ret.get().lessons.length === 1);
         });
     });
 });

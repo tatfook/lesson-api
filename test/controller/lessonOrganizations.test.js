@@ -549,96 +549,115 @@ describe('机构', () => {
         });
     });
 
-    describe('给机构批量添加课程包',async()=>{
-        beforeEach(async()=>{
-            const pkgs = [{
-                organizationId:1,
-                classId:0,
-                packageId:1
-            },
-            {
-                organizationId:2,
-                classId:0,
-                packageId:1
-            }];
+    describe('给机构批量添加课程包', async () => {
+        beforeEach(async () => {
+            const pkgs = [
+                {
+                    organizationId: 1,
+                    classId: 0,
+                    packageId: 1,
+                },
+                {
+                    organizationId: 2,
+                    classId: 0,
+                    packageId: 1,
+                },
+            ];
             await app.model.LessonOrganizationPackage.bulkCreate(pkgs);
         });
-        it('001',async()=>{
+        it('001', async () => {
             await app
                 .httpRequest()
                 .post('/lessonOrganizations/packagesToOrg')
                 .send({
-                    organizationIds:[1,2],
-                    packages:[{
-                        packageId:1,
-                        lessons:[{
-                            lessonId:1,
-                            lessonNo:1
-                        }]
-                    }]
+                    organizationIds: [1, 2],
+                    packages: [
+                        {
+                            packageId: 1,
+                            lessons: [
+                                {
+                                    lessonId: 1,
+                                    lessonNo: 1,
+                                },
+                            ],
+                        },
+                    ],
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200);
 
-           const ret =  await app.model.LessonOrganizationPackage.findOne({
-                where:{
-                    organizationId:1,
-                    classId:0,
-                    packageId:1
-                }});
+            const ret = await app.model.LessonOrganizationPackage.findOne({
+                where: {
+                    organizationId: 1,
+                    classId: 0,
+                    packageId: 1,
+                },
+            });
 
-               assert(ret.get().lessons.length ===1);
+            assert(ret.get().lessons.length === 1);
         });
 
-        it('002 organizationId错误',async()=>{
+        it('002 organizationId错误', async () => {
             await app
                 .httpRequest()
                 .post('/lessonOrganizations/packagesToOrg')
                 .send({
-                    organizationIds:[0,2],
-                    packages:[{
-                        packageId:1,
-                        lessons:[{
-                            lessonId:1,
-                            lessonNo:1
-                        }]
-                    }]
+                    organizationIds: [0, 2],
+                    packages: [
+                        {
+                            packageId: 1,
+                            lessons: [
+                                {
+                                    lessonId: 1,
+                                    lessonNo: 1,
+                                },
+                            ],
+                        },
+                    ],
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(422);
         });
 
-        it('003 packages错误',async()=>{
+        it('003 packages错误', async () => {
             await app
                 .httpRequest()
                 .post('/lessonOrganizations/packagesToOrg')
                 .send({
-                    organizationIds:[1,2],
-                    packages:[{
-                        packageId:0,
-                        lessons:[{
-                            lessonId:1,
-                            lessonNo:1
-                        }]
-                    }]
+                    organizationIds: [1, 2],
+                    packages: [
+                        {
+                            packageId: 0,
+                            lessons: [
+                                {
+                                    lessonId: 1,
+                                    lessonNo: 1,
+                                },
+                            ],
+                        },
+                    ],
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(422);
         });
 
-        it('004 lessons错误',async()=>{
+        it('004 lessons错误', async () => {
             await app
                 .httpRequest()
                 .post('/lessonOrganizations/packagesToOrg')
                 .send({
-                    organizationIds:[1,2],
-                    packages:[{
-                        packageId:1,
-                        lessons:[{
-                            lessonId:0,
-                            lessonNo:1
-                        }]
-                    }]
+                    organizationIds: [1, 2],
+                    packages: [
+                        {
+                            packageId: 1,
+                            lessons: [
+                                {
+                                    lessonId: 0,
+                                    lessonNo: 1,
+                                },
+                            ],
+                        },
+                    ],
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(422);

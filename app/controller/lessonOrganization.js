@@ -451,10 +451,14 @@ const LessonOrganization = class extends Controller {
         const { organizationIds, packages } = this.getParams();
 
         await ctx.validate(this.validateRules.batchAddPackagesToOrg, {
-            organizationIds, packages,
+            organizationIds,
+            packages,
         });
 
-        await ctx.service.lessonOrganization.batchAddPackagesToOrg(organizationIds, packages);
+        await ctx.service.lessonOrganization.batchAddPackagesToOrg(
+            organizationIds,
+            packages
+        );
         return ctx.helper.success({ ctx, status: 200 });
     }
 };
