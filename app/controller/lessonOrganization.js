@@ -442,6 +442,21 @@ const LessonOrganization = class extends Controller {
 
         return ctx.helper.success({ ctx, status: 200, res: list });
     }
+
+    // 给机构批量添加课程包
+    async batchAddPackagesToOrg() {
+        const ctx = this.ctx;
+        this.adminAuthenticated();
+
+        const { organizationIds, packages } = this.getParams();
+
+        await ctx.validate(this.validateRules.batchAddPackagesToOrg, {
+            organizationIds, packages,
+        });
+
+        await ctx.service.lessonOrganization.batchAddPackagesToOrg(organizationIds, packages);
+        return ctx.helper.success({ ctx, status: 200 });
+    }
 };
 
 module.exports = LessonOrganization;

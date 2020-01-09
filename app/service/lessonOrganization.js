@@ -515,6 +515,31 @@ class LessonOrgService extends Service {
             organizationIds
         );
     }
+
+    // 给机构批量添加课程包
+    async batchAddPackagesToOrg(organizationIds, packages) {
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            for (let i = 0; i < organizationIds.length; i++) {
+                const p = _.map(packages, pkg => ({
+                    organizationId: organizationIds[i],
+                    classId: 0,
+                    packageId: pkg.packageId,
+                    lessons: pkg.lessons,
+                }));
+                await this.ctx.model.LessonOrganizationPackage.bulkCreate(p, {
+                    updateOnDuplicate: true,
+                    transaction,
+                });
+            }
+
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
+        }
+    }
 }
 
 module.exports = LessonOrgService;

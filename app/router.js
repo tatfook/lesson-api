@@ -175,6 +175,10 @@ module.exports = app => {
         `${prefix}lessonOrganizations/search`,
         lessonOrganization.search
     );
+    router.post(
+        `${prefix}lessonOrganizations/packagesToOrg`,
+        lessonOrganization.batchAddPackagesToOrg
+    );
     router.resources(`${prefix}lessonOrganizations`, lessonOrganization);
 
     // organization class
