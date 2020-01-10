@@ -66,15 +66,18 @@ module.exports = {
                         type: 'number',
                     },
                     lessons: {
-                        type: 'object',
-                        properties: {
-                            lessonId: {
-                                type: 'number',
-                                minimum: 1,
-                            },
-                            lessonNo: {
-                                type: 'number',
-                                minimum: 1,
+                        type: 'array',
+                        items: {
+                            type: 'object',
+                            properties: {
+                                lessonId: {
+                                    type: 'number',
+                                    minimum: 1,
+                                },
+                                lessonNo: {
+                                    type: 'number',
+                                    minimum: 1,
+                                },
                             },
                         },
                     },
