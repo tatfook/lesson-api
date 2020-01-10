@@ -3,6 +3,39 @@
 module.exports = {
     type: 'object',
     properties: {
+        name: {
+            type: 'string',
+        },
+        logo: {
+            type: 'string',
+        },
+        email: {
+            type: 'string',
+        },
+        cellphone: {
+            type: 'string',
+        },
+        loginUrl: {
+            type: 'string',
+        },
+        startDate: {
+            type: 'string',
+        },
+        endDate: {
+            type: 'string',
+        },
+        location: {
+            type: 'string',
+        },
+        visibility: {
+            type: 'number',
+        },
+        type: {
+            type: 'number',
+            description: '1.试用 2.正式',
+            minimum: 1,
+            maximum: 2,
+        },
         activateCodeLimit: {
             type: 'object',
             properties: {
@@ -16,7 +49,11 @@ module.exports = {
                     type: 'number',
                 },
             },
-            required: [ 'type5', 'type6', 'type7' ],
+            required: [
+                'type5',
+                'type6',
+                'type7',
+            ],
         },
         usernames: {
             type: 'array',
@@ -24,37 +61,39 @@ module.exports = {
                 type: 'string',
             },
         },
-        name: {
-            type: 'string',
-        },
-        loginUrl: {
-            type: 'string',
-        },
-        startDate: {
-            type: 'string',
-        },
-        endDate: {
-            type: 'string',
-        },
-        visibility: {
-            type: 'number',
-        },
-        privilege: {
-            type: 'number',
-        },
-        type: {
-            type: 'string',
-            description: '1.试用  2.正式',
+        packages: {
+            type: 'array',
+            items: {
+                type: 'object',
+                properties: {
+                    packageId: {
+                        type: 'number',
+                    },
+                    lessons: {
+                        type: 'object',
+                        properties: {
+                            lessonId: {
+                                type: 'number',
+                                minimum: 1,
+                            },
+                            lessonNo: {
+                                type: 'number',
+                                minimum: 1,
+                            },
+                        },
+                    },
+                },
+            },
         },
     },
     required: [
-        'type',
+        'visibility',
         'startDate',
         'endDate',
-        'loginUrl',
         'name',
-        'usernames',
+        'loginUrl',
         'activateCodeLimit',
-        'visibility',
+        'usernames',
+        'type',
     ],
 };
