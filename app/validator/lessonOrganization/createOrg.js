@@ -49,11 +49,7 @@ module.exports = {
                     type: 'number',
                 },
             },
-            required: [
-                'type5',
-                'type6',
-                'type7',
-            ],
+            required: [ 'type5', 'type6', 'type7' ],
         },
         usernames: {
             type: 'array',
