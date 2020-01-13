@@ -11,7 +11,9 @@ const CoreApi = class extends Controller {
     async createRegisterMsg() {
         const ctx = this.ctx;
         const { user, apiKey } = this.validate();
-        if (apiKey !== this.CoreApiKey) { return this.ctx.throw(400, Err.AUTH_ERR); }
+        if (apiKey !== this.CoreApiKey) {
+            return this.ctx.throw(400, Err.AUTH_ERR);
+        }
 
         await this.ctx.service.message.createRegisterMsg(user);
 
@@ -22,7 +24,9 @@ const CoreApi = class extends Controller {
         const ctx = this.ctx;
         const { id, username, apiKey } = this.validate();
 
-        if (apiKey !== this.CoreApiKey) { return this.ctx.throw(400, Err.AUTH_ERR); }
+        if (apiKey !== this.CoreApiKey) {
+            return this.ctx.throw(400, Err.AUTH_ERR);
+        }
 
         await this.ctx.service.user.getByIdOrCreate(id, username);
         return this.ctx.helper.success({ ctx, status: 200, res: 'OK' });
@@ -32,7 +36,9 @@ const CoreApi = class extends Controller {
         const ctx = this.ctx;
         let { condition, apiKey } = this.validate();
 
-        if (apiKey !== this.CoreApiKey) { return this.ctx.throw(400, Err.AUTH_ERR); }
+        if (apiKey !== this.CoreApiKey) {
+            return this.ctx.throw(400, Err.AUTH_ERR);
+        }
 
         try {
             condition =
