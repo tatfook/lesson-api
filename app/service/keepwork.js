@@ -2,13 +2,15 @@
 
 const Service = require('../common/service.js');
 const Err = require('../common/err');
-const apiKey = require('../common/consts').API_KEY;
 /**
  * 这个类负责和keepwork那边做交互
  */
 class KeepworkService extends Service {
     get baseUrl() {
         return this.config.self.coreServiceBaseUrl;
+    }
+    get apiKey() {
+        return this.config.self.INTERNAL_API_KEY;
     }
 
     /**
@@ -43,7 +45,7 @@ class KeepworkService extends Service {
         const list = await this.ctx.helper.curl(
             'get',
             `${this.baseUrl}lessons/projects`,
-            Object.assign({ condition }, { order, apiKey }),
+            Object.assign({ condition }, { order, apiKey: this.apiKey }),
             {},
             true
         );
@@ -55,7 +57,7 @@ class KeepworkService extends Service {
         const ret = await this.ctx.helper.curl(
             'get',
             `${this.baseUrl}lessons/userdatas`,
-            { id: userId, apiKey }
+            { id: userId, apiKey: this.apiKey }
         );
         return ret;
     }
@@ -65,7 +67,7 @@ class KeepworkService extends Service {
         const ret = await this.ctx.helper.curl(
             'post',
             `${this.baseUrl}lessons/userdatas`,
-            Object.assign({ id: userId, apiKey }, data)
+            Object.assign({ id: userId, apiKey: this.apiKey }, data)
         );
         return ret;
     }
@@ -75,7 +77,7 @@ class KeepworkService extends Service {
         const ret = await this.ctx.helper.curl(
             'put',
             `${this.baseUrl}lessons/update`,
-            { condition, params, apiKey }
+            { condition, params, apiKey: this.apiKey }
         );
         return ret;
     }
@@ -84,7 +86,7 @@ class KeepworkService extends Service {
         const ret = await this.ctx.helper.curl(
             'get',
             `${this.baseUrl}lessons/accountsAndRoles`,
-            { userId, apiKey }
+            { userId, apiKey: this.apiKey }
         );
         return ret;
     }
@@ -94,7 +96,7 @@ class KeepworkService extends Service {
         const ret = await this.ctx.helper.curl(
             'put',
             `${this.baseUrl}lessons/accountsIncrement`,
-            { incrementObj, userId, apiKey }
+            { incrementObj, userId, apiKey: this.apiKey }
         );
         return ret;
     }
@@ -104,7 +106,7 @@ class KeepworkService extends Service {
         const ret = await this.ctx.helper.curl(
             'get',
             `${this.baseUrl}lessons/accounts`,
-            { userId, apiKey }
+            { userId, apiKey: this.apiKey }
         );
         return ret;
     }
@@ -114,7 +116,7 @@ class KeepworkService extends Service {
         const ret = await this.ctx.helper.curl(
             'post',
             `${this.baseUrl}lessons/createRecord`,
-            { params, apiKey }
+            { params, apiKey: this.apiKey }
         );
         return ret;
     }
@@ -124,7 +126,7 @@ class KeepworkService extends Service {
         const ret = await this.ctx.helper.curl(
             'post',
             `${this.baseUrl}lessons/truncate`,
-            { params, apiKey }
+            { params, apiKey: this.apiKey }
         );
         return ret;
     }
@@ -134,7 +136,7 @@ class KeepworkService extends Service {
         const ret = await this.ctx.helper.curl(
             'put',
             `${this.baseUrl}lessons/users/${userId}`,
-            { params, apiKey }
+            { params, apiKey: this.apiKey }
         );
         return ret;
     }
@@ -144,7 +146,7 @@ class KeepworkService extends Service {
         return await this.ctx.helper.curl(
             'get',
             `${this.baseUrl}lessons/userProjectCount`,
-            { userIds, apiKey },
+            { userIds, apiKey: this.apiKey },
             {},
             true
         );
