@@ -4,14 +4,14 @@ const Controller = require('./baseController.js');
 const Err = require('../common/err');
 
 const CoreApi = class extends Controller {
-    get CoreApiKey() {
-        return this.app.config.self.INTERNAL_API_KEY;
+    get checkApiKey() {
+        return this.app.config.self.INTERNAL_API_KEY === this.ctx.request.headers['x-api-key'];
     }
     // 创建注册消息
     async createRegisterMsg() {
         const ctx = this.ctx;
-        const { user, apiKey } = this.validate();
-        if (apiKey !== this.CoreApiKey) {
+        const { user } = this.validate();
+        if (!this.checkApiKey) {
             return this.ctx.throw(400, Err.AUTH_ERR);
         }
 
@@ -22,9 +22,9 @@ const CoreApi = class extends Controller {
 
     async createUser() {
         const ctx = this.ctx;
-        const { id, username, apiKey } = this.validate();
+        const { id, username } = this.validate();
 
-        if (apiKey !== this.CoreApiKey) {
+        if (!this.checkApiKey) {
             return this.ctx.throw(400, Err.AUTH_ERR);
         }
 
@@ -34,9 +34,9 @@ const CoreApi = class extends Controller {
 
     async getPackagesAndLessonCount() {
         const ctx = this.ctx;
-        let { condition, apiKey } = this.validate();
+        let { condition } = this.validate();
 
-        if (apiKey !== this.CoreApiKey) {
+        if (!this.checkApiKey) {
             return this.ctx.throw(400, Err.AUTH_ERR);
         }
 
