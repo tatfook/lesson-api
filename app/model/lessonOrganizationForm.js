@@ -32,28 +32,33 @@ module.exports = app => {
                 defaultValue: 0,
             },
 
-            type: { // about to remove
+            type: {
+                // about to remove
                 // 0 - 空白模板 1 - 招生通知 2 - 入学作品提交通知 3 - 报名表  4 - 入选学员通知
                 type: INTEGER,
                 defaultValue: 0,
             },
 
-            name: { // 名称
+            name: {
+                // 名称
                 type: STRING,
                 defaultValue: '',
             },
 
-            title: { // 标题
+            title: {
+                // 标题
                 type: STRING,
                 defaultValue: '',
             },
 
-            description: { // 描述
+            description: {
+                // 描述
                 type: STRING(ONEK),
                 defaultValue: '',
             },
 
-            text: { // about to remove
+            text: {
+                // about to remove
                 type: TEXT,
             },
 
