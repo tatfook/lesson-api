@@ -58,6 +58,8 @@ describe('test/service/evaluationReport.test.js', () => {
             type: 1,
             classId: 1,
         });
+
+        app.mockService('keepwork', 'getProjectCountByUserIds', () => [{}]);
     });
 
     it('001 createEvalReport 创建点评记录 应该成功', async () => {

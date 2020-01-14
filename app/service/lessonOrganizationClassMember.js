@@ -498,7 +498,7 @@ class LessonOrgClassMemberService extends Service {
             );
         }
 
-        if (!params.roleId || params.roleId === member.roleId) {
+        if (!params.roleId || ~~params.roleId === member.roleId) {
             await this.destroyByCondition({ id });
         } else {
             await this.updateByCondition(
@@ -679,33 +679,13 @@ class LessonOrgClassMemberService extends Service {
             this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED);
         }
 
-        // 激活码数据,状态是已激活
-        const datas = [];
         const currTime = new Date();
-        for (let i = 0; i < userIds.length; i++) {
-            datas.push({
-                organizationId,
-                classIds,
-                type,
-                state: 1,
-                activateUserId: userIds[i],
-                activateTime: currTime,
-                key: `${
-                    classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
-                name: '',
-            });
-        }
-
         // 事务操作
         let transaction;
         try {
             transaction = await this.ctx.model.transaction();
-            // 创建激活码
-            await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(
-                datas,
-                { transaction }
-            );
+
+            const activeCodes = []; // 创建的激活码数据
 
             const endTime = _.min([
                 endTimeMap[type](),
@@ -724,6 +704,20 @@ class LessonOrgClassMemberService extends Service {
                     realname = members[index].realname;
                     parentPhoneNum = members[index].parentPhoneNum;
                 }
+                activeCodes.push({
+                    organizationId,
+                    classIds,
+                    type,
+                    state: 1, // 状态是已激活
+                    activateUserId: userIds[i],
+                    activateTime: currTime,
+                    key: `${
+                        classIds ? classIds.reduce((p, c) => p + c, '') : ''
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    name: '',
+                    realname,
+                });
+
                 if (classIds.length) {
                     for (let j = 0; j < classIds.length; j++) {
                         const obj = {
@@ -807,6 +801,12 @@ class LessonOrgClassMemberService extends Service {
                     }
                 }
             }
+
+            // 创建激活码
+            await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(
+                activeCodes,
+                { transaction }
+            );
 
             // 把之前的试用身份都删了，然后再创建
             await this.ctx.model.LessonOrganizationClassMember.destroy({
@@ -899,32 +899,12 @@ class LessonOrgClassMemberService extends Service {
             this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED);
         }
 
-        // 激活码数据,状态是已激活
-        const datas = [];
-        for (let i = 0; i < userIds.length; i++) {
-            datas.push({
-                organizationId,
-                classIds,
-                type,
-                state: 1,
-                activateUserId: userIds[i],
-                activateTime: currTime,
-                key: `${
-                    classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
-                name: '',
-            });
-        }
-
         // 事务操作
         let transaction;
         try {
             transaction = await this.ctx.model.transaction();
-            // 创建激活码
-            await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(
-                datas,
-                { transaction }
-            );
+
+            const activeCodes = []; // 要创建的激活码
 
             // 创建成员
             const objs = [];
@@ -945,6 +925,20 @@ class LessonOrgClassMemberService extends Service {
                     endTimeMap[type](oldEndTime),
                     moment(org.endDate).format('YYYY-MM-DD'),
                 ]);
+
+                activeCodes.push({
+                    organizationId,
+                    classIds,
+                    type,
+                    state: 1,
+                    activateUserId: userIds[i],
+                    activateTime: currTime,
+                    key: `${
+                        classIds ? classIds.reduce((p, c) => p + c, '') : ''
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    name: '',
+                    realname,
+                });
 
                 if (classIds.length) {
                     for (let j = 0; j < classIds.length; j++) {
@@ -1030,6 +1024,12 @@ class LessonOrgClassMemberService extends Service {
                     }
                 }
             }
+
+            // 创建激活码
+            await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(
+                activeCodes,
+                { transaction }
+            );
 
             // 把之前的都删了，然后再创建
             await this.ctx.model.LessonOrganizationClassMember.destroy({
@@ -1122,32 +1122,12 @@ class LessonOrgClassMemberService extends Service {
             this.ctx.throw(403, Err.ACTIVATE_CODE_UPPERLIMITED);
         }
 
-        // 激活码数据,状态是已激活
-        const datas = [];
-        for (let i = 0; i < userIds.length; i++) {
-            datas.push({
-                organizationId,
-                classIds,
-                type,
-                state: 1,
-                activateUserId: userIds[i],
-                activateTime: currTime,
-                key: `${
-                    classIds ? classIds.reduce((p, c) => p + c, '') : ''
-                }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
-                name: '',
-            });
-        }
-
         // 事务操作
         let transaction;
         try {
             transaction = await this.ctx.model.transaction();
-            // 创建激活码
-            await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(
-                datas,
-                { transaction }
-            );
+
+            const activeCodes = []; // 要创建的激活码
 
             const endTime = _.min([
                 endTimeMap[type](),
@@ -1166,6 +1146,21 @@ class LessonOrgClassMemberService extends Service {
                     realname = members[index].realname;
                     parentPhoneNum = members[index].parentPhoneNum;
                 }
+
+                activeCodes.push({
+                    organizationId,
+                    classIds,
+                    type,
+                    state: 1,
+                    activateUserId: userIds[i],
+                    activateTime: currTime,
+                    key: `${
+                        classIds ? classIds.reduce((p, c) => p + c, '') : ''
+                    }${i}${currTime.getTime()}${_.random(TEN, NINTYNINE)}`,
+                    name: '',
+                    realname,
+                });
+
                 if (classIds.length) {
                     for (let j = 0; j < classIds.length; j++) {
                         const obj = {
@@ -1249,6 +1244,13 @@ class LessonOrgClassMemberService extends Service {
                     }
                 }
             }
+
+            // 创建激活码
+            await this.ctx.model.LessonOrganizationActivateCode.bulkCreate(
+                activeCodes,
+                { transaction }
+            );
+
             // 把之前的都删了，然后再创建
             await this.ctx.model.LessonOrganizationClassMember.destroy({
                 where: {
@@ -1307,6 +1309,64 @@ class LessonOrgClassMemberService extends Service {
             }
         );
         return { count: ret[1][0].count, rows: ret[0] };
+    }
+
+    async clearRoleFromClass(memberId, roleId, classId, organizationId) {
+        const members = await this.getAllByCondition({
+            organizationId,
+            memberId,
+        });
+
+        const target = _.find(members, o => o.classId === classId);
+
+        target.roleId = target.roleId & ~roleId;
+
+        let transaction;
+        try {
+            transaction = await this.ctx.model.transaction();
+            // 查看在其他的班级还有没有此身份,没有的话要加到classId为0的记录中
+            const otherClassExists = _.find(
+                members,
+                o => o.classId !== classId && o.roleId & roleId
+            );
+            if (!otherClassExists) {
+                await this.ctx.model.LessonOrganizationClassMember.upsert(
+                    {
+                        classId: 0,
+                        memberId,
+                        organizationId,
+                        realname: target.realname,
+                        roleId:
+                            roleId |
+                            (
+                                _.find(members, o => o.classId === 0) || {
+                                    roleId: 0,
+                                }
+                            ).roleId,
+                        type: target.type,
+                        parentPhoneNum: target.parentPhoneNum,
+                        endTime: target.endTime,
+                    },
+                    { transaction }
+                );
+            }
+
+            if (target.roleId === 0) {
+                await this.ctx.model.LessonOrganizationClassMember.destroy({
+                    where: { id: target.id },
+                    transaction,
+                });
+            } else {
+                await this.ctx.model.LessonOrganizationClassMember.update(
+                    { roleId: target.roleId },
+                    { where: { id: target.id }, transaction }
+                );
+            }
+            await transaction.commit();
+        } catch (e) {
+            await transaction.rollback();
+            this.ctx.throw(500, Err.DB_ERR);
+        }
     }
 }
 

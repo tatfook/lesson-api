@@ -259,7 +259,7 @@ describe('机构', () => {
                 .expect(200)
                 .then(res => res.body.data)
                 .catch(e => console.log(e));
-            assert(logs.count > 15);
+            assert(logs.count >= 15);
         });
     });
 });

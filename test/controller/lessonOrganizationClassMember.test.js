@@ -222,4 +222,79 @@ describe('机构学生', () => {
                 .expect(403);
         });
     });
+
+    describe('从班级中删除某个用户的某个身份', async () => {
+        let member;
+        beforeEach(async () => {
+            app.mockService(
+                'lessonOrganizationClassMember',
+                'clearRoleFromClass',
+                () => 0
+            );
+        });
+
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/clearRoleFromClass')
+                .send({
+                    memberId: 1,
+                    _roleId: 1,
+                    classId: 1,
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200);
+        });
+
+        it('002', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/clearRoleFromClass')
+                .send({
+                    memberId: 0,
+                    _roleId: 1,
+                    classId: 1,
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+        it('003', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/clearRoleFromClass')
+                .send({
+                    memberId: 1,
+                    _roleId: 99,
+                    classId: 1,
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+        it('004', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/clearRoleFromClass')
+                .send({
+                    memberId: 1,
+                    _roleId: 1,
+                    classId: 0,
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(422);
+        });
+
+        it('005', async () => {
+            const token = await app.login({ roleId: 1 }).then(r => r.token);
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/clearRoleFromClass')
+                .send({
+                    memberId: 1,
+                    _roleId: 1,
+                    classId: 1,
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(403);
+        });
+    });
 });

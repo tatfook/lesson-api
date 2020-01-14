@@ -175,6 +175,10 @@ module.exports = app => {
         `${prefix}lessonOrganizations/search`,
         lessonOrganization.search
     );
+    router.post(
+        `${prefix}lessonOrganizations/packagesToOrg`,
+        lessonOrganization.batchAddPackagesToOrg
+    );
     router.resources(`${prefix}lessonOrganizations`, lessonOrganization);
 
     // organization class
@@ -242,6 +246,10 @@ module.exports = app => {
     router.post(
         `${prefix}lessonOrganizationClassMembers/clearRoleFromOrg`,
         lessonOrganizationClassMember.clearRoleFromOrg
+    );
+    router.post(
+        `${prefix}lessonOrganizationClassMembers/clearRoleFromClass`,
+        lessonOrganizationClassMember.clearRoleFromClass
     );
     router.resources(
         `${prefix}lessonOrganizationClassMembers`,
