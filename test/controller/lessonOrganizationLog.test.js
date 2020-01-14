@@ -45,7 +45,17 @@ describe('机构', () => {
         await app
             .httpRequest()
             .put('/lessonOrganizations/' + organ.id)
-            .send({ privilege: 1 })
+            .send({
+                name: 'whatever',
+                loginUrl: 'whatever',
+                startDate: '2008-01-01',
+                visibility: 1,
+                type: 1,
+                activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                usernames: ['what'],
+                endDate: '2019-01-01',
+                privilege: 1,
+            })
             .set('Authorization', `Bearer ${token}`)
             .expect(200)
             .then(res => res.body)
@@ -54,7 +64,17 @@ describe('机构', () => {
         await app
             .httpRequest()
             .put('/lessonOrganizations/' + organ.id)
-            .send({ privilege: 2 })
+            .send({
+                name: 'whatever?',
+                loginUrl: 'whatever',
+                startDate: '2008-01-01',
+                visibility: 1,
+                type: 1,
+                activateCodeLimit: { type5: 2, type6: 2, type7: 2 },
+                usernames: ['what'],
+                endDate: '2019-01-01',
+                privilege: 2,
+            })
             .set('Authorization', `Bearer ${token}`)
             .expect(200)
             .then(res => res.body)
