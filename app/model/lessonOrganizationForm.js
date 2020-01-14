@@ -32,32 +32,44 @@ module.exports = app => {
                 defaultValue: 0,
             },
 
-            type: {
+            type: { // about to remove
                 // 0 - 空白模板 1 - 招生通知 2 - 入学作品提交通知 3 - 报名表  4 - 入选学员通知
                 type: INTEGER,
                 defaultValue: 0,
             },
 
-            name: {
+            name: { // 名称
                 type: STRING,
                 defaultValue: '',
             },
 
-            title: {
+            title: { // 标题
                 type: STRING,
                 defaultValue: '',
             },
 
-            description: {
+            description: { // 描述
                 type: STRING(ONEK),
                 defaultValue: '',
             },
 
-            text: {
+            text: { // about to remove
                 type: TEXT,
             },
 
             quizzes: {
+                /**
+                 * 对象数组，对象属性如下：
+                 * type: 组件类型（0.单选题，1.多选题，2.问答题，3.文本，4.文件展示）
+                 * title：标题
+                 * remark 备注
+                 * content 主要内容
+                 * options 选项
+                 * isRequire 是否必选
+                 * fileType 文件类型
+                 * url 文件路径
+                 * filename 文件名
+                 */
                 type: JSON,
             },
             createdAt: {
