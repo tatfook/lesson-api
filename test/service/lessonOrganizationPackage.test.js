@@ -21,85 +21,110 @@ describe('test/service/lessonOrganizationPackage.test.js', async () => {
 
     describe('findAllByCondition', async () => {
         let pkgs;
-        beforeEach(async()=>{
+        beforeEach(async () => {
             pkgs = await app.factory.createMany(
                 'LessonOrganizationPackage',
                 10
             );
         });
 
-        it('001',async()=>{
+        it('001', async () => {
             const ctx = app.mockContext();
-            const filterPkgs = _.filter(pkgs,o=> o.classId > 2);
-            const ret = await ctx.service.lessonOrganizationPackage.findAllByCondition({
-                classId:{$gt:2}
-            });
+            const filterPkgs = _.filter(pkgs, o => o.classId > 2);
+            const ret = await ctx.service.lessonOrganizationPackage.findAllByCondition(
+                {
+                    classId: { $gt: 2 },
+                }
+            );
             assert(ret.length === filterPkgs.length);
         });
     });
 
     describe('findAllAndExtraByCondition', async () => {
         let pkgs;
-        beforeEach(async()=>{
+        beforeEach(async () => {
             pkgs = await app.factory.createMany(
                 'LessonOrganizationPackage',
                 10
             );
         });
 
-        it('001',async()=>{
+        it('001', async () => {
             const ctx = app.mockContext();
-            const filterPkgs = _.filter(pkgs,o=> o.classId > 2);
-            const ret = await ctx.service.lessonOrganizationPackage.findAllAndExtraByCondition([{
-                as: 'lessonOrganizationClasses',
-                model: ctx.model.LessonOrganizationClass,
-            }],{
-                classId:{$gt:2}
-            });
+            const filterPkgs = _.filter(pkgs, o => o.classId > 2);
+            const ret = await ctx.service.lessonOrganizationPackage.findAllAndExtraByCondition(
+                [
+                    {
+                        as: 'lessonOrganizationClasses',
+                        model: ctx.model.LessonOrganizationClass,
+                    },
+                ],
+                {
+                    classId: { $gt: 2 },
+                }
+            );
             assert(ret.length === filterPkgs.length);
-            assert(_.every(ret,o=>o.lessonOrganizationClasses));
+            assert(_.every(ret, o => o.lessonOrganizationClasses));
         });
     });
 
-    describe('findAllEntrance',async()=>{
+    describe('findAllEntrance', async () => {
         let pkgs;
-        beforeEach(async()=>{
+        beforeEach(async () => {
             pkgs = await app.factory.createMany(
                 'LessonOrganizationPackage',
                 10
             );
         });
 
-        it('001',async()=>{
+        it('001', async () => {
             const ctx = app.mockContext();
-            const filterPkgs = _.filter(pkgs,o=> o.classId===1 && o.organizationId===1);
-           const ret= await ctx.service.lessonOrganizationPackage.findAllEntrance(1,1);
+            const filterPkgs = _.filter(
+                pkgs,
+                o => o.classId === 1 && o.organizationId === 1
+            );
+            const ret = await ctx.service.lessonOrganizationPackage.findAllEntrance(
+                1,
+                1
+            );
             assert(ret.length === filterPkgs.length);
         });
-        it('002',async()=>{
+        it('002', async () => {
             const ctx = app.mockContext();
-            const filterPkgs = _.filter(pkgs,o=> o.classId===1 && o.organizationId===1);
-            const ret = await ctx.service.lessonOrganizationPackage.findAllEntrance(1,null,1,64);
+            const filterPkgs = _.filter(
+                pkgs,
+                o => o.classId === 1 && o.organizationId === 1
+            );
+            const ret = await ctx.service.lessonOrganizationPackage.findAllEntrance(
+                1,
+                null,
+                1,
+                64
+            );
             assert(ret.length === 0);
         });
     });
 
-    describe('dealWithPackageList',async()=>{
+    describe('dealWithPackageList', async () => {
         let pkgs;
-        beforeEach(async()=>{
+        beforeEach(async () => {
             pkgs = await app.factory.createMany(
                 'LessonOrganizationPackage',
                 10
             );
         });
-        it('001',async()=>{
+        it('001', async () => {
             const ctx = app.mockContext();
-            const ret = await ctx.service.lessonOrganizationPackage.dealWithPackageList([{
-                packageId:1,
-                lessons:[],
-                lessonOrganizationClasses:[]
-            }],64);
-
+            const ret = await ctx.service.lessonOrganizationPackage.dealWithPackageList(
+                [
+                    {
+                        packageId: 1,
+                        lessons: [],
+                        lessonOrganizationClasses: [],
+                    },
+                ],
+                64
+            );
         });
     });
 });
