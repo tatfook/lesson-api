@@ -5,7 +5,10 @@ const Err = require('../common/err');
 
 const CoreApi = class extends Controller {
     get checkApiKey() {
-        return this.app.config.self.INTERNAL_API_KEY === this.ctx.request.headers['x-api-key'];
+        return (
+            this.app.config.self.INTERNAL_API_KEY ===
+            this.ctx.request.headers['x-api-key']
+        );
     }
     // 创建注册消息
     async createRegisterMsg() {
