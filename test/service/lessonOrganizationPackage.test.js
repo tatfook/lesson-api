@@ -127,4 +127,24 @@ describe('test/service/lessonOrganizationPackage.test.js', async () => {
             );
         });
     });
+
+    describe('updateLessonNo', async () => {
+        let pkgs;
+        beforeEach(async () => {
+            pkgs = await app.factory.create('LessonOrganizationPackage', {
+                organizationId: 1,
+                lessons: [{ lessonId: 1, lessonNo: 8 }],
+            });
+        });
+        it('001', async () => {
+            const ctx = app.mockContext();
+            await ctx.service.lessonOrganizationPackage.updateLessonNo(1, [
+                { lessonId: 1, lessonNo: 9 },
+            ]);
+            const ret = await ctx.model.LessonOrganizationPackage.findOne({
+                where: { id: pkgs.id },
+            });
+            assert(ret.lessons[0].lessonNo === 9);
+        });
+    });
 });

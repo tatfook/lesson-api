@@ -18,30 +18,6 @@ class Organization extends Service {
 
         return roleId;
     }
-
-    async isMember({ organizationId, memberId }) {
-        const member = await this.app.model.LessonOrganizationClassMember.findAll(
-            {
-                include: [
-                    {
-                        as: 'lessonOrganizationClasses',
-                        model: this.app.model.LessonOrganizationClass,
-                        where: {
-                            end: {
-                                $gt: new Date(),
-                            },
-                        },
-                    },
-                ],
-                where: {
-                    organizationId,
-                    memberId,
-                },
-            }
-        );
-
-        return member.length;
-    }
 }
 
 module.exports = Organization;

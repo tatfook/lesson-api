@@ -42,7 +42,7 @@ module.exports = app => {
 
     app.sendEmail = sendEmail;
 
-    app.model.Log.create({ text: 'INFO: sendEmail function load SUCCESS!!' });
+    app.logger.info('sendEmail function load SUCCESS!!');
 
     return sendEmail;
 };

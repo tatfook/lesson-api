@@ -32,9 +32,9 @@ module.exports = (options, app) => {
 
         if (!flag1 && !flag2) {
             // token解析失败，记录log
-            app.model.Log.create({
-                text: `TOKEN_ERR:path:${ctx.request.path},secret:${config.secret},adminSecret:${config.adminSecret},token:${token}`,
-            });
+            ctx.logger.warn(
+                `TOKEN_ERR:path:${ctx.request.path},secret:${config.secret},adminSecret:${config.adminSecret},token:${token}`
+            );
         }
 
         ctx.state.token = token;
