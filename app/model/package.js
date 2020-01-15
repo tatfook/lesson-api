@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const hooks = require('../common/sequelizeHooks');
 const { PACKAGE_STATE_AUDIT_SUCCESS } = require('../common/consts.js');
 
 module.exports = app => {
@@ -157,8 +156,6 @@ module.exports = app => {
             constraints: false,
         });
     };
-
-    hooks(app);
 
     return model;
 };

@@ -43,8 +43,6 @@ module.exports = app => {
 
     const subjects = controller.subject;
     router.resources('subjects', prefix + 'subjects', subjects);
-    const skills = controller.skill;
-    router.resources('skills', prefix + 'skills', skills);
 
     const admins = controller.admin;
     router.post(`${prefix}admins/query`, admins.query);
