@@ -55,6 +55,12 @@ module.exports = app => {
                 type: INTEGER,
             },
 
+            type: {
+                // 1.试用，2.正式
+                type: INTEGER,
+                defaultValue: 1,
+            },
+
             privilege: {
                 // 权限  1 -- 允许教师添加学生  2 -- 允许教师移除学生
                 type: INTEGER,
