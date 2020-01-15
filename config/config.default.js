@@ -44,6 +44,6 @@ exports.onerror = {
             ctx.body = JSON.stringify({ message: e.message });
         }
 
-        ctx.model.Log.create({ text: JSON.stringify(e) });
+        ctx.logger.error(new Error(message));
     },
 };
