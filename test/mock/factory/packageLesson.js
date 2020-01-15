@@ -4,8 +4,8 @@ module.exports = app => {
 
     factory.define(tableName, app.model[tableName], {
         userId: factory.chance('integer', { min: 1 }),
-        packageId: factory.chance('integer', { min: 1,max:100 }),
-		lessonId: factory.chance('integer', { min: 1,max:100 }),
-        lessonNo: factory.chance('integer', { min: 1,max:100 }),
+        packageId: factory.chance('integer', { min: 1, max: 100 }),
+        lessonId: factory.chance('integer', { min: 1, max: 100 }),
+        lessonNo: factory.chance('integer', { min: 1, max: 100 }),
     });
 };
