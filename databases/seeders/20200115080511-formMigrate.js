@@ -4,7 +4,7 @@ module.exports = {
     up: async (queryInterface, Sequelize) => {
         const transaction = await queryInterface.sequelize.transaction();
         try {
-            // 
+            //
             const forms = await queryInterface.sequelize.query(
                 `
             select 
@@ -14,12 +14,13 @@ module.exports = {
             `,
                 { type: Sequelize.QueryTypes.SELECT, transaction }
             );
-          
-            for (let i = 0; i < forms.length; i++) {
 
+            for (let i = 0; i < forms.length; i++) {
                 await queryInterface.sequelize.query(
                     `
-                update lessonOrganizationForms set quizzes = \'[{\"type\":3,\"content\":\"${encodeURIComponent(forms[i].text)}\"}]\' where id = ${forms[i].id};
+                update lessonOrganizationForms set quizzes = \'[{\"type\":3,\"content\":\"${encodeURIComponent(
+                    forms[i].text
+                )}\"}]\' where id = ${forms[i].id};
                 `,
                     { type: Sequelize.QueryTypes.UPDATE, transaction }
                 );
