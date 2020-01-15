@@ -18,7 +18,7 @@ module.exports = {
                     {
                         type: Sequelize.JSON,
                         comment:
-                            '底部按钮，hidden是否显示，content文字。{hidden:t|f,content:"XXXX"}',
+                            '底部按钮，show是否显示，content文字。{show:t|f,content:"XXXX"}',
                     },
                     { transaction: t }
                 );

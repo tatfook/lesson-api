@@ -77,6 +77,18 @@ module.exports = app => {
                  */
                 type: JSON,
             },
+            backGroundImg: {
+                /**
+                 * 头部&页面背景图url,{head:"XXXXX",page:"XXXXX"}
+                 */
+                type: JSON,
+            },
+            bottomButton: {
+                /**
+                 * 底部按钮，show是否显示，content文字。{show:t|f,content:"XXXX"}
+                 */
+                type: JSON,
+            },
             createdAt: {
                 type: DATE,
             },
