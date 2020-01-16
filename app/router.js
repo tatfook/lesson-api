@@ -222,10 +222,6 @@ module.exports = app => {
         lessonOrganizationClassMember.teacher
     );
     router.post(
-        `${prefix}lessonOrganizationClassMembers/bulk`,
-        lessonOrganizationClassMember.bulkCreate
-    );
-    router.post(
         `${prefix}lessonOrganizationClassMembers/formal`,
         lessonOrganizationClassMember.toFormal
     );

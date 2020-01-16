@@ -2,10 +2,6 @@
 
 const Controller = require('./baseController.js');
 
-class PackageLessonsController extends Controller {
-    get modelName() {
-        return 'PackageLesson';
-    }
-}
+class PackageLessonsController extends Controller {}
 
 module.exports = PackageLessonsController;

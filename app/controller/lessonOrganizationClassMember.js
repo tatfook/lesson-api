@@ -5,10 +5,6 @@ const { CLASS_MEMBER_ROLE_ADMIN } = require('../common/consts');
 const Err = require('../common/err');
 
 const LessonOrganizationClassMember = class extends Controller {
-    get modelName() {
-        return 'LessonOrganizationClassMember';
-    }
-
     get validateRules() {
         return this.app.validator.lessonOrganizationClassMember;
     }
@@ -43,10 +39,6 @@ const LessonOrganizationClassMember = class extends Controller {
         );
 
         return ctx.helper.success({ ctx, status: 200, res: data });
-    }
-
-    async bulkCreate() {
-        return this.success();
     }
 
     async create() {

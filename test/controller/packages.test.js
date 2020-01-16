@@ -24,17 +24,16 @@ describe('test/controller/packages.test.js', () => {
         it('001', async () => {
             const lesson = await app
                 .httpRequest()
-                .post('/lessons')
+                .post('/packages')
                 .send({
-                    lessonName: 'HTML',
+                    packageName: 'whatever',
                     subjectId: 1,
-                    skills: [
-                        { id: 1, score: 10 },
-                        { id: 2, score: 8 },
-                    ],
-                    goals: '掌握基本的前端编程',
-                    coverUrl: 'http://www.baidu.com',
-                    vedioUrl: 'http://www.baidu.com',
+                    minAge: 1,
+                    maxAge: 100,
+                    intro: '',
+                    rmb: 9,
+                    coin: 9,
+                    lessons: [1],
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)
@@ -138,6 +137,7 @@ describe('test/controller/packages.test.js', () => {
                 .put('/packages/1')
                 .send({
                     packageName: '嘿嘿',
+                    lessons: [1],
                 })
                 .set('Authorization', `Bearer ${token}`)
                 .expect(200)

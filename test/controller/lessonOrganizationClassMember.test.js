@@ -185,6 +185,141 @@ describe('机构学生', () => {
                 .expect(200)
                 .then(res => res.body);
         });
+        it('002 没有权限', async () => {
+            const user = await app.login({ roleId: 1 });
+            const token = user.token;
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/formal')
+                .send({
+                    userIds: [1],
+                    type: 5,
+                    classIds: [1],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(403)
+                .then(res => res.body);
+        });
+    });
+
+    describe('续费', async () => {
+        beforeEach('', async () => {
+            const cls = await app.factory.create('LessonOrganizationClass', {
+                organizationId: organ.id,
+                status: 1,
+            });
+            await app.model.LessonOrganizationClassMember.create({
+                organizationId: organ.id,
+                memberId: 1,
+                roleId: 1,
+                classId: cls.id,
+                endTime: '2200-01-01',
+                type: 2,
+            });
+        });
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/recharge')
+                .send({
+                    userIds: [1],
+                    type: 5,
+                    classIds: [1],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
+        });
+        it('002 没有权限', async () => {
+            const user = await app.login({ roleId: 1 });
+            const token = user.token;
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/recharge')
+                .send({
+                    userIds: [1],
+                    type: 5,
+                    classIds: [1],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(403)
+                .then(res => res.body);
+        });
+    });
+
+    describe('历史学生', async () => {
+        beforeEach('', async () => {
+            const cls = await app.factory.create('LessonOrganizationClass', {
+                organizationId: organ.id,
+                status: 1,
+            });
+            await app.model.LessonOrganizationClassMember.create({
+                organizationId: organ.id,
+                memberId: 1,
+                roleId: 1,
+                classId: cls.id,
+                endTime: '2008-01-01',
+                type: 2,
+            });
+            await app.factory.create('User', { id: 1 });
+        });
+
+        it('001', async () => {
+            const ret = await app
+                .httpRequest()
+                .get('/lessonOrganizationClassMembers/historyStudents')
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
+            assert(ret.data.count === 1);
+        });
+    });
+
+    describe('重新激活用户', async () => {
+        beforeEach('', async () => {
+            const cls = await app.factory.create('LessonOrganizationClass', {
+                organizationId: organ.id,
+                status: 1,
+            });
+            await app.model.LessonOrganizationClassMember.create({
+                organizationId: organ.id,
+                memberId: 1,
+                roleId: 1,
+                classId: cls.id,
+                endTime: '2008-01-01',
+                type: 2,
+            });
+        });
+
+        it('001', async () => {
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/reactivate')
+                .send({
+                    userIds: [1],
+                    type: 2,
+                    classIds: [1],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(200)
+                .then(res => res.body);
+        });
+
+        it('001 没有权限', async () => {
+            const user = await app.login({ roleId: 1 });
+            const token = user.token;
+            await app
+                .httpRequest()
+                .post('/lessonOrganizationClassMembers/reactivate')
+                .send({
+                    userIds: [1],
+                    type: 2,
+                    classIds: [1],
+                })
+                .set('Authorization', `Bearer ${token}`)
+                .expect(403)
+                .then(res => res.body);
+        });
     });
 
     describe('从机构中删除某个用户的某个身份', async () => {

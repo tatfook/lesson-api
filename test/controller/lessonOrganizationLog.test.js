@@ -252,6 +252,36 @@ describe('机构', () => {
             .then(res => res.body)
             .catch(e => console.log(e));
 
+        const token2 = await app.login({ roleId: 1 }).then(r => r.token);
+        await app
+            .httpRequest()
+            .post('/organizations/changepwd')
+            .send({
+                organizationId: organ.id,
+                classId: cls.data.id,
+                memberId: 2,
+                password: 'test123',
+            })
+            .set('Authorization', `Bearer ${token2}`)
+            .expect(400)
+            .then(res => res.body)
+            .catch(e => console.log(e));
+
+        const token3 = await app.login({ roleId: 2 }).then(r => r.token);
+        await app
+            .httpRequest()
+            .post('/organizations/changepwd')
+            .send({
+                organizationId: organ.id,
+                classId: cls.data.id,
+                memberId: 2,
+                password: 'test123',
+            })
+            .set('Authorization', `Bearer ${token3}`)
+            .expect(400)
+            .then(res => res.body)
+            .catch(e => console.log(e));
+
         // 移除学生15
         member = await app
             .httpRequest()
