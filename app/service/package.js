@@ -269,6 +269,34 @@ class PackageService extends Service {
             lessonId,
         });
     }
+
+    async getAllByConditionAndLessonCount(condition) {
+        const ret = await this.ctx.model.Package.findAll({
+            attributes: [
+                'id',
+                'packageName',
+                'intro',
+                'maxAge',
+                'minAge',
+                'coverUrl',
+            ],
+            where: condition,
+            include: [
+                {
+                    as: 'packageLessons',
+                    model: this.ctx.model.PackageLesson,
+                    require: false,
+                },
+            ],
+        });
+
+        return ret.map(r => {
+            r = r.get();
+            r.lessonCount = r.packageLessons.length;
+            delete r.packageLessons;
+            return r;
+        });
+    }
 }
 
 module.exports = PackageService;

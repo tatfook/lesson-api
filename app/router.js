@@ -43,8 +43,6 @@ module.exports = app => {
 
     const subjects = controller.subject;
     router.resources('subjects', prefix + 'subjects', subjects);
-    const skills = controller.skill;
-    router.resources('skills', prefix + 'skills', skills);
 
     const admins = controller.admin;
     router.post(`${prefix}admins/query`, admins.query);
@@ -118,6 +116,8 @@ module.exports = app => {
     // --------------------------apis for coreApi project-------------------------
     const coreApi = controller.coreApi;
     router.post(`${prefix}coreApi/registerMsg`, coreApi.createRegisterMsg);
+    router.post(`${prefix}coreApi/user`, coreApi.createUser);
+    router.get(`${prefix}coreApi/packages`, coreApi.getPackagesAndLessonCount);
     // --------------------------apis for coreApi project-------------------------
 
     // -----------------------------add from coreservice--------------------------------------------------------
@@ -172,6 +172,10 @@ module.exports = app => {
     router.post(
         `${prefix}lessonOrganizations/search`,
         lessonOrganization.search
+    );
+    router.post(
+        `${prefix}lessonOrganizations/packagesToOrg`,
+        lessonOrganization.batchAddPackagesToOrg
     );
     router.resources(`${prefix}lessonOrganizations`, lessonOrganization);
 

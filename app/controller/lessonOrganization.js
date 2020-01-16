@@ -196,7 +196,8 @@ const LessonOrganization = class extends Controller {
     async create() {
         const { ctx } = this;
         this.adminAuthenticated();
-        const params = this.validate();
+        const params = this.getParams();
+        await ctx.validate(this.validateRules.createOrg, params);
 
         const organ = await ctx.service.lessonOrganization.createOrganization(
             params
@@ -205,12 +206,14 @@ const LessonOrganization = class extends Controller {
         return ctx.helper.success({ ctx, status: 200, res: organ });
     }
 
-    // 禁止更新
+    //
     async update() {
         const { ctx } = this;
         const params = this.validate({ id: 'number' });
         delete params.userId;
         const id = params.id;
+
+        await ctx.validate(this.validateRules.updateOrg, params);
 
         const organ = await ctx.service.lessonOrganization.getByCondition({
             id,
@@ -438,6 +441,25 @@ const LessonOrganization = class extends Controller {
         );
 
         return ctx.helper.success({ ctx, status: 200, res: list });
+    }
+
+    // 给机构批量添加课程包
+    async batchAddPackagesToOrg() {
+        const ctx = this.ctx;
+        this.adminAuthenticated();
+
+        const { organizationIds, packages } = this.getParams();
+
+        await ctx.validate(this.validateRules.batchAddPackagesToOrg, {
+            organizationIds,
+            packages,
+        });
+
+        await ctx.service.lessonOrganization.batchAddPackagesToOrg(
+            organizationIds,
+            packages
+        );
+        return ctx.helper.success({ ctx, status: 200 });
     }
 };
 
