@@ -34,7 +34,7 @@
         "nodemailer": "^4.6.8",
         "pingpp": "^2.1.4",
         "uuid": "^3.3.2",
-        "validator": "^11.1.0"
+        "validator": "^13.7.0"
     },
     "devDependencies": {
         "chance": "^1.0.18",
